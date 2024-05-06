@@ -8,3 +8,4 @@ lightning_logs/
 *.egg-info
 *.ckpt
 .venv/
+build/
