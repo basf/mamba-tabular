@@ -8,3 +8,4 @@ lightning_logs/
 *.ckpt
 .venv/
 build/
+*.ipynb
