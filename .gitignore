@@ -7,3 +7,4 @@ lightning_logs/
 *.txt
 *.egg-info
 *.ckpt
+.venv/
