@@ -60,7 +60,7 @@ Mambular includes a comprehensive preprocessing module also following scikit-lea
 The preprocessing module supports a wide range of data transformation techniques, including ordinal and one-hot encoding for categorical variables, decision tree-based binning for numerical features, and various strategies for handling missing values. By leveraging these preprocessing tools, users can ensure that their data is in the best possible shape for training Mambular models, leading to improved model performance.
 
 # Acknowledgements
-We sincerely acknowledge and appreciate the financial support provided by the Key Digital Capability (KDC) for Generative AI at BASF, which played a critical role in facilitating this research.
+We sincerely acknowledge and appreciate the financial support provided by the Key Digital Capability (KDC) for Generative AI at BASF and the BASF Data & AI Academy, which played a critical role in facilitating this research.
 
 # References
 
