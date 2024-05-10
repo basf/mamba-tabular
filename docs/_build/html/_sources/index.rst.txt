@@ -45,3 +45,4 @@ Indices and tables
 
  
    api/base_models/index
+   api/models/index
