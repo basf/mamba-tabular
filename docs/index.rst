@@ -36,3 +36,12 @@ Indices and tables
 
    codeofconduct
   
+
+.. toctree::
+   :name: API Docs
+   :caption: API Docs
+   :maxdepth: 1
+   :hidden:
+
+ 
+   api/base_models/index
