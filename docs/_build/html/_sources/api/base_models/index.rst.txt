@@ -1,8 +1,8 @@
 .. -*- mode: rst -*-
 
-.. currentmodule:: mambular.base_models.classifier
+.. currentmodule:: mambular.base_models
 
-BaseMambularClassifier
+BaseModles
 ======================
 
 This module provides some basic functionalities for calculation.
@@ -17,7 +17,7 @@ This module provides some basic functionalities for calculation.
    :maxdepth: 1
    :hidden:
 
-   BaseMambularClassifier
+   BaseModels
 
 
 
