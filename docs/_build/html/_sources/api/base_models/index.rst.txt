@@ -2,16 +2,8 @@
 
 .. currentmodule:: mambular.base_models
 
-BaseModles
+BaseModels
 ======================
-
-This module provides some basic functionalities for calculation.
-
-=================================== =========================================================================
- Functions                            Description
-=================================== =========================================================================
-:class:`BaseMambularClassifier`       Provide class methods for addition, substraction etc.
-=================================== =========================================================================
 
 .. toctree::
    :maxdepth: 1
