@@ -5,7 +5,6 @@
 
 Welcome to mamba-tabular's documentation!
 =========================================
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -18,3 +17,22 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. toctree::
+   :name: Getting Started
+   :caption: Getting Started
+   :maxdepth: 2
+   :hidden:
+
+   installation
+   about
+   
+
+.. toctree::
+   :name: Community
+   :caption: Community
+   :maxdepth: 1
+   :hidden:
+
+   codeofconduct
+  
