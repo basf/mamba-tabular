@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mambular.base_models.classifier &mdash; mamba-tabular 06.05.2024 documentation</title>
+  <title>mambular.base_models.regressor &mdash; mamba-tabular 06.05.2024 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
@@ -81,7 +81,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">mambular.base_models.classifier</li>
+      <li class="breadcrumb-item active">mambular.base_models.regressor</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -90,59 +90,48 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mambular.base_models.classifier</h1><div class="highlight"><pre>
+  <h1>Source code for mambular.base_models.regressor</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">torchmetrics</span>
 <span class="kn">from</span> <span class="nn">..utils.mamba_arch</span> <span class="kn">import</span> <span class="n">Mamba</span>
 <span class="kn">from</span> <span class="nn">..utils.config</span> <span class="kn">import</span> <span class="n">MambularConfig</span>
 <span class="kn">import</span> <span class="nn">pytorch_lightning</span> <span class="k">as</span> <span class="nn">pl</span>
 
 
-<div class="viewcode-block" id="BaseMambularClassifier"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.classifier.BaseMambularClassifier">[docs]</a><span class="k">class</span> <span class="nc">BaseMambularClassifier</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularRegressor"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor">[docs]</a><span class="k">class</span> <span class="nc">BaseMambularRegressor</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A base class for building classification models using the Mambular architecture within the PyTorch Lightning framework.</span>
-<span class="sd">    This class integrates various components such as embeddings for categorical and numerical features, the Mambular model</span>
-<span class="sd">    for processing sequences of embeddings, and a classification head for prediction. It supports multi-class and binary classification tasks.</span>
+<span class="sd">    A base regression module for tabular data built on PyTorch Lightning. It incorporates embeddings</span>
+<span class="sd">    for categorical and numerical features with a configurable architecture provided by MambularConfig.</span>
+<span class="sd">    This module is designed for regression tasks.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">        num_classes (int): The number of classes in the classification task. For binary classification, this should be 2.</span>
-<span class="sd">        config (MambularConfig): An instance of MambularConfig containing configuration parameters for the Mambular model.</span>
-<span class="sd">        cat_feature_info (dict, optional): A dictionary mapping the names of categorical features to their number of unique categories.</span>
-<span class="sd">                                           This information is used to configure embedding layers for categorical features. Defaults to None.</span>
-<span class="sd">        num_feature_info (dict, optional): A dictionary mapping the names of numerical features to the size of their input dimensions.</span>
-<span class="sd">                                           This information is used to configure embedding layers for numerical features. Defaults to None.</span>
-<span class="sd">        lr (float, optional): The learning rate for the optimizer. Defaults to 1e-03.</span>
+<span class="sd">        config (MambularConfig): An instance of MambularConfig containing configuration parameters for the model architecture.</span>
+<span class="sd">        cat_feature_info (dict, optional): A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.</span>
+<span class="sd">        num_feature_info (dict, optional): A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.</span>
+<span class="sd">        lr (float, optional): The initial learning rate for the optimizer. Defaults to 1e-03.</span>
 <span class="sd">        lr_patience (int, optional): The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.</span>
-<span class="sd">        weight_decay (float, optional): Weight decay (L2 penalty) parameter for the optimizer. Defaults to 0.025.</span>
+<span class="sd">        weight_decay (float, optional): Weight decay (L2 penalty) coefficient. Defaults to 0.025.</span>
 <span class="sd">        lr_factor (float, optional): Factor by which the learning rate will be reduced. Defaults to 0.75.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">        embedding_activation (nn.Module): The activation function to be applied after the linear transformation of numerical features.</span>
-<span class="sd">        num_embeddings (nn.ModuleList): A list of sequential modules, each corresponding to an embedding layer for a numerical feature.</span>
-<span class="sd">        cat_embeddings (nn.ModuleList): A list of embedding layers, each corresponding to a categorical feature.</span>
-<span class="sd">        mamba (Mamba): The Mambular model for processing sequences of embeddings.</span>
-<span class="sd">        norm_f (nn.Module): A normalization layer applied after the Mambular model.</span>
-<span class="sd">        tabular_head (nn.Linear): A linear layer for predicting the class labels from the aggregated embedding representation.</span>
-<span class="sd">        pooling_method (str): The method used to aggregate embeddings across features. Supported methods are &#39;avg&#39;, &#39;max&#39;, and &#39;sum&#39;.</span>
-<span class="sd">        loss_fct (nn.Module): The loss function used for training the model, configured based on the number of classes.</span>
-<span class="sd">        acc (torchmetrics.Accuracy): A metric for computing the accuracy of predictions.</span>
-<span class="sd">        auroc (torchmetrics.AUROC): A metric for computing the Area Under the Receiver Operating Characteristic curve.</span>
-<span class="sd">        precision (torchmetrics.Precision): A metric for computing the precision of predictions.</span>
+<span class="sd">        mamba (Mamba): The core neural network module implementing the Mamba architecture.</span>
+<span class="sd">        norm_f (nn.Module): Normalization layer applied after the Mamba block.</span>
+<span class="sd">        tabular_head (nn.Linear): Final linear layer mapping the features to a single output for regression tasks.</span>
+<span class="sd">        train_mse (torchmetrics.MeanSquaredError): Metric computation module for training Mean Squared Error.</span>
+<span class="sd">        val_mse (torchmetrics.MeanSquaredError): Metric computation module for validation Mean Squared Error.</span>
+<span class="sd">        loss_fct (torch.nn.MSELoss): The loss function for regression tasks.</span>
 
 <span class="sd">    # Methods:</span>
-<span class="sd">    #     forward(cat_features, num_features): Defines the forward pass of the model, processing both categorical and numerical features, aggregating embeddings,</span>
-<span class="sd">    #                                          and producing predictions.</span>
-<span class="sd">    #     training_step(batch, batch_idx): Performs a single training step, computing the loss and logging metrics for the training set.</span>
-<span class="sd">    #     validation_step(batch, batch_idx): Performs a single validation step, computing the loss and logging metrics for the validation set.</span>
-<span class="sd">    #     configure_optimizers(): Configures the model&#39;s optimizers and learning rate schedulers.</span>
+<span class="sd">    #     forward(cat_features, num_features): Defines the forward pass of the model.</span>
+<span class="sd">    #     training_step(batch, batch_idx): Processes a single batch during training.</span>
+<span class="sd">    #     validation_step(batch, batch_idx): Processes a single batch during validation.</span>
+<span class="sd">    #     configure_optimizers(): Sets up the model&#39;s optimizer and learning rate scheduler.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">num_classes</span><span class="p">,</span>
         <span class="n">config</span><span class="p">:</span> <span class="n">MambularConfig</span><span class="p">,</span>
         <span class="n">cat_feature_info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">num_feature_info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -154,7 +143,6 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">num_classes</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">num_classes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="n">lr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lr_patience</span> <span class="o">=</span> <span class="n">lr_patience</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weight_decay</span> <span class="o">=</span> <span class="n">weight_decay</span>
@@ -187,7 +175,6 @@
             <span class="p">[</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
                     <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-                    <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">embedding_activation</span><span class="p">,</span>  <span class="c1"># Example using ReLU as the activation function, change as needed</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">input_shape</span> <span class="ow">in</span> <span class="n">num_feature_info</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
@@ -204,10 +191,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mamba</span> <span class="o">=</span> <span class="n">Mamba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
-
         <span class="n">mlp_activation_fn</span> <span class="o">=</span> <span class="n">activations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tabular_head_activation</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
         <span class="p">)</span>
+
+        <span class="c1"># Dynamically create MLP layers based on config.tabular_units</span>
         <span class="n">mlp_layers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">input_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span>  <span class="c1"># Initial input dimension</span>
 
@@ -219,7 +207,7 @@
             <span class="n">input_dim</span> <span class="o">=</span> <span class="n">units</span>
 
         <span class="c1"># Add the final linear layer to map to a single output value</span>
-        <span class="n">mlp_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">))</span>
+        <span class="n">mlp_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="c1"># Combine all layers into a Sequential module</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tabular_head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">mlp_layers</span><span class="p">)</span>
@@ -227,26 +215,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pooling_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pooling_method</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">Accuracy</span><span class="p">(</span>
-                <span class="n">task</span><span class="o">=</span><span class="s2">&quot;multiclass&quot;</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">auroc</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">AUROC</span><span class="p">(</span>
-                <span class="n">task</span><span class="o">=</span><span class="s2">&quot;multiclass&quot;</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">Precision</span><span class="p">(</span>
-                <span class="n">task</span><span class="o">=</span><span class="s2">&quot;multiclass&quot;</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">Accuracy</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">auroc</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">AUROC</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">Precision</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">layer_norm_after_embedding</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">embedding_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Defines the forward pass of the classifier.</span>
+<span class="sd">        Defines the forward pass of the regressor.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -254,13 +230,12 @@
 <span class="sd">            num_features (Tensor): Tensor containing the numerical features.</span>
 
 <span class="sd">        Returns</span>
-<span class="sd">         ------</span>
-<span class="sd">            Tensor: The output predictions of the model.</span>
+<span class="sd">        -------</span>
+<span class="sd">            Tensor: The output predictions of the model for regression tasks.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">batch_size</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">cat_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">cat_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="n">num_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">cat_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">cat_features</span> <span class="o">!=</span> <span class="p">[]</span> <span class="k">else</span> <span class="n">num_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">cls_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
@@ -271,6 +246,8 @@
             <span class="p">]</span>
             <span class="n">cat_embeddings</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">cat_embeddings</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">cat_embeddings</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">cat_embeddings</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">layer_norm_after_embedding</span><span class="p">:</span>
+                <span class="n">cat_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_norm</span><span class="p">(</span><span class="n">cat_embeddings</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cat_embeddings</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -280,10 +257,13 @@
                 <span class="n">emb</span><span class="p">(</span><span class="n">num_features</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">emb</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_embeddings</span><span class="p">)</span>
             <span class="p">]</span>
             <span class="n">num_embeddings</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">num_embeddings</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">layer_norm_after_embedding</span><span class="p">:</span>
+                <span class="n">num_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_norm</span><span class="p">(</span><span class="n">num_embeddings</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">num_embeddings</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Combine embeddings if both types are present, otherwise use whichever is available</span>
+
         <span class="k">if</span> <span class="n">cat_embeddings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_embeddings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">cls_tokens</span><span class="p">,</span> <span class="n">cat_embeddings</span><span class="p">,</span> <span class="n">num_embeddings</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">cat_embeddings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -302,7 +282,7 @@
             <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooling_method</span> <span class="o">==</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooling_method</span> <span class="o">==</span> <span class="s2">&quot;cls&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooling_method</span> <span class="o">==</span> <span class="s2">&quot;cls_token&quot;</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid pooling method: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pooling_method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -314,7 +294,7 @@
 
     <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Processes a single batch during training, computes the loss and logs training metrics.</span>
+<span class="sd">        Processes a single batch during training, computes the loss, and logs training metrics.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -328,52 +308,20 @@
         <span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span>
-                <span class="mi">1</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># Reshape for binary classification loss calculation</span>
-
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
-        <span class="c1"># Calculate and log training accuracy</span>
-
-        <span class="n">acc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acc</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">labels</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="s2">&quot;train_acc&quot;</span><span class="p">,</span>
-            <span class="n">acc</span><span class="p">,</span>
-            <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span>
+            <span class="n">loss</span><span class="p">,</span>
+            <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="c1"># Calculate and log AUROC</span>
-        <span class="n">auroc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auroc</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="s2">&quot;train_auroc&quot;</span><span class="p">,</span>
-            <span class="n">auroc</span><span class="p">,</span>
-            <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Calculate and log precision</span>
-        <span class="n">precision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="s2">&quot;train_precision&quot;</span><span class="p">,</span>
-            <span class="n">precision</span><span class="p">,</span>
-            <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-
         <span class="k">return</span> <span class="n">loss</span>
 
     <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Processes a single batch during validation, computes the loss and logs validation metrics.</span>
+<span class="sd">        Processes a single batch during validation, computes the loss, and logs validation metrics.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -383,40 +331,17 @@
         <span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span>
-                <span class="mi">1</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># Reshape for binary classification loss calculation</span>
-
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;val_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
-        <span class="c1"># Calculate and log training accuracy</span>
-
-        <span class="n">acc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acc</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">labels</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="s2">&quot;val_acc&quot;</span><span class="p">,</span>
-            <span class="n">acc</span><span class="p">,</span>
-            <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;val_loss&quot;</span><span class="p">,</span>
+            <span class="n">loss</span><span class="p">,</span>
+            <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">auroc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auroc</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="s2">&quot;val_auroc&quot;</span><span class="p">,</span> <span class="n">auroc</span><span class="p">,</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Calculate and log precision</span>
-        <span class="n">precision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="s2">&quot;val_precision&quot;</span><span class="p">,</span>
-            <span class="n">precision</span><span class="p">,</span>
-            <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span>
 
     <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
