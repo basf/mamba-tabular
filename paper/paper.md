@@ -1,5 +1,5 @@
 ---
-title: 'Mambular: A User-Centric Python Library for Tabular Deep Learning Leveraging Mamba Architecture'
+title: "Mambular: A User-Centric Python Library for Tabular Deep Learning Leveraging Mamba Architecture"
 tags:
   - Python
   - Tabular Deep Learning
@@ -7,19 +7,22 @@ tags:
   - Distributional Regression
 authors:
   - name: Anton Thielmann
+    orcid: 0000-0000-0000-0000
     affiliation: 1
   - name: Soheila Samiee
     affiliation: 2
   - name: Christoph Weisser
     affiliation: 1
 affiliations:
-  - name: BASF SE
+  - name: BASF SE, Germany
   index: 1
-  - name: BASF Canada Inc
+  - name: BASF Canada Inc, Canada
   index: 2
 date: 22 April 2024
 bibliography: paper.bib
+
 ---
+
 
 
 # 1. Summary
