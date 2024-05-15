@@ -15,9 +15,9 @@ authors:
     affiliation: 1
 affiliations:
   - name: BASF SE, Germany
-  index: 1
+    index: 1
   - name: BASF Canada Inc, Canada
-  index: 2
+    index: 2
 date: 22 April 2024
 bibliography: paper.bib
 
