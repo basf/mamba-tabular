@@ -1,40 +1,24 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'Mambular: A User-Centric Python Library for Tabular Deep Learning Leveraging Mamba Architecture'
 tags:
   - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - Tabular Deep Learning
+  - Mamba
+  - Distributional Regression
 authors:
-  - name: Adrian M. Price-Whelan
-    orcid: 0000-0000-0000-0000
-    equal-contrib: true
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
+  - name: Anton Thielmann
+    affiliation: 1
+  - name: Soheila Samiee
     affiliation: 2
-  - name: Author with no affiliation
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 3
-  - given-names: Ludwig
-    dropping-particle: van
-    surname: Beethoven
-    affiliation: 3
+  - name: Christoph Weisser
+    affiliation: 1
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University, USA
-   index: 1
- - name: Institution Name, Country
-   index: 2
- - name: Independent Researcher, Country
-   index: 3
-date: 13 August 2017
+  - name: BASF SE
+  index: 1
+  - name: BASF Canada Inc
+  index: 2
+date: 22 April 2024
 bibliography: paper.bib
-
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 
