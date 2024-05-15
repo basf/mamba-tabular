@@ -15,9 +15,9 @@ authors:
   - name: Christoph Weisser
     affiliation: 1
 affiliations:
- - name: BASF SE
+  - name: BASF SE
   index: 1
- - name: BASF Canada Inc
+  - name: BASF Canada Inc
   index: 2
 date: 22 April 2024
 bibliography: paper.bib
