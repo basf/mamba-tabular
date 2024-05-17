@@ -6,8 +6,8 @@ tags:
   - Mamba
   - Distributional Regression
 authors:
-  - name: Anton Thielmann
-    orcid: 0000-0000-0000-0000
+  - name: Anton Frederik Thielmann
+    orcid: 0000-0002-6768-8992
     affiliation: 1
   - name: Soheila Samiee
     affiliation: 2
