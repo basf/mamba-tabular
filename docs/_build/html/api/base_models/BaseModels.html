@@ -2742,7 +2742,7 @@ This module is designed for regression tasks.</p>
 <td><p>An iterable or collection of iterables specifying training samples.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mambular.base_models.regressor.BaseMambularRegressor.training_step" title="mambular.base_models.regressor.BaseMambularRegressor.training_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">training_step</span></code></a>(batch, batch_idx)</p></td>
-<td><p>Processes a single batch during training, computes the loss, and logs training metrics.</p></td>
+<td><p>Defines the forward pass of the regressor.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transfer_batch_to_device</span></code>(batch, device, ...)</p></td>
 <td><p>Override this hook if your <code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code> returns tensors wrapped in a custom data structure.</p></td>

@@ -242,14 +242,17 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">            cat_features (Tensor): Tensor containing the categorical features.</span>
-<span class="sd">            num_features (Tensor): Tensor containing the numerical features.</span>
+<span class="sd">        cat_features : Tensor</span>
+<span class="sd">            Tensor containing the categorical features.</span>
+<span class="sd">        num_features : Tensor</span>
+<span class="sd">            Tensor containing the numerical features.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">            Tensor: The output predictions of the model for regression tasks.</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            The output predictions of the model for regression tasks.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        
         <span class="n">batch_size</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">cat_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">cat_features</span> <span class="o">!=</span> <span class="p">[]</span> <span class="k">else</span> <span class="n">num_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="p">)</span>
@@ -310,17 +313,20 @@
 
 <div class="viewcode-block" id="BaseMambularRegressor.training_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor.training_step">[docs]</a>    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Processes a single batch during training, computes the loss, and logs training metrics.</span>
+<span class="sd">        Defines the forward pass of the regressor.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.</span>
-<span class="sd">            batch_idx (int): The index of the batch within the epoch.</span>
+<span class="sd">        cat_features : Tensor</span>
+<span class="sd">            Tensor containing the categorical features.</span>
+<span class="sd">        num_features : Tensor</span>
+<span class="sd">            Tensor containing the numerical features.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">            Tensor: The computed loss for the batch.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            The output predictions of the model for regression tasks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>    
         <span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">)</span>
 
@@ -341,8 +347,10 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.</span>
-<span class="sd">            batch_idx (int): The index of the batch within the epoch.</span>
+<span class="sd">        batch : tuple</span>
+<span class="sd">            A batch of data from the DataLoader, containing numerical features, categorical features, and labels.</span>
+<span class="sd">        batch_idx : int</span>
+<span class="sd">            The index of the batch within the epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">)</span>
@@ -365,8 +373,9 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">            dict: A dictionary containing the optimizer and lr_scheduler configurations.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        dict</span>
+<span class="sd">            A dictionary containing the optimizer and lr_scheduler configurations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>    
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">weight_decay</span>
         <span class="p">)</span>

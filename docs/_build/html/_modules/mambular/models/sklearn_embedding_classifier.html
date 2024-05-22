@@ -113,23 +113,27 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    **kwargs: Configuration parameters that can include both MambularConfig settings and preprocessing</span>
-<span class="sd">                  options. Any unrecognized parameters are passed to the preprocessor.</span>
+<span class="sd">    **kwargs : Configuration parameters that can include both MambularConfig settings and preprocessing</span>
+<span class="sd">        options. Any unrecognized parameters are passed to the preprocessor.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">        config (MambularConfig): Configuration object for the model, storing architecture-specific parameters.</span>
-<span class="sd">        preprocessor (Preprocessor): Object handling data preprocessing steps such as feature encoding and normalization.</span>
-<span class="sd">        model (ProteinMambularClassifier): The underlying neural network model, instantiated during the `fit` method.</span>
+<span class="sd">    config : MambularConfig</span>
+<span class="sd">        Configuration object for the model, storing architecture-specific parameters.</span>
+<span class="sd">    preprocessor : Preprocessor</span>
+<span class="sd">        Object handling data preprocessing steps such as feature encoding and normalization.</span>
+<span class="sd">    model : ProteinMambularClassifier</span>
+<span class="sd">        The underlying neural network model, instantiated during the `fit` method.</span>
 
-<span class="sd">    # Methods:</span>
-<span class="sd">    #     fit: Fits the model to the provided dataset.</span>
-<span class="sd">    #     predict: Predicts class labels for the provided data.</span>
-<span class="sd">    #     predict_proba: Predicts class probabilities for the provided data.</span>
-<span class="sd">    #     get_params: Returns the parameters of the classifier.</span>
-<span class="sd">    #     set_params: Sets the parameters of the classifier.</span>
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    fit : Fits the model to the provided dataset.</span>
+<span class="sd">    predict : Predicts class labels for the provided data.</span>
+<span class="sd">    predict_proba : Predicts class probabilities for the provided data.</span>
+<span class="sd">    get_params : Returns the parameters of the classifier.</span>
+<span class="sd">    set_params : Sets the parameters of the classifier.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+       
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># Known config arguments</span>
         <span class="n">config_arg_names</span> <span class="o">=</span> <span class="p">[</span>
@@ -419,35 +423,55 @@
         <span class="n">pca</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">reduced_dims</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
         <span class="o">**</span><span class="n">trainer_kwargs</span>
-    <span class="p">):</span>
+    <span class="p">):</span>   
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fits the model to the given dataset.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">            X: Feature matrix for training, either as a pandas DataFrame or array-like.</span>
-<span class="sd">            y: Target vector.</span>
-<span class="sd">            val_size: Fraction of the data to use for validation if X_val is None.</span>
-<span class="sd">            X_val: Feature matrix for validation.</span>
-<span class="sd">            y_val: Target vector for validation.</span>
-<span class="sd">            max_epochs: Maximum number of epochs for training.</span>
-<span class="sd">            random_state: Seed for random number generators.</span>
-<span class="sd">            batch_size: Size of batches for training and validation.</span>
-<span class="sd">            shuffle: Whether to shuffle training data before each epoch.</span>
-<span class="sd">            patience: Patience for early stopping based on val_loss.</span>
-<span class="sd">            monitor: Metric to monitor for early stopping.</span>
-<span class="sd">            mode: Mode for early stopping (&#39;min&#39; or &#39;max&#39;).</span>
-<span class="sd">            lr: Learning rate for the optimizer.</span>
-<span class="sd">            lr_patience: Patience for learning rate reduction.</span>
-<span class="sd">            factor: Factor for learning rate reduction.</span>
-<span class="sd">            weight_decay: Weight decay for the optimizer.</span>
-<span class="sd">            raw_embeddings: Whether to use raw features or embeddings.</span>
-<span class="sd">            seq_size: Sequence size for embeddings, relevant if raw_embeddings is False.</span>
-<span class="sd">            **trainer_kwargs: Additional arguments for the PyTorch Lightning Trainer.</span>
+<span class="sd">        X : pandas DataFrame or array-like</span>
+<span class="sd">            Feature matrix for training.</span>
+<span class="sd">        y : array-like</span>
+<span class="sd">            Target vector.</span>
+<span class="sd">        val_size : float, optional</span>
+<span class="sd">            Fraction of the data to use for validation if X_val is None.</span>
+<span class="sd">        X_val : pandas DataFrame or array-like, optional</span>
+<span class="sd">            Feature matrix for validation.</span>
+<span class="sd">        y_val : array-like, optional</span>
+<span class="sd">            Target vector for validation.</span>
+<span class="sd">        max_epochs : int, default=100</span>
+<span class="sd">            Maximum number of epochs for training.</span>
+<span class="sd">        random_state : int, optional</span>
+<span class="sd">            Seed for random number generators.</span>
+<span class="sd">        batch_size : int, default=32</span>
+<span class="sd">            Size of batches for training and validation.</span>
+<span class="sd">        shuffle : bool, default=True</span>
+<span class="sd">            Whether to shuffle training data before each epoch.</span>
+<span class="sd">        patience : int, default=10</span>
+<span class="sd">            Patience for early stopping based on val_loss.</span>
+<span class="sd">        monitor : str, default=&#39;val_loss&#39;</span>
+<span class="sd">            Metric to monitor for early stopping.</span>
+<span class="sd">        mode : str, default=&#39;min&#39;</span>
+<span class="sd">            Mode for early stopping (&#39;min&#39; or &#39;max&#39;).</span>
+<span class="sd">        lr : float, default=0.001</span>
+<span class="sd">            Learning rate for the optimizer.</span>
+<span class="sd">        lr_patience : int, default=5</span>
+<span class="sd">            Patience for learning rate reduction.</span>
+<span class="sd">        factor : float, default=0.1</span>
+<span class="sd">            Factor for learning rate reduction.</span>
+<span class="sd">        weight_decay : float, default=0.0</span>
+<span class="sd">            Weight decay for the optimizer.</span>
+<span class="sd">        raw_embeddings : bool, default=False</span>
+<span class="sd">            Whether to use raw features or embeddings.</span>
+<span class="sd">        seq_size : int, optional</span>
+<span class="sd">            Sequence size for embeddings, relevant if raw_embeddings is False.</span>
+<span class="sd">        **trainer_kwargs : dict</span>
+<span class="sd">            Additional arguments for the PyTorch Lightning Trainer.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">            self: The fitted estimator.</span>
+<span class="sd">        self : object</span>
+<span class="sd">            The fitted estimator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>

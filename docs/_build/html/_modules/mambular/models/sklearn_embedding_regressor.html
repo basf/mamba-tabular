@@ -109,16 +109,21 @@
 <span class="sd">    and workflows. This class wraps the PyTorch Lightning model and preprocessor, providing methods for fitting,</span>
 <span class="sd">    predicting, and setting/getting parameters in a way that mimics sklearn&#39;s API.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">        **kwargs: Keyword arguments that can include both configuration parameters for the MambularConfig and</span>
-<span class="sd">                  parameters for the preprocessor.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    **kwargs : Keyword arguments that can include both configuration parameters for the MambularConfig and</span>
+<span class="sd">        parameters for the preprocessor.</span>
 
-<span class="sd">    Attributes:</span>
-<span class="sd">        config (MambularConfig): Configuration object containing model-specific parameters.</span>
-<span class="sd">        preprocessor (Preprocessor): Preprocessor object for data preprocessing steps.</span>
-<span class="sd">        model (ProteinMambularRegressor): The neural network model, initialized after the `fit` method is called.</span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    config : MambularConfig</span>
+<span class="sd">        Configuration object containing model-specific parameters.</span>
+<span class="sd">    preprocessor : Preprocessor</span>
+<span class="sd">        Preprocessor object for data preprocessing steps.</span>
+<span class="sd">    model : ProteinMambularRegressor</span>
+<span class="sd">        The neural network model, initialized after the `fit` method is called.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># Known config arguments</span>
         <span class="n">config_arg_names</span> <span class="o">=</span> <span class="p">[</span>
@@ -159,13 +164,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get parameters for this estimator. Overrides the BaseEstimator method.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        deep : bool, default=True</span>
 <span class="sd">            If True, returns the parameters for this estimator and contained sub-objects that are estimators.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        params : dict</span>
 <span class="sd">            Parameter names mapped to their values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -186,13 +191,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the parameters of this estimator. Overrides the BaseEstimator method.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        **parameters : dict</span>
 <span class="sd">            Estimator parameters to be set.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        self : object</span>
 <span class="sd">            The instance with updated parameters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -221,8 +226,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Splits the dataset into training and validation sets.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : array-like or DataFrame, shape (n_samples, n_features)</span>
 <span class="sd">            Input features.</span>
 <span class="sd">        y : array-like, shape (n_samples,) or (n_samples, n_targets)</span>
@@ -232,8 +237,8 @@
 <span class="sd">        random_state : int</span>
 <span class="sd">            Controls the shuffling applied to the data before applying the split.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        X_train, X_val, y_train, y_val : arrays</span>
 <span class="sd">            The split datasets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -247,8 +252,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Preprocesses the training and validation data, and creates DataLoaders for them.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X_train : DataFrame or array-like, shape (n_samples_train, n_features)</span>
 <span class="sd">            Training feature set.</span>
 <span class="sd">        y_train : array-like, shape (n_samples_train,)</span>
@@ -262,8 +267,8 @@
 <span class="sd">        shuffle : bool</span>
 <span class="sd">            Whether to shuffle the training data in the DataLoader.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        data_module : MambularDataModule</span>
 <span class="sd">            An instance of MambularDataModule containing the training and validation DataLoaders.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -342,13 +347,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Preprocesses the test data and creates tensors for categorical and numerical features.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : DataFrame or array-like, shape (n_samples, n_features)</span>
 <span class="sd">            Test feature set.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        cat_tensors : list of Tensors</span>
 <span class="sd">            List of tensors for each categorical feature.</span>
 <span class="sd">        num_tensors : list of Tensors</span>
@@ -414,7 +419,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fits the ProteinMambularRegressor model to the training data.</span>
 
-<span class="sd">        Parameters:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">            X (array-like or DataFrame): The training input samples.</span>
 <span class="sd">            y (array-like): The target values (class labels for classification, real numbers for regression).</span>
 <span class="sd">            val_size (float, optional): The proportion of the dataset to include in the validation split if `X_val` is not provided.</span>
@@ -435,7 +441,8 @@
 <span class="sd">            seq_size (int, optional): The sequence size for processing numerical features when not using raw embeddings.</span>
 <span class="sd">            **trainer_kwargs: Additional keyword arguments for the PyTorch Lightning Trainer.</span>
 
-<span class="sd">        Returns:</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">            self: Returns an instance of self.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
@@ -515,13 +522,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predicts target values for the given input samples.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : DataFrame or array-like, shape (n_samples, n_features)</span>
 <span class="sd">            The input samples for which to predict target values.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)</span>
 <span class="sd">            The predicted target values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -568,8 +575,8 @@
 <span class="sd">            # Evaluate using the specified metrics</span>
 <span class="sd">            results = regressor.evaluate(X_test, y_test, metrics=metrics)</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : array-like or pd.DataFrame of shape (n_samples, n_features)</span>
 <span class="sd">            The input samples to predict.</span>
 <span class="sd">        y_true : array-like of shape (n_samples,) or (n_samples, n_outputs)</span>
@@ -577,13 +584,13 @@
 <span class="sd">        metrics : dict</span>
 <span class="sd">            A dictionary where keys are metric names and values are the metric functions.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        scores : dict</span>
 <span class="sd">            A dictionary with metric names as keys and their corresponding scores as values.</span>
 
-<span class="sd">        Notes:</span>
-<span class="sd">        ------</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        This method uses the `predict` method to generate predictions and computes each metric.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
