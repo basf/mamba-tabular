@@ -103,23 +103,23 @@
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
 
 
-<div class="viewcode-block" id="MambularClassifier"><a class="viewcode-back" href="../../../api/models/Models.html#mambular.models.sklearn_classifier.MambularClassifier">[docs]</a><span class="k">class</span> <span class="nc">MambularClassifier</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
+<div class="viewcode-block" id="MambularClassifier"><a class="viewcode-back" href="../../../api/models/Models.html#mambular.models.sklearn_classifier.MambularClassifier">[docs]</a><span class="k">class</span> <span class="nc">MambularClassifier</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>  
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A classifier that mimics scikit-learn&#39;s API using PyTorch Lightning and a custom architecture.</span>
-
+<span class="sd">    </span>
 <span class="sd">    This classifier is designed to work with tabular data and provides a flexible interface for specifying model</span>
 <span class="sd">    configurations and preprocessing steps. It integrates smoothly with scikit-learn&#39;s utilities, such as cross-validation</span>
 <span class="sd">    and grid search.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    **kwargs : Various</span>
 <span class="sd">        Accepts any number of keyword arguments that are passed to the MambularConfig and Preprocessor classes.</span>
 <span class="sd">        Known configuration arguments for the model are extracted based on a predefined list, and the rest are</span>
 <span class="sd">        passed to the Preprocessor.</span>
 
-<span class="sd">    Attributes:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
 <span class="sd">    config : MambularConfig</span>
 <span class="sd">        Configuration object that holds model-specific settings.</span>
 <span class="sd">    preprocessor : Preprocessor</span>
@@ -127,7 +127,7 @@
 <span class="sd">    model : BaseMambularClassifier or None</span>
 <span class="sd">        The underlying PyTorch Lightning model, instantiated upon calling the `fit` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># Known config arguments</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Received kwargs:&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
@@ -167,20 +167,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="n">Preprocessor</span><span class="p">(</span><span class="o">**</span><span class="n">preprocessor_kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>    
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get parameters for this estimator.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        deep : bool, default=True</span>
 <span class="sd">            If True, will return the parameters for this estimator and contained subobjects that are estimators.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        params : dict</span>
 <span class="sd">            Parameter names mapped to their values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_kwargs</span>  <span class="c1"># Parameters used to initialize MambularConfig</span>
 
         <span class="c1"># If deep=True, include parameters from nested components like preprocessor</span>
@@ -198,13 +199,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the parameters of this estimator.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        **parameters : dict</span>
 <span class="sd">            Estimator parameters.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        self : object</span>
 <span class="sd">            Estimator instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -233,8 +234,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Split the dataset into training and validation sets.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : array-like of shape (n_samples, n_features)</span>
 <span class="sd">            The input samples.</span>
 <span class="sd">        y : array-like of shape (n_samples,)</span>
@@ -244,8 +245,8 @@
 <span class="sd">        random_state : int</span>
 <span class="sd">            Controls the shuffling applied to the data before applying the split.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        X_train, X_val, y_train, y_val : arrays</span>
 <span class="sd">            The split datasets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -259,8 +260,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Preprocess the training and validation data and create corresponding DataLoaders.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X_train : array-like of shape (n_samples, n_features)</span>
 <span class="sd">            The training input samples.</span>
 <span class="sd">        y_train : array-like of shape (n_samples,)</span>
@@ -274,8 +275,8 @@
 <span class="sd">        shuffle : bool</span>
 <span class="sd">            Whether to shuffle the training data before splitting into batches.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        data_module : MambularDataModule</span>
 <span class="sd">            An instance of MambularDataModule containing training and validation DataLoaders.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -353,13 +354,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Preprocesses the test data and creates tensors for categorical and numerical features.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : DataFrame or array-like, shape (n_samples, n_features)</span>
 <span class="sd">            Test feature set.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        cat_tensors : list of Tensors</span>
 <span class="sd">            List of tensors for each categorical feature.</span>
 <span class="sd">        num_tensors : list of Tensors</span>
@@ -418,8 +419,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit the model to the given training data, optionally using a separate validation set.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : array-like or pd.DataFrame of shape (n_samples, n_features)</span>
 <span class="sd">            The training input samples.</span>
 <span class="sd">        y : array-like of shape (n_samples,) or (n_samples, n_outputs)</span>
@@ -455,8 +456,8 @@
 <span class="sd">        **trainer_kwargs : dict</span>
 <span class="sd">            Additional keyword arguments to be passed to the PyTorch Lightning Trainer constructor.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        self : object</span>
 <span class="sd">            The fitted estimator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -520,18 +521,18 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict the class labels for the given input samples.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : array-like or pd.DataFrame of shape (n_samples, n_features)</span>
 <span class="sd">            The input samples to predict.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        predictions : ndarray of shape (n_samples,)</span>
 <span class="sd">            Predicted class labels for each input sample.</span>
 
-<span class="sd">        Notes:</span>
-<span class="sd">        ------</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        The method preprocesses the input data using the same preprocessor used during training,</span>
 <span class="sd">        sets the model to evaluation mode, and then performs inference to predict the class labels.</span>
 <span class="sd">        The predictions are converted from a PyTorch tensor to a NumPy array before being returned.</span>
@@ -566,7 +567,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict class probabilities for the given input samples.</span>
 
-<span class="sd">        Example:</span>
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
 <span class="sd">            from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_score</span>
 
 <span class="sd">            # Define the metrics you want to evaluate</span>
@@ -581,18 +583,18 @@
 <span class="sd">            # Evaluate using the specified metrics</span>
 <span class="sd">            results = classifier.evaluate(X_test, y_test, metrics=metrics)</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : array-like or pd.DataFrame of shape (n_samples, n_features)</span>
 <span class="sd">            The input samples for which to predict class probabilities.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        probabilities : ndarray of shape (n_samples, n_classes)</span>
 <span class="sd">            Predicted class probabilities for each input sample.</span>
 
-<span class="sd">        Notes:</span>
-<span class="sd">        ------</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        The method preprocesses the input data using the same preprocessor used during training,</span>
 <span class="sd">        sets the model to evaluation mode, and then performs inference to predict the class probabilities.</span>
 <span class="sd">        Softmax is applied to the logits to obtain probabilities, which are then converted from a PyTorch tensor</span>
@@ -628,8 +630,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the model on the given data using specified metrics.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        X : array-like or pd.DataFrame of shape (n_samples, n_features)</span>
 <span class="sd">            The input samples to predict.</span>
 <span class="sd">        y_true : array-like of shape (n_samples,)</span>
@@ -638,13 +640,13 @@
 <span class="sd">            A dictionary where keys are metric names and values are tuples containing the metric function</span>
 <span class="sd">            and a boolean indicating whether the metric requires probability scores (True) or class labels (False).</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        scores : dict</span>
 <span class="sd">            A dictionary with metric names as keys and their corresponding scores as values.</span>
 
-<span class="sd">        Notes:</span>
-<span class="sd">        ------</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        This method uses either the `predict` or `predict_proba` method depending on the metric requirements.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Ensure input is in the correct format</span>

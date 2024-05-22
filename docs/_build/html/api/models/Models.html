@@ -64,7 +64,12 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Models</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Models</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier"><code class="docutils literal notranslate"><span class="pre">MambularClassifier</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier"><code class="docutils literal notranslate"><span class="pre">MambularClassifier</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier.config"><code class="docutils literal notranslate"><span class="pre">MambularClassifier.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier.preprocessor"><code class="docutils literal notranslate"><span class="pre">MambularClassifier.preprocessor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier.model"><code class="docutils literal notranslate"><span class="pre">MambularClassifier.model</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#mambular.models.sklearn_distributional.MambularLSS"><code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_distributional.MambularLSS.config"><code class="docutils literal notranslate"><span class="pre">MambularLSS.config</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_distributional.MambularLSS.preprocessor"><code class="docutils literal notranslate"><span class="pre">MambularLSS.preprocessor</span></code></a></li>
@@ -130,6 +135,46 @@
 <p>This classifier is designed to work with tabular data and provides a flexible interface for specifying model
 configurations and preprocessing steps. It integrates smoothly with scikit-learn's utilities, such as cross-validation
 and grid search.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Various</em>) -- Accepts any number of keyword arguments that are passed to the MambularConfig and Preprocessor classes.
+Known configuration arguments for the model are extracted based on a predefined list, and the rest are
+passed to the Preprocessor.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_classifier.MambularClassifier.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#mambular.models.sklearn_classifier.MambularClassifier.config" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration object that holds model-specific settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MambularConfig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_classifier.MambularClassifier.preprocessor">
+<span class="sig-name descname"><span class="pre">preprocessor</span></span><a class="headerlink" href="#mambular.models.sklearn_classifier.MambularClassifier.preprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>Preprocessor object for handling feature preprocessing like normalization and encoding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Preprocessor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_classifier.MambularClassifier.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#mambular.models.sklearn_classifier.MambularClassifier.model" title="Permalink to this definition"></a></dt>
+<dd><p>The underlying PyTorch Lightning model, instantiated upon calling the <cite>fit</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../base_models/BaseModels.html#mambular.base_models.classifier.BaseMambularClassifier" title="mambular.base_models.classifier.BaseMambularClassifier">BaseMambularClassifier</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -214,8 +259,7 @@ the preprocessor, allowing for flexible adjustment of parameters.</p>
 
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> -- Arbitrary keyword arguments, divided into configuration for the model and
-preprocessing. Recognized keys include model parameters such as 'd_model',
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Arbitrary keyword arguments</em><em>, </em><em>divided into configuration for the model and</em>) -- preprocessing. Recognized keys include model parameters such as 'd_model',
 'n_layers', etc., and any additional keys are assumed to be preprocessor arguments.</p>
 </dd>
 </dl>
@@ -273,40 +317,62 @@ to scikit-learn's API.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.config">
-<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MambularConfig</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.config" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.config" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration object for the model, storing architecture-specific parameters.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Configuration object for the model, storing architecture-specific parameters.</p>
+<dd class="field-odd"><p>MambularConfig</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.preprocessor">
-<span class="sig-name descname"><span class="pre">preprocessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Preprocessor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.preprocessor" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">preprocessor</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.preprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>Object handling data preprocessing steps such as feature encoding and normalization.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Object handling data preprocessing steps such as feature encoding and normalization.</p>
+<dd class="field-odd"><p>Preprocessor</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.model">
-<span class="sig-name descname"><span class="pre">model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ProteinMambularClassifier</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.model" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.model" title="Permalink to this definition"></a></dt>
+<dd><p>The underlying neural network model, instantiated during the <cite>fit</cite> method.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The underlying neural network model, instantiated during the <cite>fit</cite> method.</p>
+<dd class="field-odd"><p>ProteinMambularClassifier</p>
 </dd>
 </dl>
 </dd></dl>
 
-<p># Methods:
-#     fit: Fits the model to the provided dataset.
-#     predict: Predicts class labels for the provided data.
-#     predict_proba: Predicts class probabilities for the provided data.
-#     get_params: Returns the parameters of the classifier.
-#     set_params: Sets the parameters of the classifier.</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">fit</span> <span class="pre">:</span> <span class="pre">Fits</span> <span class="pre">the</span> <span class="pre">model</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">provided</span> <span class="pre">dataset.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">predict</span> <span class="pre">:</span> <span class="pre">Predicts</span> <span class="pre">class</span> <span class="pre">labels</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">provided</span> <span class="pre">data.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">predict_proba</span> <span class="pre">:</span> <span class="pre">Predicts</span> <span class="pre">class</span> <span class="pre">probabilities</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">provided</span> <span class="pre">data.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_params</span> <span class="pre">:</span> <span class="pre">Returns</span> <span class="pre">the</span> <span class="pre">parameters</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">classifier.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_params</span> <span class="pre">:</span> <span class="pre">Sets</span> <span class="pre">the</span> <span class="pre">parameters</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">classifier.</span></span></dt>
+<dd></dd></dl>
+
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -355,8 +421,7 @@ and workflows. This class wraps the PyTorch Lightning model and preprocessor, pr
 predicting, and setting/getting parameters in a way that mimics sklearn's API.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> -- Keyword arguments that can include both configuration parameters for the MambularConfig and
-parameters for the preprocessor.</p>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Keyword arguments that can include both configuration parameters for the MambularConfig and</em>) -- parameters for the preprocessor.</p>
 </dd>
 </dl>
 <dl class="py attribute">
