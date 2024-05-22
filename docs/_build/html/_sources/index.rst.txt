@@ -13,8 +13,7 @@
 
    mamba
    installation
-.. quickstart
-.. notebooks 
+   quickstart 
 
 .. toctree::
    :name: API Docs
