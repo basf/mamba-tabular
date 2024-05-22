@@ -99,43 +99,73 @@
 <div class="viewcode-block" id="BaseMambularClassifier"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.classifier.BaseMambularClassifier">[docs]</a><span class="k">class</span> <span class="nc">BaseMambularClassifier</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A base class for building classification models using the Mambular architecture within the PyTorch Lightning framework.</span>
+
 <span class="sd">    This class integrates various components such as embeddings for categorical and numerical features, the Mambular model</span>
 <span class="sd">    for processing sequences of embeddings, and a classification head for prediction. It supports multi-class and binary classification tasks.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">        num_classes (int): The number of classes in the classification task. For binary classification, this should be 2.</span>
-<span class="sd">        config (MambularConfig): An instance of MambularConfig containing configuration parameters for the Mambular model.</span>
-<span class="sd">        cat_feature_info (dict, optional): A dictionary mapping the names of categorical features to their number of unique categories.</span>
-<span class="sd">                                           This information is used to configure embedding layers for categorical features. Defaults to None.</span>
-<span class="sd">        num_feature_info (dict, optional): A dictionary mapping the names of numerical features to the size of their input dimensions.</span>
-<span class="sd">                                           This information is used to configure embedding layers for numerical features. Defaults to None.</span>
-<span class="sd">        lr (float, optional): The learning rate for the optimizer. Defaults to 1e-03.</span>
-<span class="sd">        lr_patience (int, optional): The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.</span>
-<span class="sd">        weight_decay (float, optional): Weight decay (L2 penalty) parameter for the optimizer. Defaults to 0.025.</span>
-<span class="sd">        lr_factor (float, optional): Factor by which the learning rate will be reduced. Defaults to 0.75.</span>
+<span class="sd">    num_classes : int</span>
+<span class="sd">        The number of classes in the classification task. For binary classification, this should be 2.</span>
+<span class="sd">    config : MambularConfig</span>
+<span class="sd">        An instance of MambularConfig containing configuration parameters for the Mambular model.</span>
+<span class="sd">    cat_feature_info : dict, optional</span>
+<span class="sd">        A dictionary mapping the names of categorical features to their number of unique categories.</span>
+<span class="sd">        This information is used to configure embedding layers for categorical features. Defaults to None.</span>
+<span class="sd">    num_feature_info : dict, optional</span>
+<span class="sd">        A dictionary mapping the names of numerical features to the size of their input dimensions.</span>
+<span class="sd">        This information is used to configure embedding layers for numerical features. Defaults to None.</span>
+<span class="sd">    lr : float, optional</span>
+<span class="sd">        The learning rate for the optimizer. Defaults to 1e-03.</span>
+<span class="sd">    lr_patience : int, optional</span>
+<span class="sd">        The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.</span>
+<span class="sd">    weight_decay : float, optional</span>
+<span class="sd">        Weight decay (L2 penalty) parameter for the optimizer. Defaults to 0.025.</span>
+<span class="sd">    lr_factor : float, optional</span>
+<span class="sd">        Factor by which the learning rate will be reduced. Defaults to 0.75.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">        embedding_activation (nn.Module): The activation function to be applied after the linear transformation of numerical features.</span>
-<span class="sd">        num_embeddings (nn.ModuleList): A list of sequential modules, each corresponding to an embedding layer for a numerical feature.</span>
-<span class="sd">        cat_embeddings (nn.ModuleList): A list of embedding layers, each corresponding to a categorical feature.</span>
-<span class="sd">        mamba (Mamba): The Mambular model for processing sequences of embeddings.</span>
-<span class="sd">        norm_f (nn.Module): A normalization layer applied after the Mambular model.</span>
-<span class="sd">        tabular_head (nn.Linear): A linear layer for predicting the class labels from the aggregated embedding representation.</span>
-<span class="sd">        pooling_method (str): The method used to aggregate embeddings across features. Supported methods are &#39;avg&#39;, &#39;max&#39;, and &#39;sum&#39;.</span>
-<span class="sd">        loss_fct (nn.Module): The loss function used for training the model, configured based on the number of classes.</span>
-<span class="sd">        acc (torchmetrics.Accuracy): A metric for computing the accuracy of predictions.</span>
-<span class="sd">        auroc (torchmetrics.AUROC): A metric for computing the Area Under the Receiver Operating Characteristic curve.</span>
-<span class="sd">        precision (torchmetrics.Precision): A metric for computing the precision of predictions.</span>
+<span class="sd">    embedding_activation : nn.Module</span>
+<span class="sd">        The activation function to be applied after the linear transformation of numerical features.</span>
+<span class="sd">    num_embeddings : nn.ModuleList</span>
+<span class="sd">        A list of sequential modules, each corresponding to an embedding layer for a numerical feature.</span>
+<span class="sd">    cat_embeddings : nn.ModuleList</span>
+<span class="sd">        A list of embedding layers, each corresponding to a categorical feature.</span>
+<span class="sd">    mamba : Mamba</span>
+<span class="sd">        The Mambular model for processing sequences of embeddings.</span>
+<span class="sd">    norm_f : nn.Module</span>
+<span class="sd">        A normalization layer applied after the Mambular model.</span>
+<span class="sd">    tabular_head : nn.Linear</span>
+<span class="sd">        A linear layer for predicting the class labels from the aggregated embedding representation.</span>
+<span class="sd">    pooling_method : str</span>
+<span class="sd">        The method used to aggregate embeddings across features. Supported methods are &#39;avg&#39;, &#39;max&#39;, and &#39;sum&#39;.</span>
+<span class="sd">    loss_fct : nn.Module</span>
+<span class="sd">        The loss function used for training the model, configured based on the number of classes.</span>
+<span class="sd">    acc : torchmetrics.Accuracy</span>
+<span class="sd">        A metric for computing the accuracy of predictions.</span>
+<span class="sd">    auroc : torchmetrics.AUROC</span>
+<span class="sd">        A metric for computing the Area Under the Receiver Operating Characteristic curve.</span>
+<span class="sd">    precision : torchmetrics.Precision</span>
+<span class="sd">        A metric for computing the precision of predictions.</span>
 
-<span class="sd">    # Methods:</span>
-<span class="sd">    #     forward(cat_features, num_features): Defines the forward pass of the model, processing both categorical and numerical features, aggregating embeddings,</span>
-<span class="sd">    #                                          and producing predictions.</span>
-<span class="sd">    #     training_step(batch, batch_idx): Performs a single training step, computing the loss and logging metrics for the training set.</span>
-<span class="sd">    #     validation_step(batch, batch_idx): Performs a single validation step, computing the loss and logging metrics for the validation set.</span>
-<span class="sd">    #     configure_optimizers(): Configures the model&#39;s optimizers and learning rate schedulers.</span>
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    forward(cat_features, num_features)</span>
+<span class="sd">        Defines the forward pass of the model, processing both categorical and numerical features, aggregating embeddings,</span>
+<span class="sd">        and producing predictions.</span>
+<span class="sd">    training_step(batch, batch_idx)</span>
+<span class="sd">        Performs a single training step, computing the loss and logging metrics for the training set.</span>
+<span class="sd">    validation_step(batch, batch_idx)</span>
+<span class="sd">        Performs a single validation step, computing the loss and logging metrics for the validation set.</span>
+<span class="sd">    configure_optimizers()</span>
+<span class="sd">        Configures the model&#39;s optimizers and learning rate schedulers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+
+
+
+
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -241,7 +271,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">auroc</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">AUROC</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">Precision</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularClassifier.forward"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.classifier.BaseMambularClassifier.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Defines the forward pass of the classifier.</span>
 
@@ -307,9 +337,9 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabular_head</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">preds</span>
+        <span class="k">return</span> <span class="n">preds</span></div>
 
-    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularClassifier.training_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.classifier.BaseMambularClassifier.training_step">[docs]</a>    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes a single batch during training, computes the loss and logs training metrics.</span>
 
@@ -366,9 +396,9 @@
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">loss</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
 
-    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularClassifier.validation_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.classifier.BaseMambularClassifier.validation_step">[docs]</a>    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes a single batch during validation, computes the loss and logs validation metrics.</span>
 
@@ -413,9 +443,9 @@
             <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularClassifier.configure_optimizers"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.classifier.BaseMambularClassifier.configure_optimizers">[docs]</a>    <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the model&#39;s optimizer and learning rate scheduler based on the configurations provided.</span>
 
@@ -439,7 +469,7 @@
             <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">}</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler</span><span class="p">}</span></div></div>
 </pre></div>
 
            </div>

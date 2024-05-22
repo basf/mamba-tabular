@@ -95,7 +95,7 @@
 <span class="kn">import</span> <span class="nn">pytorch_lightning</span> <span class="k">as</span> <span class="nn">pl</span>
 
 
-<div class="viewcode-block" id="BaseMambularRegressor"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor">[docs]</a><span class="k">class</span> <span class="nc">BaseMambularRegressor</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularRegressor"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor">[docs]</a><span class="k">class</span> <span class="nc">BaseMambularRegressor</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>    
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A base regression module for tabular data built on PyTorch Lightning. It incorporates embeddings</span>
 <span class="sd">    for categorical and numerical features with a configurable architecture provided by MambularConfig.</span>
@@ -103,29 +103,48 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">        config (MambularConfig): An instance of MambularConfig containing configuration parameters for the model architecture.</span>
-<span class="sd">        cat_feature_info (dict, optional): A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.</span>
-<span class="sd">        num_feature_info (dict, optional): A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.</span>
-<span class="sd">        lr (float, optional): The initial learning rate for the optimizer. Defaults to 1e-03.</span>
-<span class="sd">        lr_patience (int, optional): The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.</span>
-<span class="sd">        weight_decay (float, optional): Weight decay (L2 penalty) coefficient. Defaults to 0.025.</span>
-<span class="sd">        lr_factor (float, optional): Factor by which the learning rate will be reduced. Defaults to 0.75.</span>
+<span class="sd">    config : MambularConfig</span>
+<span class="sd">        An instance of MambularConfig containing configuration parameters for the model architecture.</span>
+<span class="sd">    cat_feature_info : dict, optional</span>
+<span class="sd">        A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.</span>
+<span class="sd">    num_feature_info : dict, optional</span>
+<span class="sd">        A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.</span>
+<span class="sd">    lr : float, optional</span>
+<span class="sd">        The initial learning rate for the optimizer. Defaults to 1e-03.</span>
+<span class="sd">    lr_patience : int, optional</span>
+<span class="sd">        The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.</span>
+<span class="sd">    weight_decay : float, optional</span>
+<span class="sd">        Weight decay (L2 penalty) coefficient. Defaults to 0.025.</span>
+<span class="sd">    lr_factor : float, optional</span>
+<span class="sd">        Factor by which the learning rate will be reduced. Defaults to 0.75.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">        mamba (Mamba): The core neural network module implementing the Mamba architecture.</span>
-<span class="sd">        norm_f (nn.Module): Normalization layer applied after the Mamba block.</span>
-<span class="sd">        tabular_head (nn.Linear): Final linear layer mapping the features to a single output for regression tasks.</span>
-<span class="sd">        train_mse (torchmetrics.MeanSquaredError): Metric computation module for training Mean Squared Error.</span>
-<span class="sd">        val_mse (torchmetrics.MeanSquaredError): Metric computation module for validation Mean Squared Error.</span>
-<span class="sd">        loss_fct (torch.nn.MSELoss): The loss function for regression tasks.</span>
+<span class="sd">    mamba : Mamba</span>
+<span class="sd">        The core neural network module implementing the Mamba architecture.</span>
+<span class="sd">    norm_f : nn.Module</span>
+<span class="sd">        Normalization layer applied after the Mamba block.</span>
+<span class="sd">    tabular_head : nn.Linear</span>
+<span class="sd">        Final linear layer mapping the features to a single output for regression tasks.</span>
+<span class="sd">    train_mse : torchmetrics.MeanSquaredError</span>
+<span class="sd">        Metric computation module for training Mean Squared Error.</span>
+<span class="sd">    val_mse : torchmetrics.MeanSquaredError</span>
+<span class="sd">        Metric computation module for validation Mean Squared Error.</span>
+<span class="sd">    loss_fct : torch.nn.MSELoss</span>
+<span class="sd">        The loss function for regression tasks.</span>
 
-<span class="sd">    # Methods:</span>
-<span class="sd">    #     forward(cat_features, num_features): Defines the forward pass of the model.</span>
-<span class="sd">    #     training_step(batch, batch_idx): Processes a single batch during training.</span>
-<span class="sd">    #     validation_step(batch, batch_idx): Processes a single batch during validation.</span>
-<span class="sd">    #     configure_optimizers(): Sets up the model&#39;s optimizer and learning rate scheduler.</span>
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    forward(cat_features, num_features)</span>
+<span class="sd">        Defines the forward pass of the model.</span>
+<span class="sd">    training_step(batch, batch_idx)</span>
+<span class="sd">        Processes a single batch during training.</span>
+<span class="sd">    validation_step(batch, batch_idx)</span>
+<span class="sd">        Processes a single batch during validation.</span>
+<span class="sd">    configure_optimizers()</span>
+<span class="sd">        Sets up the model&#39;s optimizer and learning rate scheduler.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -217,7 +236,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">layer_norm_after_embedding</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">embedding_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularRegressor.forward"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Defines the forward pass of the regressor.</span>
 
@@ -287,9 +306,9 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabular_head</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">preds</span>
+        <span class="k">return</span> <span class="n">preds</span></div>
 
-    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularRegressor.training_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor.training_step">[docs]</a>    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes a single batch during training, computes the loss, and logs training metrics.</span>
 
@@ -314,9 +333,9 @@
             <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">loss</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
 
-    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularRegressor.validation_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor.validation_step">[docs]</a>    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes a single batch during validation, computes the loss, and logs validation metrics.</span>
 
@@ -338,9 +357,9 @@
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">loss</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
 
-    <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularRegressor.configure_optimizers"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor.configure_optimizers">[docs]</a>    <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the model&#39;s optimizer and learning rate scheduler based on the configurations provided.</span>
 
@@ -364,7 +383,7 @@
             <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">}</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler</span><span class="p">}</span></div></div>
 </pre></div>
 
            </div>

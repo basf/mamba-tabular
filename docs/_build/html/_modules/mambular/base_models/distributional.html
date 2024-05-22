@@ -108,36 +108,57 @@
 
 <div class="viewcode-block" id="BaseMambularLSS"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.distributional.BaseMambularLSS">[docs]</a><span class="k">class</span> <span class="nc">BaseMambularLSS</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A base module for likelihood-based statistical learning (LSS) models built on PyTorch Lightning,</span>
-<span class="sd">    integrating the Mamba architecture for tabular data. This module is designed to accommodate various</span>
-<span class="sd">    statistical distribution families for different types of regression and classification tasks.</span>
+<span class="sd">A base module for likelihood-based statistical learning (LSS) models built on PyTorch Lightning,</span>
+<span class="sd">integrating the Mamba architecture for tabular data. This module is designed to accommodate various</span>
+<span class="sd">statistical distribution families for different types of regression and classification tasks.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">        family (str): The name of the statistical distribution family to be used for modeling. Supported families include</span>
-<span class="sd">                      &#39;normal&#39;, &#39;poisson&#39;, &#39;gamma&#39;, &#39;beta&#39;, &#39;dirichlet&#39;, &#39;studentt&#39;, &#39;negativebinom&#39;, &#39;inversegamma&#39;, and &#39;categorical&#39;.</span>
-<span class="sd">        config (MambularConfig): An instance of MambularConfig containing configuration parameters for the model architecture.</span>
-<span class="sd">        cat_feature_info (dict, optional): A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.</span>
-<span class="sd">        num_feature_info (dict, optional): A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.</span>
-<span class="sd">        lr (float, optional): The initial learning rate for the optimizer. Defaults to 1e-03.</span>
-<span class="sd">        lr_patience (int, optional): The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.</span>
-<span class="sd">        weight_decay (float, optional): Weight decay (L2 penalty) coefficient. Defaults to 0.025.</span>
-<span class="sd">        lr_factor (float, optional): Factor by which the learning rate will be reduced. Defaults to 0.75.</span>
-<span class="sd">        **distribution_params: Additional parameters specific to the chosen statistical distribution family.</span>
+<span class="sd">Parameters</span>
+<span class="sd">----------</span>
+<span class="sd">family : str</span>
+<span class="sd">    The name of the statistical distribution family to be used for modeling. Supported families include</span>
+<span class="sd">    &#39;normal&#39;, &#39;poisson&#39;, &#39;gamma&#39;, &#39;beta&#39;, &#39;dirichlet&#39;, &#39;studentt&#39;, &#39;negativebinom&#39;, &#39;inversegamma&#39;, and &#39;categorical&#39;.</span>
+<span class="sd">config : MambularConfig</span>
+<span class="sd">    An instance of MambularConfig containing configuration parameters for the model architecture.</span>
+<span class="sd">cat_feature_info : dict, optional</span>
+<span class="sd">    A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.</span>
+<span class="sd">num_feature_info : dict, optional</span>
+<span class="sd">    A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.</span>
+<span class="sd">lr : float, optional</span>
+<span class="sd">    The initial learning rate for the optimizer. Defaults to 1e-03.</span>
+<span class="sd">lr_patience : int, optional</span>
+<span class="sd">    The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.</span>
+<span class="sd">weight_decay : float, optional</span>
+<span class="sd">    Weight decay (L2 penalty) coefficient. Defaults to 0.025.</span>
+<span class="sd">lr_factor : float, optional</span>
+<span class="sd">    Factor by which the learning rate will be reduced. Defaults to 0.75.</span>
+<span class="sd">**distribution_params : </span>
+<span class="sd">    Additional parameters specific to the chosen statistical distribution family.</span>
 
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">        mamba (Mamba): The core neural network module implementing the Mamba architecture.</span>
-<span class="sd">        norm_f (nn.Module): Normalization layer applied after the Mamba block.</span>
-<span class="sd">        tabular_head (nn.Linear): Final linear layer mapping the features to the parameters of the chosen statistical distribution.</span>
-<span class="sd">        loss_fct (callable): The loss function derived from the chosen statistical distribution.</span>
+<span class="sd">Attributes</span>
+<span class="sd">----------</span>
+<span class="sd">mamba : Mamba</span>
+<span class="sd">    The core neural network module implementing the Mamba architecture.</span>
+<span class="sd">norm_f : nn.Module</span>
+<span class="sd">    Normalization layer applied after the Mamba block.</span>
+<span class="sd">tabular_head : nn.Linear</span>
+<span class="sd">    Final linear layer mapping the features to the parameters of the chosen statistical distribution.</span>
+<span class="sd">loss_fct : callable</span>
+<span class="sd">    The loss function derived from the chosen statistical distribution.</span>
 
-<span class="sd">    # Methods:</span>
-<span class="sd">    #     forward(cat_features, num_features): Defines the forward pass of the model.</span>
-<span class="sd">    #     training_step(batch, batch_idx): Processes a single batch during training.</span>
-<span class="sd">    #     validation_step(batch, batch_idx): Processes a single batch during validation.</span>
-<span class="sd">    #     configure_optimizers(): Sets up the model&#39;s optimizer and learning rate scheduler.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">Methods</span>
+<span class="sd">-------</span>
+<span class="sd">forward(cat_features, num_features)</span>
+<span class="sd">    Defines the forward pass of the model.</span>
+<span class="sd">training_step(batch, batch_idx)</span>
+<span class="sd">    Processes a single batch during training.</span>
+<span class="sd">validation_step(batch, batch_idx)</span>
+<span class="sd">    Processes a single batch during validation.</span>
+<span class="sd">configure_optimizers()</span>
+<span class="sd">    Sets up the model&#39;s optimizer and learning rate scheduler.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -248,7 +269,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cls_token</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">d_model</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pooling_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pooling_method</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularLSS.forward"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.distributional.BaseMambularLSS.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Defines the forward pass of the model, processing both categorical and numerical features,</span>
 <span class="sd">        and returning predictions based on the configured statistical distribution.</span>
@@ -316,9 +337,9 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabular_head</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">preds</span>
+        <span class="k">return</span> <span class="n">preds</span></div>
 
-    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularLSS.training_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.distributional.BaseMambularLSS.training_step">[docs]</a>    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes a single batch during training, computes the loss using the distribution-specific loss function,</span>
 <span class="sd">        and logs training metrics.</span>
@@ -343,9 +364,9 @@
             <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">loss</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
 
-    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularLSS.validation_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.distributional.BaseMambularLSS.validation_step">[docs]</a>    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes a single batch during validation, computes the loss using the distribution-specific loss function,</span>
 <span class="sd">        and logs validation metrics.</span>
@@ -366,9 +387,9 @@
             <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">loss</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
 
-    <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMambularLSS.configure_optimizers"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.distributional.BaseMambularLSS.configure_optimizers">[docs]</a>    <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the model&#39;s optimizer and learning rate scheduler based on the configurations provided.</span>
 
@@ -392,7 +413,7 @@
             <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">}</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler</span><span class="p">}</span></div></div>
 </pre></div>
 
            </div>
