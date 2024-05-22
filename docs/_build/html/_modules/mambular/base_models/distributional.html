@@ -55,6 +55,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../mamba.html">Mamba-Tabluar</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
 <ul>
@@ -322,11 +323,13 @@
 <span class="sd">        Processes a single batch during training, computes the loss using the distribution-specific loss function,</span>
 <span class="sd">        and logs training metrics.</span>
 
-<span class="sd">        Parameters:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.</span>
 <span class="sd">            batch_idx (int): The index of the batch within the epoch.</span>
 
-<span class="sd">        Returns:</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">            Tensor: The computed loss for the batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_features</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
@@ -347,7 +350,8 @@
 <span class="sd">        Processes a single batch during validation, computes the loss using the distribution-specific loss function,</span>
 <span class="sd">        and logs validation metrics.</span>
 
-<span class="sd">        Parameters:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.</span>
 <span class="sd">            batch_idx (int): The index of the batch within the epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -368,7 +372,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the model&#39;s optimizer and learning rate scheduler based on the configurations provided.</span>
 
-<span class="sd">        Returns:</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">            dict: A dictionary containing the optimizer and lr_scheduler configurations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
