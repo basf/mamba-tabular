@@ -104,29 +104,45 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">        config (MambularConfig): Configuration parameters for the model architecture.</span>
-<span class="sd">        cat_feature_info (dict, optional): Information about categorical features, mapping feature names to the number of unique categories.</span>
-<span class="sd">        num_feature_info (dict, optional): Information about numerical features, mapping feature names to their number of dimensions after embedding.</span>
-<span class="sd">        lr (float, optional): Learning rate for the optimizer.</span>
-<span class="sd">        lr_patience (int, optional): Number of epochs with no improvement after which learning rate will be reduced.</span>
-<span class="sd">        weight_decay (float, optional): Weight decay coefficient for regularization in the optimizer.</span>
-<span class="sd">        lr_factor (float, optional): Factor by which the learning rate will be reduced by the scheduler.</span>
-<span class="sd">        seq_size (int, optional): Size of sequence chunks for processing numerical features. Relevant when `raw_embeddings` is False.</span>
-<span class="sd">        raw_embeddings (bool, optional): Indicates whether to use raw numerical features directly or to process them into embeddings.</span>
+<span class="sd">    config : MambularConfig</span>
+<span class="sd">        Configuration parameters for the model architecture.</span>
+<span class="sd">    cat_feature_info : dict, optional</span>
+<span class="sd">        Information about categorical features, mapping feature names to the number of unique categories.</span>
+<span class="sd">    num_feature_info : dict, optional</span>
+<span class="sd">        Information about numerical features, mapping feature names to their number of dimensions after embedding.</span>
+<span class="sd">    lr : float, optional</span>
+<span class="sd">        Learning rate for the optimizer. Defaults to 1e-03.</span>
+<span class="sd">    lr_patience : int, optional</span>
+<span class="sd">        Number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.</span>
+<span class="sd">    weight_decay : float, optional</span>
+<span class="sd">        Weight decay coefficient for regularization in the optimizer. Defaults to 0.025.</span>
+<span class="sd">    lr_factor : float, optional</span>
+<span class="sd">        Factor by which the learning rate will be reduced by the scheduler. Defaults to 0.75.</span>
+<span class="sd">    seq_size : int, optional</span>
+<span class="sd">        Size of sequence chunks for processing numerical features. Relevant when `raw_embeddings` is False.</span>
+<span class="sd">    raw_embeddings : bool, optional</span>
+<span class="sd">        Indicates whether to use raw numerical features directly or to process them into embeddings. Defaults to False.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">        mamba (Mamba): The core neural network module implementing the Mamba architecture.</span>
-<span class="sd">        norm_f (nn.Module): Normalization layer applied after the Mamba block.</span>
-<span class="sd">        tabular_head (nn.Linear): Final linear layer mapping the features to the  target.</span>
+<span class="sd">    mamba : Mamba</span>
+<span class="sd">        The core neural network module implementing the Mamba architecture.</span>
+<span class="sd">    norm_f : nn.Module</span>
+<span class="sd">        Normalization layer applied after the Mamba block.</span>
+<span class="sd">    tabular_head : nn.Linear</span>
+<span class="sd">        Final linear layer mapping the features to the target.</span>
 
-
-<span class="sd">    # Methods:</span>
-<span class="sd">    #     forward(cat_features, num_features): Defines the forward pass of the model.</span>
-<span class="sd">    #     training_step(batch, batch_idx): Processes a single batch during training.</span>
-<span class="sd">    #     validation_step(batch, batch_idx): Processes a single batch during validation.</span>
-<span class="sd">    #     configure_optimizers(): Sets up the model&#39;s optimizer and learning rate scheduler.&#39;</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    forward(cat_features, num_features)</span>
+<span class="sd">        Defines the forward pass of the model.</span>
+<span class="sd">    training_step(batch, batch_idx)</span>
+<span class="sd">        Processes a single batch during training.</span>
+<span class="sd">    validation_step(batch, batch_idx)</span>
+<span class="sd">        Processes a single batch during validation.</span>
+<span class="sd">    configure_optimizers()</span>
+<span class="sd">        Sets up the model&#39;s optimizer and learning rate scheduler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -245,7 +261,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">auroc</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">AUROC</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">Precision</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseEmbeddingMambularClassifier.forward"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.embedding_classifier.BaseEmbeddingMambularClassifier.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Defines the forward pass of the model, processing both categorical and numerical features,</span>
 <span class="sd">        and returning regression predictions.</span>
@@ -349,9 +365,9 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabular_head</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">preds</span>
+        <span class="k">return</span> <span class="n">preds</span></div>
 
-    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseEmbeddingMambularClassifier.training_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.embedding_classifier.BaseEmbeddingMambularClassifier.training_step">[docs]</a>    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes a single batch during training, computes the loss, and logs training metrics.</span>
 
@@ -408,9 +424,9 @@
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">loss</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
 
-    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseEmbeddingMambularClassifier.validation_step"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.embedding_classifier.BaseEmbeddingMambularClassifier.validation_step">[docs]</a>    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processes a single batch during validation, computes the loss, and logs validation metrics.</span>
 
@@ -455,9 +471,9 @@
             <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseEmbeddingMambularClassifier.configure_optimizers"><a class="viewcode-back" href="../../../api/base_models/BaseModels.html#mambular.base_models.embedding_classifier.BaseEmbeddingMambularClassifier.configure_optimizers">[docs]</a>    <span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the model&#39;s optimizer and learning rate scheduler based on the configurations provided.</span>
 
@@ -481,7 +497,7 @@
             <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">}</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler</span><span class="p">}</span></div></div>
 </pre></div>
 
            </div>
