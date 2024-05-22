@@ -3,20 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to mamba-tabular's documentation!
-=========================================
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. mdinclude:: mamba.md
 
 .. toctree::
    :name: Getting Started
@@ -24,18 +11,10 @@ Indices and tables
    :maxdepth: 2
    :hidden:
 
+   mamba
    installation
-   about
-   
-
-.. toctree::
-   :name: Community
-   :caption: Community
-   :maxdepth: 1
-   :hidden:
-
-   codeofconduct
-  
+.. quickstart
+.. notebooks 
 
 .. toctree::
    :name: API Docs
@@ -44,5 +23,6 @@ Indices and tables
    :hidden:
 
  
-   api/base_models/index
    api/models/index
+   api/base_models/index
+   
