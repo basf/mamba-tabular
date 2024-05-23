@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 # Set random seed for reproducibility
 np.random.seed(0)
 
-# Number of samples
+# Number of samples and features
 n_samples = 1000
 n_features = 5
 
@@ -18,7 +18,7 @@ coefficients = np.random.randn(n_features)
 # Generate target variable
 y = np.dot(X, coefficients) + np.random.randn(n_samples)
 
-# Create a DataFrame to store the data
+# Create a DataFrame to store the generated data
 data = pd.DataFrame(X, columns=[f"feature_{i}" for i in range(n_features)])
 data["target"] = y
 
