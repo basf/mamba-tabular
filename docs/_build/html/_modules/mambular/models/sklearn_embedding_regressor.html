@@ -421,30 +421,52 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">            X (array-like or DataFrame): The training input samples.</span>
-<span class="sd">            y (array-like): The target values (class labels for classification, real numbers for regression).</span>
-<span class="sd">            val_size (float, optional): The proportion of the dataset to include in the validation split if `X_val` is not provided.</span>
-<span class="sd">            X_val (array-like or DataFrame, optional): The validation input samples.</span>
-<span class="sd">            y_val (array-like, optional): The validation target values.</span>
-<span class="sd">            max_epochs (int, optional): The maximum number of epochs for training.</span>
-<span class="sd">            random_state (int, optional): The seed used by the random number generator.</span>
-<span class="sd">            batch_size (int, optional): Size of the batches for training.</span>
-<span class="sd">            shuffle (bool, optional): Whether to shuffle the training data.</span>
-<span class="sd">            patience (int, optional): Patience for early stopping.</span>
-<span class="sd">            monitor (str, optional): Quantity to be monitored for early stopping.</span>
-<span class="sd">            mode (str, optional): One of {&#39;auto&#39;, &#39;min&#39;, &#39;max&#39;}. In &#39;min&#39; mode, training will stop when the quantity monitored has stopped decreasing; in &#39;max&#39; mode it will stop when the quantity monitored has stopped increasing.</span>
-<span class="sd">            lr (float, optional): Learning rate for the optimizer.</span>
-<span class="sd">            lr_patience (int, optional): Number of epochs with no improvement after which learning rate will be reduced.</span>
-<span class="sd">            factor (float, optional): Factor by which the learning rate will be reduced.</span>
-<span class="sd">            weight_decay (float, optional): Weight decay coefficient for regularization in the optimizer.</span>
-<span class="sd">            raw_embeddings (bool, optional): Whether to use raw numerical features directly or to process them into embeddings.</span>
-<span class="sd">            seq_size (int, optional): The sequence size for processing numerical features when not using raw embeddings.</span>
-<span class="sd">            **trainer_kwargs: Additional keyword arguments for the PyTorch Lightning Trainer.</span>
+<span class="sd">        X : array-like or DataFrame</span>
+<span class="sd">            The training input samples.</span>
+<span class="sd">        y : array-like</span>
+<span class="sd">            The target values (class labels for classification, real numbers for regression).</span>
+<span class="sd">        val_size : float, optional</span>
+<span class="sd">            The proportion of the dataset to include in the validation split if `X_val` is not provided.</span>
+<span class="sd">        X_val : array-like or DataFrame, optional</span>
+<span class="sd">            The validation input samples.</span>
+<span class="sd">        y_val : array-like, optional</span>
+<span class="sd">            The validation target values.</span>
+<span class="sd">        max_epochs : int, optional</span>
+<span class="sd">            The maximum number of epochs for training.</span>
+<span class="sd">        random_state : int, optional</span>
+<span class="sd">            The seed used by the random number generator.</span>
+<span class="sd">        batch_size : int, optional</span>
+<span class="sd">            Size of the batches for training.</span>
+<span class="sd">        shuffle : bool, optional</span>
+<span class="sd">            Whether to shuffle the training data.</span>
+<span class="sd">        patience : int, optional</span>
+<span class="sd">            Patience for early stopping.</span>
+<span class="sd">        monitor : str, optional</span>
+<span class="sd">            Quantity to be monitored for early stopping.</span>
+<span class="sd">        mode : str, optional</span>
+<span class="sd">            One of {&#39;auto&#39;, &#39;min&#39;, &#39;max&#39;}. In &#39;min&#39; mode, training will stop when the quantity monitored has stopped decreasing;</span>
+<span class="sd">            in &#39;max&#39; mode, it will stop when the quantity monitored has stopped increasing.</span>
+<span class="sd">        lr : float, optional</span>
+<span class="sd">            Learning rate for the optimizer.</span>
+<span class="sd">        lr_patience : int, optional</span>
+<span class="sd">            Number of epochs with no improvement after which the learning rate will be reduced.</span>
+<span class="sd">        factor : float, optional</span>
+<span class="sd">            Factor by which the learning rate will be reduced.</span>
+<span class="sd">        weight_decay : float, optional</span>
+<span class="sd">            Weight decay coefficient for regularization in the optimizer.</span>
+<span class="sd">        raw_embeddings : bool, optional</span>
+<span class="sd">            Whether to use raw numerical features directly or to process them into embeddings.</span>
+<span class="sd">        seq_size : int, optional</span>
+<span class="sd">            The sequence size for processing numerical features when not using raw embeddings.</span>
+<span class="sd">        **trainer_kwargs : dict</span>
+<span class="sd">            Additional keyword arguments for the PyTorch Lightning Trainer.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">            self: Returns an instance of self.</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Returns an instance of self.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+            
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">X_val</span><span class="p">:</span>
