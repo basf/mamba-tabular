@@ -92,7 +92,7 @@ Mambular introduces a cutting-edge approach to distributional regression through
 `MambularLSS` offers a wide range of distribution classes to cater to various statistical modeling needs. The available distribution classes include:
 
 - `normal`: Normal Distribution for modeling continuous data with a symmetric distribution around the mean.
-- `poisson`: Poisson Distribution for modeling count data that represents the number of events occurring within a fixed interval.
+- `poisson`: Poisson Distribution for modeling count data that for instance represent the number of events occurring within a fixed interval.
 - `gamma`: Gamma Distribution for modeling continuous data that is skewed and bounded at zero, often used for waiting times.
 - `beta`: Beta Distribution for modeling data that is bounded between 0 and 1, useful for proportions and percentages.
 - `dirichlet`: Dirichlet Distribution for modeling multivariate data where individual components are correlated, and the sum is constrained to 1.
