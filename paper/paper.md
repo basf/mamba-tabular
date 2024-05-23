@@ -13,11 +13,15 @@ authors:
     affiliation: 2
   - name: Christoph Weisser
     affiliation: 1
+  - name: Benjamin Säfken
+    affiliation: 3
 affiliations:
   - name: BASF SE, Germany
     index: 1
   - name: BASF Canada Inc, Canada
     index: 2
+  - name: TU Clausthal, Germany
+    index: 3
 date: 22 April 2024
 bibliography: paper.bib
 
