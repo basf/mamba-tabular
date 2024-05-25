@@ -22,30 +22,53 @@ class BaseMambularLSS(pl.LightningModule):
     integrating the Mamba architecture for tabular data. This module is designed to accommodate various
     statistical distribution families for different types of regression and classification tasks.
 
-    Parameters:
-        family (str): The name of the statistical distribution family to be used for modeling. Supported families include
-                      'normal', 'poisson', 'gamma', 'beta', 'dirichlet', 'studentt', 'negativebinom', 'inversegamma', and 'categorical'.
-        config (MambularConfig): An instance of MambularConfig containing configuration parameters for the model architecture.
-        cat_feature_info (dict, optional): A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.
-        num_feature_info (dict, optional): A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.
-        lr (float, optional): The initial learning rate for the optimizer. Defaults to 1e-03.
-        lr_patience (int, optional): The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.
-        weight_decay (float, optional): Weight decay (L2 penalty) coefficient. Defaults to 0.025.
-        lr_factor (float, optional): Factor by which the learning rate will be reduced. Defaults to 0.75.
-        **distribution_params: Additional parameters specific to the chosen statistical distribution family.
+    Parameters
+    ----------
+    family : str
+        The name of the statistical distribution family to be used for modeling. Supported families include
+        'normal', 'poisson', 'gamma', 'beta', 'dirichlet', 'studentt', 'negativebinom', 'inversegamma', and 'categorical'.
+    config : MambularConfig
+        An instance of MambularConfig containing configuration parameters for the model architecture.
+    cat_feature_info : dict, optional
+        A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.
+    num_feature_info : dict, optional
+        A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.
+    lr : float, optional
+        The initial learning rate for the optimizer. Defaults to 1e-03.
+    lr_patience : int, optional
+        The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.
+    weight_decay : float, optional
+        Weight decay (L2 penalty) coefficient. Defaults to 0.025.
+    lr_factor : float, optional
+        Factor by which the learning rate will be reduced. Defaults to 0.75.
+    **distribution_params : 
+        Additional parameters specific to the chosen statistical distribution family.
 
-    Attributes:
-        mamba (Mamba): The core neural network module implementing the Mamba architecture.
-        norm_f (nn.Module): Normalization layer applied after the Mamba block.
-        tabular_head (nn.Linear): Final linear layer mapping the features to the parameters of the chosen statistical distribution.
-        loss_fct (callable): The loss function derived from the chosen statistical distribution.
+    Attributes
+    ----------
+    mamba : Mamba
+        The core neural network module implementing the Mamba architecture.
+    norm_f : nn.Module
+        Normalization layer applied after the Mamba block.
+    tabular_head : nn.Linear
+        Final linear layer mapping the features to the parameters of the chosen statistical distribution.
+    loss_fct : callable
+        The loss function derived from the chosen statistical distribution.
 
-    Methods:
-        forward(cat_features, num_features): Defines the forward pass of the model.
-        training_step(batch, batch_idx): Processes a single batch during training.
-        validation_step(batch, batch_idx): Processes a single batch during validation.
-        configure_optimizers(): Sets up the model's optimizer and learning rate scheduler.
+    Methods
+    -------
+    forward(cat_features, num_features)
+        Defines the forward pass of the model.
+    training_step(batch, batch_idx)
+        Processes a single batch during training.
+    validation_step(batch, batch_idx)
+        Processes a single batch during validation.
+    configure_optimizers()
+        Sets up the model's optimizer and learning rate scheduler.
     """
+
+
+
 
     def __init__(
         self,
@@ -161,12 +184,17 @@ class BaseMambularLSS(pl.LightningModule):
         Defines the forward pass of the model, processing both categorical and numerical features,
         and returning predictions based on the configured statistical distribution.
 
-        Parameters:
-            cat_features (Tensor): Tensor containing the categorical features.
-            num_features (Tensor): Tensor containing the numerical features.
+        Parameters
+        ----------
+        cat_features : Tensor
+            Tensor containing the categorical features.
+        num_features : Tensor
+            Tensor containing the numerical features.
 
-        Returns:
-            Tensor: The predictions of the model, typically the parameters of the chosen statistical distribution.
+        Returns
+        -------
+        Tensor
+            The predictions of the model, typically the parameters of the chosen statistical distribution.
         """
 
         batch_size = (
@@ -229,12 +257,17 @@ class BaseMambularLSS(pl.LightningModule):
         Processes a single batch during training, computes the loss using the distribution-specific loss function,
         and logs training metrics.
 
-        Parameters:
-            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
-            batch_idx (int): The index of the batch within the epoch.
+        Parameters
+        ----------
+        batch : tuple
+            A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
+        batch_idx : int
+            The index of the batch within the epoch.
 
-        Returns:
-            Tensor: The computed loss for the batch.
+        Returns
+        -------
+        Tensor
+            The computed loss for the batch.
         """
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
@@ -249,15 +282,20 @@ class BaseMambularLSS(pl.LightningModule):
         )
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx):   
         """
         Processes a single batch during validation, computes the loss using the distribution-specific loss function,
         and logs validation metrics.
 
-        Parameters:
-            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
-            batch_idx (int): The index of the batch within the epoch.
-        """
+        Parameters
+        ----------
+        batch : tuple
+            A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
+        batch_idx : int
+            The index of the batch within the epoch.
+        """ 
+        
+        
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 
@@ -275,8 +313,10 @@ class BaseMambularLSS(pl.LightningModule):
         """
         Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
 
-        Returns:
-            dict: A dictionary containing the optimizer and lr_scheduler configurations.
+        Returns
+        -------
+        dict
+            A dictionary containing the optimizer and lr_scheduler configurations.
         """
         optimizer = torch.optim.Adam(
             self.parameters(), lr=self.lr, weight_decay=self.config.weight_decay

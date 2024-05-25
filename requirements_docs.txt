@@ -11,3 +11,4 @@ sphinx-book-theme
 pandoc
 pydata-sphinx-theme
 sphinx-rtd-theme
+lxml[html_clean]

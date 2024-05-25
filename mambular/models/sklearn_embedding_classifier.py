@@ -21,23 +21,21 @@ class EmbeddingMambularClassifier(BaseEstimator):
     and data loading, offering methods for fitting, predicting, and probability estimation in a manner akin
     to scikit-learn's API.
 
-    Parameters:
-        **kwargs: Configuration parameters that can include both MambularConfig settings and preprocessing
-                  options. Any unrecognized parameters are passed to the preprocessor.
+    Parameters
+    ----------
+    **kwargs : Configuration parameters that can include both MambularConfig settings and preprocessing
+        options. Any unrecognized parameters are passed to the preprocessor.
 
-    Attributes:
-        config (MambularConfig): Configuration object for the model, storing architecture-specific parameters.
-        preprocessor (Preprocessor): Object handling data preprocessing steps such as feature encoding and normalization.
-        model (ProteinMambularClassifier): The underlying neural network model, instantiated during the `fit` method.
-
-    Methods:
-        fit: Fits the model to the provided dataset.
-        predict: Predicts class labels for the provided data.
-        predict_proba: Predicts class probabilities for the provided data.
-        get_params: Returns the parameters of the classifier.
-        set_params: Sets the parameters of the classifier.
+    Attributes
+    ----------
+    config : MambularConfig
+        Configuration object for the model, storing architecture-specific parameters.
+    preprocessor : Preprocessor
+        Object handling data preprocessing steps such as feature encoding and normalization.
+    model : ProteinMambularClassifier
+        The underlying neural network model, instantiated during the `fit` method.
     """
-
+       
     def __init__(self, **kwargs):
         # Known config arguments
         config_arg_names = [
@@ -75,13 +73,13 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         Get parameters for this estimator.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         deep : bool, default=True
             If True, will return the parameters for this estimator and contained subobjects that are estimators.
 
-        Returns:
-        --------
+        Returns
+        -------
         params : dict
             Parameter names mapped to their values.
         """
@@ -102,13 +100,13 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         Set the parameters of this estimator.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         **parameters : dict
             Estimator parameters.
 
-        Returns:
-        --------
+        Returns
+        -------
         self : object
             Estimator instance.
         """
@@ -137,8 +135,8 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         Split the dataset into training and validation sets.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like of shape (n_samples, n_features)
             The input samples.
         y : array-like of shape (n_samples,)
@@ -148,8 +146,8 @@ class EmbeddingMambularClassifier(BaseEstimator):
         random_state : int
             Controls the shuffling applied to the data before applying the split.
 
-        Returns:
-        --------
+        Returns
+        -------
         X_train, X_val, y_train, y_val : arrays
             The split datasets.
         """
@@ -163,8 +161,8 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         Preprocess the training and validation data and create corresponding DataLoaders.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X_train : array-like of shape (n_samples, n_features)
             The training input samples.
         y_train : array-like of shape (n_samples,)
@@ -178,8 +176,8 @@ class EmbeddingMambularClassifier(BaseEstimator):
         shuffle : bool
             Whether to shuffle the training data before splitting into batches.
 
-        Returns:
-        --------
+        Returns
+        -------
         data_module : MambularDataModule
             An instance of MambularDataModule containing training and validation DataLoaders.
         """
@@ -258,13 +256,13 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         Preprocesses the test data and creates tensors for categorical and numerical features.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             Test feature set.
 
-        Returns:
-        --------
+        Returns
+        -------
         cat_tensors : list of Tensors
             List of tensors for each categorical feature.
         num_tensors : list of Tensors
@@ -327,33 +325,55 @@ class EmbeddingMambularClassifier(BaseEstimator):
         pca=False,
         reduced_dims=16,
         **trainer_kwargs
-    ):
+    ):   
         """
         Fits the model to the given dataset.
 
-        Parameters:
-            X: Feature matrix for training, either as a pandas DataFrame or array-like.
-            y: Target vector.
-            val_size: Fraction of the data to use for validation if X_val is None.
-            X_val: Feature matrix for validation.
-            y_val: Target vector for validation.
-            max_epochs: Maximum number of epochs for training.
-            random_state: Seed for random number generators.
-            batch_size: Size of batches for training and validation.
-            shuffle: Whether to shuffle training data before each epoch.
-            patience: Patience for early stopping based on val_loss.
-            monitor: Metric to monitor for early stopping.
-            mode: Mode for early stopping ('min' or 'max').
-            lr: Learning rate for the optimizer.
-            lr_patience: Patience for learning rate reduction.
-            factor: Factor for learning rate reduction.
-            weight_decay: Weight decay for the optimizer.
-            raw_embeddings: Whether to use raw features or embeddings.
-            seq_size: Sequence size for embeddings, relevant if raw_embeddings is False.
-            **trainer_kwargs: Additional arguments for the PyTorch Lightning Trainer.
+        Parameters
+        ----------
+        X : pandas DataFrame or array-like
+            Feature matrix for training.
+        y : array-like
+            Target vector.
+        val_size : float, optional
+            Fraction of the data to use for validation if X_val is None.
+        X_val : pandas DataFrame or array-like, optional
+            Feature matrix for validation.
+        y_val : array-like, optional
+            Target vector for validation.
+        max_epochs : int, default=100
+            Maximum number of epochs for training.
+        random_state : int, optional
+            Seed for random number generators.
+        batch_size : int, default=32
+            Size of batches for training and validation.
+        shuffle : bool, default=True
+            Whether to shuffle training data before each epoch.
+        patience : int, default=10
+            Patience for early stopping based on val_loss.
+        monitor : str, default='val_loss'
+            Metric to monitor for early stopping.
+        mode : str, default='min'
+            Mode for early stopping ('min' or 'max').
+        lr : float, default=0.001
+            Learning rate for the optimizer.
+        lr_patience : int, default=5
+            Patience for learning rate reduction.
+        factor : float, default=0.1
+            Factor for learning rate reduction.
+        weight_decay : float, default=0.0
+            Weight decay for the optimizer.
+        raw_embeddings : bool, default=False
+            Whether to use raw features or embeddings.
+        seq_size : int, optional
+            Sequence size for embeddings, relevant if raw_embeddings is False.
+        **trainer_kwargs : dict
+            Additional arguments for the PyTorch Lightning Trainer.
 
-        Returns:
-            self: The fitted estimator.
+        Returns
+        -------
+        self : object
+            The fitted estimator.
         """
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
@@ -435,18 +455,18 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         Predict the class labels for the given input samples.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples to predict.
 
-        Returns:
-        --------
+        Returns
+        -------
         predictions : ndarray of shape (n_samples,)
             Predicted class labels for each input sample.
 
-        Notes:
-        ------
+        Notes
+        -----
         The method preprocesses the input data using the same preprocessor used during training,
         sets the model to evaluation mode, and then performs inference to predict the class labels.
         The predictions are converted from a PyTorch tensor to a NumPy array before being returned.
@@ -486,18 +506,18 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         Predict class probabilities for the given input samples.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples for which to predict class probabilities.
 
-        Returns:
-        --------
+        Returns
+        -------
         probabilities : ndarray of shape (n_samples, n_classes)
             Predicted class probabilities for each input sample.
 
-        Notes:
-        ------
+        Notes
+        -----
         The method preprocesses the input data using the same preprocessor used during training,
         sets the model to evaluation mode, and then performs inference to predict the class probabilities.
         Softmax is applied to the logits to obtain probabilities, which are then converted from a PyTorch tensor
@@ -534,8 +554,8 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         Evaluate the model on the given data using specified metrics.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples to predict.
         y_true : array-like of shape (n_samples,)
@@ -544,13 +564,13 @@ class EmbeddingMambularClassifier(BaseEstimator):
             A dictionary where keys are metric names and values are tuples containing the metric function
             and a boolean indicating whether the metric requires probability scores (True) or class labels (False).
 
-        Returns:
-        --------
+        Returns
+        -------
         scores : dict
             A dictionary with metric names as keys and their corresponding scores as values.
 
-        Notes:
-        ------
+        Notes
+        -----
         This method uses either the `predict` or `predict_proba` method depending on the metric requirements.
         """
         # Ensure input is in the correct format

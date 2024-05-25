@@ -9,41 +9,73 @@ import pytorch_lightning as pl
 class BaseMambularClassifier(pl.LightningModule):
     """
     A base class for building classification models using the Mambular architecture within the PyTorch Lightning framework.
+
     This class integrates various components such as embeddings for categorical and numerical features, the Mambular model
     for processing sequences of embeddings, and a classification head for prediction. It supports multi-class and binary classification tasks.
 
-    Parameters:
-        num_classes (int): The number of classes in the classification task. For binary classification, this should be 2.
-        config (MambularConfig): An instance of MambularConfig containing configuration parameters for the Mambular model.
-        cat_feature_info (dict, optional): A dictionary mapping the names of categorical features to their number of unique categories.
-                                           This information is used to configure embedding layers for categorical features. Defaults to None.
-        num_feature_info (dict, optional): A dictionary mapping the names of numerical features to the size of their input dimensions.
-                                           This information is used to configure embedding layers for numerical features. Defaults to None.
-        lr (float, optional): The learning rate for the optimizer. Defaults to 1e-03.
-        lr_patience (int, optional): The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.
-        weight_decay (float, optional): Weight decay (L2 penalty) parameter for the optimizer. Defaults to 0.025.
-        lr_factor (float, optional): Factor by which the learning rate will be reduced. Defaults to 0.75.
+    Parameters
+    ----------
+    num_classes : int
+        The number of classes in the classification task. For binary classification, this should be 2.
+    config : MambularConfig
+        An instance of MambularConfig containing configuration parameters for the Mambular model.
+    cat_feature_info : dict, optional
+        A dictionary mapping the names of categorical features to their number of unique categories.
+        This information is used to configure embedding layers for categorical features. Defaults to None.
+    num_feature_info : dict, optional
+        A dictionary mapping the names of numerical features to the size of their input dimensions.
+        This information is used to configure embedding layers for numerical features. Defaults to None.
+    lr : float, optional
+        The learning rate for the optimizer. Defaults to 1e-03.
+    lr_patience : int, optional
+        The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.
+    weight_decay : float, optional
+        Weight decay (L2 penalty) parameter for the optimizer. Defaults to 0.025.
+    lr_factor : float, optional
+        Factor by which the learning rate will be reduced. Defaults to 0.75.
 
-    Attributes:
-        embedding_activation (nn.Module): The activation function to be applied after the linear transformation of numerical features.
-        num_embeddings (nn.ModuleList): A list of sequential modules, each corresponding to an embedding layer for a numerical feature.
-        cat_embeddings (nn.ModuleList): A list of embedding layers, each corresponding to a categorical feature.
-        mamba (Mamba): The Mambular model for processing sequences of embeddings.
-        norm_f (nn.Module): A normalization layer applied after the Mambular model.
-        tabular_head (nn.Linear): A linear layer for predicting the class labels from the aggregated embedding representation.
-        pooling_method (str): The method used to aggregate embeddings across features. Supported methods are 'avg', 'max', and 'sum'.
-        loss_fct (nn.Module): The loss function used for training the model, configured based on the number of classes.
-        acc (torchmetrics.Accuracy): A metric for computing the accuracy of predictions.
-        auroc (torchmetrics.AUROC): A metric for computing the Area Under the Receiver Operating Characteristic curve.
-        precision (torchmetrics.Precision): A metric for computing the precision of predictions.
+    Attributes
+    ----------
+    embedding_activation : nn.Module
+        The activation function to be applied after the linear transformation of numerical features.
+    num_embeddings : nn.ModuleList
+        A list of sequential modules, each corresponding to an embedding layer for a numerical feature.
+    cat_embeddings : nn.ModuleList
+        A list of embedding layers, each corresponding to a categorical feature.
+    mamba : Mamba
+        The Mambular model for processing sequences of embeddings.
+    norm_f : nn.Module
+        A normalization layer applied after the Mambular model.
+    tabular_head : nn.Linear
+        A linear layer for predicting the class labels from the aggregated embedding representation.
+    pooling_method : str
+        The method used to aggregate embeddings across features. Supported methods are 'avg', 'max', and 'sum'.
+    loss_fct : nn.Module
+        The loss function used for training the model, configured based on the number of classes.
+    acc : torchmetrics.Accuracy
+        A metric for computing the accuracy of predictions.
+    auroc : torchmetrics.AUROC
+        A metric for computing the Area Under the Receiver Operating Characteristic curve.
+    precision : torchmetrics.Precision
+        A metric for computing the precision of predictions.
 
-    Methods:
-        forward(cat_features, num_features): Defines the forward pass of the model, processing both categorical and numerical features, aggregating embeddings,
-                                             and producing predictions.
-        training_step(batch, batch_idx): Performs a single training step, computing the loss and logging metrics for the training set.
-        validation_step(batch, batch_idx): Performs a single validation step, computing the loss and logging metrics for the validation set.
-        configure_optimizers(): Configures the model's optimizers and learning rate schedulers.
+    Methods
+    -------
+    forward(cat_features, num_features)
+        Defines the forward pass of the model, processing both categorical and numerical features, aggregating embeddings,
+        and producing predictions.
+    training_step(batch, batch_idx)
+        Performs a single training step, computing the loss and logging metrics for the training set.
+    validation_step(batch, batch_idx)
+        Performs a single validation step, computing the loss and logging metrics for the validation set.
+    configure_optimizers()
+        Configures the model's optimizers and learning rate schedulers.
     """
+
+
+
+
+
 
     def __init__(
         self,
@@ -153,12 +185,17 @@ class BaseMambularClassifier(pl.LightningModule):
         """
         Defines the forward pass of the classifier.
 
-        Parameters:
-            cat_features (Tensor): Tensor containing the categorical features.
-            num_features (Tensor): Tensor containing the numerical features.
+        Parameters
+        ----------
+        cat_features : Tensor
+            Tensor containing the categorical features.
+        num_features : Tensor
+            Tensor containing the numerical features.
 
-        Returns:
-            Tensor: The output predictions of the model.
+        Returns
+        -------
+        Tensor
+            The output predictions of the model.
         """
         batch_size = (
             cat_features[0].size(0)
@@ -219,13 +256,14 @@ class BaseMambularClassifier(pl.LightningModule):
         """
         Processes a single batch during training, computes the loss and logs training metrics.
 
-        Parameters:
-            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
-            batch_idx (int): The index of the batch within the epoch.
-
-        Returns:
-            Tensor: The computed loss for the batch.
+        Parameters
+        ----------
+        batch : tuple
+            A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
+        batch_idx : int
+            The index of the batch within the epoch.
         """
+        
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 
@@ -272,14 +310,18 @@ class BaseMambularClassifier(pl.LightningModule):
 
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx):     
         """
         Processes a single batch during validation, computes the loss and logs validation metrics.
 
-        Parameters:
-            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
-            batch_idx (int): The index of the batch within the epoch.
+        Parameters
+        ----------
+        batch : tuple
+            A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
+        batch_idx : int
+            The index of the batch within the epoch.
         """
+        
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 
@@ -322,8 +364,10 @@ class BaseMambularClassifier(pl.LightningModule):
         """
         Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
 
-        Returns:
-            dict: A dictionary containing the optimizer and lr_scheduler configurations.
+        Returns
+        -------
+        dict
+            A dictionary containing the optimizer and lr_scheduler configurations.
         """
         optimizer = torch.optim.Adam(
             self.parameters(), lr=self.lr, weight_decay=self.config.weight_decay
