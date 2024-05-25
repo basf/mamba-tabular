@@ -1,0 +1,14 @@
+sphinx==6.2.1
+sphinx-autodoc-typehints
+numpydoc
+nbsphinx
+ipython
+myst-parser
+m2r2
+sphinx-copybutton
+sphinx-togglebutton
+sphinx-book-theme
+pandoc
+pydata-sphinx-theme
+sphinx-rtd-theme
+lxml[html_clean]

@@ -16,12 +16,21 @@ authors:
   - name: Benjamin Säfken
     affiliation: 3
 affiliations:
+<<<<<<< HEAD:paper/paper.md
   - name: BASF SE, Germany
     index: 1
   - name: BASF Canada Inc, Canada
     index: 2
   - name: TU Clausthal, Germany
     index: 3
+=======
+ - name: BASF 
+  index: 1
+ - name: BASF Canada Inc
+  index: 2
+ - name: Technical University Clausthal
+  index: 3
+>>>>>>> documentation:paper.md
 date: 22 April 2024
 bibliography: paper.bib
 
@@ -31,12 +40,18 @@ bibliography: paper.bib
 
 # 1. Summary
 
+<<<<<<< HEAD:paper/paper.md
 Mambular is a Python library designed to leverage the capabilities of the recently proposed Mamba architecture [@Gu] for deep learning tasks involving tabular datasets. The effectiveness of the attention mechanism, as demonstrated by models such as TabTransformer [@Ahamed] and FT-Transformer [@Gorishnyi1], is extended to these data types, showcasing the potential for sequence-focused architectures to excel in this domain. Thus, sequence-focused architectures can also achieve state-of-the-art performances for tabular data problems. [@Huang] already demonstrated that the Mamba architecture, similar to the attention mechanism, can effectively be used when dealing with tabular data. Mambular closely follows [@Gorishnyi1], but uses Mamba blocks instead of transformer blocks.
 Furthermore, it offers enhanced flexibility in model architecture with respect to embedding activation, pooling layers, and task-specific head architectures. Choosing the appropriate settings, a user can thus easily implement the models presented in [@Huang].
 
 # 2. Statement of Need
 Transformer-based models for tabular data have become powerful alternatives to traditional gradient-based decision trees. [@Huang; @Gorishnyi1; @natt]. However, effectively training these models requires users to:  **i)** deeply understand the intricacies of tabular transformer networks,  **ii)** master various data type-dependent preprocessing techniques, **iii)** navigate complex deep learning libraries.
 This either leads researchers and practitioners alike to develop extensive custom scripts and libraries to fit these models or discourages them from using these advanced tools altogether. However, since tabular transformer models are becoming more popular and powerful, they should be easy to use, also for practitioners. Mambular addresses this by offering a straightforward framework that allows users to easily train tabular models using the innovative Mamba architecture.
+=======
+Mambular is a Python library designed to leverage the capabilities of the recently proposed Mamba architecture [@Gu] for deep learning tasks involving tabular datasets. The effectiveness of the attention mechanism, as demonstrated by models such as TabTransformer [@Ahamed] and FT-Transformer [@Gorishnyi1], extends to these data types, showcasing the potential for sequence-focused architectures to excel in this domain. Thus, sequence-focused architectures can also achieve state-of-the-art performances for tabular data problems. [@Huang] already demonstrated that the Mamba architecture, similar to the attention mechanism, can also effectively be used when dealing with tabular data. Mambular closely follows [@Gorishnyi1], but uses Mamba blocks instead of transformer blocks.
+Additionally, it offers enhanced flexibility in model architecture with respect to embedding activation, pooling layers, and task-specific head architectures. Choosing the appropriate settings, a user can thus easily implement the models presented in [@Huang].
+You can find the Mamba-Tabular API documentation [here](https://mamba-tabular.readthedocs.io/en/latest/index.html).
+>>>>>>> documentation:paper.md
 
 # 3. Methodology
 The Mambular default architecture, independent of the task follows the straight forward architecture of tabular tansformer models [@Ahamed; @Gorishnyi1; @Huang]:

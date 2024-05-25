@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="english">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Models &mdash; mamba-tabular 06.05.2024 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="BaseModels" href="../base_models/index.html" />
+    <link rel="prev" title="Models" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            mamba-tabular
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mamba.html">Mamba-Tabluar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Models</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier"><code class="docutils literal notranslate"><span class="pre">MambularClassifier</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier.config"><code class="docutils literal notranslate"><span class="pre">MambularClassifier.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier.preprocessor"><code class="docutils literal notranslate"><span class="pre">MambularClassifier.preprocessor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_classifier.MambularClassifier.model"><code class="docutils literal notranslate"><span class="pre">MambularClassifier.model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mambular.models.sklearn_distributional.MambularLSS"><code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_distributional.MambularLSS.config"><code class="docutils literal notranslate"><span class="pre">MambularLSS.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_distributional.MambularLSS.preprocessor"><code class="docutils literal notranslate"><span class="pre">MambularLSS.preprocessor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_distributional.MambularLSS.model"><code class="docutils literal notranslate"><span class="pre">MambularLSS.model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier"><code class="docutils literal notranslate"><span class="pre">EmbeddingMambularClassifier</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.config"><code class="docutils literal notranslate"><span class="pre">EmbeddingMambularClassifier.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.preprocessor"><code class="docutils literal notranslate"><span class="pre">EmbeddingMambularClassifier.preprocessor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.model"><code class="docutils literal notranslate"><span class="pre">EmbeddingMambularClassifier.model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor"><code class="docutils literal notranslate"><span class="pre">EmbeddingMambularRegressor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.config"><code class="docutils literal notranslate"><span class="pre">EmbeddingMambularRegressor.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.preprocessor"><code class="docutils literal notranslate"><span class="pre">EmbeddingMambularRegressor.preprocessor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.model"><code class="docutils literal notranslate"><span class="pre">EmbeddingMambularRegressor.model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mambular.models.sklearn_regressor.MambularRegressor"><code class="docutils literal notranslate"><span class="pre">MambularRegressor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_regressor.MambularRegressor.config"><code class="docutils literal notranslate"><span class="pre">MambularRegressor.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_regressor.MambularRegressor.preprocessor"><code class="docutils literal notranslate"><span class="pre">MambularRegressor.preprocessor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mambular.models.sklearn_regressor.MambularRegressor.model"><code class="docutils literal notranslate"><span class="pre">MambularRegressor.model</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../base_models/index.html">BaseModels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">mamba-tabular</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Models</a></li>
+      <li class="breadcrumb-item active">Models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/models/Models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="models">
+<h1>Models<a class="headerlink" href="#models" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.models.sklearn_classifier.MambularClassifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.models.sklearn_classifier.</span></span><span class="sig-name descname"><span class="pre">MambularClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/models/sklearn_classifier.html#MambularClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.models.sklearn_classifier.MambularClassifier" title="Permalink to this definition"></a></dt>
+<dd><p>A classifier that mimics scikit-learn's API using PyTorch Lightning and a custom architecture.</p>
+<p>This classifier is designed to work with tabular data and provides a flexible interface for specifying model
+configurations and preprocessing steps. It integrates smoothly with scikit-learn's utilities, such as cross-validation
+and grid search.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Various</em>) -- Accepts any number of keyword arguments that are passed to the MambularConfig and Preprocessor classes.
+Known configuration arguments for the model are extracted based on a predefined list, and the rest are
+passed to the Preprocessor.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_classifier.MambularClassifier.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#mambular.models.sklearn_classifier.MambularClassifier.config" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration object that holds model-specific settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MambularConfig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_classifier.MambularClassifier.preprocessor">
+<span class="sig-name descname"><span class="pre">preprocessor</span></span><a class="headerlink" href="#mambular.models.sklearn_classifier.MambularClassifier.preprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>Preprocessor object for handling feature preprocessing like normalization and encoding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Preprocessor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_classifier.MambularClassifier.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#mambular.models.sklearn_classifier.MambularClassifier.model" title="Permalink to this definition"></a></dt>
+<dd><p>The underlying PyTorch Lightning model, instantiated upon calling the <cite>fit</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../base_models/BaseModels.html#mambular.base_models.classifier.BaseMambularClassifier" title="mambular.base_models.classifier.BaseMambularClassifier">BaseMambularClassifier</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code>(X, y_true[, metrics])</p></td>
+<td><p>Evaluate the model on the given data using specified metrics.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(X, y[, val_size, X_val, y_val, ...])</p></td>
+<td><p>Fit the model to the given training data, optionally using a separate validation set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata_routing</span></code>()</p></td>
+<td><p>Get metadata routing of this object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_params</span></code>([deep])</p></td>
+<td><p>Get parameters for this estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code>(X)</p></td>
+<td><p>Predict the class labels for the given input samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_proba</span></code>(X)</p></td>
+<td><p>Predict class probabilities for the given input samples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_data</span></code>(X_train, y_train, X_val, ...)</p></td>
+<td><p>Preprocess the training and validation data and create corresponding DataLoaders.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_test_data</span></code>(X)</p></td>
+<td><p>Preprocesses the test data and creates tensors for categorical and numerical features.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_fit_request</span></code>(*[, X_val, batch_size, ...])</p></td>
+<td><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_params</span></code>(**parameters)</p></td>
+<td><p>Set the parameters of this estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_data</span></code>(X, y, val_size, random_state)</p></td>
+<td><p>Split the dataset into training and validation sets.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.models.sklearn_distributional.MambularLSS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.models.sklearn_distributional.</span></span><span class="sig-name descname"><span class="pre">MambularLSS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/models/sklearn_distributional.html#MambularLSS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.models.sklearn_distributional.MambularLSS" title="Permalink to this definition"></a></dt>
+<dd><p>MambularLSS is a machine learning estimator that is designed for structured data,
+incorporating both preprocessing and a deep learning model. The estimator
+integrates configurable components for data preprocessing and the neural network model,
+facilitating end-to-end training and prediction workflows.</p>
+<p>The initialization of this class separates configuration arguments for the model and
+the preprocessor, allowing for flexible adjustment of parameters.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_distributional.MambularLSS.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#mambular.models.sklearn_distributional.MambularLSS.config" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration object containing model-specific parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MambularConfig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_distributional.MambularLSS.preprocessor">
+<span class="sig-name descname"><span class="pre">preprocessor</span></span><a class="headerlink" href="#mambular.models.sklearn_distributional.MambularLSS.preprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>Preprocessor object for data preprocessing steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Preprocessor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_distributional.MambularLSS.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#mambular.models.sklearn_distributional.MambularLSS.model" title="Permalink to this definition"></a></dt>
+<dd><p>The neural network model, initialized based on 'config'.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.nn.Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Arbitrary keyword arguments</em><em>, </em><em>divided into configuration for the model and</em>) -- preprocessing. Recognized keys include model parameters such as 'd_model',
+'n_layers', etc., and any additional keys are assumed to be preprocessor arguments.</p>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code>(X, y_true[, metrics, ...])</p></td>
+<td><p>Evaluate the model on the given data using specified metrics tailored to the distribution type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(X, y, family[, val_size, X_val, y_val, ...])</p></td>
+<td><p>Fits the model to the provided data, using the specified loss distribution family for the prediction task.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_metrics</span></code>(distribution_family)</p></td>
+<td><p>Provides default metrics based on the distribution family.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata_routing</span></code>()</p></td>
+<td><p>Get metadata routing of this object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_params</span></code>([deep])</p></td>
+<td><p>Get parameters for this estimator, optionally including parameters from nested components like the preprocessor.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code>(X)</p></td>
+<td><p>Predicts target values for the given input samples using the fitted model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_data</span></code>(X_train, y_train, X_val, ...)</p></td>
+<td><p>Preprocess the training and validation data, fit the preprocessor on the training data, and transform both training and validation data.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_test_data</span></code>(X)</p></td>
+<td><p>Preprocess test data using the fitted preprocessor.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_fit_request</span></code>(*[, X_val, batch_size, ...])</p></td>
+<td><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_params</span></code>(**parameters)</p></td>
+<td><p>Set the parameters of this estimator, allowing for modifications to both the configuration and preprocessor parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_data</span></code>(X, y, val_size, random_state)</p></td>
+<td><p>Split the dataset into training and validation sets.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.models.sklearn_embedding_classifier.</span></span><span class="sig-name descname"><span class="pre">EmbeddingMambularClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/models/sklearn_embedding_classifier.html#EmbeddingMambularClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier" title="Permalink to this definition"></a></dt>
+<dd><p>Provides an scikit-learn-like interface for the ProteinMambularClassifier, making it compatible with
+scikit-learn's utilities and workflow. This class encapsulates the PyTorch Lightning model, preprocessing,
+and data loading, offering methods for fitting, predicting, and probability estimation in a manner akin
+to scikit-learn's API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Configuration parameters that can include both MambularConfig settings and preprocessing</em>) -- options. Any unrecognized parameters are passed to the preprocessor.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.config" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration object for the model, storing architecture-specific parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MambularConfig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.preprocessor">
+<span class="sig-name descname"><span class="pre">preprocessor</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.preprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>Object handling data preprocessing steps such as feature encoding and normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Preprocessor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier.model" title="Permalink to this definition"></a></dt>
+<dd><p>The underlying neural network model, instantiated during the <cite>fit</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ProteinMambularClassifier</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code>(X, y_true[, metrics])</p></td>
+<td><p>Evaluate the model on the given data using specified metrics.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(X, y[, val_size, X_val, y_val, ...])</p></td>
+<td><p>Fits the model to the given dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata_routing</span></code>()</p></td>
+<td><p>Get metadata routing of this object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_params</span></code>([deep])</p></td>
+<td><p>Get parameters for this estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code>(X)</p></td>
+<td><p>Predict the class labels for the given input samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_proba</span></code>(X)</p></td>
+<td><p>Predict class probabilities for the given input samples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_data</span></code>(X_train, y_train, X_val, ...)</p></td>
+<td><p>Preprocess the training and validation data and create corresponding DataLoaders.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_test_data</span></code>(X)</p></td>
+<td><p>Preprocesses the test data and creates tensors for categorical and numerical features.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_fit_request</span></code>(*[, X_val, batch_size, ...])</p></td>
+<td><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_params</span></code>(**parameters)</p></td>
+<td><p>Set the parameters of this estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_data</span></code>(X, y, val_size, random_state)</p></td>
+<td><p>Split the dataset into training and validation sets.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.models.sklearn_embedding_regressor.</span></span><span class="sig-name descname"><span class="pre">EmbeddingMambularRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/models/sklearn_embedding_regressor.html#EmbeddingMambularRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor" title="Permalink to this definition"></a></dt>
+<dd><p>An sklearn-like interface for the ProteinMambularRegressor, making it compatible with sklearn's utilities
+and workflows. This class wraps the PyTorch Lightning model and preprocessor, providing methods for fitting,
+predicting, and setting/getting parameters in a way that mimics sklearn's API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Keyword arguments that can include both configuration parameters for the MambularConfig and</em>) -- parameters for the preprocessor.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.config" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration object containing model-specific parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MambularConfig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.preprocessor">
+<span class="sig-name descname"><span class="pre">preprocessor</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.preprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>Preprocessor object for data preprocessing steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Preprocessor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor.model" title="Permalink to this definition"></a></dt>
+<dd><p>The neural network model, initialized after the <cite>fit</cite> method is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ProteinMambularRegressor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code>(X, y_true[, metrics])</p></td>
+<td><p>Evaluate the model on the given data using specified metrics.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(X, y[, val_size, X_val, y_val, ...])</p></td>
+<td><p>Fits the ProteinMambularRegressor model to the training data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata_routing</span></code>()</p></td>
+<td><p>Get metadata routing of this object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_params</span></code>([deep])</p></td>
+<td><p>Get parameters for this estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code>(X)</p></td>
+<td><p>Predicts target values for the given input samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_data</span></code>(X_train, y_train, X_val, ...)</p></td>
+<td><p>Preprocesses the training and validation data, and creates DataLoaders for them.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_test_data</span></code>(X)</p></td>
+<td><p>Preprocesses the test data and creates tensors for categorical and numerical features.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_fit_request</span></code>(*[, X_val, batch_size, ...])</p></td>
+<td><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_params</span></code>(**parameters)</p></td>
+<td><p>Set the parameters of this estimator.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_data</span></code>(X, y, val_size, random_state)</p></td>
+<td><p>Splits the dataset into training and validation sets.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.models.sklearn_regressor.MambularRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.models.sklearn_regressor.</span></span><span class="sig-name descname"><span class="pre">MambularRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/models/sklearn_regressor.html#MambularRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.models.sklearn_regressor.MambularRegressor" title="Permalink to this definition"></a></dt>
+<dd><p>A regressor implemented using PyTorch Lightning that follows the scikit-learn API conventions. This class is designed
+to work with tabular data, offering a straightforward way to specify model configurations and preprocessing steps. It
+integrates seamlessly with scikit-learn's tools such as cross-validation and grid search.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Various</em>) -- Accepts any number of keyword arguments. Arguments recognized as model configuration options are passed to the
+MambularConfig constructor. Remaining arguments are assumed to be preprocessor options and passed to the
+Preprocessor constructor.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_regressor.MambularRegressor.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#mambular.models.sklearn_regressor.MambularRegressor.config" title="Permalink to this definition"></a></dt>
+<dd><p>An object storing the configuration settings for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MambularConfig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_regressor.MambularRegressor.preprocessor">
+<span class="sig-name descname"><span class="pre">preprocessor</span></span><a class="headerlink" href="#mambular.models.sklearn_regressor.MambularRegressor.preprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>An object responsible for preprocessing the input data, such as encoding categorical variables and scaling numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Preprocessor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.models.sklearn_regressor.MambularRegressor.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#mambular.models.sklearn_regressor.MambularRegressor.model" title="Permalink to this definition"></a></dt>
+<dd><p>The underlying regression model, which is a PyTorch Lightning module. It is instantiated when the <cite>fit</cite> method is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../base_models/BaseModels.html#mambular.base_models.regressor.BaseMambularRegressor" title="mambular.base_models.regressor.BaseMambularRegressor">BaseMambularRegressor</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code>(X, y_true[, metrics])</p></td>
+<td><p>Evaluate the model on the given data using specified metrics.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(X, y[, val_size, X_val, y_val, ...])</p></td>
+<td><p>Trains the regression model using the provided training data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata_routing</span></code>()</p></td>
+<td><p>Get metadata routing of this object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_params</span></code>([deep])</p></td>
+<td><p>Get parameters for this estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code>(X)</p></td>
+<td><p>Predicts target values for the given input samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_data</span></code>(X_train, y_train, X_val, ...)</p></td>
+<td><p>Preprocesses the training and validation data, and creates DataLoaders for them.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_test_data</span></code>(X)</p></td>
+<td><p>Preprocesses the test data and creates tensors for categorical and numerical features.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_fit_request</span></code>(*[, X_val, batch_size, ...])</p></td>
+<td><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_params</span></code>(**parameters)</p></td>
+<td><p>Set the parameters of this estimator.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_data</span></code>(X, y, val_size, random_state)</p></td>
+<td><p>Splits the dataset into training and validation sets.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../base_models/index.html" class="btn btn-neutral float-right" title="BaseModels" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Christoph Weisser.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

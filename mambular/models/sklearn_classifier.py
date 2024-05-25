@@ -13,23 +13,23 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 
 
-class MambularClassifier(BaseEstimator):
+class MambularClassifier(BaseEstimator):  
     """
     A classifier that mimics scikit-learn's API using PyTorch Lightning and a custom architecture.
-
+    
     This classifier is designed to work with tabular data and provides a flexible interface for specifying model
     configurations and preprocessing steps. It integrates smoothly with scikit-learn's utilities, such as cross-validation
     and grid search.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     **kwargs : Various
         Accepts any number of keyword arguments that are passed to the MambularConfig and Preprocessor classes.
         Known configuration arguments for the model are extracted based on a predefined list, and the rest are
         passed to the Preprocessor.
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     config : MambularConfig
         Configuration object that holds model-specific settings.
     preprocessor : Preprocessor
@@ -37,7 +37,7 @@ class MambularClassifier(BaseEstimator):
     model : BaseMambularClassifier or None
         The underlying PyTorch Lightning model, instantiated upon calling the `fit` method.
     """
-
+    
     def __init__(self, **kwargs):
         # Known config arguments
         print("Received kwargs:", kwargs)
@@ -77,20 +77,21 @@ class MambularClassifier(BaseEstimator):
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
         self.model = None
 
-    def get_params(self, deep=True):
+    def get_params(self, deep=True):    
         """
         Get parameters for this estimator.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         deep : bool, default=True
             If True, will return the parameters for this estimator and contained subobjects that are estimators.
 
-        Returns:
-        --------
+        Returns
+        -------
         params : dict
             Parameter names mapped to their values.
         """
+        
         params = self.config_kwargs  # Parameters used to initialize MambularConfig
 
         # If deep=True, include parameters from nested components like preprocessor
@@ -108,13 +109,13 @@ class MambularClassifier(BaseEstimator):
         """
         Set the parameters of this estimator.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         **parameters : dict
             Estimator parameters.
 
-        Returns:
-        --------
+        Returns
+        -------
         self : object
             Estimator instance.
         """
@@ -143,8 +144,8 @@ class MambularClassifier(BaseEstimator):
         """
         Split the dataset into training and validation sets.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like of shape (n_samples, n_features)
             The input samples.
         y : array-like of shape (n_samples,)
@@ -154,8 +155,8 @@ class MambularClassifier(BaseEstimator):
         random_state : int
             Controls the shuffling applied to the data before applying the split.
 
-        Returns:
-        --------
+        Returns
+        -------
         X_train, X_val, y_train, y_val : arrays
             The split datasets.
         """
@@ -169,8 +170,8 @@ class MambularClassifier(BaseEstimator):
         """
         Preprocess the training and validation data and create corresponding DataLoaders.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X_train : array-like of shape (n_samples, n_features)
             The training input samples.
         y_train : array-like of shape (n_samples,)
@@ -184,8 +185,8 @@ class MambularClassifier(BaseEstimator):
         shuffle : bool
             Whether to shuffle the training data before splitting into batches.
 
-        Returns:
-        --------
+        Returns
+        -------
         data_module : MambularDataModule
             An instance of MambularDataModule containing training and validation DataLoaders.
         """
@@ -263,13 +264,13 @@ class MambularClassifier(BaseEstimator):
         """
         Preprocesses the test data and creates tensors for categorical and numerical features.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             Test feature set.
 
-        Returns:
-        --------
+        Returns
+        -------
         cat_tensors : list of Tensors
             List of tensors for each categorical feature.
         num_tensors : list of Tensors
@@ -328,8 +329,8 @@ class MambularClassifier(BaseEstimator):
         """
         Fit the model to the given training data, optionally using a separate validation set.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The training input samples.
         y : array-like of shape (n_samples,) or (n_samples, n_outputs)
@@ -365,8 +366,8 @@ class MambularClassifier(BaseEstimator):
         **trainer_kwargs : dict
             Additional keyword arguments to be passed to the PyTorch Lightning Trainer constructor.
 
-        Returns:
-        --------
+        Returns
+        -------
         self : object
             The fitted estimator.
         """
@@ -430,18 +431,18 @@ class MambularClassifier(BaseEstimator):
         """
         Predict the class labels for the given input samples.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples to predict.
 
-        Returns:
-        --------
+        Returns
+        -------
         predictions : ndarray of shape (n_samples,)
             Predicted class labels for each input sample.
 
-        Notes:
-        ------
+        Notes
+        -----
         The method preprocesses the input data using the same preprocessor used during training,
         sets the model to evaluation mode, and then performs inference to predict the class labels.
         The predictions are converted from a PyTorch tensor to a NumPy array before being returned.
@@ -476,7 +477,8 @@ class MambularClassifier(BaseEstimator):
         """
         Predict class probabilities for the given input samples.
 
-        Example:
+        Example
+        -------
             from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_score
 
             # Define the metrics you want to evaluate
@@ -491,18 +493,18 @@ class MambularClassifier(BaseEstimator):
             # Evaluate using the specified metrics
             results = classifier.evaluate(X_test, y_test, metrics=metrics)
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples for which to predict class probabilities.
 
-        Returns:
-        --------
+        Returns
+        -------
         probabilities : ndarray of shape (n_samples, n_classes)
             Predicted class probabilities for each input sample.
 
-        Notes:
-        ------
+        Notes
+        -----
         The method preprocesses the input data using the same preprocessor used during training,
         sets the model to evaluation mode, and then performs inference to predict the class probabilities.
         Softmax is applied to the logits to obtain probabilities, which are then converted from a PyTorch tensor
@@ -538,8 +540,8 @@ class MambularClassifier(BaseEstimator):
         """
         Evaluate the model on the given data using specified metrics.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples to predict.
         y_true : array-like of shape (n_samples,)
@@ -548,13 +550,13 @@ class MambularClassifier(BaseEstimator):
             A dictionary where keys are metric names and values are tuples containing the metric function
             and a boolean indicating whether the metric requires probability scores (True) or class labels (False).
 
-        Returns:
-        --------
+        Returns
+        -------
         scores : dict
             A dictionary with metric names as keys and their corresponding scores as values.
 
-        Notes:
-        ------
+        Notes
+        -----
         This method uses either the `predict` or `predict_proba` method depending on the metric requirements.
         """
         # Ensure input is in the correct format

@@ -33,15 +33,20 @@ class MambularLSS(BaseEstimator):
     The initialization of this class separates configuration arguments for the model and
     the preprocessor, allowing for flexible adjustment of parameters.
 
-    Attributes:
-        config (MambularConfig): Configuration object containing model-specific parameters.
-        preprocessor (Preprocessor): Preprocessor object for data preprocessing steps.
-        model (torch.nn.Module): The neural network model, initialized based on 'config'.
+    Attributes
+    ----------
+    config : MambularConfig
+        Configuration object containing model-specific parameters.
+    preprocessor : Preprocessor
+        Preprocessor object for data preprocessing steps.
+    model : torch.nn.Module
+        The neural network model, initialized based on 'config'.
 
-    Parameters:
-        **kwargs: Arbitrary keyword arguments, divided into configuration for the model and
-                  preprocessing. Recognized keys include model parameters such as 'd_model',
-                  'n_layers', etc., and any additional keys are assumed to be preprocessor arguments.
+    Parameters
+    ----------
+    **kwargs : Arbitrary keyword arguments, divided into configuration for the model and
+        preprocessing. Recognized keys include model parameters such as 'd_model',
+        'n_layers', etc., and any additional keys are assumed to be preprocessor arguments.
     """
 
     def __init__(self, **kwargs):
@@ -81,18 +86,23 @@ class MambularLSS(BaseEstimator):
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
         self.model = None
 
-    def get_params(self, deep=True):
+    def get_params(self, deep=True): 
         """
         Get parameters for this estimator, optionally including parameters from nested components
         like the preprocessor.
 
-        Parameters:
-            deep (bool): If True, return parameters of nested components. Defaults to True.
+        Parameters
+        ----------
+        deep : bool, default=True
+            If True, return parameters of nested components.
 
-        Returns:
-            dict: A dictionary mapping parameter names to their values. For nested components,
-                  parameter names are prefixed accordingly (e.g., 'preprocessor__<param_name>').
+        Returns
+        -------
+        dict
+            A dictionary mapping parameter names to their values. For nested components,
+            parameter names are prefixed accordingly (e.g., 'preprocessor__<param_name>').
         """
+        
         params = self.config_kwargs  # Parameters used to initialize MambularConfig
 
         # If deep=True, include parameters from nested components like preprocessor
@@ -112,11 +122,13 @@ class MambularLSS(BaseEstimator):
         and preprocessor parameters. Parameters not recognized as configuration arguments are
         assumed to be preprocessor arguments.
 
-        Parameters:
+        Parameters
+        ----------
             **parameters: Arbitrary keyword arguments where keys are parameter names and values
                           are the new parameter values.
 
-        Returns:
+        Returns
+        -------
             self: This instance with updated parameters.
         """
         # Update config_kwargs with provided parameters
@@ -140,18 +152,25 @@ class MambularLSS(BaseEstimator):
 
         return self
 
-    def split_data(self, X, y, val_size, random_state):
+    def split_data(self, X, y, val_size, random_state): 
         """
         Split the dataset into training and validation sets.
 
-        Parameters:
-            X (array-like): Features of the dataset.
-            y (array-like): Target values.
-            val_size (float): The proportion of the dataset to include in the validation split.
-            random_state (int): The seed used by the random number generator for reproducibility.
+        Parameters
+        ----------
+        X : array-like
+            Features of the dataset.
+        y : array-like
+            Target values.
+        val_size : float
+            The proportion of the dataset to include in the validation split.
+        random_state : int, optional
+            The seed used by the random number generator for reproducibility.
 
-        Returns:
-            tuple: A tuple containing split datasets (X_train, X_val, y_train, y_val).
+        Returns
+        -------
+        tuple
+            A tuple containing split datasets (X_train, X_val, y_train, y_val).
         """
         X_train, X_val, y_train, y_val = train_test_split(
             X, y, test_size=val_size, random_state=random_state
@@ -166,16 +185,25 @@ class MambularLSS(BaseEstimator):
         for categorical and numerical features and labels, and prepares DataLoader objects for
         both datasets.
 
-        Parameters:
-            X_train (array-like): Training features.
-            y_train (array-like): Training target values.
-            X_val (array-like): Validation features.
-            y_val (array-like): Validation target values.
-            batch_size (int): Batch size for DataLoader objects.
-            shuffle (bool): Whether to shuffle the training data in the DataLoader.
+        Parameters
+        ----------
+        X_train : array-like
+            Training features.
+        y_train : array-like
+            Training target values.
+        X_val : array-like
+            Validation features.
+        y_val : array-like
+            Validation target values.
+        batch_size : int
+            Batch size for DataLoader objects.
+        shuffle : bool
+            Whether to shuffle the training data in the DataLoader.
 
-        Returns:
-            MambularDataModule: An object containing DataLoaders for training and validation datasets.
+        Returns
+        -------
+        MambularDataModule
+            An object containing DataLoaders for training and validation datasets.
         """
         train_preprocessed_data = self.preprocessor.fit_transform(X_train, y_train)
         val_preprocessed_data = self.preprocessor.transform(X_val)
@@ -249,11 +277,15 @@ class MambularLSS(BaseEstimator):
         Preprocess test data using the fitted preprocessor. This method prepares tensors for
         categorical and numerical features based on the preprocessed test data.
 
-        Parameters:
-            X (array-like): Test features to preprocess.
+        Parameters
+        ----------
+        X : array-like
+            Test features to preprocess.
 
-        Returns:
-            tuple: A tuple containing lists of tensors for categorical and numerical features.
+        Returns
+        -------
+        tuple
+            A tuple containing lists of tensors for categorical and numerical features.
         """
         processed_data = self.preprocessor.transform(X)
 
@@ -305,12 +337,12 @@ class MambularLSS(BaseEstimator):
         factor=0.75,
         weight_decay=0.025,
         **trainer_kwargs,
-    ):
+    ):    
         """
         Fits the model to the provided data, using the specified loss distribution family for the prediction task.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             Training features.
         y : array-like, shape (n_samples,) or (n_samples, n_targets)
@@ -336,7 +368,8 @@ class MambularLSS(BaseEstimator):
         monitor : str, default="val_loss"
             The metric to monitor for early stopping.
         mode : str, default="min"
-            In 'min' mode, training will stop when the quantity monitored has stopped decreasing; in 'max' mode, it will stop when the quantity monitored has stopped increasing.
+            In 'min' mode, training will stop when the quantity monitored has stopped decreasing;
+            in 'max' mode, it will stop when the quantity monitored has stopped increasing.
         lr : float, default=1e-3
             Learning rate for the optimizer.
         lr_patience : int, default=10
@@ -348,8 +381,8 @@ class MambularLSS(BaseEstimator):
         **trainer_kwargs : dict
             Additional keyword arguments for PyTorch Lightning's Trainer class.
 
-        Returns:
-        --------
+        Returns
+        -------
         self : object
             The fitted estimator.
         """
@@ -410,13 +443,13 @@ class MambularLSS(BaseEstimator):
         """
         Predicts target values for the given input samples using the fitted model.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict target values.
 
-        Returns:
-        --------
+        Returns
+        -------
         predictions : ndarray, shape (n_samples,) or (n_samples, n_distributional_parameters)
             The predicted target values.
         """
@@ -449,8 +482,8 @@ class MambularLSS(BaseEstimator):
         """
         Evaluate the model on the given data using specified metrics tailored to the distribution type.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             Input samples.
         y_true : DataFrame or array-like, shape (n_samples,) or (n_samples, n_outputs)
@@ -462,8 +495,8 @@ class MambularLSS(BaseEstimator):
             Specifies the distribution family the model is predicting for. If None, it will attempt to infer based
             on the model's settings.
 
-        Returns:
-        --------
+        Returns
+        -------
         scores : dict
             A dictionary with metric names as keys and their corresponding scores as values.
         """
@@ -491,13 +524,13 @@ class MambularLSS(BaseEstimator):
         """
         Provides default metrics based on the distribution family.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         distribution_family : str
             The distribution family for which to provide default metrics.
 
-        Returns:
-        --------
+        Returns
+        -------
         metrics : dict
             A dictionary of default metric functions.
         """
