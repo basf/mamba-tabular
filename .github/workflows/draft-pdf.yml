@@ -3,11 +3,14 @@ on:
 
 jobs:
   paper:
-    runs-on: ubuntu-20.04  # Update the runs-on field to use Ubuntu 20.04
-
+    runs-on: ubuntu-latest
     name: Paper Draft
-
     steps:
+      - name: Use Node.js 20
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
       - name: Checkout
         uses: actions/checkout@v2
 
