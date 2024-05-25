@@ -8,7 +8,7 @@ def read_requirements():
 
 setup(
     name="mambular",  # Replace with your package's name
-    version="0.1.0",  # The current version of your package
+    version="0.1.2",  # The current version of your package
     author="Anton Thielmann",  # Replace with your name
     author_email="anton.thielmann@tu-clausthal.de",  # Replace with your email
     description="A python package for tabular deep learning with mamba blocks",  # A short description of your package
