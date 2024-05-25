@@ -17,7 +17,7 @@ authors:
   - name: Benjamin Säfken
     affiliation: 3 
 affiliations:
- - name: BASF SE
+ - name: BASF 
   index: 1
  - name: BASF Canada Inc
   index: 2
