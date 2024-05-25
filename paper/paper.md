@@ -30,10 +30,7 @@ affiliations:
     index: 3
 date: 22 April 2024
 bibliography: paper.bib
-
 ---
-
-
 
 # 1. Summary
 
