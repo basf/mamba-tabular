@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mamba-Tabluar &mdash; mamba-tabular 06.05.2024 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+      <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Mamba-Tabluar" href="mamba.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            mamba-tabular
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mamba.html">Mamba-Tabluar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/models/index.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/base_models/index.html">BaseModels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">mamba-tabular</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Mamba-Tabluar</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mamba-tabluar">
+<h1>Mamba-Tabluar<a class="headerlink" href="#mamba-tabluar" title="Permalink to this heading"></a></h1>
+<p>Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn’s <code class="docutils literal notranslate"><span class="pre">BaseEstimator</span></code> interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and transform using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.</p>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Comprehensive Model Suite</strong>: Includes modules for regression (<code class="docutils literal notranslate"><span class="pre">MambularRegressor</span></code>), classification (<code class="docutils literal notranslate"><span class="pre">MambularClassifier</span></code>), and distributional regression (<code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code>), catering to a wide range of tabular data tasks.</p></li>
+<li><p><strong>State-of-the-Art Architectures</strong>: Leverages the Mamba architecture, known for its effectiveness in handling sequential and time-series data within a state-space modeling framework, adapted here for tabular data.</p></li>
+<li><p><strong>Seamless Integration</strong>: Designed to work effortlessly with scikit-learn, allowing for easy inclusion in existing machine learning pipelines, cross-validation, and hyperparameter tuning workflows.</p></li>
+<li><p><strong>Extensive Preprocessing</strong>: Comes with a powerful preprocessing module that supports a broad array of data transformation techniques, ensuring that your data is optimally prepared for model training.</p></li>
+<li><p><strong>Sklearn-like API</strong>: The familiar scikit-learn <code class="docutils literal notranslate"><span class="pre">fit</span></code>, <code class="docutils literal notranslate"><span class="pre">predict</span></code>, and <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code> methods mean minimal learning curve for those already accustomed to scikit-learn.</p></li>
+<li><p><strong>PyTorch Lightning Under the Hood</strong>: Built on top of PyTorch Lightning, Mambular models benefit from streamlined training processes, easy customization, and advanced features like distributed training and 16-bit precision.</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>Install Mambular using pip:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>mambular
+</pre></div>
+</div>
+</section>
+<section id="advanced-preprocessing-for-optimal-performance">
+<h2>Advanced Preprocessing for Optimal Performance<a class="headerlink" href="#advanced-preprocessing-for-optimal-performance" title="Permalink to this heading"></a></h2>
+<p>Mambular elevates the preprocessing stage of model development, employing a sophisticated suite of techniques to ensure your data is in the best shape for the Mamba architectures. Our preprocessing module is designed to be both powerful and intuitive, offering a range of options to transform your tabular data efficiently.</p>
+<section id="intelligent-data-type-detection-and-transformation">
+<h3>Intelligent Data Type Detection and Transformation<a class="headerlink" href="#intelligent-data-type-detection-and-transformation" title="Permalink to this heading"></a></h3>
+<p>Mambular automatically identifies the type of each feature in your dataset, applying the most suitable transformations to numerical and categorical variables. This includes:</p>
+<ul class="simple">
+<li><p><strong>Ordinal Encoding</strong>: Categorical features are seamlessly transformed into numerical values, preserving their inherent order and making them model-ready.</p></li>
+<li><p><strong>One-Hot Encoding</strong>: For nominal data, Mambular employs one-hot encoding to capture the presence or absence of categories without imposing ordinality.</p></li>
+<li><p><strong>Binning</strong>: Numerical features can be discretized into bins, a useful technique for handling continuous variables in certain modeling contexts.</p></li>
+<li><p><strong>Decision Tree Binning</strong>: Optionally, Mambular can use decision trees to find the optimal binning strategy for numerical features, enhancing model interpretability and performance.</p></li>
+<li><p><strong>Normalization</strong>: Mambular can easily handle numerical features without specifically turning them into categorical features. Standard preprocessing steps such as normalization per feature are possible</p></li>
+<li><p><strong>Standardization</strong>: Similarly, Standardization instead of Normalization can be used.</p></li>
+</ul>
+</section>
+<section id="handling-missing-values">
+<h3>Handling Missing Values<a class="headerlink" href="#handling-missing-values" title="Permalink to this heading"></a></h3>
+<p>Our preprocessing pipeline gracefully handles missing data, employing strategies like mean imputation for numerical features and mode imputation for categorical ones, ensuring that your models receive complete data inputs without manual intervention.</p>
+</section>
+<section id="flexible-and-customizable">
+<h3>Flexible and Customizable<a class="headerlink" href="#flexible-and-customizable" title="Permalink to this heading"></a></h3>
+<p>While Mambular excels in automating the preprocessing workflow, it also offers flexibility. You can customize the preprocessing steps to fit the unique needs of your dataset, ensuring that you’re not locked into a one-size-fits-all approach.</p>
+<p>By integrating Mambular’s preprocessing module into your workflow, you’re not just preparing your data for deep learning; you’re optimizing it for excellence. This commitment to data quality is what sets Mambular apart, making it an indispensable tool in your machine learning arsenal.</p>
+</section>
+</section>
+<section id="fit-a-model">
+<h2>Fit a Model<a class="headerlink" href="#fit-a-model" title="Permalink to this heading"></a></h2>
+<p>Fitting a model in mambular is as simple as it gets. All models in mambular are sklearn BaseEstimators. Thus the <code class="docutils literal notranslate"><span class="pre">.fit</span></code> method is implemented for all of them. Additionally, this allows for using all other sklearn inherent methods such as their built in hyperparameter optimization tools.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mambular.models</span> <span class="kn">import</span> <span class="n">MambularClassifier</span>
+<span class="c1"># Initialize and fit your model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">MambularClassifier</span><span class="p">(</span>
+    <span class="n">dropout</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">d_model</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">numerical_preprocessing</span><span class="o">=</span><span class="s2">&quot;normalization&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># X can be a dataframe or something that can be easily transformed into a pd.DataFrame as a np.array</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_epochs</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-03</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Predictions are also easily obtained:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># simple predictions</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Predict probabilities</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="distributional-regression-with-mambularlss">
+<h2>Distributional Regression with MambularLSS<a class="headerlink" href="#distributional-regression-with-mambularlss" title="Permalink to this heading"></a></h2>
+<p>Mambular introduces a cutting-edge approach to distributional regression through its <code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code> module, empowering users to model the full distribution of a response variable, not just its mean. This method is particularly valuable in scenarios where understanding the variability, skewness, or kurtosis of the response distribution is as crucial as predicting its central tendency.</p>
+<section id="key-features-of-mambularlss">
+<h3>Key Features of MambularLSS:<a class="headerlink" href="#key-features-of-mambularlss" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Full Distribution Modeling</strong>: Unlike traditional regression models that predict a single value (e.g., the mean), <code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code> models the entire distribution of the response variable. This allows for more informative predictions, including quantiles, variance, and higher moments.</p></li>
+<li><p><strong>Customizable Distribution Types</strong>: <code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code> supports a variety of distribution families (e.g., Gaussian, Poisson, Binomial), making it adaptable to different types of response variables, from continuous to count data.</p></li>
+<li><p><strong>Location, Scale, Shape Parameters</strong>: The model predicts parameters corresponding to the location, scale, and shape of the distribution, offering a nuanced understanding of the data’s underlying distributional characteristics.</p></li>
+<li><p><strong>Enhanced Predictive Uncertainty</strong>: By modeling the full distribution, <code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code> provides richer information on predictive uncertainty, enabling more robust decision-making processes in uncertain environments.</p></li>
+</ul>
+</section>
+<section id="available-distribution-classes">
+<h3>Available Distribution Classes:<a class="headerlink" href="#available-distribution-classes" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code> offers a wide range of distribution classes to cater to various statistical modeling needs. The available distribution classes include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">normal</span></code>: Normal Distribution for modeling continuous data with a symmetric distribution around the mean.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code>: Poisson Distribution for modeling count data that represents the number of events occurring within a fixed interval.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gamma</span></code>: Gamma Distribution for modeling continuous data that is skewed and bounded at zero, often used for waiting times.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">beta</span></code>: Beta Distribution for modeling data that is bounded between 0 and 1, useful for proportions and percentages.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dirichlet</span></code>: Dirichlet Distribution for modeling multivariate data where individual components are correlated, and the sum is constrained to 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">studentt</span></code>: Student’s T-Distribution for modeling data with heavier tails than the normal distribution, useful when the sample size is small.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">negativebinom</span></code>: Negative Binomial Distribution for modeling count data with over-dispersion relative to the Poisson distribution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inversegamma</span></code>: Inverse Gamma Distribution, often used as a prior distribution in Bayesian inference for scale parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">categorical</span></code>: Categorical Distribution for modeling categorical data with more than two categories.</p></li>
+</ul>
+<p>These distribution classes allow <code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code> to flexibly model a wide variety of data types and distributions, providing users with the tools needed to capture the full complexity of their data.</p>
+</section>
+<section id="use-cases-for-mambularlss">
+<h3>Use Cases for MambularLSS:<a class="headerlink" href="#use-cases-for-mambularlss" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Risk Assessment</strong>: In finance or insurance, understanding the range and likelihood of potential losses is as important as predicting average outcomes.</p></li>
+<li><p><strong>Demand Forecasting</strong>: For inventory management, capturing the variability in product demand helps in optimizing stock levels.</p></li>
+<li><p><strong>Personalized Medicine</strong>: In healthcare, distributional regression can predict a range of possible patient responses to a treatment, aiding in personalized therapy planning.</p></li>
+</ul>
+</section>
+<section id="getting-started-with-mambularlss">
+<h3>Getting Started with MambularLSS:<a class="headerlink" href="#getting-started-with-mambularlss" title="Permalink to this heading"></a></h3>
+<p>To integrate distributional regression into your workflow with <code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code>, start by initializing the model with your desired configuration, similar to other Mambular models:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mambular.models</span> <span class="kn">import</span> <span class="n">MambularLSS</span>
+
+<span class="c1"># Initialize the MambularLSS model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">MambularLSS</span><span class="p">(</span>
+    <span class="n">dropout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">n_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+
+<span class="p">)</span>
+
+<span class="c1"># Fit the model to your data</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="n">lr</span><span class="o">=</span><span class="mf">1e-03</span><span class="p">,</span>
+    <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">family</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span> <span class="c1"># define your distribution</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<div class="toctree-wrapper compound" id="getting-started">
+</div>
+<div class="toctree-wrapper compound" id="api-docs">
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mamba.html" class="btn btn-neutral float-right" title="Mamba-Tabluar" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Christoph Weisser.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
