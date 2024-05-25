@@ -13,7 +13,7 @@ authors:
     affiliation: 2
   - name: Christoph Weisser
     affiliation: 1
-  - name: Benjamin Säfken
+  - name: Benjamin Saefken
     affiliation: 3
 affiliations:
   - name: BASF SE, Germany
