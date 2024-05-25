@@ -5,35 +5,56 @@ from ..utils.config import MambularConfig
 import pytorch_lightning as pl
 
 
-class BaseMambularRegressor(pl.LightningModule):
+class BaseMambularRegressor(pl.LightningModule):    
     """
     A base regression module for tabular data built on PyTorch Lightning. It incorporates embeddings
     for categorical and numerical features with a configurable architecture provided by MambularConfig.
     This module is designed for regression tasks.
 
-    Parameters:
-        config (MambularConfig): An instance of MambularConfig containing configuration parameters for the model architecture.
-        cat_feature_info (dict, optional): A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.
-        num_feature_info (dict, optional): A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.
-        lr (float, optional): The initial learning rate for the optimizer. Defaults to 1e-03.
-        lr_patience (int, optional): The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.
-        weight_decay (float, optional): Weight decay (L2 penalty) coefficient. Defaults to 0.025.
-        lr_factor (float, optional): Factor by which the learning rate will be reduced. Defaults to 0.75.
+    Parameters
+    ----------
+    config : MambularConfig
+        An instance of MambularConfig containing configuration parameters for the model architecture.
+    cat_feature_info : dict, optional
+        A dictionary mapping the names of categorical features to their number of unique categories. Defaults to None.
+    num_feature_info : dict, optional
+        A dictionary mapping the names of numerical features to their number of dimensions after embedding. Defaults to None.
+    lr : float, optional
+        The initial learning rate for the optimizer. Defaults to 1e-03.
+    lr_patience : int, optional
+        The number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.
+    weight_decay : float, optional
+        Weight decay (L2 penalty) coefficient. Defaults to 0.025.
+    lr_factor : float, optional
+        Factor by which the learning rate will be reduced. Defaults to 0.75.
 
-    Attributes:
-        mamba (Mamba): The core neural network module implementing the Mamba architecture.
-        norm_f (nn.Module): Normalization layer applied after the Mamba block.
-        tabular_head (nn.Linear): Final linear layer mapping the features to a single output for regression tasks.
-        train_mse (torchmetrics.MeanSquaredError): Metric computation module for training Mean Squared Error.
-        val_mse (torchmetrics.MeanSquaredError): Metric computation module for validation Mean Squared Error.
-        loss_fct (torch.nn.MSELoss): The loss function for regression tasks.
+    Attributes
+    ----------
+    mamba : Mamba
+        The core neural network module implementing the Mamba architecture.
+    norm_f : nn.Module
+        Normalization layer applied after the Mamba block.
+    tabular_head : nn.Linear
+        Final linear layer mapping the features to a single output for regression tasks.
+    train_mse : torchmetrics.MeanSquaredError
+        Metric computation module for training Mean Squared Error.
+    val_mse : torchmetrics.MeanSquaredError
+        Metric computation module for validation Mean Squared Error.
+    loss_fct : torch.nn.MSELoss
+        The loss function for regression tasks.
 
-    Methods:
-        forward(cat_features, num_features): Defines the forward pass of the model.
-        training_step(batch, batch_idx): Processes a single batch during training.
-        validation_step(batch, batch_idx): Processes a single batch during validation.
-        configure_optimizers(): Sets up the model's optimizer and learning rate scheduler.
+    Methods
+    -------
+    forward(cat_features, num_features)
+        Defines the forward pass of the model.
+    training_step(batch, batch_idx)
+        Processes a single batch during training.
+    validation_step(batch, batch_idx)
+        Processes a single batch during validation.
+    configure_optimizers()
+        Sets up the model's optimizer and learning rate scheduler.
     """
+
 
     def __init__(
         self,
@@ -129,14 +150,19 @@ class BaseMambularRegressor(pl.LightningModule):
         """
         Defines the forward pass of the regressor.
 
-        Parameters:
-            cat_features (Tensor): Tensor containing the categorical features.
-            num_features (Tensor): Tensor containing the numerical features.
+        Parameters
+        ----------
+        cat_features : Tensor
+            Tensor containing the categorical features.
+        num_features : Tensor
+            Tensor containing the numerical features.
 
-        Returns:
-            Tensor: The output predictions of the model for regression tasks.
+        Returns
+        -------
+        Tensor
+            The output predictions of the model for regression tasks.
         """
-
+        
         batch_size = (
             cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
         )
@@ -197,15 +223,20 @@ class BaseMambularRegressor(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         """
-        Processes a single batch during training, computes the loss, and logs training metrics.
+        Defines the forward pass of the regressor.
 
-        Parameters:
-            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
-            batch_idx (int): The index of the batch within the epoch.
+        Parameters
+        ----------
+        cat_features : Tensor
+            Tensor containing the categorical features.
+        num_features : Tensor
+            Tensor containing the numerical features.
 
-        Returns:
-            Tensor: The computed loss for the batch.
-        """
+        Returns
+        -------
+        Tensor
+            The output predictions of the model for regression tasks.
+        """    
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 
@@ -224,9 +255,12 @@ class BaseMambularRegressor(pl.LightningModule):
         """
         Processes a single batch during validation, computes the loss, and logs validation metrics.
 
-        Parameters:
-            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
-            batch_idx (int): The index of the batch within the epoch.
+        Parameters
+        ----------
+        batch : tuple
+            A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
+        batch_idx : int
+            The index of the batch within the epoch.
         """
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
@@ -247,9 +281,11 @@ class BaseMambularRegressor(pl.LightningModule):
         """
         Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
 
-        Returns:
-            dict: A dictionary containing the optimizer and lr_scheduler configurations.
-        """
+        Returns
+        -------
+        dict
+            A dictionary containing the optimizer and lr_scheduler configurations.
+        """    
         optimizer = torch.optim.Adam(
             self.parameters(), lr=self.lr, weight_decay=self.config.weight_decay
         )

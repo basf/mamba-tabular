@@ -12,28 +12,46 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
     It supports embeddings for categorical features and can process raw or embedded numerical features, making it suitable
     for complex protein sequence data.
 
-    Parameters:
-        config (MambularConfig): Configuration parameters for the model architecture.
-        cat_feature_info (dict, optional): Information about categorical features, mapping feature names to the number of unique categories.
-        num_feature_info (dict, optional): Information about numerical features, mapping feature names to their number of dimensions after embedding.
-        lr (float, optional): Learning rate for the optimizer.
-        lr_patience (int, optional): Number of epochs with no improvement after which learning rate will be reduced.
-        weight_decay (float, optional): Weight decay coefficient for regularization in the optimizer.
-        lr_factor (float, optional): Factor by which the learning rate will be reduced by the scheduler.
-        seq_size (int, optional): Size of sequence chunks for processing numerical features. Relevant when `raw_embeddings` is False.
-        raw_embeddings (bool, optional): Indicates whether to use raw numerical features directly or to process them into embeddings.
+    Parameters
+    ----------
+    config : MambularConfig
+        Configuration parameters for the model architecture.
+    cat_feature_info : dict, optional
+        Information about categorical features, mapping feature names to the number of unique categories.
+    num_feature_info : dict, optional
+        Information about numerical features, mapping feature names to their number of dimensions after embedding.
+    lr : float, optional
+        Learning rate for the optimizer. Defaults to 1e-03.
+    lr_patience : int, optional
+        Number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.
+    weight_decay : float, optional
+        Weight decay coefficient for regularization in the optimizer. Defaults to 0.025.
+    lr_factor : float, optional
+        Factor by which the learning rate will be reduced by the scheduler. Defaults to 0.75.
+    seq_size : int, optional
+        Size of sequence chunks for processing numerical features. Relevant when `raw_embeddings` is False.
+    raw_embeddings : bool, optional
+        Indicates whether to use raw numerical features directly or to process them into embeddings. Defaults to False.
 
-    Attributes:
-        mamba (Mamba): The core neural network module implementing the Mamba architecture.
-        norm_f (nn.Module): Normalization layer applied after the Mamba block.
-        tabular_head (nn.Linear): Final linear layer mapping the features to the  target.
+    Attributes
+    ----------
+    mamba : Mamba
+        The core neural network module implementing the Mamba architecture.
+    norm_f : nn.Module
+        Normalization layer applied after the Mamba block.
+    tabular_head : nn.Linear
+        Final linear layer mapping the features to the target.
 
-
-    Methods:
-        forward(cat_features, num_features): Defines the forward pass of the model.
-        training_step(batch, batch_idx): Processes a single batch during training.
-        validation_step(batch, batch_idx): Processes a single batch during validation.
-        configure_optimizers(): Sets up the model's optimizer and learning rate scheduler.
+    Methods
+    -------
+    forward(cat_features, num_features)
+        Defines the forward pass of the model.
+    training_step(batch, batch_idx)
+        Processes a single batch during training.
+    validation_step(batch, batch_idx)
+        Processes a single batch during validation.
+    configure_optimizers()
+        Sets up the model's optimizer and learning rate scheduler.
     """
 
     def __init__(
@@ -153,17 +171,22 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
             self.auroc = torchmetrics.AUROC(task="binary")
             self.precision = torchmetrics.Precision(task="binary")
 
-    def forward(self, cat_features, num_features):
+    def forward(self, cat_features, num_features):      
         """
         Defines the forward pass of the model, processing both categorical and numerical features,
         and returning regression predictions.
 
-        Parameters:
-            cat_features (Tensor): Tensor containing the categorical features.
-            num_features (Tensor): Tensor containing the numerical features or raw sequence data, depending on `raw_embeddings`.
+        Parameters
+        ----------
+        cat_features : Tensor
+            Tensor containing the categorical features.
+        num_features : Tensor
+            Tensor containing the numerical features or raw sequence data, depending on `raw_embeddings`.
 
-        Returns:
-            Tensor: The output predictions of the model for regression tasks.
+        Returns
+        -------
+        Tensor
+            The output predictions of the model for regression tasks.
         """
         batch_size = (
             cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
@@ -261,12 +284,17 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
         """
         Processes a single batch during training, computes the loss, and logs training metrics.
 
-        Parameters:
-            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
-            batch_idx (int): The index of the batch within the epoch.
+        Parameters
+        ----------
+        batch : tuple
+            A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
+        batch_idx : int
+            The index of the batch within the epoch.
 
-        Returns:
-            Tensor: The computed loss for the batch.
+        Returns
+        -------
+        Tensor
+            The computed loss for the batch.
         """
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
@@ -318,9 +346,12 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
         """
         Processes a single batch during validation, computes the loss, and logs validation metrics.
 
-        Parameters:
-            batch (tuple): A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
-            batch_idx (int): The index of the batch within the epoch.
+        Parameters
+        ----------
+        batch : tuple
+            A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
+        batch_idx : int
+            The index of the batch within the epoch.
         """
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
@@ -364,8 +395,10 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
         """
         Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
 
-        Returns:
-            dict: A dictionary containing the optimizer and lr_scheduler configurations.
+        Returns
+        -------
+        dict
+            A dictionary containing the optimizer and lr_scheduler configurations.
         """
         optimizer = torch.optim.Adam(
             self.parameters(), lr=self.lr, weight_decay=self.config.weight_decay

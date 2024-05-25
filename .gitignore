@@ -6,4 +6,10 @@ examples_old/
 lightning_logs/
 *.egg-info
 *.ckpt
+<<<<<<< HEAD
 .venv/
+=======
+.venv/
+build/
+*.ipynb
+>>>>>>> documentation

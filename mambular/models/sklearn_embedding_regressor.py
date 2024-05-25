@@ -19,16 +19,21 @@ class EmbeddingMambularRegressor(BaseEstimator):
     and workflows. This class wraps the PyTorch Lightning model and preprocessor, providing methods for fitting,
     predicting, and setting/getting parameters in a way that mimics sklearn's API.
 
-    Parameters:
-        **kwargs: Keyword arguments that can include both configuration parameters for the MambularConfig and
-                  parameters for the preprocessor.
+    Parameters
+    ----------
+    **kwargs : Keyword arguments that can include both configuration parameters for the MambularConfig and
+        parameters for the preprocessor.
 
-    Attributes:
-        config (MambularConfig): Configuration object containing model-specific parameters.
-        preprocessor (Preprocessor): Preprocessor object for data preprocessing steps.
-        model (ProteinMambularRegressor): The neural network model, initialized after the `fit` method is called.
+    Attributes
+    ----------
+    config : MambularConfig
+        Configuration object containing model-specific parameters.
+    preprocessor : Preprocessor
+        Preprocessor object for data preprocessing steps.
+    model : ProteinMambularRegressor
+        The neural network model, initialized after the `fit` method is called.
     """
-
+    
     def __init__(self, **kwargs):
         # Known config arguments
         config_arg_names = [
@@ -69,13 +74,13 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         Get parameters for this estimator. Overrides the BaseEstimator method.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         deep : bool, default=True
             If True, returns the parameters for this estimator and contained sub-objects that are estimators.
 
-        Returns:
-        --------
+        Returns
+        -------
         params : dict
             Parameter names mapped to their values.
         """
@@ -96,13 +101,13 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         Set the parameters of this estimator. Overrides the BaseEstimator method.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         **parameters : dict
             Estimator parameters to be set.
 
-        Returns:
-        --------
+        Returns
+        -------
         self : object
             The instance with updated parameters.
         """
@@ -131,8 +136,8 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         Splits the dataset into training and validation sets.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or DataFrame, shape (n_samples, n_features)
             Input features.
         y : array-like, shape (n_samples,) or (n_samples, n_targets)
@@ -142,8 +147,8 @@ class EmbeddingMambularRegressor(BaseEstimator):
         random_state : int
             Controls the shuffling applied to the data before applying the split.
 
-        Returns:
-        --------
+        Returns
+        -------
         X_train, X_val, y_train, y_val : arrays
             The split datasets.
         """
@@ -157,8 +162,8 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         Preprocesses the training and validation data, and creates DataLoaders for them.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X_train : DataFrame or array-like, shape (n_samples_train, n_features)
             Training feature set.
         y_train : array-like, shape (n_samples_train,)
@@ -172,8 +177,8 @@ class EmbeddingMambularRegressor(BaseEstimator):
         shuffle : bool
             Whether to shuffle the training data in the DataLoader.
 
-        Returns:
-        --------
+        Returns
+        -------
         data_module : MambularDataModule
             An instance of MambularDataModule containing the training and validation DataLoaders.
         """
@@ -252,13 +257,13 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         Preprocesses the test data and creates tensors for categorical and numerical features.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             Test feature set.
 
-        Returns:
-        --------
+        Returns
+        -------
         cat_tensors : list of Tensors
             List of tensors for each categorical feature.
         num_tensors : list of Tensors
@@ -324,30 +329,54 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         Fits the ProteinMambularRegressor model to the training data.
 
-        Parameters:
-            X (array-like or DataFrame): The training input samples.
-            y (array-like): The target values (class labels for classification, real numbers for regression).
-            val_size (float, optional): The proportion of the dataset to include in the validation split if `X_val` is not provided.
-            X_val (array-like or DataFrame, optional): The validation input samples.
-            y_val (array-like, optional): The validation target values.
-            max_epochs (int, optional): The maximum number of epochs for training.
-            random_state (int, optional): The seed used by the random number generator.
-            batch_size (int, optional): Size of the batches for training.
-            shuffle (bool, optional): Whether to shuffle the training data.
-            patience (int, optional): Patience for early stopping.
-            monitor (str, optional): Quantity to be monitored for early stopping.
-            mode (str, optional): One of {'auto', 'min', 'max'}. In 'min' mode, training will stop when the quantity monitored has stopped decreasing; in 'max' mode it will stop when the quantity monitored has stopped increasing.
-            lr (float, optional): Learning rate for the optimizer.
-            lr_patience (int, optional): Number of epochs with no improvement after which learning rate will be reduced.
-            factor (float, optional): Factor by which the learning rate will be reduced.
-            weight_decay (float, optional): Weight decay coefficient for regularization in the optimizer.
-            raw_embeddings (bool, optional): Whether to use raw numerical features directly or to process them into embeddings.
-            seq_size (int, optional): The sequence size for processing numerical features when not using raw embeddings.
-            **trainer_kwargs: Additional keyword arguments for the PyTorch Lightning Trainer.
+        Parameters
+        ----------
+        X : array-like or DataFrame
+            The training input samples.
+        y : array-like
+            The target values (class labels for classification, real numbers for regression).
+        val_size : float, optional
+            The proportion of the dataset to include in the validation split if `X_val` is not provided.
+        X_val : array-like or DataFrame, optional
+            The validation input samples.
+        y_val : array-like, optional
+            The validation target values.
+        max_epochs : int, optional
+            The maximum number of epochs for training.
+        random_state : int, optional
+            The seed used by the random number generator.
+        batch_size : int, optional
+            Size of the batches for training.
+        shuffle : bool, optional
+            Whether to shuffle the training data.
+        patience : int, optional
+            Patience for early stopping.
+        monitor : str, optional
+            Quantity to be monitored for early stopping.
+        mode : str, optional
+            One of {'auto', 'min', 'max'}. In 'min' mode, training will stop when the quantity monitored has stopped decreasing;
+            in 'max' mode, it will stop when the quantity monitored has stopped increasing.
+        lr : float, optional
+            Learning rate for the optimizer.
+        lr_patience : int, optional
+            Number of epochs with no improvement after which the learning rate will be reduced.
+        factor : float, optional
+            Factor by which the learning rate will be reduced.
+        weight_decay : float, optional
+            Weight decay coefficient for regularization in the optimizer.
+        raw_embeddings : bool, optional
+            Whether to use raw numerical features directly or to process them into embeddings.
+        seq_size : int, optional
+            The sequence size for processing numerical features when not using raw embeddings.
+        **trainer_kwargs : dict
+            Additional keyword arguments for the PyTorch Lightning Trainer.
 
-        Returns:
-            self: Returns an instance of self.
+        Returns
+        -------
+        self : object
+            Returns an instance of self.
         """
+            
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
         if X_val:
@@ -425,13 +454,13 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         Predicts target values for the given input samples.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict target values.
 
-        Returns:
-        --------
+        Returns
+        -------
         predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
             The predicted target values.
         """
@@ -478,8 +507,8 @@ class EmbeddingMambularRegressor(BaseEstimator):
             # Evaluate using the specified metrics
             results = regressor.evaluate(X_test, y_test, metrics=metrics)
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples to predict.
         y_true : array-like of shape (n_samples,) or (n_samples, n_outputs)
@@ -487,13 +516,13 @@ class EmbeddingMambularRegressor(BaseEstimator):
         metrics : dict
             A dictionary where keys are metric names and values are the metric functions.
 
-        Returns:
-        --------
+        Returns
+        -------
         scores : dict
             A dictionary with metric names as keys and their corresponding scores as values.
 
-        Notes:
-        ------
+        Notes
+        -----
         This method uses the `predict` method to generate predictions and computes each metric.
         """
         if metrics is None:

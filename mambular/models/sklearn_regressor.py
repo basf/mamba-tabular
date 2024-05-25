@@ -18,15 +18,15 @@ class MambularRegressor(BaseEstimator):
     to work with tabular data, offering a straightforward way to specify model configurations and preprocessing steps. It
     integrates seamlessly with scikit-learn's tools such as cross-validation and grid search.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     **kwargs : Various
         Accepts any number of keyword arguments. Arguments recognized as model configuration options are passed to the
         MambularConfig constructor. Remaining arguments are assumed to be preprocessor options and passed to the
         Preprocessor constructor.
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     config : MambularConfig
         An object storing the configuration settings for the model.
     preprocessor : Preprocessor
@@ -78,13 +78,13 @@ class MambularRegressor(BaseEstimator):
         """
         Get parameters for this estimator. Overrides the BaseEstimator method.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         deep : bool, default=True
             If True, returns the parameters for this estimator and contained sub-objects that are estimators.
 
-        Returns:
-        --------
+        Returns
+        -------
         params : dict
             Parameter names mapped to their values.
         """
@@ -105,13 +105,13 @@ class MambularRegressor(BaseEstimator):
         """
         Set the parameters of this estimator. Overrides the BaseEstimator method.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         **parameters : dict
             Estimator parameters to be set.
 
-        Returns:
-        --------
+        Returns
+        -------
         self : object
             The instance with updated parameters.
         """
@@ -140,8 +140,8 @@ class MambularRegressor(BaseEstimator):
         """
         Splits the dataset into training and validation sets.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or DataFrame, shape (n_samples, n_features)
             Input features.
         y : array-like, shape (n_samples,) or (n_samples, n_targets)
@@ -151,8 +151,8 @@ class MambularRegressor(BaseEstimator):
         random_state : int
             Controls the shuffling applied to the data before applying the split.
 
-        Returns:
-        --------
+        Returns
+        -------
         X_train, X_val, y_train, y_val : arrays
             The split datasets.
         """
@@ -166,8 +166,8 @@ class MambularRegressor(BaseEstimator):
         """
         Preprocesses the training and validation data, and creates DataLoaders for them.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X_train : DataFrame or array-like, shape (n_samples_train, n_features)
             Training feature set.
         y_train : array-like, shape (n_samples_train,)
@@ -181,8 +181,8 @@ class MambularRegressor(BaseEstimator):
         shuffle : bool
             Whether to shuffle the training data in the DataLoader.
 
-        Returns:
-        --------
+        Returns
+        -------
         data_module : MambularDataModule
             An instance of MambularDataModule containing the training and validation DataLoaders.
         """
@@ -257,13 +257,13 @@ class MambularRegressor(BaseEstimator):
         """
         Preprocesses the test data and creates tensors for categorical and numerical features.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             Test feature set.
 
-        Returns:
-        --------
+        Returns
+        -------
         cat_tensors : list of Tensors
             List of tensors for each categorical feature.
         num_tensors : list of Tensors
@@ -322,8 +322,8 @@ class MambularRegressor(BaseEstimator):
         """
         Trains the regression model using the provided training data. Optionally, a separate validation set can be used.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             The training input samples.
         y : array-like, shape (n_samples,) or (n_samples, n_targets)
@@ -358,8 +358,8 @@ class MambularRegressor(BaseEstimator):
             Weight decay (L2 penalty) coefficient.
         **trainer_kwargs : Additional keyword arguments for PyTorch Lightning's Trainer class.
 
-        Returns:
-        --------
+        Returns
+        -------
         self : object
             The fitted regressor.
         """
@@ -419,13 +419,13 @@ class MambularRegressor(BaseEstimator):
         """
         Predicts target values for the given input samples.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict target values.
 
-        Returns:
-        --------
+        Returns
+        -------
         predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
             The predicted target values.
         """
@@ -468,8 +468,8 @@ class MambularRegressor(BaseEstimator):
             # Evaluate using the specified metrics
             results = regressor.evaluate(X_test, y_test, metrics=metrics)
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples to predict.
         y_true : array-like of shape (n_samples,) or (n_samples, n_outputs)
@@ -477,13 +477,13 @@ class MambularRegressor(BaseEstimator):
         metrics : dict
             A dictionary where keys are metric names and values are the metric functions.
 
-        Returns:
-        --------
+        Returns
+        -------
         scores : dict
             A dictionary with metric names as keys and their corresponding scores as values.
 
-        Notes:
-        ------
+        Notes
+        -----
         This method uses the `predict` method to generate predictions and computes each metric.
         """
         if metrics is None:
