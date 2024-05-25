@@ -3,8 +3,10 @@ on:
 
 jobs:
   paper:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Update the runs-on field to use Ubuntu 20.04
+
     name: Paper Draft
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
