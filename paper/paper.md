@@ -22,12 +22,6 @@ affiliations:
     index: 2
   - name: TU Clausthal, Germany
     index: 3
-  - name: BASF 
-    index: 1
-  - name: BASF Canada Inc
-    index: 2
- -  name: Technical University Clausthal
-    index: 3
 date: 22 April 2024
 bibliography: paper.bib
 ---
