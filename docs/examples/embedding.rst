@@ -1,7 +1,7 @@
 .. _embedding_example:
 
-Embedding Example
-=================
+Embedding
+=========
 
 This example demonstrates how use Embedding from the `mambular` package.
 
