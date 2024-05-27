@@ -1,19 +1,15 @@
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from ..utils.mamba_arch import Mamba
+
 from ..utils.config import MambularConfig
-import pytorch_lightning as pl
-from ..utils.distributions import (
-    NormalDistribution,
-    NegativeBinomialDistribution,
-    GammaDistribution,
-    StudentTDistribution,
-    PoissonDistribution,
-    InverseGammaDistribution,
-    BetaDistribution,
-    DirichletDistribution,
-    CategoricalDistribution,
-)
+from ..utils.distributions import (BetaDistribution, CategoricalDistribution,
+                                   DirichletDistribution, GammaDistribution,
+                                   InverseGammaDistribution,
+                                   NegativeBinomialDistribution,
+                                   NormalDistribution, PoissonDistribution,
+                                   StudentTDistribution)
+from ..utils.mamba_arch import Mamba
 
 
 class BaseMambularLSS(pl.LightningModule):
@@ -21,6 +17,7 @@ class BaseMambularLSS(pl.LightningModule):
     A base module for likelihood-based statistical learning (LSS) models built on PyTorch Lightning,
     integrating the Mamba architecture for tabular data. This module is designed to accommodate various
     statistical distribution families for different types of regression and classification tasks.
+
 
     Parameters
     ----------
@@ -44,6 +41,7 @@ class BaseMambularLSS(pl.LightningModule):
     **distribution_params : 
         Additional parameters specific to the chosen statistical distribution family.
 
+
     Attributes
     ----------
     mamba : Mamba
@@ -54,21 +52,7 @@ class BaseMambularLSS(pl.LightningModule):
         Final linear layer mapping the features to the parameters of the chosen statistical distribution.
     loss_fct : callable
         The loss function derived from the chosen statistical distribution.
-
-    Methods
-    -------
-    forward(cat_features, num_features)
-        Defines the forward pass of the model.
-    training_step(batch, batch_idx)
-        Processes a single batch during training.
-    validation_step(batch, batch_idx)
-        Processes a single batch during validation.
-    configure_optimizers()
-        Sets up the model's optimizer and learning rate scheduler.
     """
-
-
-
 
     def __init__(
         self,
@@ -136,7 +120,8 @@ class BaseMambularLSS(pl.LightningModule):
                 nn.Sequential(
                     nn.Linear(input_shape, self.config.d_model, bias=False),
                     nn.BatchNorm1d(self.config.d_model),
-                    self.embedding_activation,  # Example using ReLU as the activation function, change as needed
+                    # Example using ReLU as the activation function, change as needed
+                    self.embedding_activation,
                 )
                 for feature_name, input_shape in num_feature_info.items()
             ]
@@ -190,6 +175,7 @@ class BaseMambularLSS(pl.LightningModule):
             Tensor containing the categorical features.
         num_features : Tensor
             Tensor containing the numerical features.
+
 
         Returns
         -------
@@ -282,7 +268,7 @@ class BaseMambularLSS(pl.LightningModule):
         )
         return loss
 
-    def validation_step(self, batch, batch_idx):   
+    def validation_step(self, batch, batch_idx):
         """
         Processes a single batch during validation, computes the loss using the distribution-specific loss function,
         and logs validation metrics.
@@ -293,9 +279,8 @@ class BaseMambularLSS(pl.LightningModule):
             A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
         batch_idx : int
             The index of the batch within the epoch.
-        """ 
-        
-        
+        """
+
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 

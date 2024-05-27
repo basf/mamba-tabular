@@ -1,17 +1,18 @@
-from sklearn.model_selection import train_test_split
+import numpy as np
+import pandas as pd
 import pytorch_lightning as pl
 import torch
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from sklearn.base import BaseEstimator
+from sklearn.decomposition import PCA
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+
 from ..base_models.embedding_classifier import BaseEmbeddingMambularClassifier
 from ..utils.config import MambularConfig
+from ..utils.dataset import EmbeddingMambularDataset, MambularDataModule
 from ..utils.preprocessor import Preprocessor
-from ..utils.dataset import MambularDataModule, EmbeddingMambularDataset
-from sklearn.base import BaseEstimator
-import pandas as pd
-from sklearn.decomposition import PCA
-import numpy as np
-from sklearn.metrics import accuracy_score
 
 
 class EmbeddingMambularClassifier(BaseEstimator):
@@ -26,6 +27,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
     **kwargs : Configuration parameters that can include both MambularConfig settings and preprocessing
         options. Any unrecognized parameters are passed to the preprocessor.
 
+
     Attributes
     ----------
     config : MambularConfig
@@ -35,7 +37,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
     model : ProteinMambularClassifier
         The underlying neural network model, instantiated during the `fit` method.
     """
-       
+
     def __init__(self, **kwargs):
         # Known config arguments
         config_arg_names = [
@@ -59,7 +61,8 @@ class EmbeddingMambularClassifier(BaseEstimator):
             "dt_scale",
             "dt_init_floor",
         ]
-        config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
+        config_kwargs = {k: v for k,
+                         v in kwargs.items() if k in config_arg_names}
         self.config = MambularConfig(**config_kwargs)
 
         # The rest are assumed to be preprocessor arguments
@@ -77,6 +80,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
         ----------
         deep : bool, default=True
             If True, will return the parameters for this estimator and contained subobjects that are estimators.
+
 
         Returns
         -------
@@ -105,6 +109,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
         **parameters : dict
             Estimator parameters.
 
+
         Returns
         -------
         self : object
@@ -112,7 +117,8 @@ class EmbeddingMambularClassifier(BaseEstimator):
         """
         # Update config_kwargs with provided parameters
         valid_config_keys = self.config_kwargs.keys()
-        config_updates = {k: v for k, v in parameters.items() if k in valid_config_keys}
+        config_updates = {k: v for k,
+                          v in parameters.items() if k in valid_config_keys}
         self.config_kwargs.update(config_updates)
 
         # Update the config object
@@ -146,6 +152,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
         random_state : int
             Controls the shuffling applied to the data before applying the split.
 
+
         Returns
         -------
         X_train, X_val, y_train, y_val : arrays
@@ -176,12 +183,14 @@ class EmbeddingMambularClassifier(BaseEstimator):
         shuffle : bool
             Whether to shuffle the training data before splitting into batches.
 
+
         Returns
         -------
         data_module : MambularDataModule
             An instance of MambularDataModule containing training and validation DataLoaders.
         """
-        train_preprocessed_data = self.preprocessor.fit_transform(X_train, y_train)
+        train_preprocessed_data = self.preprocessor.fit_transform(
+            X_train, y_train)
         val_preprocessed_data = self.preprocessor.transform(X_val)
 
         # Update feature info based on the actual processed data
@@ -201,22 +210,26 @@ class EmbeddingMambularClassifier(BaseEstimator):
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(train_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(
+                        train_preprocessed_data[cat_key], dtype=torch.long)
                 )
             if cat_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(val_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(
+                        val_preprocessed_data[cat_key], dtype=torch.long)
                 )
 
             binned_key = "num_" + key  # for binned features
             if binned_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(train_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(
+                        train_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
             if binned_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(val_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(
+                        val_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
         # Populate tensors for numerical features, if present in processed data
@@ -226,11 +239,13 @@ class EmbeddingMambularClassifier(BaseEstimator):
             )  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(
+                        train_preprocessed_data[num_key], dtype=torch.float)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(
+                        val_preprocessed_data[num_key], dtype=torch.float)
                 )
 
         train_labels = torch.tensor(y_train, dtype=torch.long)
@@ -260,6 +275,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
         ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             Test feature set.
+
 
         Returns
         -------
@@ -325,7 +341,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
         pca=False,
         reduced_dims=16,
         **trainer_kwargs
-    ):   
+    ):
         """
         Fits the model to the given dataset.
 
@@ -369,6 +385,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
             Sequence size for embeddings, relevant if raw_embeddings is False.
         **trainer_kwargs : dict
             Additional arguments for the PyTorch Lightning Trainer.
+
 
         Returns
         -------
@@ -460,10 +477,12 @@ class EmbeddingMambularClassifier(BaseEstimator):
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples to predict.
 
+
         Returns
         -------
         predictions : ndarray of shape (n_samples,)
             Predicted class labels for each input sample.
+
 
         Notes
         -----
@@ -511,10 +530,12 @@ class EmbeddingMambularClassifier(BaseEstimator):
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples for which to predict class probabilities.
 
+
         Returns
         -------
         probabilities : ndarray of shape (n_samples, n_classes)
             Predicted class probabilities for each input sample.
+
 
         Notes
         -----
@@ -564,10 +585,12 @@ class EmbeddingMambularClassifier(BaseEstimator):
             A dictionary where keys are metric names and values are tuples containing the metric function
             and a boolean indicating whether the metric requires probability scores (True) or class labels (False).
 
+
         Returns
         -------
         scores : dict
             A dictionary with metric names as keys and their corresponding scores as values.
+
 
         Notes
         -----
