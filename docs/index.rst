@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. mdinclude:: mambular.md
+.. mdinclude:: ../README.md
 
 .. toctree::
    :name: Getting Started
