@@ -20,7 +20,6 @@ Modules                                       Description
 
 .. toctree::
    :maxdepth: 1
-   :hidden:
 
    BaseModels
 

@@ -12,7 +12,17 @@
    :hidden:
 
    installation
-   quickstart 
+
+.. toctree::
+   :name: Examples
+   :caption: Examples
+   :maxdepth: 2
+   :hidden:
+
+   examples/classification
+   examples/regression
+   examples/embedding
+   examples/distributional
 
 .. toctree::
    :name: API Docs
