@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mamba-Tabluar &mdash; mamba-tabular 06.05.2024 documentation</title>
+  <title>Mambular: Tabular Deep Learning with Mamba Architectures &mdash; mamba-tabular 06.05.2024 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -31,7 +31,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Mamba-Tabluar" href="mamba.html" /> 
+    <link rel="next" title="Mambular: Tabular Deep Learning with Mamba Architectures" href="mamba.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -55,7 +55,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="mamba.html">Mamba-Tabluar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mamba.html">Mambular: Tabular Deep Learning with Mamba Architectures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 </ul>
@@ -79,7 +79,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Mamba-Tabluar</li>
+      <li class="breadcrumb-item active">Mambular: Tabular Deep Learning with Mamba Architectures</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -89,9 +89,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="mamba-tabluar">
-<h1>Mamba-Tabluar<a class="headerlink" href="#mamba-tabluar" title="Permalink to this heading"></a></h1>
+  <section id="mambular-tabular-deep-learning-with-mamba-architectures">
+<h1>Mambular: Tabular Deep Learning with Mamba Architectures<a class="headerlink" href="#mambular-tabular-deep-learning-with-mamba-architectures" title="Permalink to this heading"></a></h1>
 <p>Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's <code class="docutils literal notranslate"><span class="pre">BaseEstimator</span></code> interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and transform using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.</p>
+<p><span class="raw-html-m2r"><img src="https://github.com/basf/mamba-tabular/blob/documentation/Mamba_Tabular_Converted.jpg" alt="Mamba Tabular" width="400"/></span></p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -102,6 +103,10 @@
 <li><p><strong>Sklearn-like API</strong>: The familiar scikit-learn <code class="docutils literal notranslate"><span class="pre">fit</span></code>, <code class="docutils literal notranslate"><span class="pre">predict</span></code>, and <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code> methods mean minimal learning curve for those already accustomed to scikit-learn.</p></li>
 <li><p><strong>PyTorch Lightning Under the Hood</strong>: Built on top of PyTorch Lightning, Mambular models benefit from streamlined training processes, easy customization, and advanced features like distributed training and 16-bit precision.</p></li>
 </ul>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
+<p>You can find the Mamba-Tabular API documentation <a class="reference external" href="https://mamba-tabular.readthedocs.io/en/latest/index.html">here</a>.</p>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
@@ -177,7 +182,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code> offers a wide range of distribution classes to cater to various statistical modeling needs. The available distribution classes include:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">normal</span></code>: Normal Distribution for modeling continuous data with a symmetric distribution around the mean.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code>: Poisson Distribution for modeling count data that represents the number of events occurring within a fixed interval.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code>: Poisson Distribution for modeling count data that for instance represent the number of events occurring within a fixed interval.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">gamma</span></code>: Gamma Distribution for modeling continuous data that is skewed and bounded at zero, often used for waiting times.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">beta</span></code>: Beta Distribution for modeling data that is bounded between 0 and 1, useful for proportions and percentages.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dirichlet</span></code>: Dirichlet Distribution for modeling multivariate data where individual components are correlated, and the sum is constrained to 1.</p></li>
@@ -232,7 +237,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mamba.html" class="btn btn-neutral float-right" title="Mamba-Tabluar" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mamba.html" class="btn btn-neutral float-right" title="Mambular: Tabular Deep Learning with Mamba Architectures" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

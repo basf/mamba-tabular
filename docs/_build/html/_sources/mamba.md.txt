@@ -1,6 +1,8 @@
-# Mamba-Tabluar
+# Mambular: Tabular Deep Learning with Mamba Architectures
 
 Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and transform using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
+
+<img src="https://github.com/basf/mamba-tabular/blob/documentation/Mamba_Tabular_Converted.jpg" alt="Mamba Tabular" width="400"/>
 
 ## Features
 
@@ -10,6 +12,10 @@ Mambular is a Python package that brings the power of Mamba architectures to tab
 - **Extensive Preprocessing**: Comes with a powerful preprocessing module that supports a broad array of data transformation techniques, ensuring that your data is optimally prepared for model training.
 - **Sklearn-like API**: The familiar scikit-learn `fit`, `predict`, and `predict_proba` methods mean minimal learning curve for those already accustomed to scikit-learn.
 - **PyTorch Lightning Under the Hood**: Built on top of PyTorch Lightning, Mambular models benefit from streamlined training processes, easy customization, and advanced features like distributed training and 16-bit precision.
+
+## Documentation
+
+You can find the Mamba-Tabular API documentation [here](https://mamba-tabular.readthedocs.io/en/latest/index.html).
 
 ## Installation
 
@@ -89,7 +95,7 @@ Mambular introduces a cutting-edge approach to distributional regression through
 `MambularLSS` offers a wide range of distribution classes to cater to various statistical modeling needs. The available distribution classes include:
 
 - `normal`: Normal Distribution for modeling continuous data with a symmetric distribution around the mean.
-- `poisson`: Poisson Distribution for modeling count data that represents the number of events occurring within a fixed interval.
+- `poisson`: Poisson Distribution for modeling count data that for instance represent the number of events occurring within a fixed interval.
 - `gamma`: Gamma Distribution for modeling continuous data that is skewed and bounded at zero, often used for waiting times.
 - `beta`: Beta Distribution for modeling data that is bounded between 0 and 1, useful for proportions and percentages.
 - `dirichlet`: Dirichlet Distribution for modeling multivariate data where individual components are correlated, and the sum is constrained to 1.
