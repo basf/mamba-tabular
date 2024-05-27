@@ -12,4 +12,4 @@ pandoc
 sphinx-rtd-theme==2.0.0
 readthedocs-sphinx-ext==2.2.5
 lxml-html-clean==0.1.1
-# pydata-sphinx-theme
+pydata-sphinx-theme

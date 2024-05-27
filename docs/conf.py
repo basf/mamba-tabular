@@ -43,6 +43,7 @@ extensions = [
     "myst_parser",
     "mdinclude",  # custom module
     "sphinx_rtd_theme",
+    # "pydata_sphinx_theme",
     "sphinx_autodoc_typehints",
 ]
 
