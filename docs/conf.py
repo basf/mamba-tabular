@@ -52,7 +52,8 @@ extensions = [
 ]
 autodoc_mock_imports = ['lightning', 'torch',
                         'torchmetrics', 'pytorch_lightning',
-                        'numpy', 'pandas', 'sklearn']
+                        'numpy', 'pandas', 'sklearn',
+                        'properscoring']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
