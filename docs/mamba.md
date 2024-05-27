@@ -2,8 +2,6 @@
 
 Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and transform using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
 
-<img src="https://github.com/basf/mamba-tabular/blob/documentation/Mamba_Tabular_Converted.jpg" alt="Mamba Tabular" width="400"/>
-
 ## Features
 
 - **Comprehensive Model Suite**: Includes modules for regression (`MambularRegressor`), classification (`MambularClassifier`), and distributional regression (`MambularLSS`), catering to a wide range of tabular data tasks.
@@ -24,11 +22,11 @@ Install Mambular using pip:
 pip install mambular
 ```
 
-## Advanced Preprocessing for Optimal Performance
+## Preprocessing
 
 Mambular elevates the preprocessing stage of model development, employing a sophisticated suite of techniques to ensure your data is in the best shape for the Mamba architectures. Our preprocessing module is designed to be both powerful and intuitive, offering a range of options to transform your tabular data efficiently.
 
-### Intelligent Data Type Detection and Transformation
+### Data Type Detection and Transformation
 
 Mambular automatically identifies the type of each feature in your dataset, applying the most suitable transformations to numerical and categorical variables. This includes:
 

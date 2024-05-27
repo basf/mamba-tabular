@@ -6,10 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'mamba-tabular'
+project = 'mambular'
 copyright = '2024, Christoph Weisser'
-author = 'Christoph Weisser'
-release = '06.05.2024'
+author = 'Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken'
+release = '26.05.2024'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
