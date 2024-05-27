@@ -17,7 +17,7 @@ sys.path.insert(1, os.path.dirname(
 project = 'mambular'
 copyright = '2024, Christoph Weisser'
 author = 'Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken'
-release = '26.05.2024'
+release = '0.1.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -46,11 +46,10 @@ extensions = [
     # "pydata_sphinx_theme",
     "sphinx_autodoc_typehints",
 ]
+autodoc_mock_imports = ['lightning']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-exclude_patterns = []
-
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -91,9 +90,8 @@ pygments_style = "sphinx"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# 'sphinx_book_theme'  # 'furo', 'press', 'pydata_sphinx_theme'
+# 'sphinx_rtd_theme'  # 'furo', 'press', 'pydata_sphinx_theme'
 html_theme = 'sphinx_book_theme'
-# html_theme = 'sphinx_rtd_theme'
 # html_static_path = ['_static']
 # html_css_files = ['custom.css']
 # html_js_files = ['custom.js']
