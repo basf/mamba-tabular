@@ -25,10 +25,20 @@
    examples/distributional
 
 .. toctree::
-   :name: API Docs
-   :caption: API Docs
+   :name: API Reference
+   :caption: API Reference
    :maxdepth: 1
  
    api/models/index
    api/base_models/index
    api/utils/index
+
+
+.. toctree::
+   :name: Developer Guide
+   :caption: Developer Guide
+   :maxdepth: 1
+
+   codeofconduct
+   development
+   release
