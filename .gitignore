@@ -160,6 +160,5 @@ cython_debug/
 #.idea/
 .DS_Store
 
-.github/*
-dist/*
+dist/
 docs/_build/*
