@@ -1,26 +1,22 @@
-from sklearn.model_selection import train_test_split
+import numpy as np
+import pandas as pd
+import properscoring as ps
 import pytorch_lightning as pl
 import torch
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from sklearn.base import BaseEstimator
+from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+
 from ..base_models.distributional import BaseMambularLSS
 from ..utils.config import MambularConfig
-from ..utils.preprocessor import Preprocessor
 from ..utils.dataset import MambularDataModule, MambularDataset
-from sklearn.base import BaseEstimator
-import pandas as pd
-from ..utils.distributional_metrics import (
-    poisson_deviance,
-    gamma_deviance,
-    beta_brier_score,
-    dirichlet_error,
-    student_t_loss,
-    negative_binomial_deviance,
-    inverse_gamma_loss,
-)
-from sklearn.metrics import mean_squared_error, accuracy_score
-import numpy as np
-import properscoring as ps
+from ..utils.distributional_metrics import (beta_brier_score, dirichlet_error,
+                                            gamma_deviance, inverse_gamma_loss,
+                                            negative_binomial_deviance,
+                                            poisson_deviance, student_t_loss)
+from ..utils.preprocessor import Preprocessor
 
 
 class MambularLSS(BaseEstimator):
@@ -31,7 +27,14 @@ class MambularLSS(BaseEstimator):
     facilitating end-to-end training and prediction workflows.
 
     The initialization of this class separates configuration arguments for the model and
-    the preprocessor, allowing for flexible adjustment of parameters.
+    the preprocessor, allowing for flexible adjustment of parameters.    
+
+    Parameters
+    ----------
+    **kwargs : Arbitrary keyword arguments, divided into configuration for the model and
+        preprocessing. Recognized keys include model parameters such as 'd_model',
+        'n_layers', etc., and any additional keys are assumed to be preprocessor arguments.
+
 
     Attributes
     ----------
@@ -42,11 +45,7 @@ class MambularLSS(BaseEstimator):
     model : torch.nn.Module
         The neural network model, initialized based on 'config'.
 
-    Parameters
-    ----------
-    **kwargs : Arbitrary keyword arguments, divided into configuration for the model and
-        preprocessing. Recognized keys include model parameters such as 'd_model',
-        'n_layers', etc., and any additional keys are assumed to be preprocessor arguments.
+
     """
 
     def __init__(self, **kwargs):
@@ -76,7 +75,8 @@ class MambularLSS(BaseEstimator):
             "tabular_head_dropout",
             "num_emebedding_activation",
         ]
-        config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
+        config_kwargs = {k: v for k,
+                         v in kwargs.items() if k in config_arg_names}
         self.config = MambularConfig(**config_kwargs)
 
         # The rest are assumed to be preprocessor arguments
@@ -86,7 +86,7 @@ class MambularLSS(BaseEstimator):
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
         self.model = None
 
-    def get_params(self, deep=True): 
+    def get_params(self, deep=True):
         """
         Get parameters for this estimator, optionally including parameters from nested components
         like the preprocessor.
@@ -96,13 +96,14 @@ class MambularLSS(BaseEstimator):
         deep : bool, default=True
             If True, return parameters of nested components.
 
+
         Returns
         -------
         dict
             A dictionary mapping parameter names to their values. For nested components,
             parameter names are prefixed accordingly (e.g., 'preprocessor__<param_name>').
         """
-        
+
         params = self.config_kwargs  # Parameters used to initialize MambularConfig
 
         # If deep=True, include parameters from nested components like preprocessor
@@ -127,13 +128,15 @@ class MambularLSS(BaseEstimator):
             **parameters: Arbitrary keyword arguments where keys are parameter names and values
                           are the new parameter values.
 
+
         Returns
         -------
             self: This instance with updated parameters.
         """
         # Update config_kwargs with provided parameters
         valid_config_keys = self.config_kwargs.keys()
-        config_updates = {k: v for k, v in parameters.items() if k in valid_config_keys}
+        config_updates = {k: v for k,
+                          v in parameters.items() if k in valid_config_keys}
         self.config_kwargs.update(config_updates)
 
         # Update the config object
@@ -152,7 +155,7 @@ class MambularLSS(BaseEstimator):
 
         return self
 
-    def split_data(self, X, y, val_size, random_state): 
+    def split_data(self, X, y, val_size, random_state):
         """
         Split the dataset into training and validation sets.
 
@@ -166,6 +169,7 @@ class MambularLSS(BaseEstimator):
             The proportion of the dataset to include in the validation split.
         random_state : int, optional
             The seed used by the random number generator for reproducibility.
+
 
         Returns
         -------
@@ -200,12 +204,14 @@ class MambularLSS(BaseEstimator):
         shuffle : bool
             Whether to shuffle the training data in the DataLoader.
 
+
         Returns
         -------
         MambularDataModule
             An object containing DataLoaders for training and validation datasets.
         """
-        train_preprocessed_data = self.preprocessor.fit_transform(X_train, y_train)
+        train_preprocessed_data = self.preprocessor.fit_transform(
+            X_train, y_train)
         val_preprocessed_data = self.preprocessor.transform(X_val)
 
         # Update feature info based on the actual processed data
@@ -225,22 +231,26 @@ class MambularLSS(BaseEstimator):
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(train_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(
+                        train_preprocessed_data[cat_key], dtype=torch.long)
                 )
             if cat_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(val_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(
+                        val_preprocessed_data[cat_key], dtype=torch.long)
                 )
 
             binned_key = "num_" + key  # for binned features
             if binned_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(train_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(
+                        train_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
             if binned_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(val_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(
+                        val_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
         # Populate tensors for numerical features, if present in processed data
@@ -248,11 +258,13 @@ class MambularLSS(BaseEstimator):
             num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(
+                        train_preprocessed_data[num_key], dtype=torch.float)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(
+                        val_preprocessed_data[num_key], dtype=torch.float)
                 )
 
         train_labels = torch.tensor(y_train, dtype=torch.float)
@@ -262,7 +274,8 @@ class MambularLSS(BaseEstimator):
         train_dataset = MambularDataset(
             train_cat_tensors, train_num_tensors, train_labels
         )
-        val_dataset = MambularDataset(val_cat_tensors, val_num_tensors, val_labels)
+        val_dataset = MambularDataset(
+            val_cat_tensors, val_num_tensors, val_labels)
 
         # Create dataloaders
         train_dataloader = DataLoader(
@@ -281,6 +294,7 @@ class MambularLSS(BaseEstimator):
         ----------
         X : array-like
             Test features to preprocess.
+
 
         Returns
         -------
@@ -337,7 +351,7 @@ class MambularLSS(BaseEstimator):
         factor=0.75,
         weight_decay=0.025,
         **trainer_kwargs,
-    ):    
+    ):
         """
         Fits the model to the provided data, using the specified loss distribution family for the prediction task.
 
@@ -380,6 +394,7 @@ class MambularLSS(BaseEstimator):
             Weight decay (L2 penalty) parameter.
         **trainer_kwargs : dict
             Additional keyword arguments for PyTorch Lightning's Trainer class.
+
 
         Returns
         -------
@@ -448,6 +463,7 @@ class MambularLSS(BaseEstimator):
         X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict target values.
 
+
         Returns
         -------
         predictions : ndarray, shape (n_samples,) or (n_samples, n_distributional_parameters)
@@ -495,6 +511,7 @@ class MambularLSS(BaseEstimator):
             Specifies the distribution family the model is predicting for. If None, it will attempt to infer based
             on the model's settings.
 
+
         Returns
         -------
         scores : dict
@@ -502,7 +519,8 @@ class MambularLSS(BaseEstimator):
         """
         # Infer distribution family from model settings if not provided
         if distribution_family is None:
-            distribution_family = getattr(self.model, "distribution_family", "normal")
+            distribution_family = getattr(
+                self.model, "distribution_family", "normal")
 
         # Setup default metrics if none are provided
         if metrics is None:
@@ -529,6 +547,7 @@ class MambularLSS(BaseEstimator):
         distribution_family : str
             The distribution family for which to provide default metrics.
 
+
         Returns
         -------
         metrics : dict
@@ -539,7 +558,8 @@ class MambularLSS(BaseEstimator):
                 "MSE": lambda y, pred: mean_squared_error(y, pred[:, 0]),
                 "CRPS": lambda y, pred: np.mean(
                     [
-                        ps.crps_gaussian(y[i], mu=pred[i, 0], sig=np.sqrt(pred[i, 1]))
+                        ps.crps_gaussian(y[i], mu=pred[i, 0],
+                                         sig=np.sqrt(pred[i, 1]))
                         for i in range(len(y))
                     ]
                 ),

@@ -91,7 +91,8 @@ pygments_style = "sphinx"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # 'sphinx_book_theme'  # 'furo', 'press', 'pydata_sphinx_theme'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'sphinx_book_theme'
+# html_theme = 'sphinx_rtd_theme'
 # html_static_path = ['_static']
 # html_css_files = ['custom.css']
 # html_js_files = ['custom.js']

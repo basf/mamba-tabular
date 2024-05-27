@@ -1,9 +1,10 @@
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torchmetrics
-from ..utils.mamba_arch import Mamba
+
 from ..utils.config import MambularConfig
-import pytorch_lightning as pl
+from ..utils.mamba_arch import Mamba
 
 
 class BaseMambularClassifier(pl.LightningModule):
@@ -34,6 +35,7 @@ class BaseMambularClassifier(pl.LightningModule):
     lr_factor : float, optional
         Factor by which the learning rate will be reduced. Defaults to 0.75.
 
+
     Attributes
     ----------
     embedding_activation : nn.Module
@@ -59,23 +61,7 @@ class BaseMambularClassifier(pl.LightningModule):
     precision : torchmetrics.Precision
         A metric for computing the precision of predictions.
 
-    Methods
-    -------
-    forward(cat_features, num_features)
-        Defines the forward pass of the model, processing both categorical and numerical features, aggregating embeddings,
-        and producing predictions.
-    training_step(batch, batch_idx)
-        Performs a single training step, computing the loss and logging metrics for the training set.
-    validation_step(batch, batch_idx)
-        Performs a single validation step, computing the loss and logging metrics for the validation set.
-    configure_optimizers()
-        Configures the model's optimizers and learning rate schedulers.
     """
-
-
-
-
-
 
     def __init__(
         self,
@@ -125,7 +111,8 @@ class BaseMambularClassifier(pl.LightningModule):
                 nn.Sequential(
                     nn.Linear(input_shape, self.config.d_model, bias=False),
                     nn.BatchNorm1d(self.config.d_model),
-                    self.embedding_activation,  # Example using ReLU as the activation function, change as needed
+                    # Example using ReLU as the activation function, change as needed
+                    self.embedding_activation,
                 )
                 for feature_name, input_shape in num_feature_info.items()
             ]
@@ -191,6 +178,7 @@ class BaseMambularClassifier(pl.LightningModule):
             Tensor containing the categorical features.
         num_features : Tensor
             Tensor containing the numerical features.
+
 
         Returns
         -------
@@ -263,7 +251,7 @@ class BaseMambularClassifier(pl.LightningModule):
         batch_idx : int
             The index of the batch within the epoch.
         """
-        
+
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 
@@ -310,7 +298,7 @@ class BaseMambularClassifier(pl.LightningModule):
 
         return loss
 
-    def validation_step(self, batch, batch_idx):     
+    def validation_step(self, batch, batch_idx):
         """
         Processes a single batch during validation, computes the loss and logs validation metrics.
 
@@ -321,7 +309,7 @@ class BaseMambularClassifier(pl.LightningModule):
         batch_idx : int
             The index of the batch within the epoch.
         """
-        
+
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 

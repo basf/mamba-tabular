@@ -1,16 +1,17 @@
-from sklearn.model_selection import train_test_split
+import pandas as pd
 import pytorch_lightning as pl
 import torch
-from torch.utils.data import DataLoader
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from ..base_models.embedding_regressor import BaseEmbeddingMambularRegressor
-from ..utils.config import MambularConfig
-from ..utils.preprocessor import Preprocessor
-from ..utils.dataset import MambularDataModule, EmbeddingMambularDataset
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.base import BaseEstimator
-import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader
+
+from ..base_models.embedding_regressor import BaseEmbeddingMambularRegressor
+from ..utils.config import MambularConfig
+from ..utils.dataset import EmbeddingMambularDataset, MambularDataModule
+from ..utils.preprocessor import Preprocessor
 
 
 class EmbeddingMambularRegressor(BaseEstimator):
@@ -24,6 +25,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
     **kwargs : Keyword arguments that can include both configuration parameters for the MambularConfig and
         parameters for the preprocessor.
 
+
     Attributes
     ----------
     config : MambularConfig
@@ -33,7 +35,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
     model : ProteinMambularRegressor
         The neural network model, initialized after the `fit` method is called.
     """
-    
+
     def __init__(self, **kwargs):
         # Known config arguments
         config_arg_names = [
@@ -57,7 +59,8 @@ class EmbeddingMambularRegressor(BaseEstimator):
             "dt_scale",
             "dt_init_floor",
         ]
-        config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
+        config_kwargs = {k: v for k,
+                         v in kwargs.items() if k in config_arg_names}
         self.config = MambularConfig(**config_kwargs)
 
         # The rest are assumed to be preprocessor arguments
@@ -106,6 +109,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
         **parameters : dict
             Estimator parameters to be set.
 
+
         Returns
         -------
         self : object
@@ -113,7 +117,8 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         # Update config_kwargs with provided parameters
         valid_config_keys = self.config_kwargs.keys()
-        config_updates = {k: v for k, v in parameters.items() if k in valid_config_keys}
+        config_updates = {k: v for k,
+                          v in parameters.items() if k in valid_config_keys}
         self.config_kwargs.update(config_updates)
 
         # Update the config object
@@ -147,6 +152,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
         random_state : int
             Controls the shuffling applied to the data before applying the split.
 
+
         Returns
         -------
         X_train, X_val, y_train, y_val : arrays
@@ -177,12 +183,14 @@ class EmbeddingMambularRegressor(BaseEstimator):
         shuffle : bool
             Whether to shuffle the training data in the DataLoader.
 
+
         Returns
         -------
         data_module : MambularDataModule
             An instance of MambularDataModule containing the training and validation DataLoaders.
         """
-        train_preprocessed_data = self.preprocessor.fit_transform(X_train, y_train)
+        train_preprocessed_data = self.preprocessor.fit_transform(
+            X_train, y_train)
         val_preprocessed_data = self.preprocessor.transform(X_val)
 
         # Update feature info based on the actual processed data
@@ -202,22 +210,26 @@ class EmbeddingMambularRegressor(BaseEstimator):
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(train_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(
+                        train_preprocessed_data[cat_key], dtype=torch.long)
                 )
             if cat_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(val_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(
+                        val_preprocessed_data[cat_key], dtype=torch.long)
                 )
 
             binned_key = "num_" + key  # for binned features
             if binned_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(train_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(
+                        train_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
             if binned_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(val_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(
+                        val_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
         # Populate tensors for numerical features, if present in processed data
@@ -227,11 +239,13 @@ class EmbeddingMambularRegressor(BaseEstimator):
             )  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(
+                        train_preprocessed_data[num_key], dtype=torch.float)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(
+                        val_preprocessed_data[num_key], dtype=torch.float)
                 )
 
         train_labels = torch.tensor(y_train, dtype=torch.float)
@@ -261,6 +275,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
         ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             Test feature set.
+
 
         Returns
         -------
@@ -376,7 +391,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
         self : object
             Returns an instance of self.
         """
-            
+
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
         if X_val:
@@ -459,6 +474,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
         X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict target values.
 
+
         Returns
         -------
         predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
@@ -497,16 +513,6 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         Evaluate the model on the given data using specified metrics.
 
-        Example:
-            metrics = {
-                'Mean Squared Error': mean_squared_error,
-                'R2 Score': r2_score
-            }
-
-            # Assuming 'X_test' and 'y_test' are your test dataset and labels
-            # Evaluate using the specified metrics
-            results = regressor.evaluate(X_test, y_test, metrics=metrics)
-
         Parameters
         ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
@@ -516,14 +522,31 @@ class EmbeddingMambularRegressor(BaseEstimator):
         metrics : dict
             A dictionary where keys are metric names and values are the metric functions.
 
+
+        Notes
+        -----
+        This method uses the `predict` method to generate predictions and computes each metric.
+
+
+        Examples
+        --------
+        >>> from sklearn.metrics import mean_squared_error, r2_score
+        >>> regressor = EmbeddingMambularRegressor()
+        >>> regressor.fit(X_train, y_train)
+        >>> metrics = {
+        ...     'Mean Squared Error': mean_squared_error,
+        ...     'R2 Score': r2_score
+        ... }
+        >>> # Assuming 'X_test' and 'y_test' are your test dataset and labels
+        >>> # Evaluate using the specified metrics
+        >>> results = regressor.evaluate(X_test, y_test, metrics=metrics)
+
+
         Returns
         -------
         scores : dict
             A dictionary with metric names as keys and their corresponding scores as values.
 
-        Notes
-        -----
-        This method uses the `predict` method to generate predictions and computes each metric.
         """
         if metrics is None:
             metrics = {"Mean Squared Error": mean_squared_error}
