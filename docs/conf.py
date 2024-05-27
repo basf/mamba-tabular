@@ -51,7 +51,8 @@ extensions = [
     "sphinx_autodoc_typehints",
 ]
 autodoc_mock_imports = ['lightning', 'torch',
-                        'torchmetrics', 'pytorch_lightning']
+                        'torchmetrics', 'pytorch_lightning',
+                        'numpy', 'pandas', 'sklearn']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
