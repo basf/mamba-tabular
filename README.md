@@ -4,6 +4,8 @@ Mambular is a Python package that brings the power of Mamba architectures to tab
 
 <img src="https://github.com/basf/mamba-tabular/blob/master/docs/images/logo/mamba_tabular.jpg" alt="Mamba Tabular" width="400"/>
 
+<!-- ![Logo](./docs/images/logo/mamba_tabular.jpg) -->
+
 ## Features
 
 - **Comprehensive Model Suite**: Includes modules for regression (`MambularRegressor`), classification (`MambularClassifier`), and distributional regression (`MambularLSS`), catering to a wide range of tabular data tasks.
