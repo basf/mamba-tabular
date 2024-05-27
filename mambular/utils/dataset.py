@@ -1,7 +1,6 @@
+import lightning as pl
 import torch
 from torch.utils.data import Dataset
-import torch
-import pytorch_lightning as pl
 
 
 # Start Training using a custom DataModule

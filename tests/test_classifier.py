@@ -1,16 +1,18 @@
 import unittest
 from unittest.mock import MagicMock, patch
-import pandas as pd
+
 import numpy as np
-from mambular.models import MambularClassifier  # Ensure correct import path
+import pandas as pd
 import torch
 from sklearn.metrics import accuracy_score, log_loss
+
+from mambular.models import MambularClassifier  # Ensure correct import path
 
 
 class TestMambularClassifier(unittest.TestCase):
     def setUp(self):
         # Patching external dependencies
-        self.patcher_pl_trainer = patch("pytorch_lightning.Trainer")
+        self.patcher_pl_trainer = patch("lightning.Trainer")
         self.mock_pl_trainer = self.patcher_pl_trainer.start()
 
         self.patcher_base_model = patch(
@@ -57,11 +59,13 @@ class TestMambularClassifier(unittest.TestCase):
 
         self.classifier.fit(self.X, self.y)
 
-        self.mock_pl_trainer.return_value.fit.assert_called_once()  # Ensure that the fit method of the trainer is called
+        # Ensure that the fit method of the trainer is called
+        self.mock_pl_trainer.return_value.fit.assert_called_once()
 
     def test_predict(self):
         # Create a mock tensor as the model output
-        mock_logits = torch.rand(100, 3)  # Assuming three classes A, B, C as per self.y
+        # Assuming three classes A, B, C as per self.y
+        mock_logits = torch.rand(100, 3)
 
         # Mock the model and its method calls
         self.classifier.model = MagicMock()
@@ -86,12 +90,14 @@ class TestMambularClassifier(unittest.TestCase):
             axis=1, keepdims=True
         )
         self.classifier.predict = MagicMock(return_value=mock_predictions)
-        self.classifier.predict_proba = MagicMock(return_value=mock_probabilities)
+        self.classifier.predict_proba = MagicMock(
+            return_value=mock_probabilities)
 
         # Define metrics to test
         metrics = {
             "Accuracy": (accuracy_score, False),
-            "Log Loss": (log_loss, True),  # Log Loss requires probability scores
+            # Log Loss requires probability scores
+            "Log Loss": (log_loss, True),
         }
 
         # Call evaluate with the defined metrics

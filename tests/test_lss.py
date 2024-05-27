@@ -1,19 +1,20 @@
 import unittest
-from unittest.mock import patch, MagicMock
-import pandas as pd
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from mambular.models import MambularLSS  # Update the import path
+import pandas as pd
 import torch
-from sklearn.metrics import mean_squared_error, mean_poisson_deviance
-from properscoring import (
-    crps_gaussian,
-)  # Assuming this is the source of the CRPS function
+from properscoring import \
+    crps_gaussian  # Assuming this is the source of the CRPS function
+from sklearn.metrics import mean_poisson_deviance, mean_squared_error
+
+from mambular.models import MambularLSS  # Update the import path
 
 
 class TestMambularLSS(unittest.TestCase):
     def setUp(self):
         # Patch PyTorch Lightning's Trainer and any other external dependencies
-        self.patcher_trainer = patch("pytorch_lightning.Trainer")
+        self.patcher_trainer = patch("lightning.Trainer")
         self.mock_trainer = self.patcher_trainer.start()
 
         self.patcher_base_model = patch(
@@ -90,7 +91,8 @@ class TestMambularLSS(unittest.TestCase):
                 "MSE": lambda y, pred: mean_squared_error(y, pred[:, 0]),
                 "CRPS": lambda y, pred: np.mean(
                     [
-                        crps_gaussian(y[i], mu=pred[i, 0], sig=np.sqrt(pred[i, 1]))
+                        crps_gaussian(y[i], mu=pred[i, 0],
+                                      sig=np.sqrt(pred[i, 1]))
                         for i in range(len(y))
                     ]
                 ),
@@ -122,7 +124,8 @@ class TestMambularLSS(unittest.TestCase):
         )
         self.assertIn("Poisson Deviance", results)
         # Optionally calculate expected deviance and check
-        expected_deviance = mean_poisson_deviance(self.y_test, mock_predictions)
+        expected_deviance = mean_poisson_deviance(
+            self.y_test, mock_predictions)
         self.assertAlmostEqual(results["Poisson Deviance"], expected_deviance)
 
 
