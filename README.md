@@ -24,11 +24,11 @@ Install Mambular using pip:
 pip install mambular
 ```
 
-## Advanced Preprocessing for Optimal Performance
+## Preprocessing
 
 Mambular elevates the preprocessing stage of model development, employing a sophisticated suite of techniques to ensure your data is in the best shape for the Mamba architectures. Our preprocessing module is designed to be both powerful and intuitive, offering a range of options to transform your tabular data efficiently.
 
-### Intelligent Data Type Detection and Transformation
+### Data Type Detection and Transformation
 
 Mambular automatically identifies the type of each feature in your dataset, applying the most suitable transformations to numerical and categorical variables. This includes:
 
@@ -49,7 +49,6 @@ Our preprocessing pipeline gracefully handles missing data, employing strategies
 While Mambular excels in automating the preprocessing workflow, it also offers flexibility. You can customize the preprocessing steps to fit the unique needs of your dataset, ensuring that you're not locked into a one-size-fits-all approach.
 
 By integrating Mambular's preprocessing module into your workflow, you're not just preparing your data for deep learning; you're optimizing it for excellence. This commitment to data quality is what sets Mambular apart, making it an indispensable tool in your machine learning arsenal.
-
 
 ## Fit a Model
 Fitting a model in mambular is as simple as it gets. All models in mambular are sklearn BaseEstimators. Thus the `.fit` method is implemented for all of them. Additionally, this allows for using all other sklearn inherent methods such as their built in hyperparameter optimization tools.
