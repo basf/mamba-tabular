@@ -17,7 +17,11 @@ sys.path.insert(1, os.path.dirname(
 project = 'mambular'
 copyright = '2024, Christoph Weisser'
 author = 'Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken'
-release = '0.1.2'
+
+VERSION_PATH = "../mambular/__version__.py"
+with open(VERSION_PATH) as f:
+    VERSION = f.readlines()[-1].split()[-1].strip("\"'")
+release = VERSION
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -46,7 +50,8 @@ extensions = [
     # "pydata_sphinx_theme",
     "sphinx_autodoc_typehints",
 ]
-autodoc_mock_imports = ['lightning']
+autodoc_mock_imports = ['lightning', 'torch',
+                        'torchmetrics', 'pytorch_lightning']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
