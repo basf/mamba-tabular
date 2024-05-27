@@ -8,7 +8,7 @@ Models
 This module provides classes for the Mambular models that adhere to scikit-learn's `BaseEstimator` interface.
 
 =======================================    =======================================================================================================
-Functionality                              Description
+Modules                                    Description
 =======================================    =======================================================================================================
 :class:`MambularClassifier`                Multi-class and binary classification tasks.
 :class:`MambularLSS`                       Various statistical distribution families for different types of regression and classification tasks.

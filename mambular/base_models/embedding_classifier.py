@@ -1,9 +1,10 @@
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from ..utils.mamba_arch import Mamba
-from ..utils.config import MambularConfig
-import pytorch_lightning as pl
 import torchmetrics
+
+from ..utils.config import MambularConfig
+from ..utils.mamba_arch import Mamba
 
 
 class BaseEmbeddingMambularClassifier(pl.LightningModule):
@@ -33,6 +34,7 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
     raw_embeddings : bool, optional
         Indicates whether to use raw numerical features directly or to process them into embeddings. Defaults to False.
 
+
     Attributes
     ----------
     mamba : Mamba
@@ -41,17 +43,6 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
         Normalization layer applied after the Mamba block.
     tabular_head : nn.Linear
         Final linear layer mapping the features to the target.
-
-    Methods
-    -------
-    forward(cat_features, num_features)
-        Defines the forward pass of the model.
-    training_step(batch, batch_idx)
-        Processes a single batch during training.
-    validation_step(batch, batch_idx)
-        Processes a single batch during validation.
-    configure_optimizers()
-        Sets up the model's optimizer and learning rate scheduler.
     """
 
     def __init__(
@@ -99,8 +90,10 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
             self.num_embeddings = nn.ModuleList(
                 [
                     nn.Sequential(
-                        nn.Linear(self.seq_size, self.config.d_model, bias=False),
-                        self.embedding_activation,  # Example using ReLU as the activation function, change as needed
+                        nn.Linear(self.seq_size,
+                                  self.config.d_model, bias=False),
+                        # Example using ReLU as the activation function, change as needed
+                        self.embedding_activation,
                     )
                     for _ in range(num_embedding_modules)
                 ]
@@ -112,7 +105,8 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
                 [
                     nn.Sequential(
                         nn.Linear(1, self.config.d_model, bias=False),
-                        self.embedding_activation,  # Example using ReLU as the activation function, change as needed
+                        # Example using ReLU as the activation function, change as needed
+                        self.embedding_activation,
                     )
                     for _ in range(num_embedding_modules)
                 ]
@@ -171,7 +165,7 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
             self.auroc = torchmetrics.AUROC(task="binary")
             self.precision = torchmetrics.Precision(task="binary")
 
-    def forward(self, cat_features, num_features):      
+    def forward(self, cat_features, num_features):
         """
         Defines the forward pass of the model, processing both categorical and numerical features,
         and returning regression predictions.
@@ -183,13 +177,15 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
         num_features : Tensor
             Tensor containing the numerical features or raw sequence data, depending on `raw_embeddings`.
 
+
         Returns
         -------
         Tensor
             The output predictions of the model for regression tasks.
         """
         batch_size = (
-            cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
+            cat_features[0].size(0) if cat_features != [
+            ] else num_features[0].size(0)
         )
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
         # Process categorical features if present
@@ -290,6 +286,7 @@ class BaseEmbeddingMambularClassifier(pl.LightningModule):
             A batch of data from the DataLoader, containing numerical features, categorical features, and labels.
         batch_idx : int
             The index of the batch within the epoch.
+
 
         Returns
         -------

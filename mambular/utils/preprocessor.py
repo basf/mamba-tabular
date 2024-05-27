@@ -197,17 +197,11 @@ class Preprocessor:
                                        optimal bin edges for numerical feature binning. This parameter is
                                        relevant only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
 
-    # Attributes:
-    #     column_transformer (ColumnTransformer): A sklearn ColumnTransformer instance that holds the configured
-    #                                             preprocessing pipelines for the different feature types.
+    Attributes
+    ----------
+        column_transformer (ColumnTransformer): A sklearn ColumnTransformer instance that holds the configured
+                                                preprocessing pipelines for the different feature types.
 
-    # Methods:
-    #     fit(X, y=None): Fits the preprocessor to the data, identifying feature types and configuring the
-    #                     appropriate transformations.
-    #     transform(X): Transforms the data using the fitted preprocessing pipelines.
-    #     fit_transform(X, y=None): Fits the preprocessor to the data and then transforms the data.
-    #     get_feature_info(): Returns information about the processed features, including the number of bins for
-    #                         binned features and the dimensionality of encoded features.
     """
 
     def __init__(
