@@ -1,7 +1,7 @@
 import lightning as pl
 import pandas as pd
 import torch
-from lightning.callbacks import EarlyStopping, ModelCheckpoint
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.base import BaseEstimator
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split

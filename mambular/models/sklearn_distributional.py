@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import properscoring as ps
 import torch
-from lightning.callbacks import EarlyStopping, ModelCheckpoint
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.base import BaseEstimator
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.model_selection import train_test_split
