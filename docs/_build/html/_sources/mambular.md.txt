@@ -22,11 +22,11 @@ Install Mambular using pip:
 pip install mambular
 ```
 
-## Advanced Preprocessing for Optimal Performance
+## Preprocessing
 
 Mambular elevates the preprocessing stage of model development, employing a sophisticated suite of techniques to ensure your data is in the best shape for the Mamba architectures. Our preprocessing module is designed to be both powerful and intuitive, offering a range of options to transform your tabular data efficiently.
 
-### Intelligent Data Type Detection and Transformation
+### Data Type Detection and Transformation
 
 Mambular automatically identifies the type of each feature in your dataset, applying the most suitable transformations to numerical and categorical variables. This includes:
 
