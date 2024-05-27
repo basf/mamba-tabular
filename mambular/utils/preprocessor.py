@@ -1,16 +1,15 @@
-import pandas as pd
 import numpy as np
-from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.preprocessing import (
-    StandardScaler,
-    KBinsDiscretizer,
-    MinMaxScaler,
-)
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
 from sklearn.exceptions import NotFittedError
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import (KBinsDiscretizer, MinMaxScaler,
+                                   StandardScaler)
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+
+__all__ = ['Preprocessor']
 
 
 class CustomBinner(TransformerMixin):
@@ -87,7 +86,8 @@ class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
         # Transform the categories to their mapped integer values
         X_transformed = np.array(
             [
-                [self.mapping_[col].get(value, -1) for col, value in enumerate(row)]
+                [self.mapping_[col].get(value, -1)
+                 for col, value in enumerate(row)]
                 for row in X
             ]
         )
@@ -187,7 +187,8 @@ class Preprocessor:
     The class is designed to work seamlessly with pandas DataFrames, facilitating easy integration into
     machine learning pipelines.
 
-    Parameters:
+    Parameters
+    ----------
         n_bins (int): The number of bins to use for numerical feature binning. This parameter is relevant
                       only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
         numerical_preprocessing (str): The preprocessing strategy for numerical features. Valid options are
@@ -196,17 +197,17 @@ class Preprocessor:
                                        optimal bin edges for numerical feature binning. This parameter is
                                        relevant only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
 
-    Attributes:
-        column_transformer (ColumnTransformer): A sklearn ColumnTransformer instance that holds the configured
-                                                preprocessing pipelines for the different feature types.
+    # Attributes:
+    #     column_transformer (ColumnTransformer): A sklearn ColumnTransformer instance that holds the configured
+    #                                             preprocessing pipelines for the different feature types.
 
-    Methods:
-        fit(X, y=None): Fits the preprocessor to the data, identifying feature types and configuring the
-                        appropriate transformations.
-        transform(X): Transforms the data using the fitted preprocessing pipelines.
-        fit_transform(X, y=None): Fits the preprocessor to the data and then transforms the data.
-        get_feature_info(): Returns information about the processed features, including the number of bins for
-                            binned features and the dimensionality of encoded features.
+    # Methods:
+    #     fit(X, y=None): Fits the preprocessor to the data, identifying feature types and configuring the
+    #                     appropriate transformations.
+    #     transform(X): Transforms the data using the fitted preprocessing pipelines.
+    #     fit_transform(X, y=None): Fits the preprocessor to the data and then transforms the data.
+    #     get_feature_info(): Returns information about the processed features, including the number of bins for
+    #                         binned features and the dimensionality of encoded features.
     """
 
     def __init__(
@@ -249,7 +250,8 @@ class Preprocessor:
             num_unique_values = X[col].nunique()
             total_samples = len(X[col])
             if X[col].dtype.kind not in "iufc" or (
-                X[col].dtype.kind == "i" and (num_unique_values / total_samples) < 0.05
+                X[col].dtype.kind == "i" and (
+                    num_unique_values / total_samples) < 0.05
             ):
                 categorical_features.append(col)
             else:
@@ -282,7 +284,8 @@ class Preprocessor:
 
                 if self.numerical_preprocessing in ["binning", "one_hot"]:
                     bins = (
-                        self._get_decision_tree_bins(X[[feature]], y, [feature])
+                        self._get_decision_tree_bins(
+                            X[[feature]], y, [feature])
                         if self.use_decision_tree_bins
                         else self.n_bins
                     )
@@ -297,7 +300,8 @@ class Preprocessor:
                                         else len(bins) - 1,
                                         encode="ordinal",
                                         strategy=self.binning_strategy,
-                                        subsample=200_000 if len(X) > 200_000 else None,
+                                        subsample=200_000 if len(
+                                            X) > 200_000 else None,
                                     ),
                                 ),
                             ]
@@ -320,14 +324,17 @@ class Preprocessor:
                         )
 
                 elif self.numerical_preprocessing == "standardization":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(
+                        ("scaler", StandardScaler()))
 
                 elif self.numerical_preprocessing == "normalization":
-                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+                    numeric_transformer_steps.append(
+                        ("normalizer", MinMaxScaler()))
 
                 numeric_transformer = Pipeline(numeric_transformer_steps)
 
-                transformers.append((f"num_{feature}", numeric_transformer, [feature]))
+                transformers.append(
+                    (f"num_{feature}", numeric_transformer, [feature]))
 
         if categorical_features:
             for feature in categorical_features:
@@ -374,7 +381,8 @@ class Preprocessor:
             bin_edges = np.sort(np.unique(thresholds))
 
             bins.append(
-                np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()]))
+                np.concatenate(
+                    ([X[feature].min()], bin_edges, [X[feature].max()]))
             )
         return bins
 
@@ -471,7 +479,8 @@ class Preprocessor:
                 # Handle features processed with discretization
                 if "discretizer" in steps:
                     step = transformer_pipeline.named_steps["discretizer"]
-                    n_bins = step.n_bins_[0] if hasattr(step, "n_bins_") else None
+                    n_bins = step.n_bins_[0] if hasattr(
+                        step, "n_bins_") else None
 
                     # Check if discretization is followed by one-hot encoding
                     if "onehot_from_ordinal" in steps:
@@ -492,7 +501,8 @@ class Preprocessor:
                 # Handle features processed with continuous ordinal encoding
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
-                    n_categories = len(step.mapping_[columns.index(feature_name)])
+                    n_categories = len(
+                        step.mapping_[columns.index(feature_name)])
                     binned_or_ordinal_info[feature_name] = n_categories
                     print(
                         f"Categorical Feature (Ordinal Encoded): {feature_name}, Number of unique categories: {n_categories}"
