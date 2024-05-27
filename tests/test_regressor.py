@@ -1,15 +1,17 @@
 import unittest
 from unittest.mock import MagicMock, patch
-import pandas as pd
+
 import numpy as np
-from mambular.models import MambularRegressor  # Ensure correct import path
+import pandas as pd
 from sklearn.metrics import mean_squared_error, r2_score
+
+from mambular.models import MambularRegressor  # Ensure correct import path
 
 
 class TestMambularRegressor(unittest.TestCase):
     def setUp(self):
         # Patching external dependencies
-        self.patcher_pl_trainer = patch("pytorch_lightning.Trainer")
+        self.patcher_pl_trainer = patch("lightning.Trainer")
         self.mock_pl_trainer = self.patcher_pl_trainer.start()
 
         self.patcher_base_model = patch(
@@ -56,13 +58,15 @@ class TestMambularRegressor(unittest.TestCase):
 
         self.regressor.fit(self.X, self.y)
 
-        self.mock_pl_trainer.return_value.fit.assert_called_once()  # Ensure that the fit method of the trainer is called
+        # Ensure that the fit method of the trainer is called
+        self.mock_pl_trainer.return_value.fit.assert_called_once()
 
     def test_predict(self):
         # Create mock return objects that mimic tensor behavior
         mock_prediction = MagicMock()
         mock_prediction.cpu.return_value = MagicMock()
-        mock_prediction.cpu.return_value.numpy.return_value = np.array([0.5] * 100)
+        mock_prediction.cpu.return_value.numpy.return_value = np.array([
+                                                                       0.5] * 100)
 
         # Mock the model and its method calls
         self.regressor.model = MagicMock()
@@ -83,7 +87,8 @@ class TestMambularRegressor(unittest.TestCase):
         self.regressor.predict = MagicMock(return_value=mock_predictions)
 
         # Define metrics to test
-        metrics = {"Mean Squared Error": mean_squared_error, "R2 Score": r2_score}
+        metrics = {"Mean Squared Error": mean_squared_error,
+                   "R2 Score": r2_score}
 
         # Call evaluate with the defined metrics
         result = self.regressor.evaluate(self.X, self.y, metrics=metrics)

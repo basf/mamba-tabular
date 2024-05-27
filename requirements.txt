@@ -1,6 +1,6 @@
 numpy
 pandas
-pytorch_lightning
+lightning
 scikit_learn
 torch
 torchmetrics
