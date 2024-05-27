@@ -10,5 +10,6 @@ sphinx-togglebutton
 sphinx-book-theme
 pandoc
 readthedocs-sphinx-ext
+lxml[html_clean]
 # pydata-sphinx-theme
 # sphinx-rtd-theme
