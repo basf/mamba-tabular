@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
-from mambular.models import MambularClassifier
 from sklearn.model_selection import train_test_split
+
+from mambular.models import MambularClassifier
 
 # Set random seed for reproducibility
 np.random.seed(0)
