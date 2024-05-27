@@ -6,4 +6,3 @@ torch
 torchmetrics
 setuptools
 properscoring
-lxml[html_clean]
