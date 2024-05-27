@@ -11,7 +11,7 @@
    :maxdepth: 2
    :hidden:
 
-   mamba
+   mambular
    installation
    quickstart 
 
@@ -24,4 +24,5 @@
  
    api/models/index
    api/base_models/index
+   api/utils/index
    

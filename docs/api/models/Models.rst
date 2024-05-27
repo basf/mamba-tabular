@@ -1,17 +1,17 @@
 Models
 ======
 
-.. autoclass:: mambular.models.sklearn_classifier.MambularClassifier
+.. autoclass:: mambular.models.MambularClassifier
     :members:
 
-.. autoclass:: mambular.models.sklearn_distributional.MambularLSS 
+.. autoclass:: mambular.models.MambularLSS 
     :members:
 
-.. autoclass:: mambular.models.sklearn_embedding_classifier.EmbeddingMambularClassifier
+.. autoclass:: mambular.models.EmbeddingMambularClassifier
     :members:
 
-.. autoclass:: mambular.models.sklearn_embedding_regressor.EmbeddingMambularRegressor
+.. autoclass:: mambular.models.EmbeddingMambularRegressor
     :members:
 
-.. autoclass:: mambular.models.sklearn_regressor.MambularRegressor
+.. autoclass:: mambular.models.MambularRegressor
     :members:
