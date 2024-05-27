@@ -7,9 +7,9 @@ myst-parser
 m2r2
 sphinx-copybutton
 sphinx-togglebutton
-sphinx-book-theme
+sphinx-book-theme==1.1.2
 pandoc
-readthedocs-sphinx-ext
-lxml[html_clean]
+sphinx-rtd-theme==2.0.0
+readthedocs-sphinx-ext==2.2.5
+lxml-html-clean==0.1.1
 # pydata-sphinx-theme
-# sphinx-rtd-theme
