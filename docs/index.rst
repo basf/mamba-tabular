@@ -28,10 +28,7 @@
    :name: API Docs
    :caption: API Docs
    :maxdepth: 1
-   :hidden:
-
  
-   api/models/index
-   api/base_models/index
-   api/utils/index
-   
+   api/models/Models
+   api/base_models/BaseModels
+   api/utils/Preprocessor
