@@ -11,7 +11,6 @@
    :maxdepth: 2
    :hidden:
 
-   mambular
    installation
    quickstart 
 
