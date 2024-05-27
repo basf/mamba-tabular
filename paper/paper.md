@@ -13,6 +13,8 @@ authors:
     affiliation: 2
   - name: Christoph Weisser
     affiliation: 1
+  - name: Manish Kumar
+    affiliation: 1     
   - name: Benjamin Saefken
     affiliation: 3
 affiliations:
