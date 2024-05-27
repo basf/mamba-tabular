@@ -1,7 +1,7 @@
 .. _dist_example:
 
-Distributional Example
-======================
+Distributional
+==============
 
 This example demonstrates how use Distributional from the `mambular` package.
 

@@ -27,11 +27,12 @@
 .. toctree::
    :name: API Reference
    :caption: API Reference
-   :maxdepth: 1
+   :maxdepth: 2
+   :hidden:
  
-   api/models/index
-   api/base_models/index
-   api/utils/index
+   api/models/Models
+   api/base_models/BaseModels
+   api/utils/Preprocessor
 
 
 .. toctree::

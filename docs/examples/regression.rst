@@ -1,7 +1,7 @@
 .. _regression_example:
 
-Regression Example
-==================
+Regression
+==========
 
 This example demonstrates how use Regression module from the `mambular` package.
 
