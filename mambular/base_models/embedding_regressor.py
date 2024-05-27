@@ -1,11 +1,12 @@
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from ..utils.mamba_arch import Mamba
+
 from ..utils.config import MambularConfig
-import pytorch_lightning as pl
+from ..utils.mamba_arch import Mamba
 
 
-class BaseEmbeddingMambularRegressor(pl.LightningModule):   
+class BaseEmbeddingMambularRegressor(pl.LightningModule):
     """
     A specialized regression module for protein data, built on PyTorch Lightning and integrating the Mamba architecture.
     It supports embeddings for categorical features and can process raw or embedded numerical features, making it suitable
@@ -32,6 +33,7 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
     raw_embeddings : bool, optional
         Indicates whether to use raw numerical features directly or to process them into embeddings. Defaults to False.
 
+
     Attributes
     ----------
     mamba : Mamba
@@ -42,19 +44,8 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
         Final linear layer mapping the features to the regression target.
     loss_fct : nn.MSELoss
         The loss function for regression tasks.
-
-    Methods
-    -------
-    forward(cat_features, num_features)
-        Defines the forward pass of the model.
-    training_step(batch, batch_idx)
-        Processes a single batch during training.
-    validation_step(batch, batch_idx)
-        Processes a single batch during validation.
-    configure_optimizers()
-        Sets up the model's optimizer and learning rate scheduler.
     """
-    
+
     def __init__(
         self,
         config: MambularConfig,
@@ -106,8 +97,10 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
             self.num_embeddings = nn.ModuleList(
                 [
                     nn.Sequential(
-                        nn.Linear(self.seq_size, self.config.d_model, bias=False),
-                        self.embedding_activation,  # Example using ReLU as the activation function, change as needed
+                        nn.Linear(self.seq_size,
+                                  self.config.d_model, bias=False),
+                        # Example using ReLU as the activation function, change as needed
+                        self.embedding_activation,
                     )
                     for _ in range(num_embedding_modules)
                 ]
@@ -119,7 +112,8 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
                 [
                     nn.Sequential(
                         nn.Linear(1, self.config.d_model, bias=False),
-                        self.embedding_activation,  # Example using ReLU as the activation function, change as needed
+                        # Example using ReLU as the activation function, change as needed
+                        self.embedding_activation,
                     )
                     for _ in range(num_embedding_modules)
                 ]
@@ -175,13 +169,15 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
         num_features : Tensor
             Tensor containing the numerical features or raw sequence data, depending on `raw_embeddings`.
 
+
         Returns
         -------
         Tensor
             The output predictions of the model for regression tasks.
         """
         batch_size = (
-            cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
+            cat_features[0].size(0) if cat_features != [
+            ] else num_features[0].size(0)
         )
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
         # Process categorical features if present
@@ -283,11 +279,12 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
         batch_idx : int
             The index of the batch within the epoch.
 
+
         Returns
         -------
         Tensor
             The computed loss for the batch.
-        """    
+        """
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 

@@ -1,11 +1,12 @@
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from ..utils.mamba_arch import Mamba
+
 from ..utils.config import MambularConfig
-import pytorch_lightning as pl
+from ..utils.mamba_arch import Mamba
 
 
-class BaseMambularRegressor(pl.LightningModule):    
+class BaseMambularRegressor(pl.LightningModule):
     """
     A base regression module for tabular data built on PyTorch Lightning. It incorporates embeddings
     for categorical and numerical features with a configurable architecture provided by MambularConfig.
@@ -28,6 +29,7 @@ class BaseMambularRegressor(pl.LightningModule):
     lr_factor : float, optional
         Factor by which the learning rate will be reduced. Defaults to 0.75.
 
+
     Attributes
     ----------
     mamba : Mamba
@@ -42,19 +44,7 @@ class BaseMambularRegressor(pl.LightningModule):
         Metric computation module for validation Mean Squared Error.
     loss_fct : torch.nn.MSELoss
         The loss function for regression tasks.
-
-    Methods
-    -------
-    forward(cat_features, num_features)
-        Defines the forward pass of the model.
-    training_step(batch, batch_idx)
-        Processes a single batch during training.
-    validation_step(batch, batch_idx)
-        Processes a single batch during validation.
-    configure_optimizers()
-        Sets up the model's optimizer and learning rate scheduler.
     """
-
 
     def __init__(
         self,
@@ -101,7 +91,8 @@ class BaseMambularRegressor(pl.LightningModule):
             [
                 nn.Sequential(
                     nn.Linear(input_shape, self.config.d_model, bias=False),
-                    self.embedding_activation,  # Example using ReLU as the activation function, change as needed
+                    # Example using ReLU as the activation function, change as needed
+                    self.embedding_activation,
                 )
                 for feature_name, input_shape in num_feature_info.items()
             ]
@@ -157,14 +148,16 @@ class BaseMambularRegressor(pl.LightningModule):
         num_features : Tensor
             Tensor containing the numerical features.
 
+
         Returns
         -------
         Tensor
             The output predictions of the model for regression tasks.
         """
-        
+
         batch_size = (
-            cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
+            cat_features[0].size(0) if cat_features != [
+            ] else num_features[0].size(0)
         )
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
 
@@ -232,11 +225,12 @@ class BaseMambularRegressor(pl.LightningModule):
         num_features : Tensor
             Tensor containing the numerical features.
 
+
         Returns
         -------
         Tensor
             The output predictions of the model for regression tasks.
-        """    
+        """
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 
@@ -285,7 +279,7 @@ class BaseMambularRegressor(pl.LightningModule):
         -------
         dict
             A dictionary containing the optimizer and lr_scheduler configurations.
-        """    
+        """
         optimizer = torch.optim.Adam(
             self.parameters(), lr=self.lr, weight_decay=self.config.weight_decay
         )
