@@ -41,7 +41,14 @@ class TestPreprocessor(unittest.TestCase):
         """Test fitting and transforming the data."""
         pp = Preprocessor(numerical_preprocessing="standardization")
         transformed_data = pp.fit_transform(self.data)
-        print(transformed_data)
+        self.assertIsInstance(transformed_data, dict)
+        self.assertTrue("num_numerical" in transformed_data)
+        self.assertTrue("cat_categorical" in transformed_data)
+
+    def test_ple(self):
+        """Test fitting and transforming the data."""
+        pp = Preprocessor(numerical_preprocessing="ple", n_bins=20)
+        transformed_data = pp.fit_transform(self.data)
         self.assertIsInstance(transformed_data, dict)
         self.assertTrue("num_numerical" in transformed_data)
         self.assertTrue("cat_categorical" in transformed_data)
