@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import numpy as np
 from .prepro_utils import OneHotFromOrdinal, CustomBinner, ContinuousOrdinalEncoder
+from .prepro_utils import OneHotFromOrdinal, CustomBinner, ContinuousOrdinalEncoder
 from sklearn.preprocessing import (
     StandardScaler,
     KBinsDiscretizer,
@@ -11,6 +12,7 @@ from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
+from .ple_encoding import PLE
 from .ple_encoding import PLE
 
 
@@ -37,6 +39,10 @@ class Preprocessor:
                                 'quantile', or other sklearn-compatible strategies.
         task (str): Indicates the type of machine learning task ('regression' or 'classification'). This can
                     influence certain preprocessing behaviors, especially when using decision tree-based binning.
+        binning_strategy (str): Defines the strategy for binning numerical features. Options include 'uniform',
+                                'quantile', or other sklearn-compatible strategies.
+        task (str): Indicates the type of machine learning task ('regression' or 'classification'). This can
+                    influence certain preprocessing behaviors, especially when using decision tree-based binning.
 
     Attributes:
         column_transformer (ColumnTransformer): An instance of sklearn's ColumnTransformer that holds the
@@ -52,8 +58,20 @@ class Preprocessor:
         use_decision_tree_bins=False,
         binning_strategy="uniform",
         task="regression",
+        task="regression",
     ):
         self.n_bins = n_bins
+        self.numerical_preprocessing = numerical_preprocessing.lower()
+        if self.numerical_preprocessing not in [
+            "ple",
+            "binning",
+            "one_hot",
+            "standardization",
+            "normalization",
+        ]:
+            raise ValueError(
+                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', and 'normalization'."
+            )
         self.numerical_preprocessing = numerical_preprocessing.lower()
         if self.numerical_preprocessing not in [
             "ple",
@@ -69,6 +87,7 @@ class Preprocessor:
         self.column_transformer = None
         self.fitted = False
         self.binning_strategy = binning_strategy
+        self.task = task
         self.task = task
 
     def set_params(self, **params):
@@ -179,6 +198,12 @@ class Preprocessor:
                         ("ple", PLE(n_bins=self.n_bins, task=self.task))
                     )
 
+                elif self.numerical_preprocessing == "ple":
+                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+                    numeric_transformer_steps.append(
+                        ("ple", PLE(n_bins=self.n_bins, task=self.task))
+                    )
+
                 numeric_transformer = Pipeline(numeric_transformer_steps)
 
                 transformers.append((f"num_{feature}", numeric_transformer, [feature]))
@@ -239,8 +264,14 @@ class Preprocessor:
 
         This method converts the sparse or dense matrix returned by the column transformer into a more accessible
         dictionary format, where each key-value pair represents a feature and its transformed data.
+        Transforms the input data using the preconfigured column transformer and converts the output into a dictionary
+        format with keys corresponding to transformed feature names and values as arrays of transformed data.
+
+        This method converts the sparse or dense matrix returned by the column transformer into a more accessible
+        dictionary format, where each key-value pair represents a feature and its transformed data.
 
         Parameters:
+            X (DataFrame): The input data to be transformed.
             X (DataFrame): The input data to be transformed.
 
         Returns:
@@ -270,7 +301,43 @@ class Preprocessor:
             The type of each array (int or float) is determined based on the type of transformation applied.
         """
         start = 0
+            dict: A dictionary where keys are the names of the features (as per the transformations defined in the
+            column transformer) and the values are numpy arrays of the transformed data.
+        """
+        transformed_X = self.column_transformer.transform(X)
+
+        # Now let's convert this into a dictionary of arrays, one per column
+        transformed_dict = self._split_transformed_output(X, transformed_X)
+        return transformed_dict
+
+    def _split_transformed_output(self, X, transformed_X):
+        """
+        Splits the transformed data array into a dictionary where keys correspond to the original column names or
+        feature groups and values are the transformed data for those columns.
+
+        This helper method is utilized within `transform` to segregate the transformed data based on the
+        specification in the column transformer, assigning each transformed section to its corresponding feature name.
+
+        Parameters:
+            X (DataFrame): The original input data, used for determining shapes and transformations.
+            transformed_X (numpy array): The transformed data as a numpy array, outputted by the column transformer.
+
+        Returns:
+            dict: A dictionary mapping each transformation's name to its respective numpy array of transformed data.
+            The type of each array (int or float) is determined based on the type of transformation applied.
+        """
+        start = 0
         transformed_dict = {}
+        for (
+            name,
+            transformer,
+            columns,
+        ) in self.column_transformer.transformers_:  # skip 'remainder'
+            if transformer != "drop":
+                end = start + transformer.transform(X[[columns[0]]]).shape[1]
+                dtype = int if "cat" in name else float
+                transformed_dict[name] = transformed_X[:, start:end].astype(dtype)
+                start = end
         for (
             name,
             transformer,
@@ -311,8 +378,23 @@ class Preprocessor:
         Raises:
             RuntimeError: If the `column_transformer` is not yet fitted, indicating that the preprocessor must be
             fitted before invoking this method.
+        Retrieves information about how features are encoded within the model's preprocessor.
+        This method identifies the type of encoding applied to each feature, categorizing them into binned or ordinal
+        encodings and other types of encodings (e.g., one-hot encoding after discretization).
+
+        This method should only be called after the preprocessor has been fitted, as it relies on the structure and
+        configuration of the `column_transformer` attribute.
+
+        Raises:
+            RuntimeError: If the `column_transformer` is not yet fitted, indicating that the preprocessor must be
+            fitted before invoking this method.
 
         Returns:
+            tuple of (dict, dict):
+                - The first dictionary maps feature names to their respective number of bins or categories if they are
+                  processed using discretization or ordinal encoding.
+                - The second dictionary includes feature names with other encoding details, such as the dimension of
+                  features after encoding transformations (e.g., one-hot encoding dimensions).
             tuple of (dict, dict):
                 - The first dictionary maps feature names to their respective number of bins or categories if they are
                   processed using discretization or ordinal encoding.
@@ -372,6 +454,7 @@ class Preprocessor:
                         )
                         other_encoding_info[feature_name] = transformed_feature.shape[1]
                         print(
+                            f"Feature: {feature_name} (Other Encoding), Encoded feature dimension: {transformed_feature.shape[1]}"
                             f"Feature: {feature_name} (Other Encoding), Encoded feature dimension: {transformed_feature.shape[1]}"
                         )
 
