@@ -53,7 +53,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    include_package_data=True,
-    project_urls={"Homepage:": HOMEPAGE, "Documentation": DOCS},
-    url=HOMEPAGE,
+    python_requires=">=3.6, <=3.12.3",
+    install_requires=read_requirements(),
 )
