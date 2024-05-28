@@ -30,9 +30,9 @@
    :maxdepth: 2
    :hidden:
  
-   api/models/Models
-   api/base_models/BaseModels
-   api/utils/Preprocessor
+   api/models/index
+   api/base_models/index
+   api/utils/index
 
 
 .. toctree::
