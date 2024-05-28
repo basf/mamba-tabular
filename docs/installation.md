@@ -1,4 +1,4 @@
-# Installation
+## Installation
 
 Please follow the steps below for installing `mambular`.
 
