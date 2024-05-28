@@ -1,16 +1,7 @@
 
-# Contribute
+## Contribute
 
 Thank you for considering contributing to our Python package! We appreciate your time and effort in helping us improve our project. Please take a moment to review the following guidelines to ensure a smooth and efficient contribution process.
-
-## Table of Contents
-
-- Code of Conduct
-- Setting Up Development Environment
-- How to Contribute
-- Submitting Contributions
-- Issue Tracker
-- License
 
 ### Code of Conduct
 
@@ -43,7 +34,7 @@ pip install -r docs/requirements_docs.txt
 
 1. Create a new branch from the `develop` branch for your contributions. Please use descriptive and concise branch names.
 2. Make your desired changes or additions to the codebase.
-3. Ensure that your code adheres to our coding style guidelines.
+3. Ensure that your code adheres to [PEP8](https://peps.python.org/pep-0008/) coding style guidelines.
 4. Write appropriate tests for your changes, ensuring that they pass.
     - `make test`
 5. Update the documentation and examples, if necessary.
