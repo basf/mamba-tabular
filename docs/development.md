@@ -1,5 +1,5 @@
 
-# Contribute
+## Contribute
 
 Thank you for considering contributing to our Python package! We appreciate your time and effort in helping us improve our project. Please take a moment to review the following guidelines to ensure a smooth and efficient contribution process.
 
