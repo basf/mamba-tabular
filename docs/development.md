@@ -3,20 +3,11 @@
 
 Thank you for considering contributing to our Python package! We appreciate your time and effort in helping us improve our project. Please take a moment to review the following guidelines to ensure a smooth and efficient contribution process.
 
-## Table of Contents
-
-- Code of Conduct
-- Setting Up Development Environment
-- How to Contribute
-- Submitting Contributions
-- Issue Tracker
-- License
-
-### Code of Conduct
+## Code of Conduct
 
 We kindly request all contributors to adhere to our Code of Conduct when participating in this project. It outlines our expectations for respectful and inclusive behavior within the community.
 
-### Setting Up Development Environment
+## Setting Up Development Environment
 
 To set up the development environment for this Python package, follow these steps:
 
@@ -39,11 +30,11 @@ pip install -r docs/requirements_docs.txt
 
 **Note:** You can also set up a virtual environment to isolate your development environment.
 
-### How to Contribute
+## How to Contribute
 
 1. Create a new branch from the `develop` branch for your contributions. Please use descriptive and concise branch names.
 2. Make your desired changes or additions to the codebase.
-3. Ensure that your code adheres to our coding style guidelines.
+3. Ensure that your code adheres to [PEP8](https://peps.python.org/pep-0008/) coding style guidelines.
 4. Write appropriate tests for your changes, ensuring that they pass.
     - `make test`
 5. Update the documentation and examples, if necessary.
@@ -58,7 +49,7 @@ pip install -r docs/requirements_docs.txt
 10. Wait for the maintainers to review your pull request. Address any feedback or comments if required.
 11. Once approved, your changes will be merged into the main codebase.
 
-### Submitting Contributions
+## Submitting Contributions
 
 When submitting your contributions, please ensure the following:
 
@@ -69,11 +60,11 @@ When submitting your contributions, please ensure the following:
 - Update the documentation if necessary to reflect the changes made.
 - Ensure that your pull request has a single, logical focus.
 
-### Issue Tracker
+## Issue Tracker
 
 If you encounter any bugs, have feature requests, or need assistance, please visit our [Issue Tracker](https://github.com/basf/mamba-tabular/issues). Make sure to search for existing issues before creating a new one.
 
-### License
+## License
 
 By contributing to this project, you agree that your contributions will be licensed under the LICENSE of the project.
 Please note that the above guidelines are subject to change, and the project maintainers hold the right to reject or request modifications to any contributions. Thank you for your understanding and support in making this project better!
