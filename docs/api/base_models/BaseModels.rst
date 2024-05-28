@@ -1,5 +1,5 @@
-Base Models
-===========
+mambular.base_models
+====================
 
 .. autoclass:: mambular.base_models.BaseMambularClassifier
     :members:
