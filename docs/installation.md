@@ -1,8 +1,8 @@
 # Installation
 
-Please follow the steps below for installing `mambular`
+Please follow the steps below for installing `mambular`.
 
-Install from the source:
+## Install from the source:
 
 ```bash
 cd mamba-tabular
@@ -11,4 +11,6 @@ pip install .
 
 Note: Make sure you in the same directory where `setup.py` file resides.
 
-This package is so far not available in PyPi.
+## Installation from PyPi:
+
+**Note:**This package is so far not available in PyPi, expected to release soon!
