@@ -17,7 +17,7 @@ Mambular is a Python package that brings the power of Mamba architectures to tab
 
 ## Documentation
 
-You can find the Mamba-Tabular API documentation [here](https://mamba-tabular.readthedocs.io/en/latest/index.html).
+You can find the Mamba-Tabular API documentation [here](https://mambular.readthedocs.io/en/latest/).
 
 ## Installation
 
