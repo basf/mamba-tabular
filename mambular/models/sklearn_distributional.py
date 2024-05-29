@@ -528,7 +528,7 @@ class MambularLSS(BaseEstimator):
 
         return self
 
-    def predict(self, X):
+    def predict(self, X, raw=False):
         """
         Predicts target values for the given input samples using the fitted model.
 
@@ -565,8 +565,12 @@ class MambularLSS(BaseEstimator):
         with torch.no_grad():
             predictions = self.model(cat_tensors, num_tensors)
 
+        if not raw:
+            return self.model.family(predictions).cpu().numpy()
+
         # Convert predictions to NumPy array and return
-        return predictions.cpu().numpy()
+        else:
+            return predictions.cpu().numpy()
 
     def evaluate(self, X, y_true, metrics=None, distribution_family=None):
         """
@@ -600,7 +604,7 @@ class MambularLSS(BaseEstimator):
             metrics = self.get_default_metrics(distribution_family)
 
         # Make predictions
-        predictions = self.predict(X)
+        predictions = self.predict(X, raw=False)
 
         # Initialize dictionary to store results
         scores = {}
