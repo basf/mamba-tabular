@@ -13,7 +13,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from .ple_encoding import PLE
-from .ple_encoding import PLE
+from sklearn.exceptions import NotFittedError
 
 
 class Preprocessor:
@@ -277,6 +277,10 @@ class Preprocessor:
             dict: A dictionary where keys are the names of the features (as per the transformations defined in the
             column transformer) and the values are numpy arrays of the transformed data.
         """
+        if not self.fitted:
+            raise NotFittedError(
+                "The preprocessor must be fitted before transforming new data. Use .fit or .fit_transform"
+            )
         transformed_X = self.column_transformer.transform(X)
 
         # Now let's convert this into a dictionary of arrays, one per column
