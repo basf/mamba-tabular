@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. mdinclude:: ../README.md
+.. mdinclude:: introduction.md
 
 .. toctree::
    :name: Getting Started
@@ -30,9 +30,9 @@
    :maxdepth: 2
    :hidden:
  
-   api/models/Models
-   api/base_models/BaseModels
-   api/utils/Preprocessor
+   api/models/index
+   api/base_models/index
+   api/utils/index
 
 
 .. toctree::
