@@ -11,7 +11,7 @@ import warnings
 from ..base_models.regressor import BaseMambularRegressor
 from ..utils.dataset import MambularDataModule, MambularDataset
 from ..utils.preprocessor import Preprocessor
-from ..utils.default_mamba_params import DefaultConfig
+from ..utils.configs import DefaultMambularConfig
 
 
 class MambularRegressor(BaseEstimator):
@@ -141,7 +141,7 @@ class MambularRegressor(BaseEstimator):
         ]
 
         self.config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
-        self.config = DefaultConfig(**self.config_kwargs)
+        self.config = DefaultMambularConfig(**self.config_kwargs)
 
         preprocessor_kwargs = {
             k: v for k, v in kwargs.items() if k in preprocessor_arg_names
