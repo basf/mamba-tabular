@@ -4,6 +4,7 @@ import torch.nn as nn
 
 from ..utils.config import MambularConfig
 from ..utils.mamba_arch import Mamba
+from ..utils.mlp_utils import MLP
 
 
 class BaseEmbeddingMambularRegressor(pl.LightningModule):
@@ -57,6 +58,12 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
         lr_factor=0.75,
         seq_size: int = 20,
         raw_embeddings=False,
+        head_layer_sizes=[64, 32, 32],
+        head_dropout: float = 0.3,
+        head_skip_layers: bool = False,
+        head_activation="leakyrelu",
+        head_use_batch_norm: bool = False,
+        attn_dropout: float = 0.3,
     ):
         super().__init__()
 
@@ -97,8 +104,7 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
             self.num_embeddings = nn.ModuleList(
                 [
                     nn.Sequential(
-                        nn.Linear(self.seq_size,
-                                  self.config.d_model, bias=False),
+                        nn.Linear(self.seq_size, self.config.d_model, bias=False),
                         # Example using ReLU as the activation function, change as needed
                         self.embedding_activation,
                     )
@@ -128,26 +134,17 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
 
         self.mamba = Mamba(self.config)
         self.norm_f = self.config.norm(self.config.d_model)
-        mlp_activation_fn = activations.get(
-            self.config.tabular_head_activation.lower(), nn.Identity()
-        )
-
-        # Dynamically create MLP layers based on config.tabular_units
-        mlp_layers = []
-        input_dim = self.config.d_model  # Initial input dimension
-
-        # Iterate over the specified units for each layer in the MLP
-        for units in self.config.tabular_head_units:
-            mlp_layers.append(nn.Linear(input_dim, units))
-            mlp_layers.append(mlp_activation_fn)
-            mlp_layers.append(nn.Dropout(self.config.tabular_head_dropout))
-            input_dim = units
-
-        # Add the final linear layer to map to a single output value
-        mlp_layers.append(nn.Linear(input_dim, 1))
+        head_activation = activations.get(head_activation.lower(), nn.Identity())
 
         # Combine all layers into a Sequential module
-        self.tabular_head = nn.Sequential(*mlp_layers)
+        self.tabular_head = MLP(
+            self.config.d_model,
+            hidden_units_list=head_layer_sizes,
+            dropout_rate=head_dropout,
+            use_skip_layers=head_skip_layers,
+            activation_fn=head_activation,
+            use_batch_norm=head_use_batch_norm,
+        )
 
         self.pooling_method = self.config.pooling_method
         self.cls_token = nn.Parameter(torch.zeros(1, 1, self.config.d_model))
@@ -176,8 +173,7 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
             The output predictions of the model for regression tasks.
         """
         batch_size = (
-            cat_features[0].size(0) if cat_features != [
-            ] else num_features[0].size(0)
+            cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
         )
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
         # Process categorical features if present

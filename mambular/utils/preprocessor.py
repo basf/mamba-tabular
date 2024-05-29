@@ -53,8 +53,8 @@ class Preprocessor:
 
     def __init__(
         self,
-        n_bins=200,
-        numerical_preprocessing="binning",
+        n_bins=50,
+        numerical_preprocessing="ple",
         use_decision_tree_bins=False,
         binning_strategy="uniform",
         task="regression",
