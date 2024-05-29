@@ -314,15 +314,15 @@ class MambularRegressor(BaseEstimator):
             num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float32)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float32)
                 )
 
-        train_labels = torch.tensor(y_train, dtype=torch.float)
-        val_labels = torch.tensor(y_val, dtype=torch.float)
+        train_labels = torch.tensor(y_train, dtype=torch.float32)
+        val_labels = torch.tensor(y_val, dtype=torch.float32)
 
         # Create datasets
         train_dataset = MambularDataset(
@@ -380,7 +380,7 @@ class MambularRegressor(BaseEstimator):
             num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
             if num_key in processed_data:
                 num_tensors.append(
-                    torch.tensor(processed_data[num_key], dtype=torch.float)
+                    torch.tensor(processed_data[num_key], dtype=torch.float32)
                 )
 
         return cat_tensors, num_tensors

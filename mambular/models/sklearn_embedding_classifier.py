@@ -325,11 +325,11 @@ class EmbeddingMambularClassifier(BaseEstimator):
             )  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float32)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float32)
                 )
 
         train_labels = torch.tensor(y_train, dtype=torch.long)
@@ -397,7 +397,7 @@ class EmbeddingMambularClassifier(BaseEstimator):
             )  # Assuming numerical keys are prefixed with 'num_'
             if num_key in processed_data:
                 num_tensors.append(
-                    torch.tensor(processed_data[num_key], dtype=torch.float)
+                    torch.tensor(processed_data[num_key], dtype=torch.float32)
                 )
 
         return cat_tensors, num_tensors
