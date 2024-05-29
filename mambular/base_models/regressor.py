@@ -11,7 +11,7 @@ from ..utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
-from ..utils.default_mamba_params import DefaultConfig
+from ..utils.configs import DefaultMambularConfig
 
 
 class BaseMambularRegressor(pl.LightningModule):
@@ -19,7 +19,7 @@ class BaseMambularRegressor(pl.LightningModule):
         self,
         cat_feature_info,
         num_feature_info,
-        config: DefaultConfig = DefaultConfig(),
+        config: DefaultMambularConfig = DefaultMambularConfig(),
         **kwargs,
     ):
         super().__init__()
