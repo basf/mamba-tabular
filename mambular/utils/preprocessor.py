@@ -58,7 +58,6 @@ class Preprocessor:
         use_decision_tree_bins=False,
         binning_strategy="uniform",
         task="regression",
-        task="regression",
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = numerical_preprocessing.lower()
@@ -301,48 +300,12 @@ class Preprocessor:
             The type of each array (int or float) is determined based on the type of transformation applied.
         """
         start = 0
-            dict: A dictionary where keys are the names of the features (as per the transformations defined in the
-            column transformer) and the values are numpy arrays of the transformed data.
-        """
-        transformed_X = self.column_transformer.transform(X)
-
-        # Now let's convert this into a dictionary of arrays, one per column
-        transformed_dict = self._split_transformed_output(X, transformed_X)
-        return transformed_dict
-
-    def _split_transformed_output(self, X, transformed_X):
-        """
-        Splits the transformed data array into a dictionary where keys correspond to the original column names or
-        feature groups and values are the transformed data for those columns.
-
-        This helper method is utilized within `transform` to segregate the transformed data based on the
-        specification in the column transformer, assigning each transformed section to its corresponding feature name.
-
-        Parameters:
-            X (DataFrame): The original input data, used for determining shapes and transformations.
-            transformed_X (numpy array): The transformed data as a numpy array, outputted by the column transformer.
-
-        Returns:
-            dict: A dictionary mapping each transformation's name to its respective numpy array of transformed data.
-            The type of each array (int or float) is determined based on the type of transformation applied.
-        """
-        start = 0
         transformed_dict = {}
         for (
             name,
             transformer,
             columns,
-        ) in self.column_transformer.transformers_:  # skip 'remainder'
-            if transformer != "drop":
-                end = start + transformer.transform(X[[columns[0]]]).shape[1]
-                dtype = int if "cat" in name else float
-                transformed_dict[name] = transformed_X[:, start:end].astype(dtype)
-                start = end
-        for (
-            name,
-            transformer,
-            columns,
-        ) in self.column_transformer.transformers_:  # skip 'remainder'
+        ) in self.column_transformer.transformers_:
             if transformer != "drop":
                 end = start + transformer.transform(X[[columns[0]]]).shape[1]
                 dtype = int if "cat" in name else float
