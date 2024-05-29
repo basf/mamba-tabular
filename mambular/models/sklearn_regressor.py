@@ -6,30 +6,94 @@ from sklearn.base import BaseEstimator
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
+import warnings
 
 from ..base_models.regressor import BaseMambularRegressor
-from ..utils.config import MambularConfig
 from ..utils.dataset import MambularDataModule, MambularDataset
 from ..utils.preprocessor import Preprocessor
+from ..utils.configs import DefaultMambularConfig
 
 
 class MambularRegressor(BaseEstimator):
     """
-    A regressor implemented using PyTorch Lightning that follows the scikit-learn API conventions. This class is designed
-    to work with tabular data, offering a straightforward way to specify model configurations and preprocessing steps. It
-    integrates seamlessly with scikit-learn's tools such as cross-validation and grid search.
+    A regressor implemented using PyTorch Lightning that follows the scikit-learn API conventions.
+    This class is designed to work with tabular data, offering a straightforward way to specify
+    model configurations and preprocessing steps. It integrates seamlessly with scikit-learn's tools
+    such as cross-validation and grid search.
 
     Parameters
     ----------
-    **kwargs : Various
-        Accepts any number of keyword arguments. Arguments recognized as model configuration options are passed to the
-        MambularConfig constructor. Remaining arguments are assumed to be preprocessor options and passed to the
-        Preprocessor constructor.
+    # configuration parameters
+    lr : float, optional
+        Learning rate for the optimizer. Default is 1e-4.
+    lr_patience : int, optional
+        Number of epochs with no improvement on the validation loss to wait before reducing the learning rate. Default is 10.
+    weight_decay : float, optional
+        Weight decay (L2 penalty) coefficient. Default is 1e-6.
+    lr_factor : float, optional
+        Factor by which the learning rate will be reduced. Default is 0.1.
+    d_model : int, optional
+        Dimension of the model. Default is 64.
+    n_layers : int, optional
+        Number of layers. Default is 8.
+    expand_factor : int, optional
+        Expansion factor. Default is 2.
+    bias : bool, optional
+        Whether to use bias. Default is False.
+    d_conv : int, optional
+        Dimension of the convolution. Default is 16.
+    conv_bias : bool, optional
+        Whether to use bias in the convolution. Default is True.
+    dropout : float, optional
+        Dropout rate in the mamba blocks. Default is 0.05.
+    dt_rank : str, optional
+        Rank of the time dimension. Default is "auto".
+    d_state : int, optional
+        State dimension. Default is 16.
+    dt_scale : float, optional
+        Scale of the time dimension. Default is 1.0.
+    dt_init : str, optional
+        Initialization method for the time dimension. Default is "random".
+    dt_max : float, optional
+        Maximum value for the time dimension. Default is 0.1.
+    dt_min : float, optional
+        Minimum value for the time dimension. Default is 1e-3.
+    dt_init_floor : float, optional
+        Floor value for the time dimension initialization. Default is 1e-4.
+    norm : str, optional
+        Normalization method. Default is 'RMSNorm'.
+    activation : callable, optional
+        Activation function. Default is nn.SELU().
+    num_embedding_activation : callable, optional
+        Activation function for numerical embeddings. Default is nn.Identity().
+    head_layer_sizes : list, optional
+        Sizes of the layers in the head. Default is [64, 64, 32].
+    head_dropout : float, optional
+        Dropout rate for the head. Default is 0.5.
+    head_skip_layers : bool, optional
+        Whether to use skip layers in the head. Default is False.
+    head_activation : callable, optional
+        Activation function for the head. Default is nn.SELU().
+    head_use_batch_norm : bool, optional
+        Whether to use batch normalization in the head. Default is False.
+
+    # Preprocessor Parameters
+    n_bins : int, optional
+        The number of bins to use for numerical feature binning. Default is 50.
+    numerical_preprocessing : str, optional
+        The preprocessing strategy for numerical features. Default is 'ple'.
+    use_decision_tree_bins : bool, optional
+        If True, uses decision tree regression/classification to determine optimal bin edges for numerical feature binning. Default is False.
+    binning_strategy : str, optional
+        Defines the strategy for binning numerical features. Default is 'uniform'.
+    task : str, optional
+        Indicates the type of machine learning task ('regression' or 'classification'). Default is 'regression'.
+
 
 
     Attributes
     ----------
-    config : MambularConfig
+    config : DefaultConfig
         An object storing the configuration settings for the model.
     preprocessor : Preprocessor
         An object responsible for preprocessing the input data, such as encoding categorical variables and scaling numerical features.
@@ -39,43 +103,59 @@ class MambularRegressor(BaseEstimator):
 
     def __init__(self, **kwargs):
         # Known config arguments
-        print("Received kwargs:", kwargs)
         config_arg_names = [
+            "lr",
+            "lr_patience",
+            "weight_decay",
+            "lr_factor",
             "d_model",
             "n_layers",
-            "dt_rank",
-            "output_dimension",
-            "pooling_method",
-            "norm",
-            "cls",
-            "dt_min",
-            "dt_max",
-            "dropout",
-            "bias",
-            "weight_decay",
-            "conv_bias",
-            "d_state",
             "expand_factor",
+            "bias",
             "d_conv",
-            "dt_init",
+            "conv_bias",
+            "dropout",
+            "dt_rank",
+            "d_state",
             "dt_scale",
+            "dt_init",
+            "dt_max",
+            "dt_min",
             "dt_init_floor",
-            "tabular_head_units",
-            "tabular_head_activation",
-            "tabular_head_dropout",
-            "num_emebedding_activation",
-            "layer_norm_after_embedding",
+            "norm",
+            "activation",
+            "num_embedding_activation",
+            "head_layer_sizes",
+            "head_dropout",
+            "head_skip_layers",
+            "head_activation",
+            "head_use_batch_norm",
         ]
-        self.config_kwargs = {k: v for k,
-                              v in kwargs.items() if k in config_arg_names}
-        self.config = MambularConfig(**self.config_kwargs)
 
-        # The rest are assumed to be preprocessor arguments
+        preprocessor_arg_names = [
+            "n_bins",
+            "numerical_preprocessing",
+            "use_decision_tree_bins",
+            "binning_strategy",
+            "task",
+        ]
+
+        self.config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
+        self.config = DefaultMambularConfig(**self.config_kwargs)
+
         preprocessor_kwargs = {
-            k: v for k, v in kwargs.items() if k not in config_arg_names
+            k: v for k, v in kwargs.items() if k in preprocessor_arg_names
         }
+
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
         self.model = None
+
+        # Raise a warning if task is set to 'classification'
+        if preprocessor_kwargs.get("task") == "classification":
+            warnings.warn(
+                "The task is set to 'classification'. MambularRegressor is designed for regression tasks.",
+                UserWarning,
+            )
 
     def get_params(self, deep=True):
         """
@@ -86,13 +166,12 @@ class MambularRegressor(BaseEstimator):
         deep : bool, default=True
             If True, returns the parameters for this estimator and contained sub-objects that are estimators.
 
-
         Returns
         -------
         params : dict
             Parameter names mapped to their values.
         """
-        params = self.config_kwargs  # Parameters used to initialize MambularConfig
+        params = self.config_kwargs  # Parameters used to initialize DefaultConfig
 
         # If deep=True, include parameters from nested components like preprocessor
         if deep:
@@ -114,7 +193,6 @@ class MambularRegressor(BaseEstimator):
         **parameters : dict
             Estimator parameters to be set.
 
-
         Returns
         -------
         self : object
@@ -122,8 +200,7 @@ class MambularRegressor(BaseEstimator):
         """
         # Update config_kwargs with provided parameters
         valid_config_keys = self.config_kwargs.keys()
-        config_updates = {k: v for k,
-                          v in parameters.items() if k in valid_config_keys}
+        config_updates = {k: v for k, v in parameters.items() if k in valid_config_keys}
         self.config_kwargs.update(config_updates)
 
         # Update the config object
@@ -194,8 +271,7 @@ class MambularRegressor(BaseEstimator):
         data_module : MambularDataModule
             An instance of MambularDataModule containing the training and validation DataLoaders.
         """
-        train_preprocessed_data = self.preprocessor.fit_transform(
-            X_train, y_train)
+        train_preprocessed_data = self.preprocessor.fit_transform(X_train, y_train)
         val_preprocessed_data = self.preprocessor.transform(X_val)
 
         # Update feature info based on the actual processed data
@@ -215,26 +291,22 @@ class MambularRegressor(BaseEstimator):
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(train_preprocessed_data[cat_key], dtype=torch.long)
                 )
             if cat_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(val_preprocessed_data[cat_key], dtype=torch.long)
                 )
 
             binned_key = "num_" + key  # for binned features
             if binned_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(train_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
             if binned_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(val_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
         # Populate tensors for numerical features, if present in processed data
@@ -242,13 +314,11 @@ class MambularRegressor(BaseEstimator):
             num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float)
                 )
 
         train_labels = torch.tensor(y_train, dtype=torch.float)
@@ -258,8 +328,7 @@ class MambularRegressor(BaseEstimator):
         train_dataset = MambularDataset(
             train_cat_tensors, train_num_tensors, train_labels
         )
-        val_dataset = MambularDataset(
-            val_cat_tensors, val_num_tensors, val_labels)
+        val_dataset = MambularDataset(val_cat_tensors, val_num_tensors, val_labels)
 
         # Create dataloaders
         train_dataloader = DataLoader(
@@ -320,20 +389,20 @@ class MambularRegressor(BaseEstimator):
         self,
         X,
         y,
-        val_size=0.2,
+        val_size: float = 0.2,
         X_val=None,
         y_val=None,
-        max_epochs=100,
-        random_state=101,
-        batch_size=128,
-        shuffle=True,
-        patience=10,
-        monitor="val_loss",
-        mode="min",
-        lr=1e-3,
-        lr_patience=5,
-        factor=0.75,
-        weight_decay=1e-06,
+        max_epochs: int = 100,
+        random_state: int = 101,
+        batch_size: int = 128,
+        shuffle: bool = True,
+        patience: int = 15,
+        monitor: str = "val_loss",
+        mode: str = "min",
+        lr: float = 1e-4,
+        lr_patience: int = 10,
+        factor: float = 0.1,
+        weight_decay: float = 1e-06,
         **trainer_kwargs
     ):
         """
@@ -369,7 +438,7 @@ class MambularRegressor(BaseEstimator):
             Learning rate for the optimizer.
         lr_patience : int, default=10
             Number of epochs with no improvement on the validation loss to wait before reducing the learning rate.
-        factor : float, default=0.75
+        factor : float, default=0.1
             Factor by which the learning rate will be reduced.
         weight_decay : float, default=0.025
             Weight decay (L2 penalty) coefficient.

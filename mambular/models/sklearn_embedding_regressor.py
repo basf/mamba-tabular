@@ -1,4 +1,5 @@
 import lightning as pl
+import warnings
 import pandas as pd
 import torch
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
@@ -9,7 +10,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
 from ..base_models.embedding_regressor import BaseEmbeddingMambularRegressor
-from ..utils.config import MambularConfig
+from ..utils.configs import DefaultMambularConfig
 from ..utils.dataset import EmbeddingMambularDataset, MambularDataModule
 from ..utils.preprocessor import Preprocessor
 
@@ -22,8 +23,71 @@ class EmbeddingMambularRegressor(BaseEstimator):
 
     Parameters
     ----------
-    **kwargs : Keyword arguments that can include both configuration parameters for the MambularConfig and
-        parameters for the preprocessor.
+    # configuration parameters
+    lr : float, optional
+        Learning rate for the optimizer. Default is 1e-4.
+    lr_patience : int, optional
+        Number of epochs with no improvement on the validation loss to wait before reducing the learning rate. Default is 10.
+    weight_decay : float, optional
+        Weight decay (L2 penalty) coefficient. Default is 1e-6.
+    lr_factor : float, optional
+        Factor by which the learning rate will be reduced. Default is 0.1.
+    d_model : int, optional
+        Dimension of the model. Default is 64.
+    n_layers : int, optional
+        Number of layers. Default is 8.
+    expand_factor : int, optional
+        Expansion factor. Default is 2.
+    bias : bool, optional
+        Whether to use bias. Default is False.
+    d_conv : int, optional
+        Dimension of the convolution. Default is 16.
+    conv_bias : bool, optional
+        Whether to use bias in the convolution. Default is True.
+    dropout : float, optional
+        Dropout rate in the mamba blocks. Default is 0.05.
+    dt_rank : str, optional
+        Rank of the time dimension. Default is "auto".
+    d_state : int, optional
+        State dimension. Default is 16.
+    dt_scale : float, optional
+        Scale of the time dimension. Default is 1.0.
+    dt_init : str, optional
+        Initialization method for the time dimension. Default is "random".
+    dt_max : float, optional
+        Maximum value for the time dimension. Default is 0.1.
+    dt_min : float, optional
+        Minimum value for the time dimension. Default is 1e-3.
+    dt_init_floor : float, optional
+        Floor value for the time dimension initialization. Default is 1e-4.
+    norm : str, optional
+        Normalization method. Default is 'RMSNorm'.
+    activation : callable, optional
+        Activation function. Default is nn.SELU().
+    num_embedding_activation : callable, optional
+        Activation function for numerical embeddings. Default is nn.Identity().
+    head_layer_sizes : list, optional
+        Sizes of the layers in the head. Default is [64, 64, 32].
+    head_dropout : float, optional
+        Dropout rate for the head. Default is 0.5.
+    head_skip_layers : bool, optional
+        Whether to use skip layers in the head. Default is False.
+    head_activation : callable, optional
+        Activation function for the head. Default is nn.SELU().
+    head_use_batch_norm : bool, optional
+        Whether to use batch normalization in the head. Default is False.
+
+    # Preprocessor Parameters
+    n_bins : int, optional
+        The number of bins to use for numerical feature binning. Default is 50.
+    numerical_preprocessing : str, optional
+        The preprocessing strategy for numerical features. Default is 'ple'.
+    use_decision_tree_bins : bool, optional
+        If True, uses decision tree regression/classification to determine optimal bin edges for numerical feature binning. Default is False.
+    binning_strategy : str, optional
+        Defines the strategy for binning numerical features. Default is 'uniform'.
+    task : str, optional
+        Indicates the type of machine learning task ('regression' or 'classification'). Default is 'regression'.
 
 
     Attributes
@@ -32,46 +96,67 @@ class EmbeddingMambularRegressor(BaseEstimator):
         Configuration object containing model-specific parameters.
     preprocessor : Preprocessor
         Preprocessor object for data preprocessing steps.
-    model : ProteinMambularRegressor
+    model : BaseEmbeddingMambularRegressor
         The neural network model, initialized after the `fit` method is called.
     """
 
     def __init__(self, **kwargs):
         # Known config arguments
         config_arg_names = [
+            "lr",
+            "lr_patience",
+            "weight_decay",
+            "lr_factor",
             "d_model",
             "n_layers",
-            "dt_rank",
-            "output_dimension",
-            "pooling_method",
-            "norm",
-            "cls",
-            "dt_min",
-            "dt_max",
-            "dropout",
-            "bias",
-            "weight_decay",
-            "conv_bias",
-            "d_state",
             "expand_factor",
+            "bias",
             "d_conv",
-            "dt_init",
+            "conv_bias",
+            "dropout",
+            "dt_rank",
+            "d_state",
             "dt_scale",
+            "dt_init",
+            "dt_max",
+            "dt_min",
             "dt_init_floor",
+            "norm",
+            "activation",
+            "num_embedding_activation",
+            "head_layer_sizes",
+            "head_dropout",
+            "head_skip_layers",
+            "head_activation",
+            "head_use_batch_norm",
         ]
-        config_kwargs = {k: v for k,
-                         v in kwargs.items() if k in config_arg_names}
-        self.config = MambularConfig(**config_kwargs)
 
-        # The rest are assumed to be preprocessor arguments
+        preprocessor_arg_names = [
+            "n_bins",
+            "numerical_preprocessing",
+            "use_decision_tree_bins",
+            "binning_strategy",
+            "task",
+        ]
+
+        self.config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
+        self.config = DefaultMambularConfig(**self.config_kwargs)
+
         preprocessor_kwargs = {
-            k: v for k, v in kwargs.items() if k not in config_arg_names
+            k: v for k, v in kwargs.items() if k in preprocessor_arg_names
         }
+        if "numerical_preprocessing" not in list(preprocessor_kwargs.keys()):
+            preprocessor_kwargs["numerical_preprocessing"] = "standardization"
 
-        if not "numerical_preprocessing" in preprocessor_kwargs.keys():
-            preprocessor_kwargs["numerical_preprocessing"] = "normalization"
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
         self.model = None
+
+        # Raise a warning if task is set to 'classification'
+        if preprocessor_kwargs.get("task") == "classification":
+            warnings.warn(
+                "The task is set to 'classification'. MambularRegressor is designed for regression tasks.",
+                UserWarning,
+            )
 
     def get_params(self, deep=True):
         """
@@ -117,8 +202,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         # Update config_kwargs with provided parameters
         valid_config_keys = self.config_kwargs.keys()
-        config_updates = {k: v for k,
-                          v in parameters.items() if k in valid_config_keys}
+        config_updates = {k: v for k, v in parameters.items() if k in valid_config_keys}
         self.config_kwargs.update(config_updates)
 
         # Update the config object
@@ -189,8 +273,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
         data_module : MambularDataModule
             An instance of MambularDataModule containing the training and validation DataLoaders.
         """
-        train_preprocessed_data = self.preprocessor.fit_transform(
-            X_train, y_train)
+        train_preprocessed_data = self.preprocessor.fit_transform(X_train, y_train)
         val_preprocessed_data = self.preprocessor.transform(X_val)
 
         # Update feature info based on the actual processed data
@@ -210,26 +293,22 @@ class EmbeddingMambularRegressor(BaseEstimator):
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(train_preprocessed_data[cat_key], dtype=torch.long)
                 )
             if cat_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(val_preprocessed_data[cat_key], dtype=torch.long)
                 )
 
             binned_key = "num_" + key  # for binned features
             if binned_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(train_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
             if binned_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(val_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
         # Populate tensors for numerical features, if present in processed data
@@ -239,13 +318,11 @@ class EmbeddingMambularRegressor(BaseEstimator):
             )  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float)
                 )
 
         train_labels = torch.tensor(y_train, dtype=torch.float)
