@@ -36,7 +36,7 @@ class BaseMambularClassifier(pl.LightningModule):
         Additional keyword arguments.
 
 
-     Attributes
+    Attributes
     ----------
     lr : float
         Learning rate.
@@ -144,11 +144,6 @@ class BaseMambularClassifier(pl.LightningModule):
             )
         else:
             raise ValueError(f"Unsupported normalization layer: {norm_layer}")
-
-        if self.embedding_activation is None:
-            raise ValueError(
-                f"Unsupported activation function: {self.hparams.get('num_embedding_activation')}"
-            )
 
         self.num_embeddings = nn.ModuleList(
             [
