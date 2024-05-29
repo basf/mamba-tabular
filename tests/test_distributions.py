@@ -47,8 +47,6 @@ class TestNormalDistribution(unittest.TestCase):
             loc=predictions[:, 0], scale=torch.nn.functional.softplus(predictions[:, 1])
         )
         expected_loss = -test_dist.log_prob(torch.tensor(0.0)).mean()
-        print(loss, expected_loss)
-
         self.assertAlmostEqual(loss.item(), expected_loss.item(), places=5)
 
     def test_evaluate_nll(self):
