@@ -150,9 +150,11 @@ class MambularClassifier(BaseEstimator):
         # Raise a warning if task is set to 'classification'
         if preprocessor_kwargs.get("task") == "regression":
             warnings.warn(
-                "The task is set to 'regression'. MambularClassifier is designed for classification tasks. Setting the task to classification",
+                "The task in preprocessing binning is set to 'regression'. MambularClassifier is designed for classification tasks.",
                 UserWarning,
             )
+
+        if "task" not in list(preprocessor_kwargs.keys()):
             preprocessor_kwargs["task"] = "classification"
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
