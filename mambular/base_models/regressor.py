@@ -15,6 +15,56 @@ from ..utils.configs import DefaultMambularConfig
 
 
 class BaseMambularRegressor(pl.LightningModule):
+    """
+    A PyTorch Lightning Module for regression tasks utilizing the Mamba architecture and various normalization techniques.
+
+    Parameters
+    ----------
+    cat_feature_info : dict
+        Dictionary containing information about categorical features.
+    num_feature_info : dict
+        Dictionary containing information about numerical features.
+    config : DefaultMambularConfig, optional
+        Configuration object containing default hyperparameters for the model (default is DefaultMambularConfig()).
+    **kwargs : dict
+        Additional keyword arguments.
+
+    Attributes
+    ----------
+    lr : float
+        Learning rate.
+    lr_patience : int
+        Patience for learning rate scheduler.
+    weight_decay : float
+        Weight decay for optimizer.
+    lr_factor : float
+        Factor by which the learning rate will be reduced.
+    pooling_method : str
+        Method to pool the features.
+    cat_feature_info : dict
+        Dictionary containing information about categorical features.
+    num_feature_info : dict
+        Dictionary containing information about numerical features.
+    embedding_activation : callable
+        Activation function for embeddings.
+    mamba : Mamba
+        Mamba architecture component.
+    norm_f : nn.Module
+        Normalization layer.
+    num_embeddings : nn.ModuleList
+        Module list for numerical feature embeddings.
+    cat_embeddings : nn.ModuleList
+        Module list for categorical feature embeddings.
+    tabular_head : MLP
+        Multi-layer perceptron head for tabular data.
+    cls_token : nn.Parameter
+        Class token parameter.
+    loss_fct : nn.Module
+        Loss function.
+    embedding_norm : nn.Module, optional
+        Layer normalization applied after embedding if specified.
+    """
+
     def __init__(
         self,
         cat_feature_info,
@@ -35,19 +85,6 @@ class BaseMambularRegressor(pl.LightningModule):
         self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-
-        activations = {
-            "relu": nn.ReLU(),
-            "tanh": nn.Tanh(),
-            "sigmoid": nn.Sigmoid(),
-            "leaky_relu": nn.LeakyReLU(),
-            "elu": nn.ELU(),
-            "selu": nn.SELU(),
-            "gelu": nn.GELU(),
-            "softplus": nn.Softplus(),
-            "linear": nn.Identity(),
-            "silu": nn.functional.silu,
-        }
 
         self.embedding_activation = self.hparams.get(
             "num_embedding_activation", config.num_embedding_activation
@@ -219,7 +256,7 @@ class BaseMambularRegressor(pl.LightningModule):
         else:
             raise ValueError(f"Invalid pooling method: {self.pooling_method}")
 
-        x = self.norm_f.forward(x)
+        x = self.norm_f(x)
         preds = self.tabular_head(x)
 
         return preds
