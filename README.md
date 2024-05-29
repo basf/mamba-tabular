@@ -2,7 +2,11 @@
   <img src="./docs/images/logo/mamba_tabular.jpg" width="400"/>
 
 
-[![Documentation Status](https://readthedocs.org/projects/mambular/badge/?version=latest)](https://mambular.readthedocs.io/en/latest/?badge=latest)
+[![PyPI](https://img.shields.io/pypi/v/mambular)](https://pypi.org/project/mambular)
+![PyPI - Downloads](https://img.shields.io/pypi/dw/mambular)
+[![docs build](https://readthedocs.org/projects/mambular/badge/?version=latest)](https://mambular.readthedocs.io/en/latest/?badge=latest)
+[![docs](https://img.shields.io/badge/docs-latest-blue)](https://mambular.readthedocs.io/en/latest/)
+[![open issues](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/basf/mamba-tabular/issues)
 
 
 [📘Documentation](https://mambular.readthedocs.io/en/latest/index.html) |
@@ -14,9 +18,6 @@
 # Mambular: Tabular Deep Learning with Mamba Architectures
 
 Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and transform using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
-
-
-<!-- ![Logo](./docs/images/logo/mamba_tabular.jpg) -->
 
 ## Features
 
