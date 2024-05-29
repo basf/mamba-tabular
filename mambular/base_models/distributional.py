@@ -78,8 +78,6 @@ class BaseMambularLSS(pl.LightningModule):
         Multi-layer perceptron head for tabular data.
     cls_token : nn.Parameter
         Class token parameter.
-    loss_fct : nn.Module
-        Loss function.
     embedding_norm : nn.Module, optional
         Layer normalization applied after embedding if specified.
     """
@@ -90,7 +88,8 @@ class BaseMambularLSS(pl.LightningModule):
         cat_feature_info,
         num_feature_info,
         config: DefaultMambularConfig = DefaultMambularConfig(),
-        **distribution_params,
+        distributional_kwargs=None,
+        **kwargs,
     ):
         super().__init__()
 
@@ -106,6 +105,10 @@ class BaseMambularLSS(pl.LightningModule):
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
+        self.embedding_activation = self.hparams.get(
+            "num_embedding_activation", config.num_embedding_activation
+        )
+
         distribution_classes = {
             "normal": NormalDistribution,
             "poisson": PoissonDistribution,
@@ -118,9 +121,11 @@ class BaseMambularLSS(pl.LightningModule):
             "categorical": CategoricalDistribution,
         }
 
+        if distributional_kwargs is None:
+            distributional_kwargs = {}
+
         if family in distribution_classes:
-            # Pass additional distribution_params to the constructor of the distribution class
-            self.family = distribution_classes[family](**distribution_params)
+            self.family = distribution_classes[family](**distributional_kwargs)
         else:
             raise ValueError("Unsupported family: {}".format(family))
 
@@ -142,11 +147,6 @@ class BaseMambularLSS(pl.LightningModule):
             )
         else:
             raise ValueError(f"Unsupported normalization layer: {norm_layer}")
-
-        if self.embedding_activation is None:
-            raise ValueError(
-                f"Unsupported activation function: {self.hparams.get('num_embedding_activation')}"
-            )
 
         # Additional layers and components initialization based on hyperparameters
         self.mamba = Mamba(
@@ -206,7 +206,7 @@ class BaseMambularLSS(pl.LightningModule):
             use_batch_norm=self.hparams.get(
                 "head_use_batch_norm", config.head_use_batch_norm
             ),
-            output_units=self.family.param_count,
+            n_output_units=self.family.param_count,
         )
 
         self.cls_token = nn.Parameter(
@@ -220,9 +220,8 @@ class BaseMambularLSS(pl.LightningModule):
                 self.hparams.get("d_model", config.d_model)
             )
 
-        self.loss_fct = lambda predictions, y_true: self.family.compute_loss(
-            predictions, y_true
-        )
+    def compute_loss(self, predictions, y_true):
+        return self.family.compute_loss(predictions, y_true)
 
     def forward(self, cat_features, num_features):
         """
@@ -322,7 +321,7 @@ class BaseMambularLSS(pl.LightningModule):
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 
-        loss = self.loss_fct(preds, labels)
+        loss = self.compute_loss(preds, labels)
         self.log(
             "train_loss",
             loss,
@@ -348,7 +347,7 @@ class BaseMambularLSS(pl.LightningModule):
         num_features, cat_features, labels = batch
         preds = self(num_features, cat_features)
 
-        loss = self.loss_fct(preds, labels)
+        loss = self.compute_loss(preds, labels)
         self.log(
             "val_loss",
             loss,
