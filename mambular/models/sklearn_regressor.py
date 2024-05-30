@@ -541,7 +541,7 @@ class MambularRegressor(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            predictions = self.model(cat_tensors, num_tensors)
+            predictions = self.model(num_features=num_tensors, cat_features=cat_tensors)
 
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()
