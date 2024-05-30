@@ -180,7 +180,7 @@ class BaseMambularRegressor(pl.LightningModule):
                 self.hparams.get("d_model", config.d_model)
             )
 
-    def forward(self, cat_features, num_features):
+    def forward(self, num_features, cat_features):
         """
         Defines the forward pass of the regressor.
 
