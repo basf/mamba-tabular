@@ -214,7 +214,7 @@ class BaseMambularClassifier(pl.LightningModule):
             self.auroc = torchmetrics.AUROC(task="binary")
             self.precision = torchmetrics.Precision(task="binary")
 
-    def forward(self, cat_features, num_features):
+    def forward(self, num_features, cat_features):
         """
         Defines the forward pass of the classifier.
 
@@ -287,7 +287,6 @@ class BaseMambularClassifier(pl.LightningModule):
 
         x = self.norm_f(x)
         preds = self.tabular_head(x)
-
         return preds
 
     def training_step(self, batch, batch_idx):
@@ -302,8 +301,8 @@ class BaseMambularClassifier(pl.LightningModule):
             The index of the batch within the epoch.
         """
 
-        num_features, cat_features, labels = batch
-        preds = self(num_features, cat_features)
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
 
         if self.num_classes == 1:
             labels = labels.unsqueeze(
@@ -359,9 +358,8 @@ class BaseMambularClassifier(pl.LightningModule):
         batch_idx : int
             The index of the batch within the epoch.
         """
-
-        num_features, cat_features, labels = batch
-        preds = self(num_features, cat_features)
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
 
         if self.num_classes == 1:
             labels = labels.unsqueeze(
