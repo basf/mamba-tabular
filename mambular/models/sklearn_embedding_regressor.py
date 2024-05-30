@@ -273,7 +273,11 @@ class EmbeddingMambularRegressor(BaseEstimator):
         data_module : MambularDataModule
             An instance of MambularDataModule containing the training and validation DataLoaders.
         """
-        train_preprocessed_data = self.preprocessor.fit_transform(X_train, y_train)
+        self.preprocessor.fit(
+            pd.concat([X_train, X_val], axis=0).reset_index(drop=True),
+            np.concatenate((y_train, y_val), axis=0),
+        )
+        train_preprocessed_data = self.preprocessor.transform(X_train)
         val_preprocessed_data = self.preprocessor.transform(X_val)
 
         # Update feature info based on the actual processed data
