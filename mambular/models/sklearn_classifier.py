@@ -563,7 +563,7 @@ class MambularClassifier(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            logits = self.model(cat_tensors, num_tensors)
+            logits = self.model(num_features=num_tensors, cat_features=cat_tensors)
 
             # Check the shape of the logits to determine binary or multi-class classification
             if logits.shape[1] == 1:
@@ -637,7 +637,7 @@ class MambularClassifier(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            logits = self.model(cat_tensors, num_tensors)
+            logits = self.model(num_features=num_tensors, cat_features=cat_tensors)
             if logits.shape[1] > 1:
                 probabilities = torch.softmax(logits, dim=1)
             else:
