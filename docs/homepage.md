@@ -11,16 +11,6 @@ Mambular is a Python package that brings the power of Mamba architectures to tab
 - **Sklearn-like API**: The familiar scikit-learn `fit`, `predict`, and `predict_proba` methods mean minimal learning curve for those already accustomed to scikit-learn.
 - **PyTorch Lightning Under the Hood**: Built on top of PyTorch Lightning, Mambular models benefit from streamlined training processes, easy customization, and advanced features like distributed training and 16-bit precision.
 
-## Documentation
-
-You can find the Mamba-Tabular API documentation [here](https://mambular.readthedocs.io/en/latest/).
-
-## Installation
-
-Install Mambular using pip:
-```sh
-pip install mambular
-```
 
 ## Preprocessing
 
@@ -137,16 +127,15 @@ model.fit(
 
 ```
 
-## Citation
+## Citing Mambular
 
-If you find this project useful in your research, please consider cite:
+If you find this project useful in your research or in scientific publication, please consider citing it in your references.
+
 ```BibTeX
-@misc{2024,
+@software{mambular2024,
     title={Mambular: Tabular Deep Learning with Mamba Architectures},
-    author={Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken'},
-    howpublished = {\url{https://github.com/basf/mamba-tabular}},
+    author={Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar},
+    url = {https://github.com/basf/mamba-tabular},
     year={2024}
 }
 ```
-
-## License
