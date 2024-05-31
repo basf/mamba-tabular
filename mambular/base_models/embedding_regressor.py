@@ -339,8 +339,8 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
         Tensor
             The computed loss for the batch.
         """
-        num_features, cat_features, labels = batch
-        preds = self(num_features, cat_features)
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
 
         loss = self.loss_fct(preds.squeeze(), labels.float())
         self.log(
@@ -364,8 +364,8 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
         batch_idx : int
             The index of the batch within the epoch.
         """
-        num_features, cat_features, labels = batch
-        preds = self(num_features, cat_features)
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
 
         loss = self.loss_fct(preds.squeeze(), labels.float())
         self.log(

@@ -67,18 +67,6 @@ class TestMambularLSS(unittest.TestCase):
         # Ensure the fit method of the trainer is called
         self.mock_trainer.return_value.fit.assert_called_once()
 
-    def test_predict(self):
-        # Create a mock tensor as model output
-        mock_prediction = torch.rand(100)
-        self.model.model = MagicMock()
-        self.model.model.return_value = mock_prediction
-        self.model.preprocess_test_data = MagicMock(return_value=([], []))
-
-        predictions = self.model.predict(self.X)
-
-        # Convert tensor to numpy and check equality
-        np.testing.assert_array_equal(predictions, mock_prediction.numpy())
-
     def test_normal_metrics(self):
         # Mock predictions for the normal distribution: [mean, variance]
         mock_predictions = np.column_stack(

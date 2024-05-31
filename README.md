@@ -53,6 +53,7 @@ Mambular automatically identifies the type of each feature in your dataset, appl
 - **Decision Tree Binning**: Optionally, Mambular can use decision trees to find the optimal binning strategy for numerical features, enhancing model interpretability and performance.
 - **Normalization**: Mambular can easily handle numerical features without specifically turning them into categorical features. Standard preprocessing steps such as normalization per feature are possible
 - **Standardization**: Similarly, Standardization instead of Normalization can be used.
+- **PLE**: Periodic Linear Encodings for numerical features can enhance performance for tabular DL methods.
 
 
 ### Handling Missing Values

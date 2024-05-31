@@ -3,7 +3,7 @@ import torch.distributions as dist
 import numpy as np
 
 
-class BaseDistribution:
+class BaseDistribution(torch.nn.Module):
     """
     The base class for various statistical distributions, providing a common interface and utilities.
 
@@ -23,6 +23,8 @@ class BaseDistribution:
     """
 
     def __init__(self, name, param_names):
+        super(BaseDistribution, self).__init__()
+
         self._name = name
         self.param_names = param_names
         self.param_count = len(param_names)
@@ -97,6 +99,24 @@ class BaseDistribution:
             "NLL": nll_loss_tensor.detach().numpy(),
         }
 
+    def forward(self, predictions):
+        """
+        Apply the appropriate transformations to the predicted parameters.
+
+        Parameters:
+            predictions (torch.Tensor): The predicted parameters of the distribution.
+
+        Returns:
+            torch.Tensor: A tensor with transformed parameters.
+        """
+        transformed_params = []
+        for idx, param_name in enumerate(self.param_names):
+            transform_func = self.get_transform(
+                getattr(self, f"{param_name}_transform", "none")
+            )
+            transformed_params.append(transform_func(predictions[:, idx]).unsqueeze(1))
+        return torch.cat(transformed_params, dim=1)
+
 
 class NormalDistribution(BaseDistribution):
     """
@@ -119,11 +139,11 @@ class NormalDistribution(BaseDistribution):
         super().__init__(name, param_names)
 
         self.mean_transform = self.get_transform(mean_transform)
-        self.var_transform = self.get_transform(var_transform)
+        self.variance_transform = self.get_transform(var_transform)
 
     def compute_loss(self, predictions, y_true):
         mean = self.mean_transform(predictions[:, self.param_names.index("mean")])
-        variance = self.var_transform(
+        variance = self.variance_transform(
             predictions[:, self.param_names.index("variance")]
         )
 

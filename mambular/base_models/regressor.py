@@ -180,7 +180,7 @@ class BaseMambularRegressor(pl.LightningModule):
                 self.hparams.get("d_model", config.d_model)
             )
 
-    def forward(self, cat_features, num_features):
+    def forward(self, num_features, cat_features):
         """
         Defines the forward pass of the regressor.
 
@@ -273,8 +273,8 @@ class BaseMambularRegressor(pl.LightningModule):
         Tensor
             The output predictions of the model for regression tasks.
         """
-        num_features, cat_features, labels = batch
-        preds = self(num_features, cat_features)
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
 
         loss = self.loss_fct(preds.squeeze(), labels.float())
         self.log(
@@ -298,8 +298,8 @@ class BaseMambularRegressor(pl.LightningModule):
         batch_idx : int
             The index of the batch within the epoch.
         """
-        num_features, cat_features, labels = batch
-        preds = self(num_features, cat_features)
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
 
         loss = self.loss_fct(preds.squeeze(), labels.float())
         self.log(

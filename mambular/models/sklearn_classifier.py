@@ -90,6 +90,10 @@ class MambularClassifier(BaseEstimator):
         Defines the strategy for binning numerical features. Default is 'uniform'.
     task : str, optional
         Indicates the type of machine learning task ('regression' or 'classification'). Default is 'regression'.
+    cat_cutoff: float or int, optional
+        Indicates the cutoff after which integer values are treated as categorical. If float, it's treated as a percentage. If int, it's the maximum number of unique values for a column to be considered categorical. Default is 3%
+    treat_all_integers_as_numerical : bool, optional
+        If True, all integer columns will be treated as numerical, regardless of their unique value count or proportion. Default is False
 
 
 
@@ -140,7 +144,10 @@ class MambularClassifier(BaseEstimator):
             "use_decision_tree_bins",
             "binning_strategy",
             "task",
+            "cat_cutoff",
+            "treat_all_integers_as_numerical",
         ]
+
         self.config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
         self.config = DefaultMambularConfig(**self.config_kwargs)
 
@@ -277,8 +284,11 @@ class MambularClassifier(BaseEstimator):
         data_module : MambularDataModule
             An instance of MambularDataModule containing training and validation DataLoaders.
         """
-
-        train_preprocessed_data = self.preprocessor.fit_transform(X_train, y_train)
+        self.preprocessor.fit(
+            pd.concat([X_train, X_val], axis=0).reset_index(drop=True),
+            np.concatenate((y_train, y_val), axis=0),
+        )
+        train_preprocessed_data = self.preprocessor.transform(X_train)
         val_preprocessed_data = self.preprocessor.transform(X_val)
 
         # Update feature info based on the actual processed data
@@ -321,11 +331,11 @@ class MambularClassifier(BaseEstimator):
             num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float32)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float)
+                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float32)
                 )
 
         train_labels = torch.tensor(y_train, dtype=torch.long)
@@ -389,7 +399,7 @@ class MambularClassifier(BaseEstimator):
             num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
             if num_key in processed_data:
                 num_tensors.append(
-                    torch.tensor(processed_data[num_key], dtype=torch.float)
+                    torch.tensor(processed_data[num_key], dtype=torch.float32)
                 )
 
         return cat_tensors, num_tensors
@@ -474,7 +484,7 @@ class MambularClassifier(BaseEstimator):
                 X, y, val_size, random_state
             )
 
-        data_module = self.preprocess_data(
+        self.data_module = self.preprocess_data(
             X_train, y_train, X_val, y_val, batch_size, shuffle
         )
 
@@ -507,7 +517,7 @@ class MambularClassifier(BaseEstimator):
             callbacks=[early_stop_callback, checkpoint_callback],
             **trainer_kwargs
         )
-        trainer.fit(self.model, data_module)
+        trainer.fit(self.model, self.data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
@@ -560,7 +570,7 @@ class MambularClassifier(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            logits = self.model(cat_tensors, num_tensors)
+            logits = self.model(num_features=num_tensors, cat_features=cat_tensors)
 
             # Check the shape of the logits to determine binary or multi-class classification
             if logits.shape[1] == 1:
@@ -634,7 +644,7 @@ class MambularClassifier(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            logits = self.model(cat_tensors, num_tensors)
+            logits = self.model(num_features=num_tensors, cat_features=cat_tensors)
             if logits.shape[1] > 1:
                 probabilities = torch.softmax(logits, dim=1)
             else:
