@@ -24,7 +24,7 @@ class TestNormalDistribution(unittest.TestCase):
         self.assertEqual(self.normal.param_names, ["mean", "variance"])
         self.assertIsInstance(self.normal.mean_transform, type(lambda x: x))
         self.assertIsInstance(
-            self.normal.var_transform, type(torch.nn.functional.softplus)
+            self.normal.variance_transform, type(torch.nn.functional.softplus)
         )
 
     def test_predefined_transforms(self):
@@ -34,7 +34,7 @@ class TestNormalDistribution(unittest.TestCase):
             torch.allclose(self.normal.mean_transform(x), x)
         )  # 'none' should change nothing
         self.assertTrue(
-            torch.all(torch.ge(self.normal.var_transform(x), 0))
+            torch.all(torch.ge(self.normal.variance_transform(x), 0))
         )  # 'positive' should make all values non-negative
 
     def test_compute_loss_known_values(self):
