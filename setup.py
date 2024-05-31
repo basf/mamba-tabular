@@ -12,7 +12,7 @@ HOMEPAGE = "https://github.com/basf/mamba-tabular"
 DOCS = "https://mambular.readthedocs.io/en/latest/index.html"
 EMAIL = "anton.thielmann@tu-clausthal.de"
 AUTHOR = "Anton Thielmann"
-REQUIRES_PYTHON = ">=3.6, <3.11"
+REQUIRES_PYTHON = ">=3.6, <=3.12.3"
 
 # Load the package's verison file and its content.
 ROOT_DIR = Path(__file__).resolve().parent
@@ -53,6 +53,8 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6, <=3.12.3",
-    install_requires=read_requirements(),
+    include_package_data=True,
+    project_urls={'Homepage:': HOMEPAGE,
+                  'Documentation': DOCS},
+    url=HOMEPAGE
 )
