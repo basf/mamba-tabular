@@ -372,16 +372,6 @@ class Preprocessor:
         Raises:
             RuntimeError: If the `column_transformer` is not yet fitted, indicating that the preprocessor must be
             fitted before invoking this method.
-        Retrieves information about how features are encoded within the model's preprocessor.
-        This method identifies the type of encoding applied to each feature, categorizing them into binned or ordinal
-        encodings and other types of encodings (e.g., one-hot encoding after discretization).
-
-        This method should only be called after the preprocessor has been fitted, as it relies on the structure and
-        configuration of the `column_transformer` attribute.
-
-        Raises:
-            RuntimeError: If the `column_transformer` is not yet fitted, indicating that the preprocessor must be
-            fitted before invoking this method.
 
         Returns:
             tuple of (dict, dict):
