@@ -305,9 +305,9 @@ class BaseMambularClassifier(pl.LightningModule):
         preds = self(num_features=num_features, cat_features=cat_features)
 
         if self.num_classes == 1:
-            labels = labels.unsqueeze(
-                1
-            ).float()  # Reshape for binary classification loss calculation
+            labels = torch.float(
+                labels.unsqueeze(1), dtype=torch.float32
+            )  # Reshape for binary classification loss calculation
 
         loss = self.loss_fct(preds, labels)
         self.log("train_loss", loss)
