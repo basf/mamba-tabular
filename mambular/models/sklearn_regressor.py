@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 import warnings
-
+import numpy as np
 from ..base_models.regressor import BaseMambularRegressor
 from ..utils.dataset import MambularDataModule, MambularDataset
 from ..utils.preprocessor import Preprocessor
@@ -88,6 +88,10 @@ class MambularRegressor(BaseEstimator):
         Defines the strategy for binning numerical features. Default is 'uniform'.
     task : str, optional
         Indicates the type of machine learning task ('regression' or 'classification'). Default is 'regression'.
+    cat_cutoff: float or int, optional
+        Indicates the cutoff after which integer values are treated as categorical. If float, it's treated as a percentage. If int, it's the maximum number of unique values for a column to be considered categorical. Default is 3%
+    treat_all_integers_as_numerical : bool, optional
+        If True, all integer columns will be treated as numerical, regardless of their unique value count or proportion. Default is False
 
 
 
@@ -138,6 +142,8 @@ class MambularRegressor(BaseEstimator):
             "use_decision_tree_bins",
             "binning_strategy",
             "task",
+            "cat_cutoff",
+            "treat_all_integers_as_numerical",
         ]
 
         self.config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
