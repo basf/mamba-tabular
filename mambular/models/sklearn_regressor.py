@@ -471,7 +471,7 @@ class MambularRegressor(BaseEstimator):
                 X, y, val_size, random_state
             )
 
-        data_module = self.preprocess_data(
+        self.data_module = self.preprocess_data(
             X_train, y_train, X_val, y_val, batch_size, shuffle
         )
 
@@ -503,7 +503,7 @@ class MambularRegressor(BaseEstimator):
             callbacks=[early_stop_callback, checkpoint_callback],
             **trainer_kwargs
         )
-        trainer.fit(self.model, data_module)
+        trainer.fit(self.model, self.data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:

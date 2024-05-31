@@ -159,7 +159,7 @@ class MambularLSS(BaseEstimator):
             "cat_cutoff",
             "treat_all_integers_as_numerical",
         ]
-        
+
         self.config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
         self.config = DefaultMambularConfig(**self.config_kwargs)
 
@@ -574,7 +574,7 @@ class MambularLSS(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            predictions = self.model(cat_tensors, num_tensors)
+            predictions = self.model(num_features=num_tensors, cat_features=cat_tensors)
 
         if not raw:
             return self.model.family(predictions).cpu().numpy()
