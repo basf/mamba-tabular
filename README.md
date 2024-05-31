@@ -160,7 +160,7 @@ If you find this project useful in your research, please consider cite:
 ```BibTeX
 @misc{2024,
     title={Mambular: Tabular Deep Learning with Mamba Architectures},
-    author={Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken'},
+    author={Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar},
     howpublished = {\url{https://github.com/basf/mamba-tabular}},
     year={2024}
 }
