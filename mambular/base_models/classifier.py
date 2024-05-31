@@ -232,9 +232,7 @@ class BaseMambularClassifier(pl.LightningModule):
             The output predictions of the model.
         """
         batch_size = (
-            cat_features[0].size(0)
-            if cat_features is not None
-            else num_features[0].size(0)
+            cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
         )
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
 
