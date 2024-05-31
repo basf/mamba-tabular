@@ -154,16 +154,16 @@ model.fit(
 
 ```
 
-## Citation
+## Citing Mambular
 
-If you find this project useful in your research, please consider cite:
+If you find this project useful in your research or in scientific publication, please consider citing it in your references.
+
 ```BibTeX
-@misc{2024,
+@software{mambular2024,
     title={Mambular: Tabular Deep Learning with Mamba Architectures},
     author={Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar},
-    howpublished = {\url{https://github.com/basf/mamba-tabular}},
+    url = {https://github.com/basf/mamba-tabular},
     year={2024}
 }
 ```
 
-## License
