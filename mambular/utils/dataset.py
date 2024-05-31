@@ -64,12 +64,14 @@ class MambularDataset(Dataset):
             feature_tensor[idx] for feature_tensor in self.cat_features_list
         ]
         num_features = [
-            feature_tensor[idx] for feature_tensor in self.num_features_list
+            torch.tensor(feature_tensor[idx], dtype=torch.float32) for feature_tensor in self.num_features_list
+
         ]
         label = self.labels[idx]
         if self.regression:
             # Convert the label to float for regression tasks
-            label = float(label)
+            # label = float(label)
+            label = torch.tensor(label, dtype=torch.float32)
 
         # Keep categorical and numerical features separate
         return cat_features, num_features, label
@@ -114,12 +116,13 @@ class EmbeddingMambularDataset(Dataset):
             feature_tensor[idx] for feature_tensor in self.cat_features_list
         ]
         num_features = [
-            feature_tensor[idx] for feature_tensor in self.num_features_list
+            torch.tensor(feature_tensor[idx], dtype=torch.float32) for feature_tensor in self.num_features_list
         ]
         label = self.labels[idx]
         if self.regression:
             # Convert the label to float for regression tasks
-            label = float(label)
+            # label = float(label)
+            label = torch.tensor(label, dtype=torch.float32)
 
         # Keep categorical and numerical features separate
         return cat_features, num_features, label
