@@ -609,8 +609,17 @@ class EmbeddingMambularClassifier(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            logits = self.model(cat_tensors, num_tensors)
-            predictions = torch.argmax(logits, dim=1)
+            logits = self.model(num_features=num_tensors, cat_features=cat_tensors)
+
+            # Check the shape of the logits to determine binary or multi-class classification
+            if logits.shape[1] == 1:
+                # Binary classification
+                probabilities = torch.sigmoid(logits)
+                predictions = (probabilities > 0.5).long().squeeze()
+            else:
+                # Multi-class classification
+                probabilities = torch.softmax(logits, dim=1)
+                predictions = torch.argmax(probabilities, dim=1)
 
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()
@@ -659,8 +668,11 @@ class EmbeddingMambularClassifier(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            logits = self.model(cat_tensors, num_tensors)
-            probabilities = torch.softmax(logits, dim=1)
+            logits = self.model(num_features=num_tensors, cat_features=cat_tensors)
+            if logits.shape[1] > 1:
+                probabilities = torch.softmax(logits, dim=1)
+            else:
+                probabilities = torch.sigmoid(logits)
 
         # Convert probabilities to NumPy array and return
         return probabilities.cpu().numpy()
