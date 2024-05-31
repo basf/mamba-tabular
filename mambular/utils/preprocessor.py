@@ -43,6 +43,8 @@ class Preprocessor:
                                 'quantile', or other sklearn-compatible strategies.
         task (str): Indicates the type of machine learning task ('regression' or 'classification'). This can
                     influence certain preprocessing behaviors, especially when using decision tree-based binning.
+        cat_cutoff (float): Indicates percentage after which integer values are treated as categorical if unique
+                            values smaller than this percentage
 
     Attributes:
         column_transformer (ColumnTransformer): An instance of sklearn's ColumnTransformer that holds the
@@ -58,6 +60,7 @@ class Preprocessor:
         use_decision_tree_bins=False,
         binning_strategy="uniform",
         task="regression",
+        cat_cutoff: float = 0.03,
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = numerical_preprocessing.lower()
@@ -87,7 +90,7 @@ class Preprocessor:
         self.fitted = False
         self.binning_strategy = binning_strategy
         self.task = task
-        self.task = task
+        self.cat_cutoff = cat_cutoff
 
     def set_params(self, **params):
         for key, value in params.items():
@@ -115,7 +118,8 @@ class Preprocessor:
             num_unique_values = X[col].nunique()
             total_samples = len(X[col])
             if X[col].dtype.kind not in "iufc" or (
-                X[col].dtype.kind == "i" and (num_unique_values / total_samples) < 0.05
+                X[col].dtype.kind == "i"
+                and (num_unique_values / total_samples) < self.cat_cutoff
             ):
                 categorical_features.append(col)
             else:
@@ -213,7 +217,10 @@ class Preprocessor:
                 categorical_transformer = Pipeline(
                     [
                         ("imputer", SimpleImputer(strategy="most_frequent")),
-                        ("continuous_ordinal", ContinuousOrdinalEncoder()),
+                        (
+                            "continuous_ordinal",
+                            ContinuousOrdinalEncoder(),
+                        ),
                     ]
                 )
                 # Append the transformer for the current categorical feature

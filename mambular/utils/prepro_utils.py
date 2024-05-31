@@ -60,8 +60,11 @@ class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
         """
         # Fit should determine the mapping from original categories to sequential integers starting from 0
         self.mapping_ = [
-            {category: i for i, category in enumerate(np.unique(col))} for col in X.T
+            {category: i + 1 for i, category in enumerate(np.unique(col))}
+            for col in X.T
         ]
+        for mapping in self.mapping_:
+            mapping[None] = 0  # Assign 0 to unknown values
         return self
 
     def transform(self, X):
@@ -77,7 +80,7 @@ class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
         # Transform the categories to their mapped integer values
         X_transformed = np.array(
             [
-                [self.mapping_[col].get(value, -1) for col, value in enumerate(row)]
+                [self.mapping_[col].get(value, 0) for col, value in enumerate(row)]
                 for row in X
             ]
         )
