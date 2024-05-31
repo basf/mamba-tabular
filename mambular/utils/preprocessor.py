@@ -1,19 +1,16 @@
 import numpy as np
 import pandas as pd
-import numpy as np
-from .prepro_utils import OneHotFromOrdinal, CustomBinner, ContinuousOrdinalEncoder
-from .prepro_utils import OneHotFromOrdinal, CustomBinner, ContinuousOrdinalEncoder
-from sklearn.preprocessing import (
-    StandardScaler,
-    KBinsDiscretizer,
-    MinMaxScaler,
-)
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from .ple_encoding import PLE
 from sklearn.exceptions import NotFittedError
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import (KBinsDiscretizer, MinMaxScaler,
+                                   StandardScaler)
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+
+from .ple_encoding import PLE
+from .prepro_utils import (ContinuousOrdinalEncoder, CustomBinner,
+                           OneHotFromOrdinal)
 
 
 class Preprocessor:
@@ -49,7 +46,9 @@ class Preprocessor:
         treat_all_integers_as_numerical (bool): If True, all integer columns will be treated as numerical, regardless
                                                 of their unique value count or proportion.
 
-    Attributes:
+
+    Attributes
+    ----------
         column_transformer (ColumnTransformer): An instance of sklearn's ColumnTransformer that holds the
                                                 configured preprocessing pipelines for different feature types.
         fitted (bool): Indicates whether the preprocessor has been fitted to the data.
@@ -107,10 +106,13 @@ class Preprocessor:
         Identifies and separates the features in the dataset into numerical and categorical types based on the data type
         and the proportion of unique values.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame or dict): The input dataset, where the features are columns in a DataFrame or keys in a dict.
 
-        Returns:
+
+        Returns
+        -------
             tuple: A tuple containing two lists, the first with the names of numerical features and the second with the names of categorical features.
         """
         categorical_features = []
@@ -151,11 +153,14 @@ class Preprocessor:
         Fits the preprocessor to the data by identifying feature types and configuring the appropriate transformations for each feature.
         It sets up a column transformer with a pipeline of transformations for numerical and categorical features based on the specified preprocessing strategy.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame or dict): The input dataset to fit the preprocessor on.
             y (array-like, optional): The target variable. Required if `use_decision_tree_bins` is True for determining optimal bin edges using decision trees.
 
-        Returns:
+
+        Returns
+        -------
             self: The fitted Preprocessor instance.
         """
         if isinstance(X, dict):
@@ -172,7 +177,8 @@ class Preprocessor:
 
                 if self.numerical_preprocessing in ["binning", "one_hot"]:
                     bins = (
-                        self._get_decision_tree_bins(X[[feature]], y, [feature])
+                        self._get_decision_tree_bins(
+                            X[[feature]], y, [feature])
                         if self.use_decision_tree_bins
                         else self.n_bins
                     )
@@ -187,7 +193,8 @@ class Preprocessor:
                                         else len(bins) - 1,
                                         encode="ordinal",
                                         strategy=self.binning_strategy,
-                                        subsample=200_000 if len(X) > 200_000 else None,
+                                        subsample=200_000 if len(
+                                            X) > 200_000 else None,
                                     ),
                                 ),
                             ]
@@ -210,26 +217,31 @@ class Preprocessor:
                         )
 
                 elif self.numerical_preprocessing == "standardization":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(
+                        ("scaler", StandardScaler()))
 
                 elif self.numerical_preprocessing == "normalization":
-                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+                    numeric_transformer_steps.append(
+                        ("normalizer", MinMaxScaler()))
 
                 elif self.numerical_preprocessing == "ple":
-                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+                    numeric_transformer_steps.append(
+                        ("normalizer", MinMaxScaler()))
                     numeric_transformer_steps.append(
                         ("ple", PLE(n_bins=self.n_bins, task=self.task))
                     )
 
                 elif self.numerical_preprocessing == "ple":
-                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+                    numeric_transformer_steps.append(
+                        ("normalizer", MinMaxScaler()))
                     numeric_transformer_steps.append(
                         ("ple", PLE(n_bins=self.n_bins, task=self.task))
                     )
 
                 numeric_transformer = Pipeline(numeric_transformer_steps)
 
-                transformers.append((f"num_{feature}", numeric_transformer, [feature]))
+                transformers.append(
+                    (f"num_{feature}", numeric_transformer, [feature]))
 
         if categorical_features:
             for feature in categorical_features:
@@ -259,12 +271,15 @@ class Preprocessor:
         """
         Uses decision tree models to determine optimal bin edges for numerical feature binning. This method is used when `use_decision_tree_bins` is True.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame): The input dataset containing only the numerical features for which the bin edges are to be determined.
             y (array-like): The target variable for training the decision tree models.
             numerical_features (list of str): The names of the numerical features for which the bin edges are to be determined.
 
-        Returns:
+
+        Returns
+        -------
             list: A list of arrays, where each array contains the bin edges determined by the decision tree for a numerical feature.
         """
         bins = []
@@ -279,7 +294,8 @@ class Preprocessor:
             bin_edges = np.sort(np.unique(thresholds))
 
             bins.append(
-                np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()]))
+                np.concatenate(
+                    ([X[feature].min()], bin_edges, [X[feature].max()]))
             )
         return bins
 
@@ -296,11 +312,14 @@ class Preprocessor:
         This method converts the sparse or dense matrix returned by the column transformer into a more accessible
         dictionary format, where each key-value pair represents a feature and its transformed data.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame): The input data to be transformed.
             X (DataFrame): The input data to be transformed.
 
-        Returns:
+
+        Returns
+        -------
             dict: A dictionary where keys are the names of the features (as per the transformations defined in the
             column transformer) and the values are numpy arrays of the transformed data.
         """
@@ -322,11 +341,14 @@ class Preprocessor:
         This helper method is utilized within `transform` to segregate the transformed data based on the
         specification in the column transformer, assigning each transformed section to its corresponding feature name.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame): The original input data, used for determining shapes and transformations.
             transformed_X (numpy array): The transformed data as a numpy array, outputted by the column transformer.
 
-        Returns:
+
+        Returns
+        -------
             dict: A dictionary mapping each transformation's name to its respective numpy array of transformed data.
             The type of each array (int or float) is determined based on the type of transformation applied.
         """
@@ -340,7 +362,8 @@ class Preprocessor:
             if transformer != "drop":
                 end = start + transformer.transform(X[[columns[0]]]).shape[1]
                 dtype = int if "cat" in name else float
-                transformed_dict[name] = transformed_X[:, start:end].astype(dtype)
+                transformed_dict[name] = transformed_X[:,
+                                                       start:end].astype(dtype)
                 start = end
 
         return transformed_dict
@@ -349,11 +372,14 @@ class Preprocessor:
         """
         Fits the preprocessor to the data and then transforms the data using the fitted preprocessing pipelines. This is a convenience method that combines `fit` and `transform`.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame or dict): The input dataset to fit the preprocessor on and then transform.
             y (array-like, optional): The target variable. Required if `use_decision_tree_bins` is True.
 
-        Returns:
+
+        Returns
+        -------
             dict: A dictionary with the transformed data, where keys are the base feature names and values are the transformed features as arrays.
         """
         self.fit(X, y)
@@ -369,11 +395,15 @@ class Preprocessor:
         This method should only be called after the preprocessor has been fitted, as it relies on the structure and
         configuration of the `column_transformer` attribute.
 
-        Raises:
+
+        Raises
+        ------
             RuntimeError: If the `column_transformer` is not yet fitted, indicating that the preprocessor must be
             fitted before invoking this method.
 
-        Returns:
+
+        Returns
+        -------
             tuple of (dict, dict):
                 - The first dictionary maps feature names to their respective number of bins or categories if they are
                   processed using discretization or ordinal encoding.
@@ -384,6 +414,7 @@ class Preprocessor:
                   processed using discretization or ordinal encoding.
                 - The second dictionary includes feature names with other encoding details, such as the dimension of
                   features after encoding transformations (e.g., one-hot encoding dimensions).
+
         """
         binned_or_ordinal_info = {}
         other_encoding_info = {}
@@ -402,7 +433,8 @@ class Preprocessor:
                 # Handle features processed with discretization
                 if "discretizer" in steps:
                     step = transformer_pipeline.named_steps["discretizer"]
-                    n_bins = step.n_bins_[0] if hasattr(step, "n_bins_") else None
+                    n_bins = step.n_bins_[0] if hasattr(
+                        step, "n_bins_") else None
 
                     # Check if discretization is followed by one-hot encoding
                     if "onehot_from_ordinal" in steps:
@@ -423,7 +455,8 @@ class Preprocessor:
                 # Handle features processed with continuous ordinal encoding
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
-                    n_categories = len(step.mapping_[columns.index(feature_name)])
+                    n_categories = len(
+                        step.mapping_[columns.index(feature_name)])
                     binned_or_ordinal_info[feature_name] = n_categories
                     print(
                         f"Categorical Feature (Ordinal Encoded): {feature_name}, Number of unique categories: {n_categories}"
