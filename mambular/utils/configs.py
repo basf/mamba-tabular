@@ -29,8 +29,8 @@ class DefaultMambularConfig:
     head_dropout: float = 0.5
     head_skip_layers: bool = False
     head_activation: callable = nn.SELU()
-    head_use_batch_norm: bool = (False,)
-    layer_norm_after_embedding: bool = (False,)
+    head_use_batch_norm: bool = False
+    layer_norm_after_embedding: bool = False
     pooling_method: str = "avg"
 
 
@@ -52,6 +52,11 @@ class DefaultFTTransformerConfig:
     head_dropout: float = 0.5
     head_skip_layers: bool = False
     head_activation: callable = nn.SELU()
-    head_use_batch_norm: bool = (False,)
-    layer_norm_after_embedding: bool = (False,)
-    pooling_method: str = "avg"
+    head_use_batch_norm: bool = False
+    layer_norm_after_embedding: bool = False
+    pooling_method: str = "cls"
+    norm_first: bool = False
+    bias: bool = True
+    transformer_activation: callable = nn.SELU()
+    layer_norm_eps: float = 1e-05
+    transformer_dim_feedforward: int = 2048
