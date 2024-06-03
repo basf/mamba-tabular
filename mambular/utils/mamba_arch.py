@@ -2,7 +2,14 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .config import MambularConfig
+from .normalization_layers import (
+    RMSNorm,
+    LayerNorm,
+    LearnableLayerScaling,
+    BatchNorm,
+    InstanceNorm,
+    GroupNorm,
+)
 
 
 ### Heavily inspired and mostly taken from https://github.com/alxndrTL/mamba.py
@@ -16,13 +23,48 @@ class Mamba(nn.Module):
         layers (nn.ModuleList): List of MambaBlocks constituting the model.
     """
 
-    def __init__(self, config: MambularConfig):
+    def __init__(
+        self,
+        d_model=32,
+        n_layers=8,
+        expand_factor=2,
+        bias=False,
+        d_conv=8,
+        conv_bias=True,
+        dropout=0.01,
+        dt_rank="auto",
+        d_state=16,
+        dt_scale=1.0,
+        dt_init="random",
+        dt_max=0.1,
+        dt_min=1e-03,
+        dt_init_floor=1e-04,
+        norm=RMSNorm,
+        activation=F.silu,
+    ):
         super().__init__()
 
-        self.config = config
-
         self.layers = nn.ModuleList(
-            [ResidualBlock(config) for _ in range(config.n_layers)]
+            [
+                ResidualBlock(
+                    d_model,
+                    expand_factor,
+                    bias,
+                    d_conv,
+                    conv_bias,
+                    dropout,
+                    dt_rank,
+                    d_state,
+                    dt_scale,
+                    dt_init,
+                    dt_max,
+                    dt_min,
+                    dt_init_floor,
+                    norm,
+                    activation,
+                )
+                for _ in range(n_layers)
+            ]
         )
 
     def forward(self, x):
@@ -40,11 +82,67 @@ class ResidualBlock(nn.Module):
         norm (RMSNorm): Normalization layer.
     """
 
-    def __init__(self, config: MambularConfig):
+    def __init__(
+        self,
+        d_model=32,
+        expand_factor=2,
+        bias=False,
+        d_conv=16,
+        conv_bias=True,
+        dropout=0.01,
+        dt_rank="auto",
+        d_state=32,
+        dt_scale=1.0,
+        dt_init="random",
+        dt_max=0.1,
+        dt_min=1e-03,
+        dt_init_floor=1e-04,
+        norm=RMSNorm,
+        activation=F.silu,
+    ):
         super().__init__()
 
-        self.layers = MambaBlock(config)
-        self.norm = config.norm(config.d_model)
+        VALID_NORMALIZATION_LAYERS = {
+            "RMSNorm": RMSNorm,
+            "LayerNorm": LayerNorm,
+            "LearnableLayerScaling": LearnableLayerScaling,
+            "BatchNorm": BatchNorm,
+            "InstanceNorm": InstanceNorm,
+            "GroupNorm": GroupNorm,
+        }
+
+        # Check if the provided normalization layer is valid
+        if isinstance(norm, type) and norm.__name__ not in VALID_NORMALIZATION_LAYERS:
+            raise ValueError(
+                f"Invalid normalization layer: {norm.__name__}. "
+                f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
+            )
+        elif isinstance(norm, str) and norm not in self.VALID_NORMALIZATION_LAYERS:
+            raise ValueError(
+                f"Invalid normalization layer: {norm}. "
+                f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
+            )
+
+        if dt_rank == "auto":
+            dt_rank = math.ceil(d_model / 16)
+
+        self.layers = MambaBlock(
+            d_model=d_model,
+            expand_factor=expand_factor,
+            bias=bias,
+            d_conv=d_conv,
+            conv_bias=conv_bias,
+            dropout=dropout,
+            dt_rank=dt_rank,
+            d_state=d_state,
+            dt_scale=dt_scale,
+            dt_init=dt_init,
+            dt_max=dt_max,
+            dt_min=dt_min,
+            dt_init_floor=dt_init_floor,
+            activation=activation,
+        )
+        self.norm = norm(d_model)
 
     def forward(self, x):
         output = self.layers(self.norm(x)) + x
@@ -65,53 +163,66 @@ class MambaBlock(nn.Module):
         out_proj (nn.Linear): Linear projection for output.
     """
 
-    def __init__(self, config: MambularConfig):
+    def __init__(
+        self,
+        d_model=32,
+        expand_factor=2,
+        bias=False,
+        d_conv=16,
+        conv_bias=True,
+        dropout=0.01,
+        dt_rank="auto",
+        d_state=32,
+        dt_scale=1.0,
+        dt_init="random",
+        dt_max=0.1,
+        dt_min=1e-03,
+        dt_init_floor=1e-04,
+        activation=F.silu,
+    ):
         super().__init__()
+        self.d_inner = d_model * expand_factor
 
-        self.config = config
-
-        self.in_proj = nn.Linear(config.d_model, 2 * config.d_inner, bias=config.bias)
+        self.in_proj = nn.Linear(d_model, 2 * self.d_inner, bias=bias)
 
         self.conv1d = nn.Conv1d(
-            in_channels=config.d_inner,
-            out_channels=config.d_inner,
-            kernel_size=config.d_conv,
-            bias=config.conv_bias,
-            groups=config.d_inner,
-            padding=config.d_conv - 1,
+            in_channels=self.d_inner,
+            out_channels=self.d_inner,
+            kernel_size=d_conv,
+            bias=conv_bias,
+            groups=self.d_inner,
+            padding=d_conv - 1,
         )
 
-        self.dropout = nn.Dropout(config.dropout)
+        self.dropout = nn.Dropout(dropout)
+        self.activation = activation
 
-        self.x_proj = nn.Linear(
-            config.d_inner, config.dt_rank + 2 * config.d_state, bias=False
-        )
+        self.x_proj = nn.Linear(self.d_inner, dt_rank + 2 * d_state, bias=False)
 
-        self.dt_proj = nn.Linear(config.dt_rank, config.d_inner, bias=True)
+        self.dt_proj = nn.Linear(dt_rank, self.d_inner, bias=True)
 
-        dt_init_std = config.dt_rank**-0.5 * config.dt_scale
-        if config.dt_init == "constant":
+        dt_init_std = dt_rank**-0.5 * dt_scale
+        if dt_init == "constant":
             nn.init.constant_(self.dt_proj.weight, dt_init_std)
-        elif config.dt_init == "random":
+        elif dt_init == "random":
             nn.init.uniform_(self.dt_proj.weight, -dt_init_std, dt_init_std)
         else:
             raise NotImplementedError
 
         dt = torch.exp(
-            torch.rand(config.d_inner)
-            * (math.log(config.dt_max) - math.log(config.dt_min))
-            + math.log(config.dt_min)
-        ).clamp(min=config.dt_init_floor)
+            torch.rand(self.d_inner) * (math.log(dt_max) - math.log(dt_min))
+            + math.log(dt_min)
+        ).clamp(min=dt_init_floor)
         inv_dt = dt + torch.log(-torch.expm1(-dt))
         with torch.no_grad():
             self.dt_proj.bias.copy_(inv_dt)
 
-        A = torch.arange(1, config.d_state + 1, dtype=torch.float32).repeat(
-            config.d_inner, 1
-        )
+        A = torch.arange(1, d_state + 1, dtype=torch.float32).repeat(self.d_inner, 1)
         self.A_log = nn.Parameter(torch.log(A))
-        self.D = nn.Parameter(torch.ones(config.d_inner))
-        self.out_proj = nn.Linear(config.d_inner, config.d_model, bias=config.bias)
+        self.D = nn.Parameter(torch.ones(self.d_inner))
+        self.out_proj = nn.Linear(self.d_inner, d_model, bias=bias)
+        self.dt_rank = dt_rank
+        self.d_state = d_state
 
     def forward(self, x):
         _, L, _ = x.shape
@@ -123,11 +234,11 @@ class MambaBlock(nn.Module):
         x = self.conv1d(x)[:, :, :L]
         x = x.transpose(1, 2)
 
-        x = F.silu(x)
+        x = self.activation(x)
         x = self.dropout(x)
         y = self.ssm(x)
 
-        z = F.silu(z)
+        z = self.activation(z)
         z = self.dropout(z)
 
         output = y * z
@@ -143,7 +254,7 @@ class MambaBlock(nn.Module):
 
         delta, B, C = torch.split(
             deltaBC,
-            [self.config.dt_rank, self.config.d_state, self.config.d_state],
+            [self.dt_rank, self.d_state, self.d_state],
             dim=-1,
         )
         delta = F.softplus(self.dt_proj(delta))
@@ -160,9 +271,7 @@ class MambaBlock(nn.Module):
 
         BX = deltaB * (x.unsqueeze(-1))
 
-        h = torch.zeros(
-            x.size(0), self.config.d_inner, self.config.d_state, device=deltaA.device
-        )
+        h = torch.zeros(x.size(0), self.d_inner, self.d_state, device=deltaA.device)
         hs = []
 
         for t in range(0, L):

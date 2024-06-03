@@ -16,7 +16,7 @@ sys.path.insert(1, os.path.dirname(
 
 project = 'mambular'
 copyright = '2024, Christoph Weisser'
-author = 'Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken'
+author = 'Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar'
 
 VERSION_PATH = "../mambular/__version__.py"
 with open(VERSION_PATH) as f:

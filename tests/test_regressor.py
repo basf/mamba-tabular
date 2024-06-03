@@ -34,9 +34,9 @@ class TestMambularRegressor(unittest.TestCase):
 
     def test_initialization(self):
         # This assumes MambularConfig is properly imported and used in the MambularRegressor class
-        from mambular.utils.config import MambularConfig
+        from mambular.utils.configs import DefaultMambularConfig
 
-        self.assertIsInstance(self.regressor.config, MambularConfig)
+        self.assertIsInstance(self.regressor.config, DefaultMambularConfig)
         self.assertEqual(self.regressor.config.d_model, 128)
         self.assertEqual(self.regressor.config.dropout, 0.1)
 
@@ -65,8 +65,7 @@ class TestMambularRegressor(unittest.TestCase):
         # Create mock return objects that mimic tensor behavior
         mock_prediction = MagicMock()
         mock_prediction.cpu.return_value = MagicMock()
-        mock_prediction.cpu.return_value.numpy.return_value = np.array([
-                                                                       0.5] * 100)
+        mock_prediction.cpu.return_value.numpy.return_value = np.array([0.5] * 100)
 
         # Mock the model and its method calls
         self.regressor.model = MagicMock()
@@ -87,8 +86,7 @@ class TestMambularRegressor(unittest.TestCase):
         self.regressor.predict = MagicMock(return_value=mock_predictions)
 
         # Define metrics to test
-        metrics = {"Mean Squared Error": mean_squared_error,
-                   "R2 Score": r2_score}
+        metrics = {"Mean Squared Error": mean_squared_error, "R2 Score": r2_score}
 
         # Call evaluate with the defined metrics
         result = self.regressor.evaluate(self.X, self.y, metrics=metrics)

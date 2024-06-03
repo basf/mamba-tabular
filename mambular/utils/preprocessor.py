@@ -1,180 +1,14 @@
 import numpy as np
 import pandas as pd
-from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import (KBinsDiscretizer, MinMaxScaler,
-                                   StandardScaler)
+from sklearn.preprocessing import KBinsDiscretizer, MinMaxScaler, StandardScaler
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-__all__ = ['Preprocessor']
-
-
-class CustomBinner(TransformerMixin):
-    def __init__(self, bins):
-        # bins can be a scalar (number of bins) or array-like (bin edges)
-        self.bins = bins
-
-    def fit(self, X, y=None):
-        # Fit doesn't need to do anything as we are directly using provided bins
-        return self
-
-    def transform(self, X):
-        if isinstance(self.bins, int):
-            # Calculate equal width bins based on the range of the data and number of bins
-            _, bins = pd.cut(X.squeeze(), bins=self.bins, retbins=True)
-        else:
-            # Use predefined bins
-            bins = self.bins
-
-        # Apply the bins to the data
-        binned_data = pd.cut(
-            X.squeeze(),
-            bins=np.sort(np.unique(bins)),
-            labels=False,
-            include_lowest=True,
-        )
-        print(binned_data)
-        return np.expand_dims(np.array(binned_data), 1)
-
-
-class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
-    """
-    This encoder converts categorical features into continuous integer values. Each unique category within a feature
-    is assigned a unique integer based on its order of appearance in the dataset. This transformation is useful for
-    models that can only handle continuous data.
-
-    Attributes:
-        mapping_ (list of dicts): A list where each element is a dictionary mapping original categories to integers
-                                  for a single feature.
-
-    Methods:
-        fit(X, y=None): Learns the mapping from original categories to integers.
-        transform(X): Applies the learned mapping to the data.
-        get_feature_names_out(input_features=None): Returns the input features after transformation.
-    """
-
-    def fit(self, X, y=None):
-        """
-        Learns the mapping from original categories to integers for each feature.
-
-        Parameters:
-            X (array-like of shape (n_samples, n_features)): The input data to fit.
-            y (ignored): Not used, present for API consistency by convention.
-
-        Returns:
-            self: Returns the instance itself.
-        """
-        # Fit should determine the mapping from original categories to sequential integers starting from 0
-        self.mapping_ = [
-            {category: i for i, category in enumerate(np.unique(col))} for col in X.T
-        ]
-        return self
-
-    def transform(self, X):
-        """
-        Transforms the categories in X to their corresponding integer values based on the learned mapping.
-
-        Parameters:
-            X (array-like of shape (n_samples, n_features)): The input data to transform.
-
-        Returns:
-            X_transformed (ndarray of shape (n_samples, n_features)): The transformed data with integer values.
-        """
-        # Transform the categories to their mapped integer values
-        X_transformed = np.array(
-            [
-                [self.mapping_[col].get(value, -1)
-                 for col, value in enumerate(row)]
-                for row in X
-            ]
-        )
-        return X_transformed
-
-    def get_feature_names_out(self, input_features=None):
-        """
-        Returns the names of the transformed features.
-
-        Parameters:
-            input_features (list of str): The names of the input features.
-
-        Returns:
-            input_features (array of shape (n_features,)): The names of the output features after transformation.
-        """
-        if input_features is None:
-            raise ValueError("input_features must be specified")
-        return input_features
-
-
-class OneHotFromOrdinal(TransformerMixin, BaseEstimator):
-    """
-    A transformer that takes ordinal-encoded features and converts them into one-hot encoded format. This is useful
-    in scenarios where features have been pre-encoded with ordinal encoding and a one-hot representation is required
-    for model training.
-
-    Attributes:
-        max_bins_ (ndarray of shape (n_features,)): An array containing the maximum bin index for each feature,
-                                                    determining the size of the one-hot encoded array for that feature.
-
-    Methods:
-        fit(X, y=None): Learns the maximum bin index for each feature.
-        transform(X): Converts ordinal-encoded features into one-hot format.
-        get_feature_names_out(input_features=None): Returns the feature names after one-hot encoding.
-    """
-
-    def fit(self, X, y=None):
-        """
-        Learns the maximum bin index for each feature from the data.
-
-        Parameters:
-            X (array-like of shape (n_samples, n_features)): The input data to fit, containing ordinal-encoded features.
-            y (ignored): Not used, present for API consistency by convention.
-
-        Returns:
-            self: Returns the instance itself.
-        """
-        self.max_bins_ = (
-            np.max(X, axis=0).astype(int) + 1
-        )  # Find the maximum bin index for each feature
-        return self
-
-    def transform(self, X):
-        """
-        Transforms ordinal-encoded features into one-hot encoded format based on the `max_bins_` learned during fitting.
-
-        Parameters:
-            X (array-like of shape (n_samples, n_features)): The input data to transform, containing ordinal-encoded features.
-
-        Returns:
-            X_one_hot (ndarray of shape (n_samples, n_output_features)): The one-hot encoded features.
-        """
-        # Initialize an empty list to hold the one-hot encoded arrays
-        one_hot_encoded = []
-        for i, max_bins in enumerate(self.max_bins_):
-            # Convert each feature to one-hot using its max_bins
-            feature_one_hot = np.eye(max_bins)[X[:, i].astype(int)]
-            one_hot_encoded.append(feature_one_hot)
-        # Concatenate the one-hot encoded features horizontally
-        return np.hstack(one_hot_encoded)
-
-    def get_feature_names_out(self, input_features=None):
-        """
-        Generates feature names for the one-hot encoded features based on the input feature names and the number of bins.
-
-        Parameters:
-            input_features (list of str): The names of the input features that were ordinal-encoded.
-
-        Returns:
-            feature_names (array of shape (n_output_features,)): The names of the one-hot encoded features.
-        """
-        feature_names = []
-        for i, max_bins in enumerate(self.max_bins_):
-            feature_names.extend(
-                [f"{input_features[i]}_bin_{j}" for j in range(int(max_bins))]
-            )
-        return np.array(feature_names)
+from .ple_encoding import PLE
+from .prepro_utils import ContinuousOrdinalEncoder, CustomBinner, OneHotFromOrdinal
 
 
 class Preprocessor:
@@ -196,27 +30,69 @@ class Preprocessor:
         use_decision_tree_bins (bool): If True, uses decision tree regression/classification to determine
                                        optimal bin edges for numerical feature binning. This parameter is
                                        relevant only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
+        binning_strategy (str): Defines the strategy for binning numerical features. Options include 'uniform',
+                                'quantile', or other sklearn-compatible strategies.
+        task (str): Indicates the type of machine learning task ('regression' or 'classification'). This can
+                    influence certain preprocessing behaviors, especially when using decision tree-based binning.
+        binning_strategy (str): Defines the strategy for binning numerical features. Options include 'uniform',
+                                'quantile', or other sklearn-compatible strategies.
+        task (str): Indicates the type of machine learning task ('regression' or 'classification'). This can
+                    influence certain preprocessing behaviors, especially when using decision tree-based binning.
+        cat_cutoff (float or int): Indicates the cutoff after which integer values are treated as categorical.
+                                   If float, it's treated as a percentage. If int, it's the maximum number of
+                                   unique values for a column to be considered categorical.
+        treat_all_integers_as_numerical (bool): If True, all integer columns will be treated as numerical, regardless
+                                                of their unique value count or proportion.
+
 
     Attributes
     ----------
-        column_transformer (ColumnTransformer): A sklearn ColumnTransformer instance that holds the configured
-                                                preprocessing pipelines for the different feature types.
+        column_transformer (ColumnTransformer): An instance of sklearn's ColumnTransformer that holds the
+                                                configured preprocessing pipelines for different feature types.
+        fitted (bool): Indicates whether the preprocessor has been fitted to the data.
 
     """
 
     def __init__(
         self,
-        n_bins=200,
-        numerical_preprocessing="binning",
+        n_bins=50,
+        numerical_preprocessing="ple",
         use_decision_tree_bins=False,
         binning_strategy="uniform",
+        task="regression",
+        cat_cutoff=0.03,
+        treat_all_integers_as_numerical=False,
     ):
         self.n_bins = n_bins
-        self.numerical_preprocessing = numerical_preprocessing
+        self.numerical_preprocessing = numerical_preprocessing.lower()
+        if self.numerical_preprocessing not in [
+            "ple",
+            "binning",
+            "one_hot",
+            "standardization",
+            "normalization",
+        ]:
+            raise ValueError(
+                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', and 'normalization'."
+            )
+        self.numerical_preprocessing = numerical_preprocessing.lower()
+        if self.numerical_preprocessing not in [
+            "ple",
+            "binning",
+            "one_hot",
+            "standardization",
+            "normalization",
+        ]:
+            raise ValueError(
+                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', and 'normalization'."
+            )
         self.use_decision_tree_bins = use_decision_tree_bins
         self.column_transformer = None
         self.fitted = False
         self.binning_strategy = binning_strategy
+        self.task = task
+        self.cat_cutoff = cat_cutoff
+        self.treat_all_integers_as_numerical = treat_all_integers_as_numerical
 
     def set_params(self, **params):
         for key, value in params.items():
@@ -228,10 +104,13 @@ class Preprocessor:
         Identifies and separates the features in the dataset into numerical and categorical types based on the data type
         and the proportion of unique values.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame or dict): The input dataset, where the features are columns in a DataFrame or keys in a dict.
 
-        Returns:
+
+        Returns
+        -------
             tuple: A tuple containing two lists, the first with the names of numerical features and the second with the names of categorical features.
         """
         categorical_features = []
@@ -243,13 +122,28 @@ class Preprocessor:
         for col in X.columns:
             num_unique_values = X[col].nunique()
             total_samples = len(X[col])
-            if X[col].dtype.kind not in "iufc" or (
-                X[col].dtype.kind == "i" and (
-                    num_unique_values / total_samples) < 0.05
-            ):
-                categorical_features.append(col)
-            else:
+
+            if self.treat_all_integers_as_numerical and X[col].dtype.kind == "i":
                 numerical_features.append(col)
+            else:
+                if isinstance(self.cat_cutoff, float):
+                    cutoff_condition = (
+                        num_unique_values / total_samples
+                    ) < self.cat_cutoff
+                elif isinstance(self.cat_cutoff, int):
+                    cutoff_condition = num_unique_values < self.cat_cutoff
+                else:
+                    raise ValueError(
+                        "cat_cutoff should be either a float or an integer."
+                    )
+
+                if X[col].dtype.kind not in "iufc" or (
+                    X[col].dtype.kind == "i" and cutoff_condition
+                ):
+                    categorical_features.append(col)
+                else:
+                    numerical_features.append(col)
+
         return numerical_features, categorical_features
 
     def fit(self, X, y=None):
@@ -257,11 +151,14 @@ class Preprocessor:
         Fits the preprocessor to the data by identifying feature types and configuring the appropriate transformations for each feature.
         It sets up a column transformer with a pipeline of transformations for numerical and categorical features based on the specified preprocessing strategy.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame or dict): The input dataset to fit the preprocessor on.
             y (array-like, optional): The target variable. Required if `use_decision_tree_bins` is True for determining optimal bin edges using decision trees.
 
-        Returns:
+
+        Returns
+        -------
             self: The fitted Preprocessor instance.
         """
         if isinstance(X, dict):
@@ -278,8 +175,7 @@ class Preprocessor:
 
                 if self.numerical_preprocessing in ["binning", "one_hot"]:
                     bins = (
-                        self._get_decision_tree_bins(
-                            X[[feature]], y, [feature])
+                        self._get_decision_tree_bins(X[[feature]], y, [feature])
                         if self.use_decision_tree_bins
                         else self.n_bins
                     )
@@ -294,8 +190,7 @@ class Preprocessor:
                                         else len(bins) - 1,
                                         encode="ordinal",
                                         strategy=self.binning_strategy,
-                                        subsample=200_000 if len(
-                                            X) > 200_000 else None,
+                                        subsample=200_000 if len(X) > 200_000 else None,
                                     ),
                                 ),
                             ]
@@ -318,17 +213,26 @@ class Preprocessor:
                         )
 
                 elif self.numerical_preprocessing == "standardization":
-                    numeric_transformer_steps.append(
-                        ("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(("scaler", StandardScaler()))
 
                 elif self.numerical_preprocessing == "normalization":
+                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+
+                elif self.numerical_preprocessing == "ple":
+                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
                     numeric_transformer_steps.append(
-                        ("normalizer", MinMaxScaler()))
+                        ("ple", PLE(n_bins=self.n_bins, task=self.task))
+                    )
+
+                elif self.numerical_preprocessing == "ple":
+                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+                    numeric_transformer_steps.append(
+                        ("ple", PLE(n_bins=self.n_bins, task=self.task))
+                    )
 
                 numeric_transformer = Pipeline(numeric_transformer_steps)
 
-                transformers.append(
-                    (f"num_{feature}", numeric_transformer, [feature]))
+                transformers.append((f"num_{feature}", numeric_transformer, [feature]))
 
         if categorical_features:
             for feature in categorical_features:
@@ -336,7 +240,10 @@ class Preprocessor:
                 categorical_transformer = Pipeline(
                     [
                         ("imputer", SimpleImputer(strategy="most_frequent")),
-                        ("continuous_ordinal", ContinuousOrdinalEncoder()),
+                        (
+                            "continuous_ordinal",
+                            ContinuousOrdinalEncoder(),
+                        ),
                     ]
                 )
                 # Append the transformer for the current categorical feature
@@ -355,12 +262,15 @@ class Preprocessor:
         """
         Uses decision tree models to determine optimal bin edges for numerical feature binning. This method is used when `use_decision_tree_bins` is True.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame): The input dataset containing only the numerical features for which the bin edges are to be determined.
             y (array-like): The target variable for training the decision tree models.
             numerical_features (list of str): The names of the numerical features for which the bin edges are to be determined.
 
-        Returns:
+
+        Returns
+        -------
             list: A list of arrays, where each array contains the bin edges determined by the decision tree for a numerical feature.
         """
         bins = []
@@ -375,60 +285,75 @@ class Preprocessor:
             bin_edges = np.sort(np.unique(thresholds))
 
             bins.append(
-                np.concatenate(
-                    ([X[feature].min()], bin_edges, [X[feature].max()]))
+                np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()]))
             )
         return bins
 
     def transform(self, X):
         """
-        Transforms the dataset using the fitted preprocessing pipelines. This method applies the transformations set up during the fitting process
-        to the input data and returns a dictionary with the transformed data.
+        Transforms the input data using the preconfigured column transformer and converts the output into a dictionary
+        format with keys corresponding to transformed feature names and values as arrays of transformed data.
 
-        Parameters:
-            X (DataFrame or dict): The input dataset to be transformed.
+        This method converts the sparse or dense matrix returned by the column transformer into a more accessible
+        dictionary format, where each key-value pair represents a feature and its transformed data.
+        Transforms the input data using the preconfigured column transformer and converts the output into a dictionary
+        format with keys corresponding to transformed feature names and values as arrays of transformed data.
 
-        Returns:
-            dict: A dictionary where keys are the base feature names and values are the transformed features as arrays.
+        This method converts the sparse or dense matrix returned by the column transformer into a more accessible
+        dictionary format, where each key-value pair represents a feature and its transformed data.
+
+        Parameters
+        ----------
+            X (DataFrame): The input data to be transformed.
+            X (DataFrame): The input data to be transformed.
+
+
+        Returns
+        -------
+            dict: A dictionary where keys are the names of the features (as per the transformations defined in the
+            column transformer) and the values are numpy arrays of the transformed data.
         """
         if not self.fitted:
             raise NotFittedError(
-                "This Preprocessor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method."
+                "The preprocessor must be fitted before transforming new data. Use .fit or .fit_transform"
             )
+        transformed_X = self.column_transformer.transform(X)
 
-        if isinstance(X, dict):
-            X = pd.DataFrame(X)
+        # Now let's convert this into a dictionary of arrays, one per column
+        transformed_dict = self._split_transformed_output(X, transformed_X)
+        return transformed_dict
 
-        # Transform X using the column transformer
-        transformed_X = self.column_transformer.transform(
-            X
-        )  # To understand the shape of the transformed data
+    def _split_transformed_output(self, X, transformed_X):
+        """
+        Splits the transformed data array into a dictionary where keys correspond to the original column names or
+        feature groups and values are the transformed data for those columns.
 
-        # Initialize the transformed dictionary
+        This helper method is utilized within `transform` to segregate the transformed data based on the
+        specification in the column transformer, assigning each transformed section to its corresponding feature name.
+
+        Parameters
+        ----------
+            X (DataFrame): The original input data, used for determining shapes and transformations.
+            transformed_X (numpy array): The transformed data as a numpy array, outputted by the column transformer.
+
+
+        Returns
+        -------
+            dict: A dictionary mapping each transformation's name to its respective numpy array of transformed data.
+            The type of each array (int or float) is determined based on the type of transformation applied.
+        """
+        start = 0
         transformed_dict = {}
-
-        # Retrieve output feature names from the column transformer
-        output_features = self.column_transformer.get_feature_names_out()
-
-        # Iterate over each output feature name to populate the transformed_dict
-        for i, col in enumerate(output_features):
-            # Extract the base feature name (before any transformation)
-            base_feature = col.split("__")[0]
-
-            # If the base feature name already exists in the dictionary, append the new data
-            if base_feature in transformed_dict:
-                transformed_dict[base_feature] = np.vstack(
-                    [transformed_dict[base_feature], transformed_X[:, i]]
-                )
-            else:
-                # Otherwise, create a new entry in the dictionary
-                transformed_dict[base_feature] = transformed_X[:, i]
-
-        # Ensure all arrays in the dictionary are the correct shape
-        for key in transformed_dict.keys():
-            transformed_dict[key] = (
-                transformed_dict[key].reshape(-1, transformed_X.shape[0]).T
-            )
+        for (
+            name,
+            transformer,
+            columns,
+        ) in self.column_transformer.transformers_:
+            if transformer != "drop":
+                end = start + transformer.transform(X[[columns[0]]]).shape[1]
+                dtype = int if "cat" in name else float
+                transformed_dict[name] = transformed_X[:, start:end].astype(dtype)
+                start = end
 
         return transformed_dict
 
@@ -436,11 +361,14 @@ class Preprocessor:
         """
         Fits the preprocessor to the data and then transforms the data using the fitted preprocessing pipelines. This is a convenience method that combines `fit` and `transform`.
 
-        Parameters:
+        Parameters
+        ----------
             X (DataFrame or dict): The input dataset to fit the preprocessor on and then transform.
             y (array-like, optional): The target variable. Required if `use_decision_tree_bins` is True.
 
-        Returns:
+
+        Returns
+        -------
             dict: A dictionary with the transformed data, where keys are the base feature names and values are the transformed features as arrays.
         """
         self.fit(X, y)
@@ -449,12 +377,28 @@ class Preprocessor:
 
     def get_feature_info(self):
         """
-        Returns detailed information about the processed features, including the number of bins for binned features
-        and the dimensionality of encoded features. This method is useful for understanding the transformations applied to each feature.
+        Retrieves information about how features are encoded within the model's preprocessor.
+        This method identifies the type of encoding applied to each feature, categorizing them into binned or ordinal
+        encodings and other types of encodings (e.g., one-hot encoding after discretization).
 
-        Returns:
-            tuple: A tuple containing two dictionaries, the first with information about binned or ordinal encoded features and
-                   the second with information about other encoded features.
+        This method should only be called after the preprocessor has been fitted, as it relies on the structure and
+        configuration of the `column_transformer` attribute.
+
+
+        Raises
+        ------
+            RuntimeError: If the `column_transformer` is not yet fitted, indicating that the preprocessor must be
+            fitted before invoking this method.
+
+
+        Returns
+        -------
+            tuple of (dict, dict):
+                - The first dictionary maps feature names to their respective number of bins or categories if they are
+                  processed using discretization or ordinal encoding.
+                - The second dictionary includes feature names with other encoding details, such as the dimension of
+                  features after encoding transformations (e.g., one-hot encoding dimensions).
+
         """
         binned_or_ordinal_info = {}
         other_encoding_info = {}
@@ -473,8 +417,7 @@ class Preprocessor:
                 # Handle features processed with discretization
                 if "discretizer" in steps:
                     step = transformer_pipeline.named_steps["discretizer"]
-                    n_bins = step.n_bins_[0] if hasattr(
-                        step, "n_bins_") else None
+                    n_bins = step.n_bins_[0] if hasattr(step, "n_bins_") else None
 
                     # Check if discretization is followed by one-hot encoding
                     if "onehot_from_ordinal" in steps:
@@ -495,8 +438,7 @@ class Preprocessor:
                 # Handle features processed with continuous ordinal encoding
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
-                    n_categories = len(
-                        step.mapping_[columns.index(feature_name)])
+                    n_categories = len(step.mapping_[columns.index(feature_name)])
                     binned_or_ordinal_info[feature_name] = n_categories
                     print(
                         f"Categorical Feature (Ordinal Encoded): {feature_name}, Number of unique categories: {n_categories}"
@@ -511,7 +453,8 @@ class Preprocessor:
                         )
                         other_encoding_info[feature_name] = transformed_feature.shape[1]
                         print(
-                            f"Feature: {feature_name} ({self.numerical_preprocessing}), Encoded feature dimension: {transformed_feature.shape[1]}"
+                            f"Feature: {feature_name} (Other Encoding), Encoded feature dimension: {transformed_feature.shape[1]}"
+                            f"Feature: {feature_name} (Other Encoding), Encoded feature dimension: {transformed_feature.shape[1]}"
                         )
 
                 print("-" * 50)

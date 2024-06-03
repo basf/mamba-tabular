@@ -20,7 +20,7 @@ class TestPreprocessor(unittest.TestCase):
 
     def test_initialization(self):
         """Test initialization of the Preprocessor with default parameters."""
-        pp = Preprocessor(n_bins=20)
+        pp = Preprocessor(n_bins=20, numerical_preprocessing="binning")
         self.assertEqual(pp.n_bins, 20)
         self.assertEqual(pp.numerical_preprocessing, "binning")
         self.assertFalse(pp.use_decision_tree_bins)
@@ -28,7 +28,7 @@ class TestPreprocessor(unittest.TestCase):
     def test_fit(self):
         """Test the fitting process of the preprocessor."""
         pp = Preprocessor(numerical_preprocessing="binning", n_bins=20)
-        pp.fit(self.data)
+        pp.fit(self.data, self.target)
         self.assertIsNotNone(pp.column_transformer)
 
     def test_transform_not_fitted(self):
@@ -40,8 +40,15 @@ class TestPreprocessor(unittest.TestCase):
     def test_fit_transform(self):
         """Test fitting and transforming the data."""
         pp = Preprocessor(numerical_preprocessing="standardization")
-        transformed_data = pp.fit_transform(self.data)
-        print(transformed_data)
+        transformed_data = pp.fit_transform(self.data, self.target)
+        self.assertIsInstance(transformed_data, dict)
+        self.assertTrue("num_numerical" in transformed_data)
+        self.assertTrue("cat_categorical" in transformed_data)
+
+    def test_ple(self):
+        """Test fitting and transforming the data."""
+        pp = Preprocessor(numerical_preprocessing="ple", n_bins=20)
+        transformed_data = pp.fit_transform(self.data, self.target)
         self.assertIsInstance(transformed_data, dict)
         self.assertTrue("num_numerical" in transformed_data)
         self.assertTrue("cat_categorical" in transformed_data)
@@ -52,7 +59,7 @@ class TestPreprocessor(unittest.TestCase):
         data_with_missing.loc[0, "numerical"] = np.nan
         data_with_missing.loc[1, "categorical"] = np.nan
         pp = Preprocessor(numerical_preprocessing="normalization")
-        transformed_data = pp.fit_transform(data_with_missing)
+        transformed_data = pp.fit_transform(data_with_missing, self.target)
         self.assertNotIn(np.nan, transformed_data["num_numerical"])
         self.assertNotIn(np.nan, transformed_data["cat_categorical"])
 

@@ -9,20 +9,20 @@ authors:
   - name: Anton Frederik Thielmann
     orcid: 0000-0002-6768-8992
     affiliation: 1
-  - name: Soheila Samiee
-    affiliation: 2
   - name: Christoph Weisser
     affiliation: 1
   - name: Manish Kumar
     affiliation: 1     
   - name: Benjamin Saefken
+    affiliation: 2
+  - name: Soheila Samiee
     affiliation: 3
 affiliations:
   - name: BASF SE, Germany
     index: 1
-  - name: BASF Canada Inc, Canada
-    index: 2
   - name: TU Clausthal, Germany
+    index: 2
+  - name: BASF Canada Inc, Canada
     index: 3
 date: 22 April 2024
 bibliography: paper.bib

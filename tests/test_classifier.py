@@ -35,9 +35,9 @@ class TestMambularClassifier(unittest.TestCase):
 
     def test_initialization(self):
         # This assumes MambularConfig is properly imported and used in the MambularRegressor class
-        from mambular.utils.config import MambularConfig
+        from mambular.utils.configs import DefaultMambularConfig
 
-        self.assertIsInstance(self.classifier.config, MambularConfig)
+        self.assertIsInstance(self.classifier.config, DefaultMambularConfig)
         self.assertEqual(self.classifier.config.d_model, 128)
         self.assertEqual(self.classifier.config.dropout, 0.1)
 
@@ -90,8 +90,7 @@ class TestMambularClassifier(unittest.TestCase):
             axis=1, keepdims=True
         )
         self.classifier.predict = MagicMock(return_value=mock_predictions)
-        self.classifier.predict_proba = MagicMock(
-            return_value=mock_probabilities)
+        self.classifier.predict_proba = MagicMock(return_value=mock_probabilities)
 
         # Define metrics to test
         metrics = {

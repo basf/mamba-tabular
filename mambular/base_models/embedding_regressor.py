@@ -1,9 +1,18 @@
 import lightning as pl
 import torch
 import torch.nn as nn
+from ..utils.normalization_layers import (
+    RMSNorm,
+    LayerNorm,
+    LearnableLayerScaling,
+    BatchNorm,
+    InstanceNorm,
+    GroupNorm,
+)
 
-from ..utils.config import MambularConfig
+from ..utils.configs import DefaultMambularConfig
 from ..utils.mamba_arch import Mamba
+from ..utils.mlp_utils import MLP
 
 
 class BaseEmbeddingMambularRegressor(pl.LightningModule):
@@ -14,20 +23,12 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
 
     Parameters
     ----------
-    config : MambularConfig
-        Configuration parameters for the model architecture.
-    cat_feature_info : dict, optional
-        Information about categorical features, mapping feature names to the number of unique categories. Defaults to None.
-    num_feature_info : dict, optional
-        Information about numerical features, mapping feature names to their number of dimensions after embedding. Defaults to None.
-    lr : float, optional
-        Learning rate for the optimizer. Defaults to 1e-03.
-    lr_patience : int, optional
-        Number of epochs with no improvement after which learning rate will be reduced. Defaults to 10.
-    weight_decay : float, optional
-        Weight decay coefficient for regularization in the optimizer. Defaults to 0.025.
-    lr_factor : float, optional
-        Factor by which the learning rate will be reduced by the scheduler. Defaults to 0.75.
+    cat_feature_info : dict
+        Dictionary containing information about categorical features.
+    num_feature_info : dict
+        Dictionary containing information about numerical features.
+    config : DefaultMambularConfig, optional
+        Configuration object containing default hyperparameters for the model (default is DefaultMambularConfig()).
     seq_size : int, optional
         Size of sequence chunks for processing numerical features. Relevant when `raw_embeddings` is False.
     raw_embeddings : bool, optional
@@ -36,60 +37,108 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
 
     Attributes
     ----------
+    lr : float
+        Learning rate.
+    lr_patience : int
+        Patience for learning rate scheduler.
+    weight_decay : float
+        Weight decay for optimizer.
+    lr_factor : float
+        Factor by which the learning rate will be reduced.
+    pooling_method : str
+        Method to pool the features.
+    cat_feature_info : dict
+        Dictionary containing information about categorical features.
+    num_feature_info : dict
+        Dictionary containing information about numerical features.
+    embedding_activation : callable
+        Activation function for embeddings.
     mamba : Mamba
-        The core neural network module implementing the Mamba architecture.
+        Mamba architecture component.
     norm_f : nn.Module
-        Normalization layer applied after the Mamba block.
-    tabular_head : nn.Linear
-        Final linear layer mapping the features to the regression target.
-    loss_fct : nn.MSELoss
-        The loss function for regression tasks.
+        Normalization layer.
+    num_embeddings : nn.ModuleList
+        Module list for numerical feature embeddings.
+    cat_embeddings : nn.ModuleList
+        Module list for categorical feature embeddings.
+    tabular_head : MLP
+        Multi-layer perceptron head for tabular data.
+    cls_token : nn.Parameter
+        Class token parameter.
+    embedding_norm : nn.Module, optional
+        Layer normalization applied after embedding if specified.
+    loss_fct : nn.Module
+        The loss function used for training the model, MSE loss.
+
     """
 
     def __init__(
         self,
-        config: MambularConfig,
-        cat_feature_info: dict = None,
-        num_feature_info: dict = None,
-        lr=1e-03,
-        lr_patience=10,
-        weight_decay=0.025,
-        lr_factor=0.75,
+        cat_feature_info,
+        num_feature_info,
+        config: DefaultMambularConfig = DefaultMambularConfig(),
         seq_size: int = 20,
         raw_embeddings=False,
+        **kwargs,
     ):
         super().__init__()
 
-        self.config = config
-        self.lr = lr
-        self.lr_patience = lr_patience
-        self.weight_decay = weight_decay
-        self.lr_factor = lr_factor
+        # Save all hyperparameters
+        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+
+        # Assigning values from hyperparameters
+        self.lr = self.hparams.get("lr", config.lr)
+        self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
+        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
+        self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
+        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
+
+        self.embedding_activation = self.hparams.get(
+            "num_embedding_activation", config.num_embedding_activation
+        )
         self.seq_size = seq_size
         self.raw_embeddings = raw_embeddings
 
-        activations = {
-            "relu": nn.ReLU(),
-            "tanh": nn.Tanh(),
-            "sigmoid": nn.Sigmoid(),
-            "leaky_relu": nn.LeakyReLU(),
-            "elu": nn.ELU(),
-            "selu": nn.SELU(),
-            "gelu": nn.GELU(),
-            "softplus": nn.Softplus(),
-            "leakyrelu": nn.LeakyReLU(),
-            "linear": nn.Identity(),
-        }
-
-        self.embedding_activation = activations.get(
-            self.config.num_embedding_activation.lower()
+        # Additional layers and components initialization based on hyperparameters
+        self.mamba = Mamba(
+            d_model=self.hparams.get("d_model", config.d_model),
+            n_layers=self.hparams.get("n_layers", config.n_layers),
+            expand_factor=self.hparams.get("expand_factor", config.expand_factor),
+            bias=self.hparams.get("bias", config.bias),
+            d_conv=self.hparams.get("d_conv", config.d_conv),
+            conv_bias=self.hparams.get("conv_bias", config.conv_bias),
+            dropout=self.hparams.get("dropout", config.dropout),
+            dt_rank=self.hparams.get("dt_rank", config.dt_rank),
+            d_state=self.hparams.get("d_state", config.d_state),
+            dt_scale=self.hparams.get("dt_scale", config.dt_scale),
+            dt_init=self.hparams.get("dt_init", config.dt_init),
+            dt_max=self.hparams.get("dt_max", config.dt_max),
+            dt_min=self.hparams.get("dt_min", config.dt_min),
+            dt_init_floor=self.hparams.get("dt_init_floor", config.dt_init_floor),
+            norm=globals()[self.hparams.get("norm", config.norm)],
+            activation=self.hparams.get("activation", config.activation),
         )
-        if self.embedding_activation is None:
-            raise ValueError(
-                f"Unsupported activation function: {self.config.num_embedding_activation}"
+
+        # Set the normalization layer dynamically
+        norm_layer = self.hparams.get("norm", config.norm)
+        if norm_layer == "RMSNorm":
+            self.norm_f = RMSNorm(self.hparams.get("d_model", config.d_model))
+        elif norm_layer == "LayerNorm":
+            self.norm_f = LayerNorm(self.hparams.get("d_model", config.d_model))
+        elif norm_layer == "BatchNorm":
+            self.norm_f = BatchNorm(self.hparams.get("d_model", config.d_model))
+        elif norm_layer == "InstanceNorm":
+            self.norm_f = InstanceNorm(self.hparams.get("d_model", config.d_model))
+        elif norm_layer == "GroupNorm":
+            self.norm_f = GroupNorm(1, self.hparams.get("d_model", config.d_model))
+        elif norm_layer == "LearnableLayerScaling":
+            self.norm_f = LearnableLayerScaling(
+                self.hparams.get("d_model", config.d_model)
             )
+        else:
+            raise ValueError(f"Unsupported normalization layer: {norm_layer}")
 
         if not self.raw_embeddings:
             data_size = len(num_feature_info.items())
@@ -97,8 +146,11 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
             self.num_embeddings = nn.ModuleList(
                 [
                     nn.Sequential(
-                        nn.Linear(self.seq_size,
-                                  self.config.d_model, bias=False),
+                        nn.Linear(
+                            self.seq_size,
+                            self.hparams.get("d_model", config.d_model),
+                            bias=False,
+                        ),
                         # Example using ReLU as the activation function, change as needed
                         self.embedding_activation,
                     )
@@ -111,51 +163,54 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
             self.num_embeddings = nn.ModuleList(
                 [
                     nn.Sequential(
-                        nn.Linear(1, self.config.d_model, bias=False),
+                        nn.Linear(
+                            input_shape,
+                            self.hparams.get("d_model", config.d_model),
+                            bias=False,
+                        ),
                         # Example using ReLU as the activation function, change as needed
                         self.embedding_activation,
                     )
-                    for _ in range(num_embedding_modules)
+                    for feature_name, input_shape in num_feature_info.items()
                 ]
             )
 
         self.cat_embeddings = nn.ModuleList(
             [
-                nn.Embedding(num_categories + 1, self.config.d_model)
+                nn.Embedding(
+                    num_categories + 1, self.hparams.get("d_model", config.d_model)
+                )
                 for feature_name, num_categories in cat_feature_info.items()
             ]
         )
 
-        self.mamba = Mamba(self.config)
-        self.norm_f = self.config.norm(self.config.d_model)
-        mlp_activation_fn = activations.get(
-            self.config.tabular_head_activation.lower(), nn.Identity()
+        head_activation = self.hparams.get("head_activation", config.head_activation)
+
+        self.tabular_head = MLP(
+            self.hparams.get("d_model", config.d_model),
+            hidden_units_list=self.hparams.get(
+                "head_layer_sizes", config.head_layer_sizes
+            ),
+            dropout_rate=self.hparams.get("head_dropout", config.head_dropout),
+            use_skip_layers=self.hparams.get(
+                "head_skip_layers", config.head_skip_layers
+            ),
+            activation_fn=head_activation,
+            use_batch_norm=self.hparams.get(
+                "head_use_batch_norm", config.head_use_batch_norm
+            ),
         )
 
-        # Dynamically create MLP layers based on config.tabular_units
-        mlp_layers = []
-        input_dim = self.config.d_model  # Initial input dimension
-
-        # Iterate over the specified units for each layer in the MLP
-        for units in self.config.tabular_head_units:
-            mlp_layers.append(nn.Linear(input_dim, units))
-            mlp_layers.append(mlp_activation_fn)
-            mlp_layers.append(nn.Dropout(self.config.tabular_head_dropout))
-            input_dim = units
-
-        # Add the final linear layer to map to a single output value
-        mlp_layers.append(nn.Linear(input_dim, 1))
-
-        # Combine all layers into a Sequential module
-        self.tabular_head = nn.Sequential(*mlp_layers)
-
-        self.pooling_method = self.config.pooling_method
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, self.config.d_model))
-
-        if self.config.layer_norm_after_embedding:
-            self.embedding_norm = nn.LayerNorm(self.config.d_model)
+        self.cls_token = nn.Parameter(
+            torch.zeros(1, 1, self.hparams.get("d_model", config.d_model))
+        )
 
         self.loss_fct = nn.MSELoss()
+
+        if self.hparams.get("layer_norm_after_embedding"):
+            self.embedding_norm = nn.LayerNorm(
+                self.hparams.get("d_model", config.d_model)
+            )
 
     def forward(self, cat_features, num_features):
         """
@@ -176,8 +231,7 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
             The output predictions of the model for regression tasks.
         """
         batch_size = (
-            cat_features[0].size(0) if cat_features != [
-            ] else num_features[0].size(0)
+            cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
         )
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
         # Process categorical features if present
@@ -223,7 +277,7 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
                 ]
                 cat_embeddings = torch.stack(cat_embeddings, dim=1)
                 cat_embeddings = torch.squeeze(cat_embeddings, dim=2)
-                if self.config.layer_norm_after_embedding:
+                if self.hparams.get("layer_norm_after_embedding"):
                     cat_embeddings = self.embedding_norm(cat_embeddings)
             else:
                 cat_embeddings = None
@@ -234,7 +288,7 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
                     emb(num_features[i]) for i, emb in enumerate(self.num_embeddings)
                 ]
                 num_embeddings = torch.stack(num_embeddings, dim=1)
-                if self.config.layer_norm_after_embedding:
+                if self.hparams.get("layer_norm_after_embedding"):
                     num_embeddings = self.embedding_norm(num_embeddings)
             else:
                 num_embeddings = None
@@ -285,8 +339,8 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
         Tensor
             The computed loss for the batch.
         """
-        num_features, cat_features, labels = batch
-        preds = self(num_features, cat_features)
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
 
         loss = self.loss_fct(preds.squeeze(), labels.float())
         self.log(
@@ -310,8 +364,8 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
         batch_idx : int
             The index of the batch within the epoch.
         """
-        num_features, cat_features, labels = batch
-        preds = self(num_features, cat_features)
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
 
         loss = self.loss_fct(preds.squeeze(), labels.float())
         self.log(
@@ -335,7 +389,7 @@ class BaseEmbeddingMambularRegressor(pl.LightningModule):
             A dictionary containing the optimizer and lr_scheduler configurations.
         """
         optimizer = torch.optim.Adam(
-            self.parameters(), lr=self.lr, weight_decay=self.config.weight_decay
+            self.parameters(), lr=self.lr, weight_decay=self.weight_decay
         )
         scheduler = {
             "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(
