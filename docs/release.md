@@ -1,8 +1,8 @@
-## Build and release
+# Build and release
 
 The document outlines the steps to build and release the `mambular` package. At this point, it is assumed that the development and testing of the package have been completed successfully.
 
-### 1. Test documentation
+## 1. Test documentation
 It is expected from the contributor to update the documentation as an when required along side the change in source code. Please use the below process to test the documentation:
 
 ```sh
@@ -12,10 +12,10 @@ make doctest
 ```
 Fix any docstring related issue, then proceed with next steps.
 
-### 2. Version update
+## 2. Version update
 The package version is mantained in `mambular/__version__.py` file. Increment the version according to the changes such as patch, minor, major or all.
 
-### 3. Release
+## 3. Release
 We use git flow for the package release. 
 
 ```sh
