@@ -1,0 +1,929 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index &#8212; mambular</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="_static/jquery.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="2024-06-03"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/mamba_tabular.jpg" class="logo__image only-light" alt="mambular - Home"/>
+    <script>document.write(`<img src="_static/mamba_tabular.jpg" class="logo__image only-dark" alt="mambular - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="examples/classification.html">Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/regression.html">Regression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/embedding.html">Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/distributional.html">Distributional</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/models/index.html">Models</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/models/Models.html">mambular.models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/base_models/index.html">BaseModels</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/base_models/BaseModels.html">mambular.base_models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/utils/index.html">Utils</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/utils/Preprocessor.html">mambular.utils</a></li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="codeofconduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release.html">Build and release</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ 
+</div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.acc">acc (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.acc">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.auroc">auroc (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.auroc">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier">BaseEmbeddingMambularClassifier (class in mambular.base_models)</a>
+</li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor">BaseEmbeddingMambularRegressor (class in mambular.base_models)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier">BaseMambularClassifier (class in mambular.base_models)</a>
+</li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS">BaseMambularLSS (class in mambular.base_models)</a>
+</li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor">BaseMambularRegressor (class in mambular.base_models)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.cat_embeddings">cat_embeddings (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.cat_embeddings">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.cat_embeddings">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.cat_embeddings">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.cat_embeddings">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.cat_feature_info">cat_feature_info (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.cat_feature_info">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.cat_feature_info">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.cat_feature_info">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.cat_feature_info">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.cls_token">cls_token (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.cls_token">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.cls_token">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.cls_token">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.cls_token">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/utils/Preprocessor.html#mambular.utils.Preprocessor.column_transformer">column_transformer (mambular.utils.Preprocessor attribute)</a>
+</li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.config">config (mambular.models.EmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.config">(mambular.models.EmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.config">(mambular.models.MambularClassifier attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.config">(mambular.models.MambularLSS attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.config">(mambular.models.MambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.configure_optimizers">configure_optimizers() (mambular.base_models.BaseEmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.configure_optimizers">(mambular.base_models.BaseEmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.configure_optimizers">(mambular.base_models.BaseMambularClassifier method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.configure_optimizers">(mambular.base_models.BaseMambularLSS method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.configure_optimizers">(mambular.base_models.BaseMambularRegressor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.embedding_activation">embedding_activation (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.embedding_activation">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.embedding_activation">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.embedding_activation">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.embedding_activation">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.embedding_norm">embedding_norm (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.embedding_norm">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.embedding_norm">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.embedding_norm">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.embedding_norm">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier">EmbeddingMambularClassifier (class in mambular.models)</a>
+</li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor">EmbeddingMambularRegressor (class in mambular.models)</a>
+</li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.evaluate">evaluate() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.evaluate">(mambular.models.EmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.evaluate">(mambular.models.MambularClassifier method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.evaluate">(mambular.models.MambularLSS method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.evaluate">(mambular.models.MambularRegressor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.fit">fit() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.fit">(mambular.models.EmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.fit">(mambular.models.MambularClassifier method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.fit">(mambular.models.MambularLSS method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.fit">(mambular.models.MambularRegressor method)</a>
+</li>
+        <li><a href="api/utils/Preprocessor.html#mambular.utils.Preprocessor.fit">(mambular.utils.Preprocessor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/utils/Preprocessor.html#mambular.utils.Preprocessor.fit_transform">fit_transform() (mambular.utils.Preprocessor method)</a>
+</li>
+      <li><a href="api/utils/Preprocessor.html#mambular.utils.Preprocessor.fitted">fitted (mambular.utils.Preprocessor attribute)</a>
+</li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.forward">forward() (mambular.base_models.BaseEmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.forward">(mambular.base_models.BaseEmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.forward">(mambular.base_models.BaseMambularClassifier method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.forward">(mambular.base_models.BaseMambularLSS method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.forward">(mambular.base_models.BaseMambularRegressor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/models/Models.html#mambular.models.MambularLSS.get_default_metrics">get_default_metrics() (mambular.models.MambularLSS method)</a>
+</li>
+      <li><a href="api/utils/Preprocessor.html#mambular.utils.Preprocessor.get_feature_info">get_feature_info() (mambular.utils.Preprocessor method)</a>
+</li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.get_params">get_params() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.get_params">(mambular.models.EmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.get_params">(mambular.models.MambularClassifier method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.get_params">(mambular.models.MambularLSS method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.get_params">(mambular.models.MambularRegressor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.loss_fct">loss_fct (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.loss_fct">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.loss_fct">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.loss_fct">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.lr">lr (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.lr">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.lr">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.lr">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.lr">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.lr_factor">lr_factor (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.lr_factor">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.lr_factor">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.lr_factor">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.lr_factor">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.lr_patience">lr_patience (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.lr_patience">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.lr_patience">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.lr_patience">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.lr_patience">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.mamba">mamba (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.mamba">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.mamba">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.mamba">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.mamba">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/models/Models.html#mambular.models.MambularClassifier">MambularClassifier (class in mambular.models)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/models/Models.html#mambular.models.MambularLSS">MambularLSS (class in mambular.models)</a>
+</li>
+      <li><a href="api/models/Models.html#mambular.models.MambularRegressor">MambularRegressor (class in mambular.models)</a>
+</li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.model">model (mambular.models.EmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.model">(mambular.models.EmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.model">(mambular.models.MambularClassifier attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.model">(mambular.models.MambularLSS attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.model">(mambular.models.MambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.norm_f">norm_f (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.norm_f">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.norm_f">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.norm_f">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.norm_f">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.num_embeddings">num_embeddings (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.num_embeddings">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.num_embeddings">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.num_embeddings">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.num_embeddings">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.num_feature_info">num_feature_info (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.num_feature_info">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.num_feature_info">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.num_feature_info">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.num_feature_info">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.pooling_method">pooling_method (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.pooling_method">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.pooling_method">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.pooling_method">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.pooling_method">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.precision">precision (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.precision">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.predict">predict() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.predict">(mambular.models.EmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.predict">(mambular.models.MambularClassifier method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.predict">(mambular.models.MambularLSS method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.predict">(mambular.models.MambularRegressor method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.predict_proba">predict_proba() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.predict_proba">(mambular.models.MambularClassifier method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.preprocess_data">preprocess_data() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.preprocess_data">(mambular.models.EmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.preprocess_data">(mambular.models.MambularClassifier method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.preprocess_data">(mambular.models.MambularLSS method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.preprocess_data">(mambular.models.MambularRegressor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.preprocess_test_data">preprocess_test_data() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.preprocess_test_data">(mambular.models.EmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.preprocess_test_data">(mambular.models.MambularClassifier method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.preprocess_test_data">(mambular.models.MambularLSS method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.preprocess_test_data">(mambular.models.MambularRegressor method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/utils/Preprocessor.html#mambular.utils.Preprocessor">Preprocessor (class in mambular.utils)</a>
+</li>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.preprocessor">preprocessor (mambular.models.EmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.preprocessor">(mambular.models.EmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.preprocessor">(mambular.models.MambularClassifier attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.preprocessor">(mambular.models.MambularLSS attribute)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.preprocessor">(mambular.models.MambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.set_params">set_params() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.set_params">(mambular.models.EmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.set_params">(mambular.models.MambularClassifier method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.set_params">(mambular.models.MambularLSS method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.set_params">(mambular.models.MambularRegressor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularClassifier.split_data">split_data() (mambular.models.EmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/models/Models.html#mambular.models.EmbeddingMambularRegressor.split_data">(mambular.models.EmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularClassifier.split_data">(mambular.models.MambularClassifier method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularLSS.split_data">(mambular.models.MambularLSS method)</a>
+</li>
+        <li><a href="api/models/Models.html#mambular.models.MambularRegressor.split_data">(mambular.models.MambularRegressor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.tabular_head">tabular_head (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.tabular_head">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.tabular_head">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.tabular_head">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.tabular_head">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.training_step">training_step() (mambular.base_models.BaseEmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.training_step">(mambular.base_models.BaseEmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.training_step">(mambular.base_models.BaseMambularClassifier method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.training_step">(mambular.base_models.BaseMambularLSS method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.training_step">(mambular.base_models.BaseMambularRegressor method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/utils/Preprocessor.html#mambular.utils.Preprocessor.transform">transform() (mambular.utils.Preprocessor method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.validation_step">validation_step() (mambular.base_models.BaseEmbeddingMambularClassifier method)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.validation_step">(mambular.base_models.BaseEmbeddingMambularRegressor method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.validation_step">(mambular.base_models.BaseMambularClassifier method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.validation_step">(mambular.base_models.BaseMambularLSS method)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.validation_step">(mambular.base_models.BaseMambularRegressor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularClassifier.weight_decay">weight_decay (mambular.base_models.BaseEmbeddingMambularClassifier attribute)</a>
+
+      <ul>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseEmbeddingMambularRegressor.weight_decay">(mambular.base_models.BaseEmbeddingMambularRegressor attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularClassifier.weight_decay">(mambular.base_models.BaseMambularClassifier attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularLSS.weight_decay">(mambular.base_models.BaseMambularLSS attribute)</a>
+</li>
+        <li><a href="api/base_models/BaseModels.html#mambular.base_models.BaseMambularRegressor.weight_decay">(mambular.base_models.BaseMambularRegressor attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Christoph Weisser.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on 2024-06-03.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
