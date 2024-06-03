@@ -17,7 +17,7 @@
 
 # Mambular: Tabular Deep Learning with Mamba Architectures
 
-Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and transform using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
+Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and evaluate using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
 
 ## Features
 
@@ -30,7 +30,7 @@ Mambular is a Python package that brings the power of Mamba architectures to tab
 
 ## Documentation
 
-You can find the Mamba-Tabular API documentation [here](https://mambular.readthedocs.io/en/latest/).
+You can find the Mamba-Tabular API documentation [here](https://mamba-tabular.readthedocs.io/en/latest/index.html).
 
 ## Installation
 
@@ -41,12 +41,11 @@ pip install mambular
 
 ## Preprocessing
 
-Mambular elevates the preprocessing stage of model development, employing a sophisticated suite of techniques to ensure your data is in the best shape for the Mamba architectures. Our preprocessing module is designed to be both powerful and intuitive, offering a range of options to transform your tabular data efficiently.
+Mambular simplifies the preprocessing stage of model development with a comprehensive set of techniques to prepare your data for Mamba architectures. Our preprocessing module is designed to be both powerful and easy to use, offering a variety of options to efficiently transform your tabular data.
 
 ### Data Type Detection and Transformation
 
-Mambular automatically identifies the type of each feature in your dataset, applying the most suitable transformations to numerical and categorical variables. This includes:
-
+Mambular automatically identifies the type of each feature in your dataset and applies the most appropriate transformations for numerical and categorical variables. This includes:
 - **Ordinal Encoding**: Categorical features are seamlessly transformed into numerical values, preserving their inherent order and making them model-ready.
 - **One-Hot Encoding**: For nominal data, Mambular employs one-hot encoding to capture the presence or absence of categories without imposing ordinality.
 - **Binning**: Numerical features can be discretized into bins, a useful technique for handling continuous variables in certain modeling contexts.
@@ -58,13 +57,9 @@ Mambular automatically identifies the type of each feature in your dataset, appl
 
 ### Handling Missing Values
 
-Our preprocessing pipeline gracefully handles missing data, employing strategies like mean imputation for numerical features and mode imputation for categorical ones, ensuring that your models receive complete data inputs without manual intervention.
+Our preprocessing pipeline effectively handles missing data by using mean imputation for numerical features and mode imputation for categorical features. This ensures that your models receive complete data inputs without needing manual intervention.
+Additionally, Mambular can manage unknown categorical values during inference by incorporating classical <UNK> tokens in categorical preprocessing.
 
-### Flexible and Customizable
-
-While Mambular excels in automating the preprocessing workflow, it also offers flexibility. You can customize the preprocessing steps to fit the unique needs of your dataset, ensuring that you're not locked into a one-size-fits-all approach.
-
-By integrating Mambular's preprocessing module into your workflow, you're not just preparing your data for deep learning; you're optimizing it for excellence. This commitment to data quality is what sets Mambular apart, making it an indispensable tool in your machine learning arsenal.
 
 ## Fit a Model
 Fitting a model in mambular is as simple as it gets. All models in mambular are sklearn BaseEstimators. Thus the `.fit` method is implemented for all of them. Additionally, this allows for using all other sklearn inherent methods such as their built in hyperparameter optimization tools.
@@ -73,14 +68,14 @@ Fitting a model in mambular is as simple as it gets. All models in mambular are 
 from mambular.models import MambularClassifier
 # Initialize and fit your model
 model = MambularClassifier(
-    dropout=0.01,
-    d_model=128,
-    n_layers=6,
-    numerical_preprocessing="normalization",
+    d_model=64,
+    n_layers=8,
+    numerical_preprocessing="ple",
+    n_bins=50
 )
 
 # X can be a dataframe or something that can be easily transformed into a pd.DataFrame as a np.array
-model.fit(X, y, max_epochs=500, lr=1e-03, patience=25)
+model.fit(X, y, max_epochs=150, lr=1e-04)
 ```
 
 Predictions are also easily obtained:
@@ -122,12 +117,6 @@ Mambular introduces a cutting-edge approach to distributional regression through
 These distribution classes allow `MambularLSS` to flexibly model a wide variety of data types and distributions, providing users with the tools needed to capture the full complexity of their data.
 
 
-### Use Cases for MambularLSS:
-
-- **Risk Assessment**: In finance or insurance, understanding the range and likelihood of potential losses is as important as predicting average outcomes.
-- **Demand Forecasting**: For inventory management, capturing the variability in product demand helps in optimizing stock levels.
-- **Personalized Medicine**: In healthcare, distributional regression can predict a range of possible patient responses to a treatment, aiding in personalized therapy planning.
-
 ### Getting Started with MambularLSS:
 
 To integrate distributional regression into your workflow with `MambularLSS`, start by initializing the model with your desired configuration, similar to other Mambular models:
@@ -138,8 +127,8 @@ from mambular.models import MambularLSS
 # Initialize the MambularLSS model
 model = MambularLSS(
     dropout=0.2,
-    d_model=256,
-    n_layers=4,
+    d_model=64,
+    n_layers=8,
  
 )
 
@@ -147,24 +136,24 @@ model = MambularLSS(
 model.fit(
     X, 
     y, 
-    max_epochs=300, 
-    lr=1e-03, 
+    max_epochs=150, 
+    lr=1e-04, 
     patience=10,     
     family="normal" # define your distribution
     )
 
 ```
 
-## Citing Mambular
+## Citation
 
-If you find this project useful in your research or in scientific publication, please consider citing it in your references.
-
+If you find this project useful in your research, please consider cite:
 ```BibTeX
-@software{mambular2024,
+@misc{2024,
     title={Mambular: Tabular Deep Learning with Mamba Architectures},
-    author={Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar},
-    url = {https://github.com/basf/mamba-tabular},
+    author={Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken, Soheila Samiee},
+    howpublished = {\url{https://github.com/basf/mamba-tabular}},
     year={2024}
 }
 ```
 
+## License
