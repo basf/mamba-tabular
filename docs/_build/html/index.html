@@ -349,14 +349,12 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing">Preprocessing</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-type-detection-and-transformation">Data Type Detection and Transformation</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-missing-values">Handling Missing Values</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flexible-and-customizable">Flexible and Customizable</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fit-a-model">Fit a Model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#distributional-regression-with-mambularlss">Distributional Regression with MambularLSS</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features-of-mambularlss">Key Features of MambularLSS:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#available-distribution-classes">Available Distribution Classes:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use-cases-for-mambularlss">Use Cases for MambularLSS:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-started-with-mambularlss">Getting Started with MambularLSS:</a></li>
 </ul>
 </li>
@@ -376,7 +374,7 @@ document.write(`
                   
   <section id="mambular-tabular-deep-learning-with-mamba-architectures">
 <h1>Mambular: Tabular Deep Learning with Mamba Architectures<a class="headerlink" href="#mambular-tabular-deep-learning-with-mamba-architectures" title="Permalink to this heading">#</a></h1>
-<p>Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn’s <code class="docutils literal notranslate"><span class="pre">BaseEstimator</span></code> interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and transform using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.</p>
+<p>Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn’s <code class="docutils literal notranslate"><span class="pre">BaseEstimator</span></code> interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and evaluate using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.</p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
@@ -390,10 +388,10 @@ document.write(`
 </section>
 <section id="preprocessing">
 <h2>Preprocessing<a class="headerlink" href="#preprocessing" title="Permalink to this heading">#</a></h2>
-<p>Mambular elevates the preprocessing stage of model development, employing a sophisticated suite of techniques to ensure your data is in the best shape for the Mamba architectures. Our preprocessing module is designed to be both powerful and intuitive, offering a range of options to transform your tabular data efficiently.</p>
+<p>Mambular simplifies the preprocessing stage of model development with a comprehensive set of techniques to prepare your data for Mamba architectures. Our preprocessing module is designed to be both powerful and easy to use, offering a variety of options to efficiently transform your tabular data.</p>
 <section id="data-type-detection-and-transformation">
 <h3>Data Type Detection and Transformation<a class="headerlink" href="#data-type-detection-and-transformation" title="Permalink to this heading">#</a></h3>
-<p>Mambular automatically identifies the type of each feature in your dataset, applying the most suitable transformations to numerical and categorical variables. This includes:</p>
+<p>Mambular automatically identifies the type of each feature in your dataset and applies the most appropriate transformations for numerical and categorical variables. This includes:</p>
 <ul class="simple">
 <li><p><strong>Ordinal Encoding</strong>: Categorical features are seamlessly transformed into numerical values, preserving their inherent order and making them model-ready.</p></li>
 <li><p><strong>One-Hot Encoding</strong>: For nominal data, Mambular employs one-hot encoding to capture the presence or absence of categories without imposing ordinality.</p></li>
@@ -401,16 +399,13 @@ document.write(`
 <li><p><strong>Decision Tree Binning</strong>: Optionally, Mambular can use decision trees to find the optimal binning strategy for numerical features, enhancing model interpretability and performance.</p></li>
 <li><p><strong>Normalization</strong>: Mambular can easily handle numerical features without specifically turning them into categorical features. Standard preprocessing steps such as normalization per feature are possible</p></li>
 <li><p><strong>Standardization</strong>: Similarly, Standardization instead of Normalization can be used.</p></li>
+<li><p><strong>PLE</strong>: Periodic Linear Encodings for numerical features can enhance performance for tabular DL methods.</p></li>
 </ul>
 </section>
 <section id="handling-missing-values">
 <h3>Handling Missing Values<a class="headerlink" href="#handling-missing-values" title="Permalink to this heading">#</a></h3>
-<p>Our preprocessing pipeline gracefully handles missing data, employing strategies like mean imputation for numerical features and mode imputation for categorical ones, ensuring that your models receive complete data inputs without manual intervention.</p>
-</section>
-<section id="flexible-and-customizable">
-<h3>Flexible and Customizable<a class="headerlink" href="#flexible-and-customizable" title="Permalink to this heading">#</a></h3>
-<p>While Mambular excels in automating the preprocessing workflow, it also offers flexibility. You can customize the preprocessing steps to fit the unique needs of your dataset, ensuring that you’re not locked into a one-size-fits-all approach.</p>
-<p>By integrating Mambular’s preprocessing module into your workflow, you’re not just preparing your data for deep learning; you’re optimizing it for excellence. This commitment to data quality is what sets Mambular apart, making it an indispensable tool in your machine learning arsenal.</p>
+<p>Our preprocessing pipeline effectively handles missing data by using mean imputation for numerical features and mode imputation for categorical features. This ensures that your models receive complete data inputs without needing manual intervention.
+Additionally, Mambular can manage unknown categorical values during inference by incorporating classical <span class="raw-html-m2r"><UNK></span> tokens in categorical preprocessing.</p>
 </section>
 </section>
 <section id="fit-a-model">
@@ -419,14 +414,14 @@ document.write(`
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mambular.models</span> <span class="kn">import</span> <span class="n">MambularClassifier</span>
 <span class="c1"># Initialize and fit your model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">MambularClassifier</span><span class="p">(</span>
-    <span class="n">dropout</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-    <span class="n">d_model</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
-    <span class="n">n_layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-    <span class="n">numerical_preprocessing</span><span class="o">=</span><span class="s2">&quot;normalization&quot;</span><span class="p">,</span>
+    <span class="n">d_model</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">n_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">numerical_preprocessing</span><span class="o">=</span><span class="s2">&quot;ple&quot;</span><span class="p">,</span>
+    <span class="n">n_bins</span><span class="o">=</span><span class="mi">50</span>
 <span class="p">)</span>
 
 <span class="c1"># X can be a dataframe or something that can be easily transformed into a pd.DataFrame as a np.array</span>
-<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_epochs</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-03</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_epochs</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-04</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Predictions are also easily obtained:</p>
@@ -466,14 +461,6 @@ document.write(`
 </ul>
 <p>These distribution classes allow <code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code> to flexibly model a wide variety of data types and distributions, providing users with the tools needed to capture the full complexity of their data.</p>
 </section>
-<section id="use-cases-for-mambularlss">
-<h3>Use Cases for MambularLSS:<a class="headerlink" href="#use-cases-for-mambularlss" title="Permalink to this heading">#</a></h3>
-<ul class="simple">
-<li><p><strong>Risk Assessment</strong>: In finance or insurance, understanding the range and likelihood of potential losses is as important as predicting average outcomes.</p></li>
-<li><p><strong>Demand Forecasting</strong>: For inventory management, capturing the variability in product demand helps in optimizing stock levels.</p></li>
-<li><p><strong>Personalized Medicine</strong>: In healthcare, distributional regression can predict a range of possible patient responses to a treatment, aiding in personalized therapy planning.</p></li>
-</ul>
-</section>
 <section id="getting-started-with-mambularlss">
 <h3>Getting Started with MambularLSS:<a class="headerlink" href="#getting-started-with-mambularlss" title="Permalink to this heading">#</a></h3>
 <p>To integrate distributional regression into your workflow with <code class="docutils literal notranslate"><span class="pre">MambularLSS</span></code>, start by initializing the model with your desired configuration, similar to other Mambular models:</p>
@@ -482,17 +469,16 @@ document.write(`
 <span class="c1"># Initialize the MambularLSS model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">MambularLSS</span><span class="p">(</span>
     <span class="n">dropout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
-    <span class="n">n_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-
+    <span class="n">d_model</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">n_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Fit the model to your data</span>
 <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">X</span><span class="p">,</span>
     <span class="n">y</span><span class="p">,</span>
-    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
-    <span class="n">lr</span><span class="o">=</span><span class="mf">1e-03</span><span class="p">,</span>
+    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+    <span class="n">lr</span><span class="o">=</span><span class="mf">1e-04</span><span class="p">,</span>
     <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">family</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span> <span class="c1"># define your distribution</span>
     <span class="p">)</span>
@@ -505,7 +491,7 @@ document.write(`
 <p>If you find this project useful in your research or in scientific publication, please consider citing it in your references.</p>
 <div class="highlight-BibTeX notranslate"><div class="highlight"><pre><span></span><span class="nc">@software</span><span class="p">{</span><span class="nl">mambular2024</span><span class="p">,</span>
 <span class="w">    </span><span class="na">title</span><span class="p">=</span><span class="s">{Mambular: Tabular Deep Learning with Mamba Architectures}</span><span class="p">,</span>
-<span class="w">    </span><span class="na">author</span><span class="p">=</span><span class="s">{Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">author</span><span class="p">=</span><span class="s">{Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken,  Soheila Samiee}</span><span class="p">,</span>
 <span class="w">    </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://github.com/basf/mamba-tabular}</span><span class="p">,</span>
 <span class="w">    </span><span class="na">year</span><span class="p">=</span><span class="s">{2024}</span>
 <span class="p">}</span>
@@ -568,14 +554,12 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing">Preprocessing</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-type-detection-and-transformation">Data Type Detection and Transformation</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-missing-values">Handling Missing Values</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flexible-and-customizable">Flexible and Customizable</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fit-a-model">Fit a Model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#distributional-regression-with-mambularlss">Distributional Regression with MambularLSS</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features-of-mambularlss">Key Features of MambularLSS:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#available-distribution-classes">Available Distribution Classes:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use-cases-for-mambularlss">Use Cases for MambularLSS:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-started-with-mambularlss">Getting Started with MambularLSS:</a></li>
 </ul>
 </li>
@@ -596,7 +580,7 @@ document.write(`
   <div class="footer-item">
     
 <p class="component-author">
-By Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar
+By Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken, Soheila Samiee
 </p>
 
   </div>
