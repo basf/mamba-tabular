@@ -4,6 +4,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import pathlib
@@ -11,12 +12,11 @@ import sys
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../"))
-sys.path.insert(1, os.path.dirname(
-    os.path.abspath("../")) + os.sep + "mambular")
+sys.path.insert(1, os.path.dirname(os.path.abspath("../")) + os.sep + "mambular")
 
-project = 'mambular'
-copyright = '2024, Christoph Weisser'
-author = 'Anton Frederik Thielmann, Soheila Samiee, Christoph Weisser, Benjamin Saefken, Manish Kumar'
+project = "mambular"
+copyright = "2024, Christoph Weisser"
+author = "Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken, Soheila Samiee"
 
 VERSION_PATH = "../mambular/__version__.py"
 with open(VERSION_PATH) as f:
@@ -27,10 +27,10 @@ release = VERSION
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.duration',
-    'sphinx.ext.doctest',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.duration",
+    "sphinx.ext.doctest",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
@@ -41,7 +41,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_togglebutton",
     "nbsphinx",
-    'numpydoc',
+    "numpydoc",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "myst_parser",
@@ -50,17 +50,23 @@ extensions = [
     # "pydata_sphinx_theme",
     "sphinx_autodoc_typehints",
 ]
-autodoc_mock_imports = ['lightning', 'torch',
-                        'torchmetrics', 'pytorch_lightning',
-                        'numpy', 'pandas', 'sklearn',
-                        'properscoring', 'tqdm']
-
+autodoc_mock_imports = [
+    "lightning",
+    "torch",
+    "torchmetrics",
+    "pytorch_lightning",
+    "numpy",
+    "pandas",
+    "sklearn",
+    "properscoring",
+    "tqdm"
+]
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 # source_suffix = ".rst"
 
 # The master toctree document.
@@ -98,13 +104,13 @@ pygments_style = "sphinx"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # 'sphinx_rtd_theme'  # 'furo', 'press', 'pydata_sphinx_theme'
-html_theme = 'sphinx_book_theme'
+html_theme = "sphinx_book_theme"
 # html_static_path = ['_static']
 # html_css_files = ['custom.css']
 # html_js_files = ['custom.js']
 
 html_theme_options = {
-    'globaltoc_collapse': False,
+    "globaltoc_collapse": False,
 }
 
 # The name of an image file (relative to this directory) to place at the top
@@ -112,9 +118,9 @@ html_theme_options = {
 html_logo = "images/logo/mamba_tabular.jpg"
 
 # Override the Sphinx default title that appends `documentation`
-html_title = f'{project}'
+html_title = f"{project}"
 # Format of the last updated section in the footer
-html_last_updated_fmt = '%Y-%m-%d'
+html_last_updated_fmt = "%Y-%m-%d"
 
 # -- Options for autodoc ------------------------------------------------------
 
