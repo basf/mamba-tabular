@@ -9,7 +9,7 @@ from setuptools import find_packages, setup
 NAME = "mambular"
 DESCRIPTION = "A python package for tabular deep learning with mamba blocks."
 HOMEPAGE = "https://github.com/basf/mamba-tabular"
-DOCS = "https://mambular.readthedocs.io/en/latest/index.html"
+DOCS = "https://mambular.readthedocs.io/en/"
 EMAIL = "anton.thielmann@tu-clausthal.de"
 AUTHOR = "Anton Thielmann"
 REQUIRES_PYTHON = ">=3.6, <=3.12.3"
@@ -54,7 +54,6 @@ setup(
         "Operating System :: OS Independent",
     ],
     include_package_data=True,
-    project_urls={'Homepage:': HOMEPAGE,
-                  'Documentation': DOCS},
+    project_urls={'Documentation': DOCS},
     url=HOMEPAGE
 )
