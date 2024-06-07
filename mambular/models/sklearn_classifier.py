@@ -9,7 +9,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
-from ..base_models.classifier import BaseMambularClassifier
+from ..base_models.lightning_wrapper import TaskModel
+from ..base_models.mambular_base import MambularBaseModel
 from ..utils.configs import DefaultMambularConfig
 from ..utils.dataset import MambularDataModule, MambularDataset
 from ..utils.preprocessor import Preprocessor
@@ -488,7 +489,8 @@ class MambularClassifier(BaseEstimator):
             X_train, y_train, X_val, y_val, batch_size, shuffle
         )
 
-        self.model = BaseMambularClassifier(
+        self.model = TaskModel(
+            model_class=MambularBaseModel,
             num_classes=num_classes,
             config=self.config,
             cat_feature_info=self.cat_feature_info,

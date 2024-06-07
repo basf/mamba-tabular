@@ -10,7 +10,8 @@ from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
-from ..base_models.distributional import BaseMambularLSS
+from ..base_models.lightning_wrapper import TaskModel
+from ..base_models.mambular_base import MambularBaseModel
 from ..utils.configs import DefaultMambularConfig
 from ..utils.dataset import MambularDataModule, MambularDataset
 from ..utils.distributional_metrics import (
@@ -21,6 +22,17 @@ from ..utils.distributional_metrics import (
     negative_binomial_deviance,
     poisson_deviance,
     student_t_loss,
+)
+from ..utils.distributions import (
+    BetaDistribution,
+    CategoricalDistribution,
+    DirichletDistribution,
+    GammaDistribution,
+    InverseGammaDistribution,
+    NegativeBinomialDistribution,
+    NormalDistribution,
+    PoissonDistribution,
+    StudentTDistribution,
 )
 from ..utils.preprocessor import Preprocessor
 
@@ -435,6 +447,7 @@ class MambularLSS(BaseEstimator):
         lr_patience: int = 10,
         factor: float = 0.1,
         weight_decay: float = 1e-06,
+        distributional_kwargs=None,
         **trainer_kwargs
     ):
         """
@@ -477,6 +490,8 @@ class MambularLSS(BaseEstimator):
             Factor by which the learning rate will be reduced.
         weight_decay : float, default=0.025
             Weight decay (L2 penalty) parameter.
+        distributional_kwargs : dict, optional
+            Additional keyword arguments for the distribution class.
         **trainer_kwargs : dict
             Additional keyword arguments for PyTorch Lightning's Trainer class.
 
@@ -486,6 +501,26 @@ class MambularLSS(BaseEstimator):
         self : object
             The fitted estimator.
         """
+        distribution_classes = {
+            "normal": NormalDistribution,
+            "poisson": PoissonDistribution,
+            "gamma": GammaDistribution,
+            "beta": BetaDistribution,
+            "dirichlet": DirichletDistribution,
+            "studentt": StudentTDistribution,
+            "negativebinom": NegativeBinomialDistribution,
+            "inversegamma": InverseGammaDistribution,
+            "categorical": CategoricalDistribution,
+        }
+
+        if distributional_kwargs is None:
+            distributional_kwargs = {}
+
+        if family in distribution_classes:
+            self.family = distribution_classes[family](**distributional_kwargs)
+        else:
+            raise ValueError("Unsupported family: {}".format(family))
+
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
         if X_val:
@@ -501,12 +536,15 @@ class MambularLSS(BaseEstimator):
             X_train, y_train, X_val, y_val, batch_size, shuffle
         )
 
-        self.model = BaseMambularLSS(
-            family=family,
+        self.model = TaskModel(
+            model_class=MambularBaseModel,
+            num_classes=self.family.param_count,
+            family=self.family,
             config=self.config,
             cat_feature_info=self.cat_feature_info,
             num_feature_info=self.num_feature_info,
             lr=lr,
+            lss=True,
             lr_patience=lr_patience,
             lr_factor=factor,
             weight_decay=weight_decay,

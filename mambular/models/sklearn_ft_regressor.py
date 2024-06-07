@@ -8,14 +8,14 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 import warnings
 import numpy as np
-from ..base_models.lightning_wrapper import TaskModel
-from ..base_models.mambular_base import MambularBaseModel
+
+from ..base_models.ft_regressor import BaseFTTransformerRegressor
 from ..utils.dataset import MambularDataModule, MambularDataset
 from ..utils.preprocessor import Preprocessor
-from ..utils.configs import DefaultMambularConfig
+from ..utils.configs import DefaultFTTransformerConfig
 
 
-class MambularRegressor(BaseEstimator):
+class FTTransformerRegressor(BaseEstimator):
     """
     A regressor implemented using PyTorch Lightning that follows the scikit-learn API conventions.
     This class is designed to work with tabular data, offering a straightforward way to specify
@@ -24,7 +24,7 @@ class MambularRegressor(BaseEstimator):
 
     Parameters
     ----------
-    # configuration parameters
+    # Configuration parameters
     lr : float, optional
         Learning rate for the optimizer. Default is 1e-4.
     lr_patience : int, optional
@@ -37,38 +37,20 @@ class MambularRegressor(BaseEstimator):
         Dimension of the model. Default is 64.
     n_layers : int, optional
         Number of layers. Default is 8.
-    expand_factor : int, optional
-        Expansion factor. Default is 2.
-    bias : bool, optional
-        Whether to use bias. Default is False.
-    d_conv : int, optional
-        Dimension of the convolution. Default is 16.
-    conv_bias : bool, optional
-        Whether to use bias in the convolution. Default is True.
-    dropout : float, optional
-        Dropout rate in the mamba blocks. Default is 0.05.
-    dt_rank : str, optional
-        Rank of the time dimension. Default is "auto".
-    d_state : int, optional
-        State dimension. Default is 16.
-    dt_scale : float, optional
-        Scale of the time dimension. Default is 1.0.
-    dt_init : str, optional
-        Initialization method for the time dimension. Default is "random".
-    dt_max : float, optional
-        Maximum value for the time dimension. Default is 0.1.
-    dt_min : float, optional
-        Minimum value for the time dimension. Default is 1e-3.
-    dt_init_floor : float, optional
-        Floor value for the time dimension initialization. Default is 1e-4.
+    n_heads: int, optional
+        Number of heads in the transformer blocks. Default is 4.
+    attn_dropout : float, optional
+        Dropout rate for attention layers. Default is 0.3.
+    ff_dropout : float, optional
+        Dropout rate for feed-forward layers. Default is 0.3.
     norm : str, optional
-        Normalization method. Default is 'RMSNorm'.
+        Normalization type. Default is "RMSNorm".
     activation : callable, optional
         Activation function. Default is nn.SELU().
     num_embedding_activation : callable, optional
         Activation function for numerical embeddings. Default is nn.Identity().
     head_layer_sizes : list, optional
-        Sizes of the layers in the head. Default is [64, 64, 32].
+        Sizes of the layers in the head. Default is (128, 64, 32).
     head_dropout : float, optional
         Dropout rate for the head. Default is 0.5.
     head_skip_layers : bool, optional
@@ -77,6 +59,20 @@ class MambularRegressor(BaseEstimator):
         Activation function for the head. Default is nn.SELU().
     head_use_batch_norm : bool, optional
         Whether to use batch normalization in the head. Default is False.
+    layer_norm_after_embedding : bool, optional
+        Whether to apply layer normalization after embedding. Default is False.
+    pooling_method : str, optional
+        Pooling method to use. Default is "cls".
+    norm_first : bool, optional
+        Whether to apply normalization first. Default is False.
+    bias : bool, optional
+        Whether to use bias in the layers. Default is True.
+    transformer_activation : callable, optional
+        Activation function for the transformer. Default is nn.SELU().
+    layer_norm_eps : float, optional
+        Epsilon value for layer normalization. Default is 1e-05.
+    transformer_dim_feedforward : int, optional
+        Dimension of the feedforward network in the transformer. Default is 2048.
 
     # Preprocessor Parameters
     n_bins : int, optional
@@ -94,11 +90,9 @@ class MambularRegressor(BaseEstimator):
     treat_all_integers_as_numerical : bool, optional
         If True, all integer columns will be treated as numerical, regardless of their unique value count or proportion. Default is False
 
-
-
     Attributes
     ----------
-    config : DefaultConfig
+    config : DefaultFTTransformerConfig
         An object storing the configuration settings for the model.
     preprocessor : Preprocessor
         An object responsible for preprocessing the input data, such as encoding categorical variables and scaling numerical features.
@@ -115,18 +109,9 @@ class MambularRegressor(BaseEstimator):
             "lr_factor",
             "d_model",
             "n_layers",
-            "expand_factor",
-            "bias",
-            "d_conv",
-            "conv_bias",
-            "dropout",
-            "dt_rank",
-            "d_state",
-            "dt_scale",
-            "dt_init",
-            "dt_max",
-            "dt_min",
-            "dt_init_floor",
+            "n_heads",
+            "attn_dropout",
+            "ff_dropout",
             "norm",
             "activation",
             "num_embedding_activation",
@@ -135,6 +120,13 @@ class MambularRegressor(BaseEstimator):
             "head_skip_layers",
             "head_activation",
             "head_use_batch_norm",
+            "layer_norm_after_embedding",
+            "pooling_method",
+            "norm_first",
+            "bias",
+            "transformer_activation",
+            "layer_norm_eps",
+            "transformer_dim_feedforward",
         ]
 
         preprocessor_arg_names = [
@@ -148,7 +140,7 @@ class MambularRegressor(BaseEstimator):
         ]
 
         self.config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
-        self.config = DefaultMambularConfig(**self.config_kwargs)
+        self.config = DefaultFTTransformerConfig(**self.config_kwargs)
 
         preprocessor_kwargs = {
             k: v for k, v in kwargs.items() if k in preprocessor_arg_names
@@ -160,7 +152,7 @@ class MambularRegressor(BaseEstimator):
         # Raise a warning if task is set to 'classification'
         if preprocessor_kwargs.get("task") == "classification":
             warnings.warn(
-                "The task is set to 'classification'. MambularRegressor is designed for regression tasks.",
+                "The task is set to 'classification'. FTTransformerRegressor is designed for regression tasks.",
                 UserWarning,
             )
 
@@ -403,7 +395,7 @@ class MambularRegressor(BaseEstimator):
         val_size: float = 0.2,
         X_val=None,
         y_val=None,
-        max_epochs: int = 100,
+        max_epochs: int = 150,
         random_state: int = 101,
         batch_size: int = 128,
         shuffle: bool = True,
@@ -472,12 +464,11 @@ class MambularRegressor(BaseEstimator):
                 X, y, val_size, random_state
             )
 
-        self.data_module = self.preprocess_data(
+        data_module = self.preprocess_data(
             X_train, y_train, X_val, y_val, batch_size, shuffle
         )
 
-        self.model = TaskModel(
-            model_class=MambularBaseModel,
+        self.model = BaseFTTransformerRegressor(
             config=self.config,
             cat_feature_info=self.cat_feature_info,
             num_feature_info=self.num_feature_info,
@@ -505,7 +496,7 @@ class MambularRegressor(BaseEstimator):
             callbacks=[early_stop_callback, checkpoint_callback],
             **trainer_kwargs
         )
-        trainer.fit(self.model, self.data_module)
+        trainer.fit(self.model, data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
