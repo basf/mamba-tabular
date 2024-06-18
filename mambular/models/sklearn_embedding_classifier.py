@@ -13,7 +13,8 @@ from torch.utils.data import DataLoader
 
 from ..base_models.embedding_classifier import BaseEmbeddingMambularClassifier
 from ..utils.configs import DefaultMambularConfig
-from ..utils.dataset import EmbeddingMambularDataset, MambularDataModule
+from ..data_utils.dataset import EmbeddingMambularDataset
+from ..data_utils.datamodule import MambularDataModule
 from ..utils.preprocessor import Preprocessor
 
 

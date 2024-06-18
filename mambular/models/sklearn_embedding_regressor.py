@@ -13,7 +13,8 @@ from torch.utils.data import DataLoader
 
 from ..base_models.embedding_regressor import BaseEmbeddingMambularRegressor
 from ..utils.configs import DefaultMambularConfig
-from ..utils.dataset import EmbeddingMambularDataset, MambularDataModule
+from ..data_utils.dataset import EmbeddingMambularDataset
+from ..data_utils.datamodule import MambularDataModule
 from ..utils.preprocessor import Preprocessor
 
 
@@ -147,8 +148,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
             "treat_all_integers_as_numerical",
         ]
 
-        self.config_kwargs = {k: v for k,
-                              v in kwargs.items() if k in config_arg_names}
+        self.config_kwargs = {k: v for k, v in kwargs.items() if k in config_arg_names}
         self.config = DefaultMambularConfig(**self.config_kwargs)
 
         preprocessor_kwargs = {
@@ -211,8 +211,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
         """
         # Update config_kwargs with provided parameters
         valid_config_keys = self.config_kwargs.keys()
-        config_updates = {k: v for k,
-                          v in parameters.items() if k in valid_config_keys}
+        config_updates = {k: v for k, v in parameters.items() if k in valid_config_keys}
         self.config_kwargs.update(config_updates)
 
         # Update the config object
@@ -307,26 +306,22 @@ class EmbeddingMambularRegressor(BaseEstimator):
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(train_preprocessed_data[cat_key], dtype=torch.long)
                 )
             if cat_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(val_preprocessed_data[cat_key], dtype=torch.long)
                 )
 
             binned_key = "num_" + key  # for binned features
             if binned_key in train_preprocessed_data:
                 train_cat_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(train_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
             if binned_key in val_preprocessed_data:
                 val_cat_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(val_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
         # Populate tensors for numerical features, if present in processed data
@@ -336,13 +331,11 @@ class EmbeddingMambularRegressor(BaseEstimator):
             )  # Assuming numerical keys are prefixed with 'num_'
             if num_key in train_preprocessed_data:
                 train_num_tensors.append(
-                    torch.tensor(
-                        train_preprocessed_data[num_key], dtype=torch.float32)
+                    torch.tensor(train_preprocessed_data[num_key], dtype=torch.float32)
                 )
             if num_key in val_preprocessed_data:
                 val_num_tensors.append(
-                    torch.tensor(
-                        val_preprocessed_data[num_key], dtype=torch.float32)
+                    torch.tensor(val_preprocessed_data[num_key], dtype=torch.float32)
                 )
 
         train_labels = torch.tensor(y_train, dtype=torch.float32)
@@ -601,8 +594,7 @@ class EmbeddingMambularRegressor(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            predictions = self.model(
-                num_features=num_tensors, cat_features=cat_tensors)
+            predictions = self.model(num_features=num_tensors, cat_features=cat_tensors)
 
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()
