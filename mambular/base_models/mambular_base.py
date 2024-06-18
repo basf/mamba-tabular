@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from ..utils.mamba_arch import Mamba
-from ..utils.mlp_utils import MLP
-from ..utils.normalization_layers import (
+from ..arch_utils.mamba_arch import Mamba
+from ..arch_utils.mlp_utils import MLP
+from ..arch_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
@@ -14,7 +14,7 @@ from ..utils.configs import DefaultMambularConfig
 from .basemodel import BaseModel
 
 
-class MambularBaseModel(BaseModel):
+class Mambular(BaseModel):
     """
     A PyTorch model for tasks utilizing the Mamba architecture and various normalization techniques.
 
@@ -174,6 +174,9 @@ class MambularBaseModel(BaseModel):
             self.embedding_norm = nn.LayerNorm(
                 self.hparams.get("d_model", config.d_model)
             )
+
+    def __post__init(self):
+        pass
 
     def forward(self, num_features, cat_features):
         """

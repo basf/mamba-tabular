@@ -1,7 +1,9 @@
 import lightning as pl
 import torch
 import torch.nn as nn
-from ..utils.normalization_layers import (
+from ..arch_utils.mamba_arch import Mamba
+from ..arch_utils.mlp_utils import MLP
+from ..arch_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
@@ -11,8 +13,6 @@ from ..utils.normalization_layers import (
 )
 
 from ..utils.configs import DefaultMambularConfig
-from ..utils.mamba_arch import Mamba
-from ..utils.mlp_utils import MLP
 
 
 class BaseEmbeddingMambularRegressor(pl.LightningModule):
