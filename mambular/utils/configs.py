@@ -60,3 +60,31 @@ class DefaultFTTransformerConfig:
     transformer_activation: callable = nn.SELU()
     layer_norm_eps: float = 1e-05
     transformer_dim_feedforward: int = 2048
+
+
+@dataclass
+class DefaultMLPConfig:
+    lr: float = 1e-04
+    lr_patience: int = 10
+    weight_decay: float = 1e-06
+    lr_factor: float = 0.1
+    layer_sizes: list = (128, 128, 32)
+    activation: callable = nn.SELU()
+    skip_layers: bool = False
+    dropout: float = 0.5
+    norm: str = None
+    use_glu: bool = False
+
+
+@dataclass
+class DefaultResNetConfig:
+    hidden_dims: list = (128, 64, 32)
+    activation: callable = nn.SELU()
+    dropout: float = 0.2
+    batch_norm: bool = True
+    norm: str = "BatchNorm"
+    num_blocks: int = 3
+    lr: float = 0.001
+    lr_patience: int = 10
+    weight_decay: float = 1e-4
+    lr_factor: float = 0.5
