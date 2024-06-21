@@ -1,6 +1,6 @@
 from .sklearn_base_regressor import SklearnBaseRegressor
-from ..base_models.mambular_base import Mambular
-from ..utils.configs import DefaultMambularConfig
+from ..base_models.mambular import Mambular
+from ..configs.mambular_config import DefaultMambularConfig
 
 
 class MambularRegressor(SklearnBaseRegressor):
