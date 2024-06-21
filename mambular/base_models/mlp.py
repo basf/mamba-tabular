@@ -1,10 +1,8 @@
 import torch
 import torch.nn as nn
-from ..utils.mlp_utils import Linear_block, Linear_skip_block
-from ..utils.configs import DefaultMLPConfig
+from ..configs.mlp_config import DefaultMLPConfig
 from .basemodel import BaseModel
-import numpy as np
-from ..utils.normalization_layers import (
+from ..arch_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
@@ -19,7 +17,6 @@ class MLP(BaseModel):
         self,
         cat_feature_info,
         num_feature_info,
-        input_dim: int,
         num_classes: int = 1,
         config: DefaultMLPConfig = DefaultMLPConfig(),
         **kwargs,
@@ -33,8 +30,7 @@ class MLP(BaseModel):
             Information about categorical features.
         num_feature_info : Any
             Information about numerical features.
-        input_dim : int
-            Number of input features.
+
         num_classes : int, optional
             Number of output classes, by default 1.
         config : DefaultMLPConfig, optional
@@ -42,6 +38,12 @@ class MLP(BaseModel):
         """
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+
+        input_dim = 0
+        for feature_name, input_shape in num_feature_info.items():
+            input_dim += input_shape
+        for feature_name, input_shape in cat_feature_info.items():
+            input_dim += 1
 
         self.lr = self.hparams.get("lr", config.lr)
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
@@ -52,34 +54,35 @@ class MLP(BaseModel):
 
         # Initialize layers
         self.layers = nn.ModuleList()
-        self.skip_connections = config.skip_connections
-        self.use_attention = config.use_attention
-        self.use_glu = config.use_glu
-        self.activation = config.activation
+        self.skip_connections = self.hparams.get(
+            "skip_connections", config.skip_connections
+        )
+        self.use_glu = self.hparams.get("use_glu", config.use_glu)
+        self.activation = self.hparams.get("activation", config.activation)
 
         # Input layer
-        self.layers.append(nn.Linear(input_dim, config.hidden_dims[0]))
+        self.layers.append(nn.Linear(input_dim, config.layer_sizes[0]))
         if config.batch_norm:
-            self.layers.append(nn.BatchNorm1d(config.hidden_dims[0]))
+            self.layers.append(nn.BatchNorm1d(config.layer_sizes[0]))
 
         norm_layer = self.hparams.get("norm", config.norm)
         if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm(config.hidden_dims[0])
+            self.norm_f = RMSNorm(config.layer_sizes[0])
         elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(config.hidden_dims[0])
+            self.norm_f = LayerNorm(config.layer_sizes[0])
         elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(config.hidden_dims[0])
+            self.norm_f = BatchNorm(config.layer_sizes[0])
         elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(config.hidden_dims[0])
+            self.norm_f = InstanceNorm(config.layer_sizes[0])
         elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(1, config.hidden_dims[0])
+            self.norm_f = GroupNorm(1, config.layer_sizes[0])
         elif norm_layer == "LearnableLayerScaling":
-            self.norm_f = LearnableLayerScaling(config.hidden_dims[0])
+            self.norm_f = LearnableLayerScaling(config.layer_sizes[0])
         else:
             self.norm_f = None
 
         if self.norm_f is not None:
-            self.layers.append(self.norm_f(config.hidden_dims[0]))
+            self.layers.append(self.norm_f(config.layer_sizes[0]))
 
         if config.use_glu:
             self.layers.append(nn.GLU())
@@ -89,14 +92,14 @@ class MLP(BaseModel):
             self.layers.append(nn.Dropout(config.dropout))
 
         # Hidden layers
-        for i in range(1, len(config.hidden_dims)):
+        for i in range(1, len(config.layer_sizes)):
             self.layers.append(
-                nn.Linear(config.hidden_dims[i - 1], config.hidden_dims[i])
+                nn.Linear(config.layer_sizes[i - 1], config.layer_sizes[i])
             )
             if config.batch_norm:
-                self.layers.append(nn.BatchNorm1d(config.hidden_dims[i]))
+                self.layers.append(nn.BatchNorm1d(config.layer_sizes[i]))
             if config.layer_norm:
-                self.layers.append(nn.LayerNorm(config.hidden_dims[i]))
+                self.layers.append(nn.LayerNorm(config.layer_sizes[i]))
             if config.use_glu:
                 self.layers.append(nn.GLU())
             else:
@@ -105,9 +108,9 @@ class MLP(BaseModel):
                 self.layers.append(nn.Dropout(config.dropout))
 
         # Output layer
-        self.layers.append(nn.Linear(config.hidden_dims[-1], num_classes))
+        self.layers.append(nn.Linear(config.layer_sizes[-1], num_classes))
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, num_features, cat_features) -> torch.Tensor:
         """
         Forward pass of the MLP model.
 
@@ -121,6 +124,9 @@ class MLP(BaseModel):
         torch.Tensor
             Output tensor.
         """
+        x = num_features + cat_features
+        x = torch.cat(x, dim=1)
+
         for i in range(len(self.layers) - 1):
             if isinstance(self.layers[i], nn.Linear):
                 out = self.layers[i](x)
