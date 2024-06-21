@@ -3,7 +3,7 @@
 
 
 [![PyPI](https://img.shields.io/pypi/v/mambular)](https://pypi.org/project/mambular)
-![PyPI - Downloads](https://img.shields.io/pypi/dw/mambular)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/mambular)
 [![docs build](https://readthedocs.org/projects/mambular/badge/?version=latest)](https://mambular.readthedocs.io/en/latest/?badge=latest)
 [![docs](https://img.shields.io/badge/docs-latest-blue)](https://mambular.readthedocs.io/en/latest/)
 [![open issues](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/basf/mamba-tabular/issues)
