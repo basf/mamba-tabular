@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import Dataset
+import numpy as np
 
 
 class MambularDataset(Dataset):
@@ -17,8 +18,18 @@ class MambularDataset(Dataset):
     def __init__(self, cat_features_list, num_features_list, labels, regression=True):
         self.cat_features_list = cat_features_list  # Categorical features tensors
         self.num_features_list = num_features_list  # Numerical features tensors
-        self.labels = labels
+
         self.regression = regression
+        if not self.regression:
+            self.num_classes = len(np.unique(labels))
+            if self.num_classes > 2:
+                self.labels = labels.view(-1)
+            else:
+                self.num_classes = 1
+                self.labels = labels
+        else:
+            self.labels = labels
+            self.num_classes = 1
 
     def __len__(self):
         return len(self.labels)
@@ -43,10 +54,9 @@ class MambularDataset(Dataset):
         ]
         label = self.labels[idx]
         if self.regression:
-            # Convert the label to float for regression tasks
-            # label = float(label)
             label = torch.tensor(label, dtype=torch.float32)
-
+        elif self.num_classes == 1:
+            label = torch.tensor(label, dtype=torch.float32)
         else:
             label = torch.tensor(label, dtype=torch.long)
 

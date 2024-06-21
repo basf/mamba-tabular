@@ -206,10 +206,13 @@ class MambularDataModule(pl.LightningDataModule):
 
             # Create datasets
             self.train_dataset = MambularDataset(
-                train_cat_tensors, train_num_tensors, train_labels
+                train_cat_tensors,
+                train_num_tensors,
+                train_labels,
+                regression=self.regression,
             )
             self.val_dataset = MambularDataset(
-                val_cat_tensors, val_num_tensors, val_labels
+                val_cat_tensors, val_num_tensors, val_labels, regression=self.regression
             )
         elif stage == "test":
             if not self.test_preprocessor_fitted:
@@ -218,7 +221,10 @@ class MambularDataModule(pl.LightningDataModule):
                 )
 
             self.test_dataset = MambularDataset(
-                self.test_cat_tensors, self.test_num_tensors, train_labels
+                self.test_cat_tensors,
+                self.test_num_tensors,
+                train_labels,
+                regression=self.regression,
             )
 
     def preprocess_test_data(self, X):
