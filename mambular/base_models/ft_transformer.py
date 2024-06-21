@@ -9,7 +9,7 @@ from ..arch_utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
-from ..utils.configs import DefaultFTTransformerConfig
+from ..configs.fttransformer_config import DefaultFTTransformerConfig
 from .basemodel import BaseModel
 
 
@@ -236,7 +236,7 @@ class FTTransformer(BaseModel):
             x, _ = torch.max(x, dim=1)
         elif self.pooling_method == "sum":
             x = torch.sum(x, dim=1)
-        elif self.pooling_method == "cls_token":
+        elif self.pooling_method == "cls":
             x = x[:, 0]
         else:
             raise ValueError(f"Invalid pooling method: {self.pooling_method}")
