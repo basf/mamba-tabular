@@ -10,7 +10,7 @@ from ..arch_utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
-from ..utils.configs import DefaultMambularConfig
+from ..configs.mambular_config import DefaultMambularConfig
 from .basemodel import BaseModel
 
 

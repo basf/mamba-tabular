@@ -77,11 +77,16 @@ class TaskModel(pl.LightningModule):
         self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
 
+        if num_classes == 2:
+            output_dim = 1
+        else:
+            output_dim = num_classes
+
         self.model = model_class(
             config=config,
             num_feature_info=num_feature_info,
             cat_feature_info=cat_feature_info,
-            num_classes=num_classes,
+            num_classes=output_dim,
             **kwargs,
         )
 
@@ -122,10 +127,9 @@ class TaskModel(pl.LightningModule):
         """
         if self.lss:
             return self.family.compute_loss(predictions, y_true)
-        elif isinstance(self.loss_fct, nn.BCEWithLogitsLoss) and self.num_classes == 1:
-            y_true = torch.float(y_true.unsqueeze(1), dtype=torch.float32)
-        loss = self.loss_fct(predictions, y_true)
-        return loss
+        else:
+            loss = self.loss_fct(predictions, y_true)
+            return loss
 
     def training_step(self, batch, batch_idx):
         """
@@ -143,6 +147,7 @@ class TaskModel(pl.LightningModule):
         Tensor
             Training loss.
         """
+
         cat_features, num_features, labels = batch
         preds = self(num_features=num_features, cat_features=cat_features)
         loss = self.compute_loss(preds, labels)
@@ -192,6 +197,7 @@ class TaskModel(pl.LightningModule):
         Tensor
             Validation loss.
         """
+
         cat_features, num_features, labels = batch
         preds = self(num_features=num_features, cat_features=cat_features)
         val_loss = self.compute_loss(preds, labels)
