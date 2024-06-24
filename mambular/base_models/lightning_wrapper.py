@@ -310,7 +310,6 @@ class TaskModel(pl.LightningModule):
                 mode="min",
                 factor=self.lr_factor,
                 patience=self.lr_patience,
-                verbose=True,
             ),
             "monitor": "val_loss",
             "interval": "epoch",

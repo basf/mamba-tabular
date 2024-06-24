@@ -49,16 +49,16 @@ class MambularDataset(Dataset):
             feature_tensor[idx] for feature_tensor in self.cat_features_list
         ]
         num_features = [
-            torch.tensor(feature_tensor[idx], dtype=torch.float32)
+            torch.as_tensor(feature_tensor[idx]).clone().detach().to(torch.float32)
             for feature_tensor in self.num_features_list
         ]
         label = self.labels[idx]
         if self.regression:
-            label = torch.tensor(label, dtype=torch.float32)
+            label = label.clone().detach().to(torch.float32)
         elif self.num_classes == 1:
-            label = torch.tensor(label, dtype=torch.float32)
+            label = label.clone().detach().to(torch.float32)
         else:
-            label = torch.tensor(label, dtype=torch.long)
+            label = label.clone().detach().to(torch.long)
 
         # Keep categorical and numerical features separate
         return cat_features, num_features, label

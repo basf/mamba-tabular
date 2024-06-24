@@ -43,6 +43,7 @@ class MambularDataModule(pl.LightningDataModule):
         y_val=None,
         val_size=0.2,
         random_state=101,
+        **dataloader_kwargs,
     ):
         """
         Initialize the data module with the specified preprocessor, batch size, shuffle option,
@@ -78,6 +79,7 @@ class MambularDataModule(pl.LightningDataModule):
         self.X_train = None
         self.y_train = None
         self.test_preprocessor_fitted = False
+        self.dataloader_kwargs = dataloader_kwargs
 
     def preprocess_data(
         self,
@@ -266,7 +268,10 @@ class MambularDataModule(pl.LightningDataModule):
         """
 
         return DataLoader(
-            self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle
+            self.train_dataset,
+            batch_size=self.batch_size,
+            shuffle=self.shuffle,
+            **self.dataloader_kwargs,
         )
 
     def val_dataloader(self):
@@ -276,7 +281,9 @@ class MambularDataModule(pl.LightningDataModule):
         Returns:
             DataLoader: DataLoader instance for the validation dataset.
         """
-        return DataLoader(self.val_dataset, batch_size=self.batch_size)
+        return DataLoader(
+            self.val_dataset, batch_size=self.batch_size, **self.dataloader_kwargs
+        )
 
     def test_dataloader(self):
         """
@@ -285,4 +292,6 @@ class MambularDataModule(pl.LightningDataModule):
         Returns:
             DataLoader: DataLoader instance for the test dataset.
         """
-        return DataLoader(self.test_dataset, batch_size=self.batch_size)
+        return DataLoader(
+            self.test_dataset, batch_size=self.batch_size, **self.dataloader_kwargs
+        )
