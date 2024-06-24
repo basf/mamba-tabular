@@ -162,3 +162,11 @@ cython_debug/
 
 dist/
 docs/_build/*
+
+
+# pkl files
+*.pkl
+
+# logs and checkpoints
+examples/lightning_logs
+*.ckpt

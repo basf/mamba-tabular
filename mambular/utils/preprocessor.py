@@ -454,7 +454,6 @@ class Preprocessor:
                         other_encoding_info[feature_name] = transformed_feature.shape[1]
                         print(
                             f"Feature: {feature_name} (Other Encoding), Encoded feature dimension: {transformed_feature.shape[1]}"
-                            f"Feature: {feature_name} (Other Encoding), Encoded feature dimension: {transformed_feature.shape[1]}"
                         )
 
                 print("-" * 50)

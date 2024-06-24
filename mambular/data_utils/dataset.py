@@ -1,31 +1,6 @@
-import lightning as pl
 import torch
 from torch.utils.data import Dataset
-
-
-# Start Training using a custom DataModule
-class MambularDataModule(pl.LightningDataModule):
-    """
-    A PyTorch Lightning data module for managing training and validation data loaders in a structured way.
-
-    This class simplifies the process of batch-wise data loading for training and validation datasets during
-    the training loop, and is particularly useful when working with PyTorch Lightning's training framework.
-
-    Parameters:
-        train_loader (DataLoader): The DataLoader instance for the training dataset.
-        val_loader (DataLoader): The DataLoader instance for the validation dataset.
-    """
-
-    def __init__(self, train_loader, val_loader):
-        super().__init__()
-        self.train_loader = train_loader
-        self.val_loader = val_loader
-
-    def train_dataloader(self):
-        return self.train_loader
-
-    def val_dataloader(self):
-        return self.val_loader
+import numpy as np
 
 
 class MambularDataset(Dataset):
@@ -43,8 +18,18 @@ class MambularDataset(Dataset):
     def __init__(self, cat_features_list, num_features_list, labels, regression=True):
         self.cat_features_list = cat_features_list  # Categorical features tensors
         self.num_features_list = num_features_list  # Numerical features tensors
-        self.labels = labels
+
         self.regression = regression
+        if not self.regression:
+            self.num_classes = len(np.unique(labels))
+            if self.num_classes > 2:
+                self.labels = labels.view(-1)
+            else:
+                self.num_classes = 1
+                self.labels = labels
+        else:
+            self.labels = labels
+            self.num_classes = 1
 
     def __len__(self):
         return len(self.labels)
@@ -69,10 +54,9 @@ class MambularDataset(Dataset):
         ]
         label = self.labels[idx]
         if self.regression:
-            # Convert the label to float for regression tasks
-            # label = float(label)
             label = torch.tensor(label, dtype=torch.float32)
-
+        elif self.num_classes == 1:
+            label = torch.tensor(label, dtype=torch.float32)
         else:
             label = torch.tensor(label, dtype=torch.long)
 
