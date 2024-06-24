@@ -4,6 +4,7 @@ from .ft_transformer import FTTransformer
 from .mlp import MLP
 from .tabtransformer import TabTransformer
 from .resnet import ResNet
+from .basemodel import BaseModel
 
 __all__ = [
     "TaskModel",
@@ -12,4 +13,5 @@ __all__ = [
     "FTTransformer",
     "TabTransformer",
     "MLP",
+    "BaseModel",
 ]

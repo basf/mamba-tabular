@@ -11,6 +11,9 @@ from .tabtransformer import (
     TabTransformerLSS,
 )
 from .resnet import ResNetClassifier, ResNetRegressor, ResNetLSS
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 __all__ = [
@@ -29,4 +32,7 @@ __all__ = [
     "ResNetClassifier",
     "ResNetRegressor",
     "ResNetLSS",
+    "SklearnBaseClassifier",
+    "SklearnBaseLSS",
+    "SklearnBaseRegressor",
 ]
