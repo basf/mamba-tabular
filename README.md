@@ -28,6 +28,22 @@ Mambular is a Python package that brings the power of Mamba architectures to tab
 - **Sklearn-like API**: The familiar scikit-learn `fit`, `predict`, and `predict_proba` methods mean minimal learning curve for those already accustomed to scikit-learn.
 - **PyTorch Lightning Under the Hood**: Built on top of PyTorch Lightning, Mambular models benefit from streamlined training processes, easy customization, and advanced features like distributed training and 16-bit precision.
 
+
+## Models
+
+| Model               | Description                                                                                      |
+|---------------------|--------------------------------------------------------------------------------------------------|
+| `Mambular`          | An advanced model using Mamba blocks specifically designed for various tabular data tasks.       |
+| `FTTransformer`     | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data. |
+| `MLP`               | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                  |
+| `ResNet`            | An adaptation of the ResNet architecture for tabular data applications.                          |
+| `TabTransformer`    | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities. |
+
+All models are available for `regression`, `classification` and distributional regression, denoted by `LSS`.
+Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `MambularLSS`
+
+
+
 ## Documentation
 
 You can find the Mamba-Tabular API documentation [here](https://mamba-tabular.readthedocs.io/en/latest/index.html).
@@ -143,6 +159,56 @@ model.fit(
     )
 
 ```
+
+
+### Implement your own model:
+mambular allows users to easily integrate their custom models into the existing logic. Simply create a pytorch model and define its forward pass. Instead of inheriting from nn.Module, inherit from mambulars BaseModel. Each mambular model takse three arguments. The number of classes, e.g. = 1 for regression or = 2 for binary classification. For distributional regression, while this argument must be provided, it is determined automatically depending on the chosen distribution. Additionally, it takes two arguments directly passed from preprocessor. The cat_feature_info and num_feature_info for categorical and numerical feature information of e.g. the provided shape. Additionally, you can  provide a config argument, which you can either use simialr to the implemented models, or leave empty as shown below. A custom model could hence look just like this:
+
+
+```python
+from mambular.base_models import BaseModel
+
+class MyCustomModel(BaseModel):
+    def __init__(
+        self,
+        cat_feature_info,
+        num_feature_info,
+        num_classes: int = 1,
+        config=None,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+
+        input_dim = 0
+        for feature_name, input_shape in num_feature_info.items():
+            input_dim += input_shape
+        for feature_name, input_shape in cat_feature_info.items():
+            input_dim += 1 
+
+        self.linear = nn.Linear(input_dim, num_classes)
+
+    def forward(self, num_features, cat_features):
+        x = num_features + cat_features
+        x = torch.cat(x, dim=1)
+        
+        # Pass through linear layer
+        output = self.linear(x)
+        return output
+```
+
+To leverage the mambular API, you can build a regression, classification or distributional regression model that can leverage all of mambulars built-in methods, by using the following:
+
+```python
+from mambular.models import SklearnBaseRegressor
+
+class MyRegressor(SklearnBaseRegressor):
+    def __init__(self, **kwargs):
+        super().__init__(model=MyCustomModel, config=None, **kwargs)
+```
+
+Subsequently, you can fit, evaluate and predict with your model just like with any other mambualr model.
+To achieve the same for classification or disrtibutional regression, instead of inheriting from the SklearnbaseRegressor, simply inherit from the SklearnBaseClassifier and SklearnBaseLSS.
 
 ## Citation
 
