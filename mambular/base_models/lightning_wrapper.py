@@ -77,7 +77,7 @@ class TaskModel(pl.LightningModule):
         self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
 
-        if num_classes == 2:
+        if family is None and num_classes == 2:
             output_dim = 1
         else:
             output_dim = num_classes

@@ -6,6 +6,7 @@ from .mlp_classifier import MLPClassifier
 from .mlp_regressor import MLPRegressor
 from .tabtransformer_classifier import TabTransformerClassifier
 from .resnet_classifier import ResNetClassifier
+from .mambular_distributional import MambularLSS
 
 __all__ = [
     "MambularClassifier",
@@ -16,4 +17,5 @@ __all__ = [
     "MLPRegressor",
     "TabTransformerClassifier",
     "ResNetClassifier",
+    "MambularLSS",
 ]
