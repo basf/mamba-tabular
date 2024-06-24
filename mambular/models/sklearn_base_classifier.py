@@ -36,9 +36,9 @@ class SklearnBaseClassifier(BaseEstimator):
         self.model = None
 
         # Raise a warning if task is set to 'classification'
-        if preprocessor_kwargs.get("task") == "classification":
+        if preprocessor_kwargs.get("task") == "regression":
             warnings.warn(
-                "The task is set to 'classification'. MambularRegressor is designed for regression tasks.",
+                "The task is set to 'regression'. The Classifier is designed for classification tasks.",
                 UserWarning,
             )
 
@@ -173,9 +173,13 @@ class SklearnBaseClassifier(BaseEstimator):
         """
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
+        if isinstance(y, pd.Series):
+            y = y.values
         if X_val:
             if not isinstance(X_val, pd.DataFrame):
                 X_val = pd.DataFrame(X_val)
+            if isinstance(y_val, pd.Series):
+                y_val = y_val.values
 
         self.data_module = MambularDataModule(
             preprocessor=self.preprocessor,
