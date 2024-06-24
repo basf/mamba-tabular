@@ -124,6 +124,7 @@ class SklearnBaseRegressor(BaseEstimator):
         factor: float = 0.1,
         weight_decay: float = 1e-06,
         checkpoint_path="model_checkpoints",
+        dataloader_kwargs={},
         **trainer_kwargs
     ):
         """
@@ -163,6 +164,10 @@ class SklearnBaseRegressor(BaseEstimator):
             Factor by which the learning rate will be reduced.
         weight_decay : float, default=0.025
             Weight decay (L2 penalty) coefficient.
+        checkpoint_path : str, default="model_checkpoints"
+            Path where the checkpoints are being saved.
+        dataloader_kwargs: dict, default={}
+            The kwargs for the pytorch dataloader class.
         **trainer_kwargs : Additional keyword arguments for PyTorch Lightning's Trainer class.
 
 
@@ -190,6 +195,7 @@ class SklearnBaseRegressor(BaseEstimator):
             val_size=val_size,
             random_state=random_state,
             regression=True,
+            **dataloader_kwargs
         )
 
         self.data_module.preprocess_data(
