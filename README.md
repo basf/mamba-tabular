@@ -162,11 +162,28 @@ model.fit(
 
 
 ### Implement your own model:
-mambular allows users to easily integrate their custom models into the existing logic. Simply create a pytorch model and define its forward pass. Instead of inheriting from nn.Module, inherit from mambulars BaseModel. Each mambular model takse three arguments. The number of classes, e.g. = 1 for regression or = 2 for binary classification. For distributional regression, while this argument must be provided, it is determined automatically depending on the chosen distribution. Additionally, it takes two arguments directly passed from preprocessor. The cat_feature_info and num_feature_info for categorical and numerical feature information of e.g. the provided shape. Additionally, you can  provide a config argument, which you can either use simialr to the implemented models, or leave empty as shown below. A custom model could hence look just like this:
+mambular allows users to easily integrate their custom models into the existing logic. Simply create a pytorch model and define its forward pass. Instead of inheriting from nn.Module, inherit from mambulars BaseModel. Each mambular model takse three arguments. The number of classes, e.g. = 1 for regression or = 2 for binary classification. For distributional regression, while this argument must be provided, it is determined automatically depending on the chosen distribution. Additionally, it takes two arguments directly passed from preprocessor. The cat_feature_info and num_feature_info for categorical and numerical feature information of e.g. the provided shape. Additionally, you can  provide a config argument, which you can either implement similarly to the implemented configs, or simply use one of the Default Configs provided. A custom model could hence look just like this:
 
+
+1. First, define your config
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class MyConfig:
+    lr: float = 1e-04
+    lr_patience: int = 10
+    weight_decay: float = 1e-06
+    lr_factor: float = 0.1
+```
+
+2. Second, define your model just as you would for a nn.Module. Simply define the architecture and the forward pass
 
 ```python
 from mambular.base_models import BaseModel
+import torch
+import torch.nn
 
 class MyCustomModel(BaseModel):
     def __init__(
@@ -197,18 +214,23 @@ class MyCustomModel(BaseModel):
         return output
 ```
 
-To leverage the mambular API, you can build a regression, classification or distributional regression model that can leverage all of mambulars built-in methods, by using the following:
+3. To leverage the mambular API, you can build a regression, classification or distributional regression model that can leverage all of mambulars built-in methods, by using the following:
 
 ```python
 from mambular.models import SklearnBaseRegressor
 
 class MyRegressor(SklearnBaseRegressor):
     def __init__(self, **kwargs):
-        super().__init__(model=MyCustomModel, config=None, **kwargs)
+        super().__init__(model=MyCustomModel, config=MyConfig, **kwargs)
 ```
 
-Subsequently, you can fit, evaluate and predict with your model just like with any other mambualr model.
+4.  Subsequently, you can fit, evaluate and predict with your model just like with any other mambualr model.
 To achieve the same for classification or disrtibutional regression, instead of inheriting from the SklearnbaseRegressor, simply inherit from the SklearnBaseClassifier and SklearnBaseLSS.
+
+```python
+regressor = MyRegressor(numerical_preprocessing="ple")
+regressor.fit(X_train, y_train, max_epochs=50)
+```
 
 ## Citation
 
