@@ -199,7 +199,6 @@ class TabTransformer(BaseModel):
                 cat_embeddings = self.embedding_norm(cat_embeddings)
         else:
             cat_embeddings = None
-        print(cat_embeddings.shape)
 
         num_features = torch.cat(num_features, dim=1)
         num_embeddings = self.norm_f(num_features)
@@ -215,7 +214,6 @@ class TabTransformer(BaseModel):
         else:
             raise ValueError(f"Invalid pooling method: {self.pooling_method}")
 
-        print(num_embeddings.shape, x.shape)
         x = torch.cat((x, num_embeddings), axis=1)
         preds = self.tabular_head(x)
 
