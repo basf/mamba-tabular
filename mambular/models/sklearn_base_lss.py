@@ -147,6 +147,7 @@ class SklearnBaseLSS(BaseEstimator):
         lr_patience: int = 10,
         factor: float = 0.1,
         weight_decay: float = 1e-06,
+        checkpoint_path="model_checkpoints",
         distributional_kwargs=None,
         **trainer_kwargs
     ):
@@ -264,7 +265,7 @@ class SklearnBaseLSS(BaseEstimator):
             monitor="val_loss",  # Adjust according to your validation metric
             mode="min",
             save_top_k=1,
-            dirpath="model_checkpoints",  # Specify the directory to save checkpoints
+            dirpath=checkpoint_path,  # Specify the directory to save checkpoints
             filename="best_model",
         )
 

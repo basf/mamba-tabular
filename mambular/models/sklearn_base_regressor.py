@@ -123,6 +123,7 @@ class SklearnBaseRegressor(BaseEstimator):
         lr_patience: int = 10,
         factor: float = 0.1,
         weight_decay: float = 1e-06,
+        checkpoint_path="model_checkpoints",
         **trainer_kwargs
     ):
         """
@@ -214,7 +215,7 @@ class SklearnBaseRegressor(BaseEstimator):
             monitor="val_loss",  # Adjust according to your validation metric
             mode="min",
             save_top_k=1,
-            dirpath="model_checkpoints",  # Specify the directory to save checkpoints
+            dirpath=checkpoint_path,  # Specify the directory to save checkpoints
             filename="best_model",
         )
 
