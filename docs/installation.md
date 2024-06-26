@@ -14,8 +14,8 @@ Note: Make sure you in the same directory where `setup.py` file resides.
 ### Installation from PyPi:
 The package is available on PyPi. You can install it using the following command:
 
-```bash```bash
-pip install mambular
+```bash
+pip install -U mambular
 ```
 
 PyPi link: [mambular](https://pypi.org/project/mambular/)
