@@ -9,6 +9,8 @@ from sklearn.preprocessing import (
     MinMaxScaler,
     StandardScaler,
     QuantileTransformer,
+    PolynomialFeatures,
+    SplineTransformer,
 )
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
@@ -67,6 +69,8 @@ class Preprocessor:
         task="regression",
         cat_cutoff=0.03,
         treat_all_integers_as_numerical=False,
+        degree=3,
+        knots=12,
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = numerical_preprocessing.lower()
@@ -77,9 +81,11 @@ class Preprocessor:
             "standardization",
             "normalization",
             "quantile",
+            "polynomial",
+            "splines",
         ]:
             raise ValueError(
-                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', 'quantile' and 'normalization'."
+                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', 'quantile', 'polynomial', 'splines' and 'normalization'."
             )
 
         self.use_decision_tree_bins = use_decision_tree_bins
@@ -89,6 +95,8 @@ class Preprocessor:
         self.task = task
         self.cat_cutoff = cat_cutoff
         self.treat_all_integers_as_numerical = treat_all_integers_as_numerical
+        self.degree = degree
+        self.n_knots = knots
 
     def set_params(self, **params):
         for key, value in params.items():
@@ -222,6 +230,22 @@ class Preprocessor:
                                 n_quantiles=self.n_bins, random_state=101
                             ),
                         )
+                    )
+
+                elif self.numerical_preprocessing == "polynomial":
+                    numeric_transformer_steps.append(
+                        (
+                            "polynomial",
+                            PolynomialFeatures(self.degree, include_bias=True),
+                        )
+                    )
+
+                elif self.numerical_preprocessing == "splines":
+                    numeric_transformer_steps.append(
+                        (
+                            "splines",
+                            SplineTransformer(degree=self.degree, n_knots=self.n_knots),
+                        ),
                     )
 
                 elif self.numerical_preprocessing == "ple":
