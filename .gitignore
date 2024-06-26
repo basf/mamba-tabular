@@ -161,8 +161,6 @@ cython_debug/
 .DS_Store
 
 dist/
-docs/_build/*
-
 
 # pkl files
 *.pkl
@@ -171,4 +169,5 @@ docs/_build/*
 examples/lightning_logs
 *.ckpt
 
-docs/_build/*
+docs/_build/doctrees/*
+docs/_build/html/*
