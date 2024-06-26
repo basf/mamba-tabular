@@ -245,3 +245,5 @@ If you find this project useful in your research, please consider cite:
 ```
 
 ## License
+
+The entire codebase is under MIT license.
