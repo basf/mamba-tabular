@@ -170,3 +170,5 @@ docs/_build/*
 # logs and checkpoints
 examples/lightning_logs
 *.ckpt
+
+docs/_build/*
