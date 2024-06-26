@@ -4,7 +4,12 @@ from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import KBinsDiscretizer, MinMaxScaler, StandardScaler
+from sklearn.preprocessing import (
+    KBinsDiscretizer,
+    MinMaxScaler,
+    StandardScaler,
+    QuantileTransformer,
+)
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from .ple_encoding import PLE
@@ -71,21 +76,12 @@ class Preprocessor:
             "one_hot",
             "standardization",
             "normalization",
+            "quantile",
         ]:
             raise ValueError(
-                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', and 'normalization'."
+                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', 'quantile' and 'normalization'."
             )
-        self.numerical_preprocessing = numerical_preprocessing.lower()
-        if self.numerical_preprocessing not in [
-            "ple",
-            "binning",
-            "one_hot",
-            "standardization",
-            "normalization",
-        ]:
-            raise ValueError(
-                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', and 'normalization'."
-            )
+
         self.use_decision_tree_bins = use_decision_tree_bins
         self.column_transformer = None
         self.fitted = False
@@ -217,6 +213,16 @@ class Preprocessor:
 
                 elif self.numerical_preprocessing == "normalization":
                     numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+
+                elif self.numerical_preprocessing == "quantile":
+                    numeric_transformer_steps.append(
+                        (
+                            "quantile",
+                            QuantileTransformer(
+                                n_quantiles=self.n_bins, random_state=101
+                            ),
+                        )
+                    )
 
                 elif self.numerical_preprocessing == "ple":
                     numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
