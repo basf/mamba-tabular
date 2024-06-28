@@ -32,3 +32,5 @@ class DefaultMambularConfig:
     head_use_batch_norm: bool = False
     layer_norm_after_embedding: bool = False
     pooling_method: str = "avg"
+    bidirectional: bool = True
+    use_learnable_interaction: bool = False

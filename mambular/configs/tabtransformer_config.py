@@ -27,4 +27,4 @@ class DefaultTabTransformerConfig:
     bias: bool = True
     transformer_activation: callable = nn.SELU()
     layer_norm_eps: float = 1e-05
-    transformer_dim_feedforward: int = 2048
+    transformer_dim_feedforward: int = 512
