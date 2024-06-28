@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error
 import warnings
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
-from ..utils.preprocessor import Preprocessor
+from ..preprocessing import Preprocessor
 
 
 class SklearnBaseRegressor(BaseEstimator):
