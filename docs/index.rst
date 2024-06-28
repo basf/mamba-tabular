@@ -32,7 +32,7 @@
  
    api/models/index
    api/base_models/index
-   api/utils/index
+   api/preprocessing/index
    api/data_utils/index
 
 
