@@ -105,6 +105,10 @@ class Mambular(BaseModel):
             dt_init_floor=self.hparams.get("dt_init_floor", config.dt_init_floor),
             norm=globals()[self.hparams.get("norm", config.norm)],
             activation=self.hparams.get("activation", config.activation),
+            bidirectional=self.hparams.get("bidiretional", config.bidirectional),
+            use_learnable_interaction=self.hparams.get(
+                "use_learnable_interactions", config.use_learnable_interaction
+            ),
         )
 
         norm_layer = self.hparams.get("norm", config.norm)

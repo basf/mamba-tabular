@@ -4,7 +4,14 @@ from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import KBinsDiscretizer, MinMaxScaler, StandardScaler
+from sklearn.preprocessing import (
+    KBinsDiscretizer,
+    MinMaxScaler,
+    StandardScaler,
+    QuantileTransformer,
+    PolynomialFeatures,
+    SplineTransformer,
+)
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from .ple_encoding import PLE
@@ -62,6 +69,8 @@ class Preprocessor:
         task="regression",
         cat_cutoff=0.03,
         treat_all_integers_as_numerical=False,
+        degree=3,
+        knots=12,
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = numerical_preprocessing.lower()
@@ -71,21 +80,14 @@ class Preprocessor:
             "one_hot",
             "standardization",
             "normalization",
+            "quantile",
+            "polynomial",
+            "splines",
         ]:
             raise ValueError(
-                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', and 'normalization'."
+                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', 'quantile', 'polynomial', 'splines' and 'normalization'."
             )
-        self.numerical_preprocessing = numerical_preprocessing.lower()
-        if self.numerical_preprocessing not in [
-            "ple",
-            "binning",
-            "one_hot",
-            "standardization",
-            "normalization",
-        ]:
-            raise ValueError(
-                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', and 'normalization'."
-            )
+
         self.use_decision_tree_bins = use_decision_tree_bins
         self.column_transformer = None
         self.fitted = False
@@ -93,6 +95,8 @@ class Preprocessor:
         self.task = task
         self.cat_cutoff = cat_cutoff
         self.treat_all_integers_as_numerical = treat_all_integers_as_numerical
+        self.degree = degree
+        self.n_knots = knots
 
     def set_params(self, **params):
         for key, value in params.items():
@@ -217,6 +221,36 @@ class Preprocessor:
 
                 elif self.numerical_preprocessing == "normalization":
                     numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+
+                elif self.numerical_preprocessing == "quantile":
+                    numeric_transformer_steps.append(
+                        (
+                            "quantile",
+                            QuantileTransformer(
+                                n_quantiles=self.n_bins, random_state=101
+                            ),
+                        )
+                    )
+
+                elif self.numerical_preprocessing == "polynomial":
+                    numeric_transformer_steps.append(
+                        (
+                            "polynomial",
+                            PolynomialFeatures(self.degree, include_bias=False),
+                        )
+                    )
+
+                elif self.numerical_preprocessing == "splines":
+                    numeric_transformer_steps.append(
+                        (
+                            "splines",
+                            SplineTransformer(
+                                degree=self.degree,
+                                n_knots=self.n_knots,
+                                include_bias=False,
+                            ),
+                        ),
+                    )
 
                 elif self.numerical_preprocessing == "ple":
                     numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
@@ -447,13 +481,15 @@ class Preprocessor:
                 # Handle other numerical feature encodings
                 else:
                     last_step = transformer_pipeline.steps[-1][1]
+                    step_names = [step[0] for step in transformer_pipeline.steps]
+                    step_descriptions = " -> ".join(step_names)
                     if hasattr(last_step, "transform"):
                         transformed_feature = last_step.transform(
                             np.zeros((1, len(columns)))
                         )
                         other_encoding_info[feature_name] = transformed_feature.shape[1]
                         print(
-                            f"Feature: {feature_name} (Other Encoding), Encoded feature dimension: {transformed_feature.shape[1]}"
+                            f"Feature: {feature_name} ({step_descriptions}), Encoded feature dimension: {transformed_feature.shape[1]}"
                         )
 
                 print("-" * 50)
