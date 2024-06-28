@@ -236,7 +236,7 @@ class Preprocessor:
                     numeric_transformer_steps.append(
                         (
                             "polynomial",
-                            PolynomialFeatures(self.degree, include_bias=True),
+                            PolynomialFeatures(self.degree, include_bias=False),
                         )
                     )
 
@@ -244,7 +244,11 @@ class Preprocessor:
                     numeric_transformer_steps.append(
                         (
                             "splines",
-                            SplineTransformer(degree=self.degree, n_knots=self.n_knots),
+                            SplineTransformer(
+                                degree=self.degree,
+                                n_knots=self.n_knots,
+                                include_bias=False,
+                            ),
                         ),
                     )
 
@@ -477,13 +481,15 @@ class Preprocessor:
                 # Handle other numerical feature encodings
                 else:
                     last_step = transformer_pipeline.steps[-1][1]
+                    step_names = [step[0] for step in transformer_pipeline.steps]
+                    step_descriptions = " -> ".join(step_names)
                     if hasattr(last_step, "transform"):
                         transformed_feature = last_step.transform(
                             np.zeros((1, len(columns)))
                         )
                         other_encoding_info[feature_name] = transformed_feature.shape[1]
                         print(
-                            f"Feature: {feature_name} (Other Encoding), Encoded feature dimension: {transformed_feature.shape[1]}"
+                            f"Feature: {feature_name} ({step_descriptions}), Encoded feature dimension: {transformed_feature.shape[1]}"
                         )
 
                 print("-" * 50)
