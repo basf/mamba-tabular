@@ -43,6 +43,8 @@ class SklearnBaseLSS(BaseEstimator):
             "task",
             "cat_cutoff",
             "treat_all_integers_as_numerical",
+            "knots",
+            "degree",
         ]
 
         self.config_kwargs = {
