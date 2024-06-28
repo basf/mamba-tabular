@@ -30,34 +30,41 @@ class Preprocessor:
 
     Parameters
     ----------
-        n_bins (int): The number of bins to use for numerical feature binning. This parameter is relevant
-                      only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
-        numerical_preprocessing (str): The preprocessing strategy for numerical features. Valid options are
-                                       'binning', 'one_hot', 'standardization', and 'normalization'.
-        use_decision_tree_bins (bool): If True, uses decision tree regression/classification to determine
-                                       optimal bin edges for numerical feature binning. This parameter is
-                                       relevant only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
-        binning_strategy (str): Defines the strategy for binning numerical features. Options include 'uniform',
-                                'quantile', or other sklearn-compatible strategies.
-        task (str): Indicates the type of machine learning task ('regression' or 'classification'). This can
-                    influence certain preprocessing behaviors, especially when using decision tree-based binning.
-        binning_strategy (str): Defines the strategy for binning numerical features. Options include 'uniform',
-                                'quantile', or other sklearn-compatible strategies.
-        task (str): Indicates the type of machine learning task ('regression' or 'classification'). This can
-                    influence certain preprocessing behaviors, especially when using decision tree-based binning.
-        cat_cutoff (float or int): Indicates the cutoff after which integer values are treated as categorical.
-                                   If float, it's treated as a percentage. If int, it's the maximum number of
-                                   unique values for a column to be considered categorical.
-        treat_all_integers_as_numerical (bool): If True, all integer columns will be treated as numerical, regardless
-                                                of their unique value count or proportion.
-
+    n_bins : int, default=50
+        The number of bins to use for numerical feature binning. This parameter is relevant
+        only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
+    numerical_preprocessing : str, default="ple"
+        The preprocessing strategy for numerical features. Valid options are
+        'binning', 'one_hot', 'standardization', and 'normalization'.
+    use_decision_tree_bins : bool, default=False
+        If True, uses decision tree regression/classification to determine
+        optimal bin edges for numerical feature binning. This parameter is
+        relevant only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
+    binning_strategy : str, default="uniform"
+        Defines the strategy for binning numerical features. Options include 'uniform',
+        'quantile', or other sklearn-compatible strategies.
+    task : str, default="regression"
+        Indicates the type of machine learning task ('regression' or 'classification'). This can
+        influence certain preprocessing behaviors, especially when using decision tree-based binning.
+    cat_cutoff : float or int, default=0.03
+        Indicates the cutoff after which integer values are treated as categorical.
+        If float, it's treated as a percentage. If int, it's the maximum number of
+        unique values for a column to be considered categorical.
+    treat_all_integers_as_numerical : bool, default=False
+        If True, all integer columns will be treated as numerical, regardless
+        of their unique value count or proportion.
+    degree : int, default=3
+        The degree of the polynomial features to be used in preprocessing.
+    knots : int, default=12
+        The number of knots to be used in spline transformations.
 
     Attributes
     ----------
-        column_transformer (ColumnTransformer): An instance of sklearn's ColumnTransformer that holds the
-                                                configured preprocessing pipelines for different feature types.
-        fitted (bool): Indicates whether the preprocessor has been fitted to the data.
-
+    column_transformer : ColumnTransformer
+        An instance of sklearn's ColumnTransformer that holds the
+        configured preprocessing pipelines for different feature types.
+    fitted : bool
+        Indicates whether the preprocessor has been fitted to the data.
     """
 
     def __init__(
