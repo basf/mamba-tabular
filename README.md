@@ -3,7 +3,7 @@
 
 
 [![PyPI](https://img.shields.io/pypi/v/mambular)](https://pypi.org/project/mambular)
-![PyPI - Downloads](https://img.shields.io/pypi/dw/mambular)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/mambular)
 [![docs build](https://readthedocs.org/projects/mambular/badge/?version=latest)](https://mambular.readthedocs.io/en/latest/?badge=latest)
 [![docs](https://img.shields.io/badge/docs-latest-blue)](https://mambular.readthedocs.io/en/latest/)
 [![open issues](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/basf/mamba-tabular/issues)
@@ -46,7 +46,7 @@ Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `
 
 ## Documentation
 
-You can find the Mamba-Tabular API documentation [here](https://mamba-tabular.readthedocs.io/en/latest/index.html).
+You can find the Mamba-Tabular API documentation [here](https://mambular.readthedocs.io/en/latest/).
 
 ## Installation
 
