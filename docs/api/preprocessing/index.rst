@@ -3,7 +3,7 @@
 .. currentmodule:: mambular.preprocessing
 
 Preprocessing
-=====
+=============
 
 This module provides class for preprocessing input data.
 
