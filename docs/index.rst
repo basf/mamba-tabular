@@ -21,7 +21,6 @@
 
    examples/classification
    examples/regression
-   examples/embedding
    examples/distributional
 
 .. toctree::
