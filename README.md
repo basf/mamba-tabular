@@ -3,7 +3,7 @@
 
 
 [![PyPI](https://img.shields.io/pypi/v/mambular)](https://pypi.org/project/mambular)
-![PyPI - Downloads](https://img.shields.io/pypi/dw/mambular)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/mambular)
 [![docs build](https://readthedocs.org/projects/mambular/badge/?version=latest)](https://mambular.readthedocs.io/en/latest/?badge=latest)
 [![docs](https://img.shields.io/badge/docs-latest-blue)](https://mambular.readthedocs.io/en/latest/)
 [![open issues](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/basf/mamba-tabular/issues)
@@ -17,23 +17,24 @@
 
 # Mambular: Tabular Deep Learning with Mamba Architectures
 
-Mambular is a Python package that brings the power of Mamba architectures to tabular data, offering a suite of deep learning models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and evaluate using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
+Mambular is a Python package that brings the power of advanced deep learning architectures to tabular data, offering a suite of models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and evaluate using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
 
 ## Features
 
-- **Comprehensive Model Suite**: Includes modules for regression (`MambularRegressor`), classification (`MambularClassifier`), and distributional regression (`MambularLSS`), catering to a wide range of tabular data tasks.
-- **State-of-the-Art Architectures**: Leverages the Mamba architecture, known for its effectiveness in handling sequential and time-series data within a state-space modeling framework, adapted here for tabular data.
+- **Comprehensive Model Suite**: Includes modules for regression, classification, and distributional regression, catering to a wide range of tabular data tasks.
+- **State-of-the-Art Architectures**: Leverages various advanced architectures known for their effectiveness in handling tabular data. Mambular models include powerful Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752) and can include bidirectional processing as well as feature interaction layers.
 - **Seamless Integration**: Designed to work effortlessly with scikit-learn, allowing for easy inclusion in existing machine learning pipelines, cross-validation, and hyperparameter tuning workflows.
 - **Extensive Preprocessing**: Comes with a powerful preprocessing module that supports a broad array of data transformation techniques, ensuring that your data is optimally prepared for model training.
 - **Sklearn-like API**: The familiar scikit-learn `fit`, `predict`, and `predict_proba` methods mean minimal learning curve for those already accustomed to scikit-learn.
 - **PyTorch Lightning Under the Hood**: Built on top of PyTorch Lightning, Mambular models benefit from streamlined training processes, easy customization, and advanced features like distributed training and 16-bit precision.
 
 
+
 ## Models
 
 | Model               | Description                                                                                      |
 |---------------------|--------------------------------------------------------------------------------------------------|
-| `Mambular`          | An advanced model using Mamba blocks specifically designed for various tabular data tasks.       |
+| `Mambular`          | An advanced model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.       |
 | `FTTransformer`     | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data. |
 | `MLP`               | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                  |
 | `ResNet`            | An adaptation of the ResNet architecture for tabular data applications.                          |
@@ -46,7 +47,7 @@ Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `
 
 ## Documentation
 
-You can find the Mamba-Tabular API documentation [here](https://mamba-tabular.readthedocs.io/en/latest/index.html).
+You can find the Mamba-Tabular API documentation [here](https://mambular.readthedocs.io/en/latest/).
 
 ## Installation
 
@@ -66,9 +67,13 @@ Mambular automatically identifies the type of each feature in your dataset and a
 - **One-Hot Encoding**: For nominal data, Mambular employs one-hot encoding to capture the presence or absence of categories without imposing ordinality.
 - **Binning**: Numerical features can be discretized into bins, a useful technique for handling continuous variables in certain modeling contexts.
 - **Decision Tree Binning**: Optionally, Mambular can use decision trees to find the optimal binning strategy for numerical features, enhancing model interpretability and performance.
-- **Normalization**: Mambular can easily handle numerical features without specifically turning them into categorical features. Standard preprocessing steps such as normalization per feature are possible
-- **Standardization**: Similarly, Standardization instead of Normalization can be used.
-- **PLE**: Periodic Linear Encodings for numerical features can enhance performance for tabular DL methods.
+- **Normalization**: Mambular can easily handle numerical features without specifically turning them into categorical features. Standard preprocessing steps such as normalization per feature are possible.
+- **Standardization**: Similarly, standardization instead of normalization can be used to scale features based on the mean and standard deviation.
+- **PLE (Periodic Linear Encoding)**: This technique can be applied to numerical features to enhance the performance of tabular deep learning methods by encoding periodicity.
+- **Quantile Transformation**: Numerical features can be transformed to follow a uniform or normal distribution, improving model robustness to outliers.
+- **Spline Transformation**: Applies piecewise polynomial functions to numerical features, capturing nonlinear relationships more effectively.
+- **Polynomial Features**: Generates polynomial and interaction features, increasing the feature space to capture more complex relationships within the data.
+
 
 
 ### Handling Missing Values
@@ -106,7 +111,7 @@ preds = model.predict_proba(X)
 
 ## Distributional Regression with MambularLSS
 
-Mambular introduces a cutting-edge approach to distributional regression through its `MambularLSS` module, empowering users to model the full distribution of a response variable, not just its mean. This method is particularly valuable in scenarios where understanding the variability, skewness, or kurtosis of the response distribution is as crucial as predicting its central tendency.
+Mambular introduces an approach to distributional regression through its `MambularLSS` module, allowing users to model the full distribution of a response variable, not just its mean. This method is particularly valuable in scenarios where understanding the variability, skewness, or kurtosis of the response distribution is as crucial as predicting its central tendency. All available moedls in mambular are also available as distributional models.
 
 ### Key Features of MambularLSS:
 
@@ -114,6 +119,7 @@ Mambular introduces a cutting-edge approach to distributional regression through
 - **Customizable Distribution Types**: `MambularLSS` supports a variety of distribution families (e.g., Gaussian, Poisson, Binomial), making it adaptable to different types of response variables, from continuous to count data.
 - **Location, Scale, Shape Parameters**: The model predicts parameters corresponding to the location, scale, and shape of the distribution, offering a nuanced understanding of the data's underlying distributional characteristics.
 - **Enhanced Predictive Uncertainty**: By modeling the full distribution, `MambularLSS` provides richer information on predictive uncertainty, enabling more robust decision-making processes in uncertain environments.
+
 
 
 ### Available Distribution Classes:
@@ -161,11 +167,17 @@ model.fit(
 ```
 
 
-### Implement your own model:
-mambular allows users to easily integrate their custom models into the existing logic. Simply create a pytorch model and define its forward pass. Instead of inheriting from nn.Module, inherit from mambulars BaseModel. Each mambular model takse three arguments. The number of classes, e.g. = 1 for regression or = 2 for binary classification. For distributional regression, while this argument must be provided, it is determined automatically depending on the chosen distribution. Additionally, it takes two arguments directly passed from preprocessor. The cat_feature_info and num_feature_info for categorical and numerical feature information of e.g. the provided shape. Additionally, you can  provide a config argument, which you can either implement similarly to the implemented configs, or simply use one of the Default Configs provided. A custom model could hence look just like this:
+### Implement Your Own Model
+
+Mambular allows users to easily integrate their custom models into the existing logic. This process is designed to be straightforward, making it simple to create a PyTorch model and define its forward pass. Instead of inheriting from `nn.Module`, you inherit from Mambular's `BaseModel`. Each Mambular model takes three main arguments: the number of classes (e.g., 1 for regression or 2 for binary classification), `cat_feature_info`, and `num_feature_info` for categorical and numerical feature information, respectively. Additionally, you can provide a config argument, which can either be a custom configuration or one of the provided default configs.
+
+One of the key advantages of using Mambular is that the inputs to the forward passes are lists of tensors. While this might be unconventional, it is highly beneficial for models that treat different data types differently. For example, the TabTransformer model leverages this feature to handle categorical and numerical data separately, applying different transformations and processing steps to each type of data.
+
+Here's how you can implement a custom model with Mambular:
 
 
-1. First, define your config
+1. First, define your config:
+The configuration class allows you to specify hyperparameters and other settings for your model. This can be done using a simple dataclass.
 
 ```python
 from dataclasses import dataclass
@@ -178,7 +190,8 @@ class MyConfig:
     lr_factor: float = 0.1
 ```
 
-2. Second, define your model just as you would for a nn.Module. Simply define the architecture and the forward pass
+2. Second, define your model:
+Define your custom model just as you would for an `nn.Module`. The main difference is that you will inherit from `BaseModel` and use the provided feature information to construct your layers. To integrate your model into the existing API, you only need to define the architecture and the forward pass.
 
 ```python
 from mambular.base_models import BaseModel
@@ -214,7 +227,8 @@ class MyCustomModel(BaseModel):
         return output
 ```
 
-3. To leverage the mambular API, you can build a regression, classification or distributional regression model that can leverage all of mambulars built-in methods, by using the following:
+3. Leverage the Mambular API:
+You can build a regression, classification or distributional regression model that can leverage all of mambulars built-in methods, by using the following:
 
 ```python
 from mambular.models import SklearnBaseRegressor
@@ -224,8 +238,8 @@ class MyRegressor(SklearnBaseRegressor):
         super().__init__(model=MyCustomModel, config=MyConfig, **kwargs)
 ```
 
-4.  Subsequently, you can fit, evaluate and predict with your model just like with any other mambualr model.
-To achieve the same for classification or disrtibutional regression, instead of inheriting from the SklearnbaseRegressor, simply inherit from the SklearnBaseClassifier and SklearnBaseLSS.
+4. Train and evaluate your model:
+You can now fit, evaluate, and predict with your custom model just like with any other Mambular model. For classification or distributional regression, inherit from `SklearnBaseClassifier` or `SklearnBaseLSS` respectively.
 
 ```python
 regressor = MyRegressor(numerical_preprocessing="ple")

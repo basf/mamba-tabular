@@ -1,9 +1,9 @@
 .. -*- mode: rst -*-
 
-.. currentmodule:: mambular.utils
+.. currentmodule:: mambular.preprocessing
 
-Utils
-=====
+Preprocessing
+=============
 
 This module provides class for preprocessing input data.
 
