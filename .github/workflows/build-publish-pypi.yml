@@ -3,10 +3,10 @@ name: PyPI Builder and Releaser
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "v**"
 
 jobs:
-  release:
+  publish:
     name: Publishes release candidate to PyPI
     runs-on: ubuntu-latest
 
