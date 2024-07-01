@@ -161,4 +161,15 @@ cython_debug/
 .DS_Store
 
 dist/
-docs/_build/*
+
+# pkl files
+*.pkl
+
+# logs and checkpoints
+examples/lightning_logs
+*.ckpt
+
+docs/_build/doctrees/*
+docs/_build/html/*
+
+dev/*

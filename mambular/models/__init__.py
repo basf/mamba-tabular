@@ -1,11 +1,31 @@
-from .sklearn_classifier import MambularClassifier
-from .sklearn_distributional import MambularLSS
-from .sklearn_embedding_classifier import EmbeddingMambularClassifier
-from .sklearn_embedding_regressor import EmbeddingMambularRegressor
-from .sklearn_regressor import MambularRegressor
+from .fttransformer import (FTTransformerClassifier, FTTransformerLSS,
+                            FTTransformerRegressor)
+from .mambular import MambularClassifier, MambularLSS, MambularRegressor
+from .mlp import MLPLSS, MLPClassifier, MLPRegressor
+from .resnet import ResNetClassifier, ResNetLSS, ResNetRegressor
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
+from .tabtransformer import (TabTransformerClassifier, TabTransformerLSS,
+                             TabTransformerRegressor)
 
-__all__ = ['MambularClassifier',
-           'MambularRegressor',
-           'MambularLSS',
-           'EmbeddingMambularRegressor',
-           'EmbeddingMambularClassifier']
+__all__ = [
+    "MambularClassifier",
+    "MambularRegressor",
+    "MambularLSS",
+    "FTTransformerClassifier",
+    "FTTransformerRegressor",
+    "FTTransformerLSS",
+    "MLPClassifier",
+    "MLPRegressor",
+    "MLPLSS",
+    "TabTransformerClassifier",
+    "TabTransformerRegressor",
+    "TabTransformerLSS",
+    "ResNetClassifier",
+    "ResNetRegressor",
+    "ResNetLSS",
+    "SklearnBaseClassifier",
+    "SklearnBaseLSS",
+    "SklearnBaseRegressor",
+]
