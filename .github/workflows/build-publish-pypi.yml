@@ -1,20 +1,17 @@
-name: PyPI Builder and Releaser
+name: Publish Package to PyPi
 
 on:
   push:
-    tags:
-      - "**"
+    branches:
+      - master
 
 jobs:
   publish:
-    name: Publishes release candidate to PyPI
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v2
