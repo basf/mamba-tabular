@@ -3,7 +3,7 @@ name: PyPI Builder and Releaser
 on:
   push:
     tags:
-      - "v**"
+      - "**"
 
 jobs:
   publish:
