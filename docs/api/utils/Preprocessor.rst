@@ -1,5 +1,5 @@
 mambular.utils
 ==============
 
-.. autoclass:: mambular.utils.Preprocessor
+.. autoclass:: mambular.preprocessing.Preprocessor
     :members:
