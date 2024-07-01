@@ -80,7 +80,7 @@ class ResNetRegressor(SklearnBaseRegressor):
     Examples
     --------
     >>> from mambular.models import ResNetRegressor
-    >>> model = ResNetRegressor(d_model=64, n_layers=8)
+    >>> model = ResNetRegressor()
     >>> model.fit(X_train, y_train)
     >>> preds = model.predict(X_test)
     >>> model.evaluate(X_test, y_test)
@@ -165,7 +165,7 @@ class ResNetClassifier(SklearnBaseClassifier):
     Examples
     --------
     >>> from mambular.models import ResNetClassifier
-    >>> model = ResNetClassifier(d_model=64, n_layers=8)
+    >>> model = ResNetClassifier()
     >>> model.fit(X_train, y_train)
     >>> preds = model.predict(X_test)
     >>> model.evaluate(X_test, y_test)
@@ -253,7 +253,7 @@ class ResNetLSS(SklearnBaseLSS):
     Examples
     --------
     >>> from mambular.models import ResNetLSS
-    >>> model = ResNetLSS(d_model=64, n_layers=8)
+    >>> model = ResNetLSS()
     >>> model.fit(X_train, y_train, family="normal")
     >>> preds = model.predict(X_test)
     >>> model.evaluate(X_test, y_test)
