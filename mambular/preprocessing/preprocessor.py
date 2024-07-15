@@ -227,7 +227,9 @@ class Preprocessor:
                     numeric_transformer_steps.append(("scaler", StandardScaler()))
 
                 elif self.numerical_preprocessing == "normalization":
-                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
+                    numeric_transformer_steps.append(
+                        ("normalizer", MinMaxScaler(feature_range=(-1, 1)))
+                    )
 
                 elif self.numerical_preprocessing == "quantile":
                     numeric_transformer_steps.append(
@@ -240,12 +242,15 @@ class Preprocessor:
                     )
 
                 elif self.numerical_preprocessing == "polynomial":
+                    numeric_transformer_steps.append(("scaler", StandardScaler()))
                     numeric_transformer_steps.append(
                         (
                             "polynomial",
                             PolynomialFeatures(self.degree, include_bias=False),
                         )
                     )
+                    # if self.degree > 10:
+                    #    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
 
                 elif self.numerical_preprocessing == "splines":
                     numeric_transformer_steps.append(
@@ -260,13 +265,9 @@ class Preprocessor:
                     )
 
                 elif self.numerical_preprocessing == "ple":
-                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
                     numeric_transformer_steps.append(
-                        ("ple", PLE(n_bins=self.n_bins, task=self.task))
+                        ("normalizer", MinMaxScaler(feature_range=(-1, 1)))
                     )
-
-                elif self.numerical_preprocessing == "ple":
-                    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
                     numeric_transformer_steps.append(
                         ("ple", PLE(n_bins=self.n_bins, task=self.task))
                     )
