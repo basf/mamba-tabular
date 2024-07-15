@@ -107,6 +107,134 @@ class SklearnBaseRegressor(BaseEstimator):
 
         return self
 
+    def build_model(
+        self,
+        X,
+        y,
+        val_size: float = 0.2,
+        X_val=None,
+        y_val=None,
+        random_state: int = 101,
+        batch_size: int = 128,
+        shuffle: bool = True,
+        lr: float = 1e-4,
+        lr_patience: int = 10,
+        factor: float = 0.1,
+        weight_decay: float = 1e-06,
+        dataloader_kwargs={},
+    ):
+        """
+        Builds the model using the provided training data.
+
+        Parameters
+        ----------
+        X : DataFrame or array-like, shape (n_samples, n_features)
+            The training input samples.
+        y : array-like, shape (n_samples,) or (n_samples, n_targets)
+            The target values (real numbers).
+        val_size : float, default=0.2
+            The proportion of the dataset to include in the validation split if `X_val` is None. Ignored if `X_val` is provided.
+        X_val : DataFrame or array-like, shape (n_samples, n_features), optional
+            The validation input samples. If provided, `X` and `y` are not split and this data is used for validation.
+        y_val : array-like, shape (n_samples,) or (n_samples, n_targets), optional
+            The validation target values. Required if `X_val` is provided.
+        random_state : int, default=101
+            Controls the shuffling applied to the data before applying the split.
+        batch_size : int, default=64
+            Number of samples per gradient update.
+        shuffle : bool, default=True
+            Whether to shuffle the training data before each epoch.
+        lr : float, default=1e-3
+            Learning rate for the optimizer.
+        lr_patience : int, default=10
+            Number of epochs with no improvement on the validation loss to wait before reducing the learning rate.
+        factor : float, default=0.1
+            Factor by which the learning rate will be reduced.
+        weight_decay : float, default=0.025
+            Weight decay (L2 penalty) coefficient.
+        dataloader_kwargs: dict, default={}
+            The kwargs for the pytorch dataloader class.
+
+
+
+        Returns
+        -------
+        self : object
+            The built regressor.
+        """
+        if not isinstance(X, pd.DataFrame):
+            X = pd.DataFrame(X)
+        if isinstance(y, pd.Series):
+            y = y.values
+        if X_val:
+            if not isinstance(X_val, pd.DataFrame):
+                X_val = pd.DataFrame(X_val)
+            if isinstance(y_val, pd.Series):
+                y_val = y_val.values
+
+        self.data_module = MambularDataModule(
+            preprocessor=self.preprocessor,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            X_val=X_val,
+            y_val=y_val,
+            val_size=val_size,
+            random_state=random_state,
+            regression=False,
+            **dataloader_kwargs
+        )
+
+        self.data_module.preprocess_data(
+            X, y, X_val, y_val, val_size=val_size, random_state=random_state
+        )
+
+        self.model = TaskModel(
+            model_class=self.base_model,
+            config=self.config,
+            cat_feature_info=self.data_module.cat_feature_info,
+            num_feature_info=self.data_module.num_feature_info,
+            lr=lr,
+            lr_patience=lr_patience,
+            lr_factor=factor,
+            weight_decay=weight_decay,
+        )
+
+        self.built = True
+
+        return self
+
+    def get_number_of_params(self, requires_grad=True):
+        """
+        Calculate the number of parameters in the model.
+
+        Parameters
+        ----------
+        requires_grad : bool, optional
+            If True, only count the parameters that require gradients (trainable parameters).
+            If False, count all parameters. Default is True.
+
+        Returns
+        -------
+        int
+            The total number of parameters in the model.
+
+        Raises
+        ------
+        ValueError
+            If the model has not been built prior to calling this method.
+        """
+        if not self.built:
+            raise ValueError(
+                "The model must be built before the number of parameters can be estimated"
+            )
+        else:
+            if requires_grad:
+                return sum(
+                    p.numel() for p in self.model.parameters() if p.requires_grad
+                )
+            else:
+                return sum(p.numel() for p in self.model.parameters())
+
     def fit(
         self,
         X,
