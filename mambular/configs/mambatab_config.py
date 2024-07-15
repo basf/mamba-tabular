@@ -91,4 +91,4 @@ class DefaultMambaTabConfig:
     head_activation: callable = nn.ReLU()
     head_use_batch_norm: bool = False
     norm: str = "LayerNorm"
-    paper: bool = False
+    axis: int = 1
