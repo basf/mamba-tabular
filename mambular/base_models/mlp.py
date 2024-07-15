@@ -152,6 +152,7 @@ class MLP(BaseModel):
             x = x.reshape(B, S * D)
         else:
             x = num_features + cat_features
+            x = torch.cat(x, dim=1)
 
         for i in range(len(self.layers) - 1):
             if isinstance(self.layers[i], nn.Linear):
