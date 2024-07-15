@@ -55,8 +55,8 @@ class MambularRegressor(SklearnBaseRegressor):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the model.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -75,6 +75,8 @@ class MambularRegressor(SklearnBaseRegressor):
         Whether to use bidirectional processing of the input sequences.
     use_learnable_interaction : bool, default=False
         Whether to use learnable feature interactions before passing through mamba blocks.
+    use_cls : bool, default=True
+        Whether to append a cls to the end of each 'sequence'.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -172,8 +174,8 @@ class MambularClassifier(SklearnBaseClassifier):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the model.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -289,8 +291,8 @@ class MambularLSS(SklearnBaseLSS):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the model.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5

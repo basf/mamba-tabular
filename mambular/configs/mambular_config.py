@@ -70,7 +70,7 @@ class DefaultMambularConfig:
     use_learnable_interaction : bool, default=False
         Whether to use learnable feature interactions before passing through mamba blocks.
     use_cls : bool, default=True
-        Whether to append a cls to the beginning of each 'sequence'.
+        Whether to append a cls to the end of each 'sequence'.
     """
 
     lr: float = 1e-04
