@@ -11,6 +11,7 @@ from ..arch_utils.normalization_layers import (
 )
 from ..configs.tabtransformer_config import DefaultTabTransformerConfig
 from .basemodel import BaseModel
+from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 
 
 class TabTransformer(BaseModel):
@@ -91,7 +92,7 @@ class TabTransformer(BaseModel):
             "num_embedding_activation", config.num_embedding_activation
         )
 
-        encoder_layer = nn.TransformerEncoderLayer(
+        encoder_layer = CustomTransformerEncoderLayer(
             d_model=self.hparams.get("d_model", config.d_model),
             nhead=self.hparams.get("n_heads", config.n_heads),
             batch_first=True,
