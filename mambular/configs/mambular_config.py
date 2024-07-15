@@ -69,6 +69,8 @@ class DefaultMambularConfig:
         Whether to use bidirectional processing of the input sequences.
     use_learnable_interaction : bool, default=False
         Whether to use learnable feature interactions before passing through mamba blocks.
+    use_cls : bool, default=True
+        Whether to append a cls to the beginning of each 'sequence'.
     """
 
     lr: float = 1e-04
@@ -76,23 +78,23 @@ class DefaultMambularConfig:
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
     d_model: int = 64
-    n_layers: int = 8
+    n_layers: int = 4
     expand_factor: int = 2
     bias: bool = False
-    d_conv: int = 16
+    d_conv: int = 4
     conv_bias: bool = True
-    dropout: float = 0.05
+    dropout: float = 0.0
     dt_rank: str = "auto"
-    d_state: int = 32
+    d_state: int = 128
     dt_scale: float = 1.0
     dt_init: str = "random"
     dt_max: float = 0.1
     dt_min: float = 1e-04
     dt_init_floor: float = 1e-04
-    norm: str = "RMSNorm"
-    activation: callable = nn.SELU()
+    norm: str = "LayerNorm"
+    activation: callable = nn.SiLU()
     num_embedding_activation: callable = nn.Identity()
-    head_layer_sizes: list = (128, 64, 32)
+    head_layer_sizes: list = ()
     head_dropout: float = 0.5
     head_skip_layers: bool = False
     head_activation: callable = nn.SELU()
@@ -101,3 +103,4 @@ class DefaultMambularConfig:
     pooling_method: str = "avg"
     bidirectional: bool = False
     use_learnable_interaction: bool = False
+    use_cls: bool = False
