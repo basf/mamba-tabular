@@ -35,6 +35,14 @@ class DefaultMLPConfig:
         Whether to use batch normalization in the MLP layers.
     layer_norm : bool, default=False
         Whether to use layer normalization in the MLP layers.
+    use_embeddings : bool, default=False
+        Whether to use embedding layers for all features.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for  embeddings.
+    layer_norm_after_embedding : bool, default=False
+        Whether to apply layer normalization after embedding.
+    d_model : int, default=32
+        Dimensionality of the embeddings.
     """
 
     lr: float = 1e-04
@@ -50,3 +58,7 @@ class DefaultMLPConfig:
     skip_connections: bool = False
     batch_norm: bool = False
     layer_norm: bool = False
+    use_embeddings: bool = False
+    embedding_activation: callable = nn.Identity()
+    layer_norm_after_embedding: bool = False
+    d_model: int = 32

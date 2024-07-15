@@ -32,8 +32,8 @@ class DefaultFTTransformerConfig:
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the transformer.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for  embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -71,7 +71,7 @@ class DefaultFTTransformerConfig:
     ff_dropout: float = 0.1
     norm: str = "LayerNorm"
     activation: callable = nn.SELU()
-    num_embedding_activation: callable = nn.Identity()
+    embedding_activation: callable = nn.Identity()
     head_layer_sizes: list = ()
     head_dropout: float = 0.5
     head_skip_layers: bool = False
