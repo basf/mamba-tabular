@@ -174,6 +174,11 @@ class Mambular(BaseModel):
             torch.zeros(1, 1, self.hparams.get("d_model", config.d_model))
         )
 
+        if self.pooling_method == "cls":
+            self.use_cls = True
+        else:
+            self.use_cls = self.hparams.get("use_cls", config.use_cls)
+
         if self.hparams.get("layer_norm_after_embedding"):
             self.embedding_norm = nn.LayerNorm(
                 self.hparams.get("d_model", config.d_model)
@@ -198,10 +203,13 @@ class Mambular(BaseModel):
         Tensor
             The output predictions of the model.
         """
-        batch_size = (
-            cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
-        )
-        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
+        if self.use_cls:
+            batch_size = (
+                cat_features[0].size(0)
+                if cat_features != []
+                else num_features[0].size(0)
+            )
+            cls_tokens = self.cls_token.expand(batch_size, -1, -1)
 
         if len(self.cat_embeddings) > 0 and cat_features:
             cat_embeddings = [
@@ -225,11 +233,20 @@ class Mambular(BaseModel):
             num_embeddings = None
 
         if cat_embeddings is not None and num_embeddings is not None:
-            x = torch.cat([cls_tokens, cat_embeddings, num_embeddings], dim=1)
+            if self.use_cls:
+                x = torch.cat([cat_embeddings, num_embeddings, cls_tokens], dim=1)
+            else:
+                x = torch.cat([cat_embeddings, num_embeddings], dim=1)
         elif cat_embeddings is not None:
-            x = torch.cat([cls_tokens, cat_embeddings], dim=1)
+            if self.use_cls:
+                x = torch.cat([cat_embeddings, cls_tokens], dim=1)
+            else:
+                x = cat_embeddings
         elif num_embeddings is not None:
-            x = torch.cat([cls_tokens, num_embeddings], dim=1)
+            if self.use_cls:
+                x = torch.cat([num_embeddings, cls_tokens], dim=1)
+            else:
+                x = num_embeddings
         else:
             raise ValueError("No features provided to the model.")
 
@@ -242,7 +259,9 @@ class Mambular(BaseModel):
         elif self.pooling_method == "sum":
             x = torch.sum(x, dim=1)
         elif self.pooling_method == "cls_token":
-            x = x[:, 0]
+            x = x[:, -1]
+        elif self.pooling_method == "last":
+            x = x[:, -1]
         else:
             raise ValueError(f"Invalid pooling method: {self.pooling_method}")
 

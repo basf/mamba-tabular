@@ -9,6 +9,7 @@ from ..arch_utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
+from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 from ..configs.fttransformer_config import DefaultFTTransformerConfig
 from .basemodel import BaseModel
 
@@ -87,7 +88,7 @@ class FTTransformer(BaseModel):
             "num_embedding_activation", config.num_embedding_activation
         )
 
-        encoder_layer = nn.TransformerEncoderLayer(
+        encoder_layer = CustomTransformerEncoderLayer(
             d_model=self.hparams.get("d_model", config.d_model),
             nhead=self.hparams.get("n_heads", config.n_heads),
             batch_first=True,

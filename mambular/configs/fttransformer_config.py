@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import torch.nn as nn
+from ..arch_utils.transformer_utils import ReGLU
 
 
 @dataclass
@@ -63,15 +64,15 @@ class DefaultFTTransformerConfig:
     lr_patience: int = 10
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
-    d_model: int = 64
-    n_layers: int = 8
-    n_heads: int = 4
-    attn_dropout: float = 0.3
-    ff_dropout: float = 0.3
-    norm: str = "RMSNorm"
+    d_model: int = 128
+    n_layers: int = 4
+    n_heads: int = 8
+    attn_dropout: float = 0.2
+    ff_dropout: float = 0.1
+    norm: str = "LayerNorm"
     activation: callable = nn.SELU()
     num_embedding_activation: callable = nn.Identity()
-    head_layer_sizes: list = (128, 64, 32)
+    head_layer_sizes: list = ()
     head_dropout: float = 0.5
     head_skip_layers: bool = False
     head_activation: callable = nn.SELU()
@@ -80,6 +81,7 @@ class DefaultFTTransformerConfig:
     pooling_method: str = "cls"
     norm_first: bool = False
     bias: bool = True
-    transformer_activation: callable = nn.SELU()
+    transformer_activation: callable = ReGLU()
     layer_norm_eps: float = 1e-05
-    transformer_dim_feedforward: int = 512
+    transformer_dim_feedforward: int = 256
+    numerical_embedding: str = "ple"
