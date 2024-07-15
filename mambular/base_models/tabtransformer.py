@@ -9,6 +9,7 @@ from ..arch_utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
+from ..arch_utils.embedding_layer import EmbeddingLayer
 from ..configs.tabtransformer_config import DefaultTabTransformerConfig
 from .basemodel import BaseModel
 from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
@@ -75,6 +76,10 @@ class TabTransformer(BaseModel):
     ):
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        if cat_feature_info == {}:
+            raise ValueError(
+                "You are trying to fit a TabTransformer with no categorical features. Try using a different model that is better suited for tasks without categorical features."
+            )
 
         layer_norm_dim = 0
         for feature_name, input_shape in num_feature_info.items():
@@ -87,10 +92,6 @@ class TabTransformer(BaseModel):
         self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-
-        self.embedding_activation = self.hparams.get(
-            "num_embedding_activation", config.num_embedding_activation
-        )
 
         encoder_layer = CustomTransformerEncoderLayer(
             d_model=self.hparams.get("d_model", config.d_model),
@@ -131,13 +132,16 @@ class TabTransformer(BaseModel):
             norm=self.norm_embedding,
         )
 
-        self.cat_embeddings = nn.ModuleList(
-            [
-                nn.Embedding(
-                    num_categories + 1, self.hparams.get("d_model", config.d_model)
-                )
-                for feature_name, num_categories in cat_feature_info.items()
-            ]
+        self.embedding_layer = EmbeddingLayer(
+            num_feature_info=num_feature_info,
+            cat_feature_info=cat_feature_info,
+            d_model=self.hparams.get("d_model", config.d_model),
+            embedding_activation=self.hparams.get(
+                "embedding_activation", config.embedding_activation
+            ),
+            layer_norm_after_embedding=self.hparams.get("layer_norm_after_embedding"),
+            use_cls=True,
+            cls_position=0,
         )
 
         head_activation = self.hparams.get("head_activation", config.head_activation)
@@ -166,11 +170,6 @@ class TabTransformer(BaseModel):
             torch.zeros(1, 1, self.hparams.get("d_model", config.d_model))
         )
 
-        if self.hparams.get("layer_norm_after_embedding"):
-            self.embedding_norm = nn.LayerNorm(
-                self.hparams.get("d_model", config.d_model)
-            )
-
     def forward(self, num_features, cat_features):
         """
         Defines the forward pass of the model.
@@ -187,19 +186,7 @@ class TabTransformer(BaseModel):
         Tensor
             The output predictions of the model.
         """
-        if cat_features == []:
-            raise ValueError("No categorical features provided.")
-
-        if len(self.cat_embeddings) > 0 and cat_features:
-            cat_embeddings = [
-                emb(cat_features[i]) for i, emb in enumerate(self.cat_embeddings)
-            ]
-            cat_embeddings = torch.stack(cat_embeddings, dim=1)
-            cat_embeddings = torch.squeeze(cat_embeddings, dim=2)
-            if self.hparams.get("layer_norm_after_embedding"):
-                cat_embeddings = self.embedding_norm(cat_embeddings)
-        else:
-            cat_embeddings = None
+        cat_embeddings = self.embedding_layer({}, cat_features)
 
         num_features = torch.cat(num_features, dim=1)
         num_embeddings = self.norm_f(num_features)
@@ -212,6 +199,8 @@ class TabTransformer(BaseModel):
             x, _ = torch.max(x, dim=1)
         elif self.pooling_method == "sum":
             x = torch.sum(x, dim=1)
+        elif self.pooling_method == "cls":
+            x = x[:, 0]
         else:
             raise ValueError(f"Invalid pooling method: {self.pooling_method}")
 
