@@ -71,6 +71,8 @@ class DefaultMambularConfig:
         Whether to use learnable feature interactions before passing through mamba blocks.
     use_cls : bool, default=True
         Whether to append a cls to the end of each 'sequence'.
+    shuffle_embeddings : bool, default=False.
+        Whether to shuffle the embeddings before being passed to the Mamba layers.
     """
 
     lr: float = 1e-04
@@ -104,3 +106,4 @@ class DefaultMambularConfig:
     bidirectional: bool = False
     use_learnable_interaction: bool = False
     use_cls: bool = False
+    shuffle_embeddings: bool = False
