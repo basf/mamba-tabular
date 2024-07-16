@@ -71,6 +71,8 @@ class EmbeddingLayer(nn.Module):
         if layer_norm_after_embedding:
             self.embedding_norm = nn.LayerNorm(d_model)
 
+        self.seq_len = len(self.num_embeddings) + len(self.cat_embeddings)
+
     def forward(self, num_features=None, cat_features=None):
         """
         Defines the forward pass of the model.
