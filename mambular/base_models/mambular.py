@@ -82,6 +82,9 @@ class Mambular(BaseModel):
         self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
         self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
+        self.shuffle_embeddings = self.hparams.get(
+            "shuffle_embeddings", config.shuffle_embeddings
+        )
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -161,8 +164,8 @@ class Mambular(BaseModel):
         else:
             self.use_cls = self.hparams.get("use_cls", config.use_cls)
 
-    def __post__init(self):
-        pass
+        if self.shuffle_embeddings:
+            self.perm = torch.randperm(self.embedding_layer.seq_len)
 
     def forward(self, num_features, cat_features):
         """
@@ -181,6 +184,9 @@ class Mambular(BaseModel):
             The output predictions of the model.
         """
         x = self.embedding_layer(num_features, cat_features)
+
+        if self.shuffle_embeddings:
+            x = x[:, self.perm, :]
 
         x = self.mamba(x)
 
