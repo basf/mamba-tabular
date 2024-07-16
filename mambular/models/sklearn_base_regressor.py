@@ -44,6 +44,7 @@ class SklearnBaseRegressor(BaseEstimator):
             )
 
         self.base_model = model
+        self.built = False
 
     def get_params(self, deep=True):
         """
@@ -255,6 +256,7 @@ class SklearnBaseRegressor(BaseEstimator):
         weight_decay: float = 1e-06,
         checkpoint_path="model_checkpoints",
         dataloader_kwargs={},
+        rebuild=True,
         **trainer_kwargs
     ):
         """
@@ -306,42 +308,43 @@ class SklearnBaseRegressor(BaseEstimator):
         self : object
             The fitted regressor.
         """
-        if not isinstance(X, pd.DataFrame):
-            X = pd.DataFrame(X)
-        if isinstance(y, pd.Series):
-            y = y.values
-        if X_val:
-            if not isinstance(X_val, pd.DataFrame):
-                X_val = pd.DataFrame(X_val)
-            if isinstance(y_val, pd.Series):
-                y_val = y_val.values
+        if not self.built and not rebuild:
+            if not isinstance(X, pd.DataFrame):
+                X = pd.DataFrame(X)
+            if isinstance(y, pd.Series):
+                y = y.values
+            if X_val:
+                if not isinstance(X_val, pd.DataFrame):
+                    X_val = pd.DataFrame(X_val)
+                if isinstance(y_val, pd.Series):
+                    y_val = y_val.values
 
-        self.data_module = MambularDataModule(
-            preprocessor=self.preprocessor,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            X_val=X_val,
-            y_val=y_val,
-            val_size=val_size,
-            random_state=random_state,
-            regression=True,
-            **dataloader_kwargs
-        )
+            self.data_module = MambularDataModule(
+                preprocessor=self.preprocessor,
+                batch_size=batch_size,
+                shuffle=shuffle,
+                X_val=X_val,
+                y_val=y_val,
+                val_size=val_size,
+                random_state=random_state,
+                regression=False,
+                **dataloader_kwargs
+            )
 
-        self.data_module.preprocess_data(
-            X, y, X_val, y_val, val_size=val_size, random_state=random_state
-        )
+            self.data_module.preprocess_data(
+                X, y, X_val, y_val, val_size=val_size, random_state=random_state
+            )
 
-        self.model = TaskModel(
-            model_class=self.base_model,
-            config=self.config,
-            cat_feature_info=self.data_module.cat_feature_info,
-            num_feature_info=self.data_module.num_feature_info,
-            lr=lr,
-            lr_patience=lr_patience,
-            lr_factor=factor,
-            weight_decay=weight_decay,
-        )
+            self.model = TaskModel(
+                model_class=self.base_model,
+                config=self.config,
+                cat_feature_info=self.data_module.cat_feature_info,
+                num_feature_info=self.data_module.num_feature_info,
+                lr=lr,
+                lr_patience=lr_patience,
+                lr_factor=factor,
+                weight_decay=weight_decay,
+            )
 
         early_stop_callback = EarlyStopping(
             monitor=monitor, min_delta=0.00, patience=patience, verbose=False, mode=mode
