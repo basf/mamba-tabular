@@ -77,6 +77,8 @@ class MambularRegressor(SklearnBaseRegressor):
         Whether to use learnable feature interactions before passing through mamba blocks.
     use_cls : bool, default=True
         Whether to append a cls to the end of each 'sequence'.
+    shuffle_embeddings : bool, default=False.
+        Whether to shuffle the embeddings before being passed to the Mamba layers.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -194,6 +196,8 @@ class MambularClassifier(SklearnBaseClassifier):
         Whether to use bidirectional processing of the input sequences.
     use_learnable_interaction : bool, default=False
         Whether to use learnable feature interactions before passing through mamba blocks.
+    shuffle_embeddings : bool, default=False.
+        Whether to shuffle the embeddings before being passed to the Mamba layers.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -314,6 +318,8 @@ class MambularLSS(SklearnBaseLSS):
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
+    shuffle_embeddings : bool, default=False.
+        Whether to shuffle the embeddings before being passed to the Mamba layers.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
         'binning', 'one_hot', 'standardization', and 'normalization'.
