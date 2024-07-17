@@ -327,7 +327,7 @@ class SklearnBaseRegressor(BaseEstimator):
                 y_val=y_val,
                 val_size=val_size,
                 random_state=random_state,
-                regression=False,
+                regression=True,
                 **dataloader_kwargs
             )
 
