@@ -14,11 +14,6 @@ from .tabtransformer import (
     TabTransformerLSS,
     TabTransformerRegressor,
 )
-from .basisexpandft import (
-    BasisFTTransformerClassifier,
-    BasisFTTransformerRegressor,
-    BasisFTTransformerLSS,
-)
 
 from .mambatab import MambaTabClassifier, MambaTabRegressor, MambaTabLSS
 from .rnn import RNNClassifier, RNNRegressor, RNNLSS
@@ -42,9 +37,6 @@ __all__ = [
     "SklearnBaseClassifier",
     "SklearnBaseLSS",
     "SklearnBaseRegressor",
-    "BasisFTTransformerClassifier",
-    "BasisFTTransformerRegressor",
-    "BasisFTTransformerLSS",
     "MambaTabRegressor",
     "MambaTabClassifier",
     "MambaTabLSS",
