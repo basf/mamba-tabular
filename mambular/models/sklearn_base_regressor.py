@@ -181,7 +181,7 @@ class SklearnBaseRegressor(BaseEstimator):
             y_val=y_val,
             val_size=val_size,
             random_state=random_state,
-            regression=False,
+            regression=True,
             **dataloader_kwargs
         )
 
@@ -308,7 +308,7 @@ class SklearnBaseRegressor(BaseEstimator):
         self : object
             The fitted regressor.
         """
-        if not self.built and not rebuild:
+        if rebuild:
             if not isinstance(X, pd.DataFrame):
                 X = pd.DataFrame(X)
             if isinstance(y, pd.Series):
@@ -345,6 +345,9 @@ class SklearnBaseRegressor(BaseEstimator):
                 lr_factor=factor,
                 weight_decay=weight_decay,
             )
+
+        else:
+            assert self.built, "The model must be built before calling the fit method."
 
         early_stop_callback = EarlyStopping(
             monitor=monitor, min_delta=0.00, patience=patience, verbose=False, mode=mode
