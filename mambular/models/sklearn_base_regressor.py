@@ -8,6 +8,7 @@ import warnings
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
+from lightning.pytorch.callbacks import ModelSummary
 
 
 class SklearnBaseRegressor(BaseEstimator):
@@ -356,12 +357,16 @@ class SklearnBaseRegressor(BaseEstimator):
         )
 
         # Initialize the trainer and train the model
-        trainer = pl.Trainer(
+        self.trainer = pl.Trainer(
             max_epochs=max_epochs,
-            callbacks=[early_stop_callback, checkpoint_callback],
+            callbacks=[
+                early_stop_callback,
+                checkpoint_callback,
+                ModelSummary(max_depth=2),
+            ],
             **trainer_kwargs
         )
-        trainer.fit(self.model, self.data_module)
+        self.trainer.fit(self.model, self.data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
