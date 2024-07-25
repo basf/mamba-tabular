@@ -37,7 +37,7 @@ class TaskModel(pl.LightningModule):
         lss=False,
         family=None,
         loss_fct: callable = None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.num_classes = num_classes
@@ -300,7 +300,7 @@ class TaskModel(pl.LightningModule):
             A dictionary containing the optimizer and lr_scheduler configurations.
         """
         optimizer = torch.optim.Adam(
-            self.parameters(),
+            self.model.parameters(),
             lr=self.lr,
             weight_decay=self.weight_decay,
         )
