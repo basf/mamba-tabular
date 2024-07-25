@@ -31,6 +31,7 @@ from ..utils.distributions import (
     PoissonDistribution,
     StudentTDistribution,
 )
+from lightning.pytorch.callbacks import ModelSummary
 
 
 class SklearnBaseLSS(BaseEstimator):
@@ -409,12 +410,16 @@ class SklearnBaseLSS(BaseEstimator):
         )
 
         # Initialize the trainer and train the model
-        trainer = pl.Trainer(
+        self.trainer = pl.Trainer(
             max_epochs=max_epochs,
-            callbacks=[early_stop_callback, checkpoint_callback],
+            callbacks=[
+                early_stop_callback,
+                checkpoint_callback,
+                ModelSummary(max_depth=2),
+            ],
             **trainer_kwargs
         )
-        trainer.fit(self.model, self.data_module)
+        self.trainer.fit(self.model, self.data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
