@@ -126,7 +126,7 @@ class TaskModel(pl.LightningModule):
             Computed loss.
         """
         if self.lss:
-            return self.family.compute_loss(predictions, y_true)
+            return self.family.compute_loss(predictions, y_true.squeeze(-1))
         else:
             loss = self.loss_fct(predictions, y_true)
             return loss
