@@ -47,6 +47,7 @@ class SklearnBaseClassifier(BaseEstimator):
             )
 
         self.base_model = model
+        self.built = False
 
     def get_params(self, deep=True):
         """

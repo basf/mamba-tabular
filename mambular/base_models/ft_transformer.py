@@ -9,6 +9,7 @@ from ..arch_utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
+from ..arch_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 from ..configs.fttransformer_config import DefaultFTTransformerConfig
 from .basemodel import BaseModel
@@ -84,10 +85,6 @@ class FTTransformer(BaseModel):
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
-        self.embedding_activation = self.hparams.get(
-            "num_embedding_activation", config.num_embedding_activation
-        )
-
         encoder_layer = CustomTransformerEncoderLayer(
             d_model=self.hparams.get("d_model", config.d_model),
             nhead=self.hparams.get("n_heads", config.n_heads),
@@ -128,27 +125,16 @@ class FTTransformer(BaseModel):
             norm=self.norm_f,
         )
 
-        self.num_embeddings = nn.ModuleList(
-            [
-                nn.Sequential(
-                    nn.Linear(
-                        input_shape,
-                        self.hparams.get("d_model", config.d_model),
-                        bias=False,
-                    ),
-                    self.embedding_activation,
-                )
-                for feature_name, input_shape in num_feature_info.items()
-            ]
-        )
-
-        self.cat_embeddings = nn.ModuleList(
-            [
-                nn.Embedding(
-                    num_categories + 1, self.hparams.get("d_model", config.d_model)
-                )
-                for feature_name, num_categories in cat_feature_info.items()
-            ]
+        self.embedding_layer = EmbeddingLayer(
+            num_feature_info=num_feature_info,
+            cat_feature_info=cat_feature_info,
+            d_model=self.hparams.get("d_model", config.d_model),
+            embedding_activation=self.hparams.get(
+                "embedding_activation", config.embedding_activation
+            ),
+            layer_norm_after_embedding=self.hparams.get("layer_norm_after_embedding"),
+            use_cls=True,
+            cls_position=0,
         )
 
         head_activation = self.hparams.get("head_activation", config.head_activation)
@@ -169,15 +155,6 @@ class FTTransformer(BaseModel):
             n_output_units=num_classes,
         )
 
-        self.cls_token = nn.Parameter(
-            torch.zeros(1, 1, self.hparams.get("d_model", config.d_model))
-        )
-
-        if self.hparams.get("layer_norm_after_embedding"):
-            self.embedding_norm = nn.LayerNorm(
-                self.hparams.get("d_model", config.d_model)
-            )
-
     def forward(self, num_features, cat_features):
         """
         Defines the forward pass of the model.
@@ -194,40 +171,7 @@ class FTTransformer(BaseModel):
         Tensor
             The output predictions of the model.
         """
-        batch_size = (
-            cat_features[0].size(0) if cat_features != [] else num_features[0].size(0)
-        )
-        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
-
-        if len(self.cat_embeddings) > 0 and cat_features:
-            cat_embeddings = [
-                emb(cat_features[i]) for i, emb in enumerate(self.cat_embeddings)
-            ]
-            cat_embeddings = torch.stack(cat_embeddings, dim=1)
-            cat_embeddings = torch.squeeze(cat_embeddings, dim=2)
-            if self.hparams.get("layer_norm_after_embedding"):
-                cat_embeddings = self.embedding_norm(cat_embeddings)
-        else:
-            cat_embeddings = None
-
-        if len(self.num_embeddings) > 0 and num_features:
-            num_embeddings = [
-                emb(num_features[i]) for i, emb in enumerate(self.num_embeddings)
-            ]
-            num_embeddings = torch.stack(num_embeddings, dim=1)
-            if self.hparams.get("layer_norm_after_embedding"):
-                num_embeddings = self.embedding_norm(num_embeddings)
-        else:
-            num_embeddings = None
-
-        if cat_embeddings is not None and num_embeddings is not None:
-            x = torch.cat([cls_tokens, cat_embeddings, num_embeddings], dim=1)
-        elif cat_embeddings is not None:
-            x = torch.cat([cls_tokens, cat_embeddings], dim=1)
-        elif num_embeddings is not None:
-            x = torch.cat([cls_tokens, num_embeddings], dim=1)
-        else:
-            raise ValueError("No features provided to the model.")
+        x = self.embedding_layer(num_features, cat_features)
 
         x = self.encoder(x)
 

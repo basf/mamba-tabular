@@ -5,6 +5,7 @@ from .mambular import Mambular
 from .mlp import MLP
 from .resnet import ResNet
 from .tabtransformer import TabTransformer
+from .mambatab import MambaTab
 
 __all__ = [
     "TaskModel",
@@ -14,4 +15,5 @@ __all__ = [
     "TabTransformer",
     "MLP",
     "BaseModel",
+    "MambaTab",
 ]

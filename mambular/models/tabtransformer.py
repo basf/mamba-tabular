@@ -37,8 +37,8 @@ class TabTransformerRegressor(SklearnBaseRegressor):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the transformer.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -144,8 +144,8 @@ class TabTransformerClassifier(SklearnBaseClassifier):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the transformer.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -251,8 +251,8 @@ class TabTransformerLSS(SklearnBaseLSS):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the transformer.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
