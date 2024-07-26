@@ -31,6 +31,7 @@ from ..utils.distributions import (
     PoissonDistribution,
     StudentTDistribution,
 )
+from lightning.pytorch.callbacks import ModelSummary
 
 
 class SklearnBaseLSS(BaseEstimator):
@@ -70,23 +71,22 @@ class SklearnBaseLSS(BaseEstimator):
 
     def get_params(self, deep=True):
         """
-        Get parameters for this estimator. Overrides the BaseEstimator method.
+        Get parameters for this estimator.
 
         Parameters
         ----------
         deep : bool, default=True
-            If True, returns the parameters for this estimator and contained sub-objects that are estimators.
+            If True, will return the parameters for this estimator and contained subobjects that are estimators.
 
         Returns
         -------
         params : dict
             Parameter names mapped to their values.
         """
-        params = self.config_kwargs  # Parameters used to initialize DefaultConfig
+        params = {}
+        params.update(self.config_kwargs)
 
-        # If deep=True, include parameters from nested components like preprocessor
         if deep:
-            # Assuming Preprocessor has a get_params method
             preprocessor_params = {
                 "preprocessor__" + key: value
                 for key, value in self.preprocessor.get_params().items()
@@ -97,35 +97,36 @@ class SklearnBaseLSS(BaseEstimator):
 
     def set_params(self, **parameters):
         """
-        Set the parameters of this estimator. Overrides the BaseEstimator method.
+        Set the parameters of this estimator.
 
         Parameters
         ----------
         **parameters : dict
-            Estimator parameters to be set.
+            Estimator parameters.
 
         Returns
         -------
         self : object
-            The instance with updated parameters.
+            Estimator instance.
         """
-        # Update config_kwargs with provided parameters
-        valid_config_keys = self.config_kwargs.keys()
-        config_updates = {k: v for k, v in parameters.items() if k in valid_config_keys}
-        self.config_kwargs.update(config_updates)
-
-        # Update the config object
-        for key, value in config_updates.items():
-            setattr(self.config, key, value)
-
-        # Handle preprocessor parameters (prefixed with 'preprocessor__')
+        config_params = {
+            k: v for k, v in parameters.items() if not k.startswith("preprocessor__")
+        }
         preprocessor_params = {
             k.split("__")[1]: v
             for k, v in parameters.items()
             if k.startswith("preprocessor__")
         }
+
+        if config_params:
+            self.config_kwargs.update(config_params)
+            if self.config is not None:
+                for key, value in config_params.items():
+                    setattr(self.config, key, value)
+            else:
+                self.config = self.config_class(**self.config_kwargs)
+
         if preprocessor_params:
-            # Assuming Preprocessor has a set_params method
             self.preprocessor.set_params(**preprocessor_params)
 
         return self
@@ -409,12 +410,16 @@ class SklearnBaseLSS(BaseEstimator):
         )
 
         # Initialize the trainer and train the model
-        trainer = pl.Trainer(
+        self.trainer = pl.Trainer(
             max_epochs=max_epochs,
-            callbacks=[early_stop_callback, checkpoint_callback],
+            callbacks=[
+                early_stop_callback,
+                checkpoint_callback,
+                ModelSummary(max_depth=2),
+            ],
             **trainer_kwargs
         )
-        trainer.fit(self.model, self.data_module)
+        self.trainer.fit(self.model, self.data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
