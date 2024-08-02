@@ -308,7 +308,7 @@ class SklearnBaseRegressor(BaseEstimator):
         self : object
             The fitted regressor.
         """
-        if rebuild:
+        if (not self.built) or (self.built and rebuild):
             if not isinstance(X, pd.DataFrame):
                 X = pd.DataFrame(X)
             if isinstance(y, pd.Series):

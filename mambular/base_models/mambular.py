@@ -109,19 +109,34 @@ class Mambular(BaseModel):
             use_learnable_interaction=self.hparams.get(
                 "use_learnable_interactions", config.use_learnable_interaction
             ),
+            AB_weight_decay=self.hparams.get("AB_weight_decay", config.AB_weight_decay),
+            AB_layer_norm=self.hparams.get("AB_layer_norm", config.AB_layer_norm),
+            layer_norm_eps=self.hparams.get("layer_norm_eps", config.layer_norm_eps),
         )
 
         norm_layer = self.hparams.get("norm", config.norm)
         if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm(self.hparams.get("d_model", config.d_model))
+            self.norm_f = RMSNorm(
+                self.hparams.get("d_model", config.d_model), eps=config.layer_norm_eps
+            )
         elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(self.hparams.get("d_model", config.d_model))
+            self.norm_f = LayerNorm(
+                self.hparams.get("d_model", config.d_model), eps=config.layer_norm_eps
+            )
         elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(self.hparams.get("d_model", config.d_model))
+            self.norm_f = BatchNorm(
+                self.hparams.get("d_model", config.d_model), eps=config.layer_norm_eps
+            )
         elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(self.hparams.get("d_model", config.d_model))
+            self.norm_f = InstanceNorm(
+                self.hparams.get("d_model", config.d_model), eps=config.layer_norm_eps
+            )
         elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(1, self.hparams.get("d_model", config.d_model))
+            self.norm_f = GroupNorm(
+                1,
+                self.hparams.get("d_model", config.d_model),
+                eps=config.layer_norm_eps,
+            )
         elif norm_layer == "LearnableLayerScaling":
             self.norm_f = LearnableLayerScaling(
                 self.hparams.get("d_model", config.d_model)
