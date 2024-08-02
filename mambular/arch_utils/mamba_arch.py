@@ -44,8 +44,8 @@ class Mamba(nn.Module):
         bidirectional=False,
         use_learnable_interaction=False,
         layer_norm_eps=1e-05,
-        AB_weight_decay=False,
-        AB_layer_norm=True,
+        AD_weight_decay=False,
+        BC_layer_norm=True,
     ):
         super().__init__()
 
@@ -70,8 +70,8 @@ class Mamba(nn.Module):
                     bidirectional,
                     use_learnable_interaction,
                     layer_norm_eps,
-                    AB_weight_decay,
-                    AB_layer_norm,
+                    AD_weight_decay,
+                    BC_layer_norm,
                 )
                 for _ in range(n_layers)
             ]
@@ -112,8 +112,8 @@ class ResidualBlock(nn.Module):
         bidirectional=False,
         use_learnable_interaction=False,
         layer_norm_eps=1e-05,
-        AB_weight_decay=False,
-        AB_layer_norm=False,
+        AD_weight_decay=False,
+        BC_layer_norm=False,
     ):
         super().__init__()
 
@@ -159,8 +159,8 @@ class ResidualBlock(nn.Module):
             bidirectional=bidirectional,
             use_learnable_interaction=use_learnable_interaction,
             layer_norm_eps=layer_norm_eps,
-            AB_weight_decay=AB_weight_decay,
-            AB_layer_norm=AB_layer_norm,
+            AD_weight_decay=AD_weight_decay,
+            BC_layer_norm=BC_layer_norm,
         )
         self.norm = norm(d_model, eps=layer_norm_eps)
 
@@ -202,8 +202,8 @@ class MambaBlock(nn.Module):
         bidirectional=False,
         use_learnable_interaction=False,
         layer_norm_eps=1e-05,
-        AB_weight_decay=False,
-        AB_layer_norm=False,
+        AD_weight_decay=False,
+        BC_layer_norm=False,
     ):
         super().__init__()
         self.d_inner = d_model * expand_factor
@@ -284,13 +284,13 @@ class MambaBlock(nn.Module):
             self.A_log_bwd = nn.Parameter(torch.log(A))
             self.D_bwd = nn.Parameter(torch.ones(self.d_inner))
 
-        if not AB_weight_decay:
+        if not AD_weight_decay:
             self.A_log_fwd._no_weight_decay = True
             self.D_fwd._no_weight_decay = True
 
         if self.bidirectional:
 
-            if not AB_weight_decay:
+            if not AD_weight_decay:
                 self.A_log_bwd._no_weight_decay = True
                 self.D_bwd._no_weight_decay = True
 
@@ -298,7 +298,7 @@ class MambaBlock(nn.Module):
         self.dt_rank = dt_rank
         self.d_state = d_state
 
-        if AB_layer_norm:
+        if BC_layer_norm:
             self.dt_layernorm = RMSNorm(self.dt_rank, eps=layer_norm_eps)
             self.B_layernorm = RMSNorm(self.d_state, eps=layer_norm_eps)
             self.C_layernorm = RMSNorm(self.d_state, eps=layer_norm_eps)
