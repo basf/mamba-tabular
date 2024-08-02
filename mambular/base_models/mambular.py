@@ -109,8 +109,8 @@ class Mambular(BaseModel):
             use_learnable_interaction=self.hparams.get(
                 "use_learnable_interactions", config.use_learnable_interaction
             ),
-            AB_weight_decay=self.hparams.get("AB_weight_decay", config.AB_weight_decay),
-            AB_layer_norm=self.hparams.get("AB_layer_norm", config.AB_layer_norm),
+            AD_weight_decay=self.hparams.get("AB_weight_decay", config.AD_weight_decay),
+            BC_layer_norm=self.hparams.get("AB_layer_norm", config.BC_layer_norm),
             layer_norm_eps=self.hparams.get("layer_norm_eps", config.layer_norm_eps),
         )
         norm_layer = self.hparams.get("norm", config.norm)
