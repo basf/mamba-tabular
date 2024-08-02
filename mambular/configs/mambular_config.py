@@ -73,6 +73,10 @@ class DefaultMambularConfig:
         Whether to append a cls to the end of each 'sequence'.
     shuffle_embeddings : bool, default=False.
         Whether to shuffle the embeddings before being passed to the Mamba layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AB_weight_decay : bool, default=False
+        wether weight decay is also applied to A-B matrices
     """
 
     lr: float = 1e-04
@@ -107,3 +111,6 @@ class DefaultMambularConfig:
     use_learnable_interaction: bool = False
     use_cls: bool = False
     shuffle_embeddings: bool = False
+    layer_norm_eps: float = 1e-05
+    AB_weight_decay: bool = False
+    AB_layer_norm: bool = True
