@@ -467,7 +467,9 @@ class SklearnBaseLSS(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            predictions = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
+            predictions = self.task_model(
+                num_features=num_tensors, cat_features=cat_tensors
+            )
 
         if not raw:
             return self.task_model.family(predictions).cpu().numpy()
@@ -506,7 +508,9 @@ class SklearnBaseLSS(BaseEstimator):
         """
         # Infer distribution family from model settings if not provided
         if distribution_family is None:
-            distribution_family = getattr(self.task_model, "distribution_family", "normal")
+            distribution_family = getattr(
+                self.task_model, "distribution_family", "normal"
+            )
 
         # Setup default metrics if none are provided
         if metrics is None:
@@ -559,3 +563,25 @@ class SklearnBaseLSS(BaseEstimator):
             "categorical": {"Accuracy": accuracy_score},
         }
         return default_metrics.get(distribution_family, {})
+
+    def score(self, X, y, metric="NLL"):
+        """
+        Calculate the score of the model using the specified metric.
+
+        Parameters
+        ----------
+        X : array-like or pd.DataFrame of shape (n_samples, n_features)
+            The input samples to predict.
+        y : array-like of shape (n_samples,) or (n_samples, n_outputs)
+            The true target values against which to evaluate the predictions.
+        metric : str, default="NLL"
+            So far, only negative log-likelihood is supported
+
+        Returns
+        -------
+        score : float
+            The score calculated using the specified metric.
+        """
+        predictions = self.predict(X)
+        score = self.task_model.family.evaluate_nll(y, predictions)
+        return score
