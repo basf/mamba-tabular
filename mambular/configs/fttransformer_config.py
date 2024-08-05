@@ -85,3 +85,4 @@ class DefaultFTTransformerConfig:
     layer_norm_eps: float = 1e-05
     transformer_dim_feedforward: int = 256
     numerical_embedding: str = "ple"
+    cat_encoding: str = "int"

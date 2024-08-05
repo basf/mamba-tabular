@@ -116,3 +116,4 @@ class DefaultMambularConfig:
     layer_norm_eps: float = 1e-05
     AD_weight_decay: bool = False
     BC_layer_norm: bool = True
+    cat_encoding: str = "int"

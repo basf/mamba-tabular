@@ -84,3 +84,4 @@ class DefaultTabTransformerConfig:
     transformer_activation: callable = ReGLU()
     layer_norm_eps: float = 1e-05
     transformer_dim_feedforward: int = 512
+    cat_encoding: str = "int"
