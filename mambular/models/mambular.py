@@ -79,6 +79,14 @@ class MambularRegressor(SklearnBaseRegressor):
         Whether to append a cls to the end of each 'sequence'.
     shuffle_embeddings : bool, default=False.
         Whether to shuffle the embeddings before being passed to the Mamba layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=False
+        whether weight decay is also applied to A-D matrices.
+    BC_layer_norm: bool, default=True
+        whether to apply layer normalization to B-C matrices.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -198,6 +206,14 @@ class MambularClassifier(SklearnBaseClassifier):
         Whether to use learnable feature interactions before passing through mamba blocks.
     shuffle_embeddings : bool, default=False.
         Whether to shuffle the embeddings before being passed to the Mamba layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=False
+        whether weight decay is also applied to A-D matrices.
+    BC_layer_norm: bool, default=True
+        whether to apply layer normalization to B-C matrices.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -320,6 +336,14 @@ class MambularLSS(SklearnBaseLSS):
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
     shuffle_embeddings : bool, default=False.
         Whether to shuffle the embeddings before being passed to the Mamba layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=False
+        whether weight decay is also applied to A-D matrices.
+    BC_layer_norm: bool, default=True
+        whether to apply layer normalization to B-C matrices.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
         'binning', 'one_hot', 'standardization', and 'normalization'.
