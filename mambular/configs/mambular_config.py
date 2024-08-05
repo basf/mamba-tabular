@@ -75,9 +75,9 @@ class DefaultMambularConfig:
         Whether to shuffle the embeddings before being passed to the Mamba layers.
     layer_norm_eps : float, default=1e-05
         Epsilon value for layer normalization.
-    AD_weight_decay : bool, default=False
+    AD_weight_decay : bool, default=True
         whether weight decay is also applied to A-D matrices.
-    BC_layer_norm: bool, default=True
+    BC_layer_norm: bool, default=False
         whether to apply layer normalization to B-C matrices.
     cat_encoding : str, default="int"
         whether to use integer encoding or one-hot encoding for cat features.
@@ -116,6 +116,6 @@ class DefaultMambularConfig:
     use_cls: bool = False
     shuffle_embeddings: bool = False
     layer_norm_eps: float = 1e-05
-    AD_weight_decay: bool = False
-    BC_layer_norm: bool = True
+    AD_weight_decay: bool = True
+    BC_layer_norm: bool = False
     cat_encoding: str = "int"
