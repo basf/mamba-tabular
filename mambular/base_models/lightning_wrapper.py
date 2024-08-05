@@ -82,7 +82,7 @@ class TaskModel(pl.LightningModule):
         else:
             output_dim = num_classes
 
-        self.model = model_class(
+        self.base_model = model_class(
             config=config,
             num_feature_info=num_feature_info,
             cat_feature_info=cat_feature_info,
@@ -107,7 +107,7 @@ class TaskModel(pl.LightningModule):
             Model output.
         """
 
-        return self.model.forward(num_features, cat_features)
+        return self.base_model.forward(num_features, cat_features)
 
     def compute_loss(self, predictions, y_true):
         """
@@ -168,16 +168,6 @@ class TaskModel(pl.LightningModule):
                     prog_bar=True,
                     logger=True,
                 )
-            elif isinstance(self.loss_fct, nn.MSELoss):
-                rmse = torch.sqrt(loss)
-                self.log(
-                    "train_rmse",
-                    rmse,
-                    on_step=True,
-                    on_epoch=True,
-                    prog_bar=True,
-                    logger=True,
-                )
 
         return loss
 
@@ -205,7 +195,7 @@ class TaskModel(pl.LightningModule):
         self.log(
             "val_loss",
             val_loss,
-            on_step=True,
+            on_step=False,
             on_epoch=True,
             prog_bar=True,
             logger=True,
@@ -218,17 +208,7 @@ class TaskModel(pl.LightningModule):
                 self.log(
                     "val_acc",
                     acc,
-                    on_step=True,
-                    on_epoch=True,
-                    prog_bar=True,
-                    logger=True,
-                )
-            elif isinstance(self.loss_fct, nn.MSELoss):
-                rmse = torch.sqrt(val_loss)
-                self.log(
-                    "val_rmse",
-                    rmse,
-                    on_step=True,
+                    on_step=False,
                     on_epoch=True,
                     prog_bar=True,
                     logger=True,
@@ -272,17 +252,7 @@ class TaskModel(pl.LightningModule):
                 self.log(
                     "test_acc",
                     acc,
-                    on_step=True,
-                    on_epoch=True,
-                    prog_bar=True,
-                    logger=True,
-                )
-            elif isinstance(self.loss_fct, nn.MSELoss):
-                rmse = torch.sqrt(test_loss)
-                self.log(
-                    "test_rmse",
-                    rmse,
-                    on_step=True,
+                    on_step=False,
                     on_epoch=True,
                     prog_bar=True,
                     logger=True,
@@ -300,7 +270,7 @@ class TaskModel(pl.LightningModule):
             A dictionary containing the optimizer and lr_scheduler configurations.
         """
         optimizer = torch.optim.Adam(
-            self.model.parameters(),
+            self.base_model.parameters(),
             lr=self.lr,
             weight_decay=self.weight_decay,
         )
