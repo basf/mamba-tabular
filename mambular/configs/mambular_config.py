@@ -76,9 +76,11 @@ class DefaultMambularConfig:
     layer_norm_eps : float, default=1e-05
         Epsilon value for layer normalization.
     AD_weight_decay : bool, default=False
-        whether weight decay is also applied to A-D matrices
+        whether weight decay is also applied to A-D matrices.
     BC_layer_norm: bool, default=True
-        whether to apply layer normalization to B-C matrices
+        whether to apply layer normalization to B-C matrices.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     """
 
     lr: float = 1e-04
@@ -116,3 +118,4 @@ class DefaultMambularConfig:
     layer_norm_eps: float = 1e-05
     AD_weight_decay: bool = False
     BC_layer_norm: bool = True
+    cat_encoding: str = "int"

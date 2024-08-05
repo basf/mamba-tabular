@@ -12,6 +12,7 @@ class EmbeddingLayer(nn.Module):
         layer_norm_after_embedding=False,
         use_cls=False,
         cls_position=0,
+        cat_encoding="int",
     ):
         """
         Embedding layer that handles numerical and categorical embeddings.
@@ -56,15 +57,23 @@ class EmbeddingLayer(nn.Module):
             ]
         )
 
-        self.cat_embeddings = nn.ModuleList(
-            [
-                nn.Sequential(
-                    nn.Embedding(num_categories + 1, d_model),
-                    self.embedding_activation,
+        self.cat_embeddings = nn.ModuleList()
+        for feature_name, num_categories in cat_feature_info.items():
+            if cat_encoding == "int":
+                self.cat_embeddings.append(
+                    nn.Sequential(
+                        nn.Embedding(num_categories + 1, d_model),
+                        self.embedding_activation,
+                    )
                 )
-                for feature_name, num_categories in cat_feature_info.items()
-            ]
-        )
+            elif cat_encoding == "one-hot":
+                self.cat_embeddings.append(
+                    nn.Sequential(
+                        OneHotEncoding(num_categories),
+                        nn.Linear(num_categories, d_model, bias=False),
+                        self.embedding_activation,
+                    )
+                )
 
         if self.use_cls:
             self.cls_token = nn.Parameter(torch.zeros(1, 1, d_model))
@@ -143,3 +152,12 @@ class EmbeddingLayer(nn.Module):
                 )
 
         return x
+
+
+class OneHotEncoding(nn.Module):
+    def __init__(self, num_categories):
+        super(OneHotEncoding, self).__init__()
+        self.num_categories = num_categories
+
+    def forward(self, x):
+        return torch.nn.functional.one_hot(x, num_classes=self.num_categories).float()

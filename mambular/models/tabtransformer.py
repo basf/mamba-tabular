@@ -63,6 +63,8 @@ class TabTransformerRegressor(SklearnBaseRegressor):
         Epsilon value for layer normalization.
     transformer_dim_feedforward : int, default=512
         Dimensionality of the feed-forward layers in the transformer.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -170,6 +172,8 @@ class TabTransformerClassifier(SklearnBaseClassifier):
         Epsilon value for layer normalization.
     transformer_dim_feedforward : int, default=512
         Dimensionality of the feed-forward layers in the transformer.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -277,6 +281,8 @@ class TabTransformerLSS(SklearnBaseLSS):
         Epsilon value for layer normalization.
     transformer_dim_feedforward : int, default=512
         Dimensionality of the feed-forward layers in the transformer.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.

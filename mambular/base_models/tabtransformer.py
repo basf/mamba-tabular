@@ -139,9 +139,12 @@ class TabTransformer(BaseModel):
             embedding_activation=self.hparams.get(
                 "embedding_activation", config.embedding_activation
             ),
-            layer_norm_after_embedding=self.hparams.get("layer_norm_after_embedding"),
+            layer_norm_after_embedding=self.hparams.get(
+                "layer_norm_after_embedding", config.layer_norm_after_embedding
+            ),
             use_cls=True,
             cls_position=0,
+            cat_encoding=self.hparams.get("cat_encoding", config.cat_encoding),
         )
 
         head_activation = self.hparams.get("head_activation", config.head_activation)

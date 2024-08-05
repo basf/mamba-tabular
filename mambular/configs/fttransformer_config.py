@@ -58,6 +58,8 @@ class DefaultFTTransformerConfig:
         Epsilon value for layer normalization.
     transformer_dim_feedforward : int, default=512
         Dimensionality of the feed-forward layers in the transformer.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     """
 
     lr: float = 1e-04
@@ -84,4 +86,4 @@ class DefaultFTTransformerConfig:
     transformer_activation: callable = ReGLU()
     layer_norm_eps: float = 1e-05
     transformer_dim_feedforward: int = 256
-    numerical_embedding: str = "ple"
+    cat_encoding: str = "int"
