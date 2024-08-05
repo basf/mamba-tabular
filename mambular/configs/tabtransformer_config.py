@@ -58,6 +58,8 @@ class DefaultTabTransformerConfig:
         Epsilon value for layer normalization.
     transformer_dim_feedforward : int, default=512
         Dimensionality of the feed-forward layers in the transformer.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     """
 
     lr: float = 1e-04
