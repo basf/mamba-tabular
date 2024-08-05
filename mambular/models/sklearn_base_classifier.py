@@ -37,7 +37,7 @@ class SklearnBaseClassifier(BaseEstimator):
         }
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
-        self.model = None
+        self.task_model = None
 
         # Raise a warning if task is set to 'classification'
         if preprocessor_kwargs.get("task") == "regression":
@@ -194,7 +194,7 @@ class SklearnBaseClassifier(BaseEstimator):
 
         num_classes = len(np.unique(y))
 
-        self.model = TaskModel(
+        self.task_model = TaskModel(
             model_class=self.base_model,
             num_classes=num_classes,
             config=self.config,
@@ -237,10 +237,10 @@ class SklearnBaseClassifier(BaseEstimator):
         else:
             if requires_grad:
                 return sum(
-                    p.numel() for p in self.model.parameters() if p.requires_grad
+                    p.numel() for p in self.task_model.parameters() if p.requires_grad
                 )
             else:
-                return sum(p.numel() for p in self.model.parameters())
+                return sum(p.numel() for p in self.task_model.parameters())
 
     def fit(
         self,
@@ -345,7 +345,7 @@ class SklearnBaseClassifier(BaseEstimator):
 
             num_classes = len(np.unique(y))
 
-            self.model = TaskModel(
+            self.task_model = TaskModel(
                 model_class=self.base_model,
                 num_classes=num_classes,
                 config=self.config,
@@ -379,12 +379,12 @@ class SklearnBaseClassifier(BaseEstimator):
             ],
             **trainer_kwargs
         )
-        self.trainer.fit(self.model, self.data_module)
+        self.trainer.fit(self.task_model, self.data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
             checkpoint = torch.load(best_model_path)
-            self.model.load_state_dict(checkpoint["state_dict"])
+            self.task_model.load_state_dict(checkpoint["state_dict"])
 
         return self
 
@@ -404,14 +404,14 @@ class SklearnBaseClassifier(BaseEstimator):
             The predicted target values.
         """
         # Ensure model and data module are initialized
-        if self.model is None or self.data_module is None:
+        if self.task_model is None or self.data_module is None:
             raise ValueError("The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
 
         # Move tensors to appropriate device
-        device = next(self.model.parameters()).device
+        device = next(self.task_model.parameters()).device
         if isinstance(cat_tensors, list):
             cat_tensors = [tensor.to(device) for tensor in cat_tensors]
         else:
@@ -423,11 +423,11 @@ class SklearnBaseClassifier(BaseEstimator):
             num_tensors = num_tensors.to(device)
 
         # Set model to evaluation mode
-        self.model.eval()
+        self.task_model.eval()
 
         # Perform inference
         with torch.no_grad():
-            logits = self.model(num_features=num_tensors, cat_features=cat_tensors)
+            logits = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
 
             # Check the shape of the logits to determine binary or multi-class classification
             if logits.shape[1] == 1:
@@ -484,7 +484,7 @@ class SklearnBaseClassifier(BaseEstimator):
         # Preprocess the data
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
-        device = next(self.model.parameters()).device
+        device = next(self.task_model.parameters()).device
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
         if isinstance(cat_tensors, list):
             cat_tensors = [tensor.to(device) for tensor in cat_tensors]
@@ -497,11 +497,11 @@ class SklearnBaseClassifier(BaseEstimator):
             num_tensors = num_tensors.to(device)
 
         # Set the model to evaluation mode
-        self.model.eval()
+        self.task_model.eval()
 
         # Perform inference
         with torch.no_grad():
-            logits = self.model(num_features=num_tensors, cat_features=cat_tensors)
+            logits = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
             if logits.shape[1] > 1:
                 probabilities = torch.softmax(logits, dim=1)
             else:

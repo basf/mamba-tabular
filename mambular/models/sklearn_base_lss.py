@@ -58,7 +58,7 @@ class SklearnBaseLSS(BaseEstimator):
         }
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
-        self.model = None
+        self.task_model = None
 
         # Raise a warning if task is set to 'classification'
         if preprocessor_kwargs.get("task") == "classification":
@@ -212,7 +212,7 @@ class SklearnBaseLSS(BaseEstimator):
 
         num_classes = len(np.unique(y))
 
-        self.model = TaskModel(
+        self.task_model = TaskModel(
             model_class=self.base_model,
             num_classes=num_classes,
             config=self.config,
@@ -255,10 +255,10 @@ class SklearnBaseLSS(BaseEstimator):
         else:
             if requires_grad:
                 return sum(
-                    p.numel() for p in self.model.parameters() if p.requires_grad
+                    p.numel() for p in self.task_model.parameters() if p.requires_grad
                 )
             else:
-                return sum(p.numel() for p in self.model.parameters())
+                return sum(p.numel() for p in self.task_model.parameters())
 
     def fit(
         self,
@@ -383,7 +383,7 @@ class SklearnBaseLSS(BaseEstimator):
             X, y, X_val, y_val, val_size=val_size, random_state=random_state
         )
 
-        self.model = TaskModel(
+        self.task_model = TaskModel(
             model_class=self.base_model,
             num_classes=self.family.param_count,
             family=self.family,
@@ -419,12 +419,12 @@ class SklearnBaseLSS(BaseEstimator):
             ],
             **trainer_kwargs
         )
-        self.trainer.fit(self.model, self.data_module)
+        self.trainer.fit(self.task_model, self.data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
             checkpoint = torch.load(best_model_path)
-            self.model.load_state_dict(checkpoint["state_dict"])
+            self.task_model.load_state_dict(checkpoint["state_dict"])
 
         return self
 
@@ -444,14 +444,14 @@ class SklearnBaseLSS(BaseEstimator):
             The predicted target values.
         """
         # Ensure model and data module are initialized
-        if self.model is None or self.data_module is None:
+        if self.task_model is None or self.data_module is None:
             raise ValueError("The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
 
         # Move tensors to appropriate device
-        device = next(self.model.parameters()).device
+        device = next(self.task_model.parameters()).device
         if isinstance(cat_tensors, list):
             cat_tensors = [tensor.to(device) for tensor in cat_tensors]
         else:
@@ -463,14 +463,14 @@ class SklearnBaseLSS(BaseEstimator):
             num_tensors = num_tensors.to(device)
 
         # Set model to evaluation mode
-        self.model.eval()
+        self.task_model.eval()
 
         # Perform inference
         with torch.no_grad():
-            predictions = self.model(num_features=num_tensors, cat_features=cat_tensors)
+            predictions = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
 
         if not raw:
-            return self.model.family(predictions).cpu().numpy()
+            return self.task_model.family(predictions).cpu().numpy()
 
         # Convert predictions to NumPy array and return
         else:
@@ -506,7 +506,7 @@ class SklearnBaseLSS(BaseEstimator):
         """
         # Infer distribution family from model settings if not provided
         if distribution_family is None:
-            distribution_family = getattr(self.model, "distribution_family", "normal")
+            distribution_family = getattr(self.task_model, "distribution_family", "normal")
 
         # Setup default metrics if none are provided
         if metrics is None:
