@@ -17,6 +17,35 @@
 
 # Mambular: Tabular Deep Learning with Mamba Architectures
 
+You can find our paper `Mambular: A Sequential Model for Tabular Deep Learning` [here](https://arxiv.org/abs/2408.06291).
+
+# Table of Contents
+- [Mambular: Tabular Deep Learning with Mamba Architectures](#mambular-tabular-deep-learning-with-mamba-architectures)
+- [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Features](#features)
+  - [Models](#models)
+  - [Results](#results)
+      - [Regression Results](#regression-results)
+      - [Classification Results](#classification-results)
+  - [Documentation](#documentation)
+  - [Installation](#installation)
+- [Usage](#usage)
+  - [Preprocessing](#preprocessing)
+    - [Data Type Detection and Transformation](#data-type-detection-and-transformation)
+    - [Handling Missing Values](#handling-missing-values)
+  - [Fit a Model](#fit-a-model)
+  - [Distributional Regression with MambularLSS](#distributional-regression-with-mambularlss)
+    - [Key Features of MambularLSS:](#key-features-of-mambularlss)
+    - [Available Distribution Classes:](#available-distribution-classes)
+    - [Getting Started with MambularLSS:](#getting-started-with-mambularlss)
+    - [Implement Your Own Model](#implement-your-own-model)
+  - [Citation](#citation)
+  - [License](#license)
+
+
+
+## Introduction
 Mambular is a Python package that brings the power of advanced deep learning architectures to tabular data, offering a suite of models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and evaluate using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
 
 ## Features
@@ -29,20 +58,74 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 - **PyTorch Lightning Under the Hood**: Built on top of PyTorch Lightning, Mambular models benefit from streamlined training processes, easy customization, and advanced features like distributed training and 16-bit precision.
 
 
-
 ## Models
 
-| Model               | Description                                                                                      |
-|---------------------|--------------------------------------------------------------------------------------------------|
-| `Mambular`          | An advanced model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.       |
-| `FTTransformer`     | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data. |
-| `MLP`               | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                  |
-| `ResNet`            | An adaptation of the ResNet architecture for tabular data applications.                          |
-| `TabTransformer`    | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities. |
+| Model            | Description                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Mambular`       | A sequential model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.         |
+| `FTTransformer`  | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data.                   |
+| `MLP`            | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                                                                     |
+| `ResNet`         | An adaptation of the ResNet architecture for tabular data applications.                                                                             |
+| `TabTransformer` | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities. |
+| `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.    |
+| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks                                                                     |
+
 
 All models are available for `regression`, `classification` and distributional regression, denoted by `LSS`.
 Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `MambularLSS`
 
+
+## Results
+Detailed results for the available methods can be found [here](https://arxiv.org/abs/2408.06291).
+Note, that these are achieved results with default hyperparameter and for our splits. Performing hyperparameter optimization could improve the performance of all models.
+
+The average rank table over all models and all datasets is given here:
+
+<div align="center">
+
+| **Model**            | **Avg. Rank**               |
+| -------------------- | --------------------------- |
+| **Mambular**         | **2.083** <sub>±1.037</sub> |
+| FT-Transformer       | 2.417 <sub>±1.256</sub>     |
+| XGBoost              | 3.167 <sub>±2.577</sub>     |
+| MambaTab*            | 4.333 <sub>±1.374</sub>     |
+| ResNet               | 4.750 <sub>±1.639</sub>     |
+| TabTransformer       | 6.222 <sub>±1.618</sub>     |
+| MLP                  | 6.500 <sub>±1.500</sub>     |
+| MambaTab             | 6.583 <sub>±1.801</sub>     |
+| MambaTab<sup>T</sup> | 7.917 <sub>±1.187</sub>     |
+
+</div>
+
+
+The detailed results for different datasets are given below. 
+
+#### Regression Results
+The given values are MSE values. All results are achieved with 5-fold CV and the standard deviation is reported.
+
+
+| Models         | DI ↓                        | AB ↓                        | CA ↓                        | WI ↓                        | PA ↓                        | HS ↓                        | CP ↓                        |
+| -------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- |
+| XGBoost        | 0.019 <sub>±0.000</sub>     | 0.506 <sub>±0.044</sub>     | 0.171 <sub>±0.007</sub>     | **0.528** <sub>±0.008</sub> | 0.036 <sub>±0.004</sub>     | 0.119 <sub>±0.024</sub>     | **0.024** <sub>±0.004</sub> |
+| FT-Transformer | 0.018 <sub>±0.001</sub>     | 0.458 <sub>±0.055</sub>     | 0.169 <sub>±0.006</sub>     | 0.615 <sub>±0.012</sub>     | **0.024** <sub>±0.005</sub> | **0.111** <sub>±0.014</sub> | 0.024 <sub>±0.001</sub>     |
+| MLP            | 0.066 <sub>±0.003</sub>     | 0.462 <sub>±0.051</sub>     | 0.198 <sub>±0.011</sub>     | 0.654 <sub>±0.013</sub>     | 0.764 <sub>±0.023</sub>     | 0.147 <sub>±0.017</sub>     | 0.031 <sub>±0.001</sub>     |
+| TabTransformer | 0.065 <sub>±0.002</sub>     | 0.472 <sub>±0.057</sub>     | 0.247 <sub>±0.013</sub>     | -                           | 0.135 <sub>±0.001</sub>     | 0.160 <sub>±0.028</sub>     | -                           |
+| ResNet         | 0.039 <sub>±0.018</sub>     | 0.455 <sub>±0.045</sub>     | 0.178 <sub>±0.006</sub>     | 0.639 <sub>±0.013</sub>     | 0.606 <sub>±0.031</sub>     | 0.141 <sub>±0.017</sub>     | 0.030 <sub>±0.002</sub>     |
+| MambaTab*      | 0.040 <sub>±0.008</sub>     | 0.455 <sub>±0.043</sub>     | 0.180 <sub>±0.008</sub>     | 0.601 <sub>±0.010</sub>     | 0.571 <sub>±0.021</sub>     | 0.122 <sub>±0.017</sub>     | 0.030 <sub>±0.002</sub>     |
+| **Mambular**   | **0.018** <sub>±0.000</sub> | **0.452** <sub>±0.043</sub> | **0.167** <sub>±0.011</sub> | 0.628 <sub>±0.010</sub>     | 0.035 <sub>±0.005</sub>     | 0.132 <sub>±0.020</sub>     | 0.027 <sub>±0.002</sub>     |
+
+#### Classification Results
+The table reports AUC values for binary classification tasks
+
+| Models         | BA ↑                        | AD ↑                        | CH ↑                        | FI ↑                        | MA ↑                        |
+| -------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- |
+| XGBoost        | **0.928** <sub>±0.004</sub> | **0.929** <sub>±0.002</sub> | 0.845 <sub>±0.008</sub>     | 0.774 <sub>±0.009</sub>     | **0.922** <sub>±0.002</sub> |
+| FT-Transformer | 0.926 <sub>±0.003</sub>     | 0.926 <sub>±0.002</sub>     | **0.863** <sub>±0.007</sub> | 0.792 <sub>±0.011</sub>     | 0.916 <sub>±0.003</sub>     |
+| MLP            | 0.895 <sub>±0.004</sub>     | 0.914 <sub>±0.002</sub>     | 0.840 <sub>±0.005</sub>     | 0.793 <sub>±0.011</sub>     | 0.886 <sub>±0.003</sub>     |
+| TabTransformer | 0.921 <sub>±0.004</sub>     | 0.912 <sub>±0.002</sub>     | 0.835 <sub>±0.007</sub>     | -                           | 0.910 <sub>±0.002</sub>     |
+| ResNet         | 0.896 <sub>±0.006</sub>     | 0.917 <sub>±0.002</sub>     | 0.841 <sub>±0.006</sub>     | 0.793 <sub>±0.013</sub>     | 0.889 <sub>±0.003</sub>     |
+| MambaTab*      | 0.900 <sub>±0.004</sub>     | 0.916 <sub>±0.003</sub>     | 0.846 <sub>±0.007</sub>     | 0.792 <sub>±0.011</sub>     | 0.890 <sub>±0.003</sub>     |
+| **Mambular**   | 0.927 <sub>±0.006</sub>     | 0.928 <sub>±0.002</sub>     | 0.856 <sub>±0.004</sub>     | **0.795** <sub>±0.011</sub> | 0.917 <sub>±0.003</sub>     |
 
 
 ## Documentation
@@ -56,6 +139,7 @@ Install Mambular using pip:
 pip install mambular
 ```
 
+# Usage
 ## Preprocessing
 
 Mambular simplifies the preprocessing stage of model development with a comprehensive set of techniques to prepare your data for Mamba architectures. Our preprocessing module is designed to be both powerful and easy to use, offering a variety of options to efficiently transform your tabular data.
@@ -250,11 +334,14 @@ regressor.fit(X_train, y_train, max_epochs=50)
 
 If you find this project useful in your research, please consider cite:
 ```BibTeX
-@misc{2024,
-    title={Mambular: Tabular Deep Learning with Mamba Architectures},
-    author={Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken, Soheila Samiee},
-    howpublished = {\url{https://github.com/basf/mamba-tabular}},
-    year={2024}
+@misc{thielmann2024mambularsequentialmodeltabular,
+      title={Mambular: A Sequential Model for Tabular Deep Learning}, 
+      author={Anton Frederik Thielmann and Manish Kumar and Christoph Weisser and Arik Reuter and Benjamin Säfken and Soheila Samiee},
+      year={2024},
+      eprint={2408.06291},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2408.06291}, 
 }
 ```
 
