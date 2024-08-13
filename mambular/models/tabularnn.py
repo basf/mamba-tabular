@@ -185,6 +185,8 @@ class TabulaRNNLSS(SklearnBaseLSS):
         Learning rate for the optimizer.
     model_type : str, default="RNN"
         type of model, one of "RNN", "LSTM", "GRU"
+    family : str, default=None
+        Distributional family to be used for the model.
     lr_patience : int, default=10
         Number of epochs with no improvement after which learning rate will be reduced.
     weight_decay : float, default=1e-06
