@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 @dataclass
-class DefaultMambularConfig:
+class DefaultMambaTabConfig:
     """
     Configuration class for the Default Mambular model with predefined hyperparameters.
 
@@ -49,8 +49,8 @@ class DefaultMambularConfig:
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the model.
-    embedding_activation : callable, default=nn.Identity()
-        Activation function for embeddings.
+    num_embedding_activation : callable, default=nn.Identity()
+        Activation function for numerical embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -63,24 +63,6 @@ class DefaultMambularConfig:
         Whether to use batch normalization in the head layers.
     layer_norm_after_embedding : bool, default=False
         Whether to apply layer normalization after embedding.
-    pooling_method : str, default="avg"
-        Pooling method to be used ('avg', 'max', etc.).
-    bidirectional : bool, default=False
-        Whether to use bidirectional processing of the input sequences.
-    use_learnable_interaction : bool, default=False
-        Whether to use learnable feature interactions before passing through mamba blocks.
-    use_cls : bool, default=True
-        Whether to append a cls to the end of each 'sequence'.
-    shuffle_embeddings : bool, default=False.
-        Whether to shuffle the embeddings before being passed to the Mamba layers.
-    layer_norm_eps : float, default=1e-05
-        Epsilon value for layer normalization.
-    AD_weight_decay : bool, default=True
-        whether weight decay is also applied to A-D matrices.
-    BC_layer_norm: bool, default=False
-        whether to apply layer normalization to B-C matrices.
-    cat_encoding : str, default="int"
-        whether to use integer encoding or one-hot encoding for cat features.
     """
 
     lr: float = 1e-04
@@ -88,12 +70,12 @@ class DefaultMambularConfig:
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
     d_model: int = 64
-    n_layers: int = 4
+    n_layers: int = 1
     expand_factor: int = 2
     bias: bool = False
-    d_conv: int = 4
+    d_conv: int = 16
     conv_bias: bool = True
-    dropout: float = 0.0
+    dropout: float = 0.05
     dt_rank: str = "auto"
     d_state: int = 128
     dt_scale: float = 1.0
@@ -101,21 +83,12 @@ class DefaultMambularConfig:
     dt_max: float = 0.1
     dt_min: float = 1e-04
     dt_init_floor: float = 1e-04
-    norm: str = "LayerNorm"
-    activation: callable = nn.SiLU()
-    embedding_activation: callable = nn.Identity()
+    activation: callable = nn.ReLU()
+    num_embedding_activation: callable = nn.ReLU()
     head_layer_sizes: list = ()
-    head_dropout: float = 0.5
+    head_dropout: float = 0.0
     head_skip_layers: bool = False
-    head_activation: callable = nn.SELU()
+    head_activation: callable = nn.ReLU()
     head_use_batch_norm: bool = False
-    layer_norm_after_embedding: bool = False
-    pooling_method: str = "avg"
-    bidirectional: bool = False
-    use_learnable_interaction: bool = False
-    use_cls: bool = False
-    shuffle_embeddings: bool = False
-    layer_norm_eps: float = 1e-05
-    AD_weight_decay: bool = True
-    BC_layer_norm: bool = False
-    cat_encoding: str = "int"
+    norm: str = "LayerNorm"
+    axis: int = 1

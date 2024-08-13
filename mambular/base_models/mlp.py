@@ -10,6 +10,7 @@ from ..arch_utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
+from ..arch_utils.embedding_layer import EmbeddingLayer
 
 
 class MLP(BaseModel):
@@ -39,12 +40,6 @@ class MLP(BaseModel):
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            input_dim += input_shape
-        for feature_name, input_shape in cat_feature_info.items():
-            input_dim += 1
-
         self.lr = self.hparams.get("lr", config.lr)
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
         self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
@@ -59,6 +54,19 @@ class MLP(BaseModel):
         )
         self.use_glu = self.hparams.get("use_glu", config.use_glu)
         self.activation = self.hparams.get("activation", config.activation)
+        self.use_embeddings = self.hparams.get("use_embeddings", config.use_embeddings)
+
+        input_dim = 0
+        for feature_name, input_shape in num_feature_info.items():
+            input_dim += input_shape
+        for feature_name, input_shape in cat_feature_info.items():
+            input_dim += 1
+
+        if self.use_embeddings:
+            input_dim = (
+                len(num_feature_info) * config.d_model
+                + len(cat_feature_info) * config.d_model
+            )
 
         # Input layer
         self.layers.append(nn.Linear(input_dim, config.layer_sizes[0]))
@@ -110,6 +118,20 @@ class MLP(BaseModel):
         # Output layer
         self.layers.append(nn.Linear(config.layer_sizes[-1], num_classes))
 
+        if self.use_embeddings:
+            self.embedding_layer = EmbeddingLayer(
+                num_feature_info=num_feature_info,
+                cat_feature_info=cat_feature_info,
+                d_model=self.hparams.get("d_model", config.d_model),
+                embedding_activation=self.hparams.get(
+                    "embedding_activation", config.embedding_activation
+                ),
+                layer_norm_after_embedding=self.hparams.get(
+                    "layer_norm_after_embedding"
+                ),
+                use_cls=False,
+            )
+
     def forward(self, num_features, cat_features) -> torch.Tensor:
         """
         Forward pass of the MLP model.
@@ -124,8 +146,13 @@ class MLP(BaseModel):
         torch.Tensor
             Output tensor.
         """
-        x = num_features + cat_features
-        x = torch.cat(x, dim=1)
+        if self.use_embeddings:
+            x = self.embedding_layer(num_features, cat_features)
+            B, S, D = x.shape
+            x = x.reshape(B, S * D)
+        else:
+            x = num_features + cat_features
+            x = torch.cat(x, dim=1)
 
         for i in range(len(self.layers) - 1):
             if isinstance(self.layers[i], nn.Linear):
