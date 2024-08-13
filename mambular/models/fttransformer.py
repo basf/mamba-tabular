@@ -20,6 +20,8 @@ class FTTransformerRegressor(SklearnBaseRegressor):
         Learning rate for the optimizer.
     lr_patience : int, default=10
         Number of epochs with no improvement after which learning rate will be reduced.
+    family : str, default=None
+        Distributional family to be used for the model.
     weight_decay : float, default=1e-06
         Weight decay (L2 penalty) for the optimizer.
     lr_factor : float, default=0.1
