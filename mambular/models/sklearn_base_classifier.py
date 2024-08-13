@@ -316,7 +316,7 @@ class SklearnBaseClassifier(BaseEstimator):
         self : object
             The fitted classifier.
         """
-        if not self.built and not rebuild:
+        if rebuild:
             if not isinstance(X, pd.DataFrame):
                 X = pd.DataFrame(X)
             if isinstance(y, pd.Series):
