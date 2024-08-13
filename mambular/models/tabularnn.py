@@ -86,6 +86,9 @@ class TabulaRNNRegressor(SklearnBaseRegressor):
         The number of knots to be used in spline transformations.
     """
 
+    def __init__(self, **kwargs):
+        super().__init__(model=TabulaRNN, config=DefaultTabulaRNNConfig, **kwargs)
+
 
 class TabulaRNNClassifier(SklearnBaseClassifier):
     """
