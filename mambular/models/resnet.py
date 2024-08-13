@@ -219,6 +219,8 @@ class ResNetLSS(SklearnBaseLSS):
         Dropout rate for regularization.
     norm : str, default=None
         Normalization method to be used, if any.
+    family : str, default=None
+        Distributional family to be used for the model.
     use_glu : bool, default=False
         Whether to use Gated Linear Units (GLU) in the ResNet.
     skip_connections : bool, default=True
