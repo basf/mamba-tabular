@@ -61,6 +61,30 @@ mambular.models
     :members:
     :undoc-members:
 
+.. autoclass:: mambular.models.MambaTabClassifier
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.MambaTabRegressor
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.MambaTabLSS
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.TabulaRNNClassifier
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.TabulaRNNRegressor
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.TabulaRNNLSS
+    :members:
+    :undoc-members:
+
 .. autoclass:: mambular.models.SklearnBaseClassifier
     :members:
     :undoc-members:
