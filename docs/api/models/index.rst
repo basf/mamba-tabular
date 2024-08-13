@@ -10,8 +10,8 @@ This module provides classes for the Mambular models that adhere to scikit-learn
 =======================================    =======================================================================================================
 Modules                                     Description
 =======================================    =======================================================================================================
-:class:`MambularClassifier`                 Multi-class and binary classification tasks.
-:class:`MambularRegressor`                  Regression tasks.
+:class:`MambularClassifier`                 Multi-class and binary classification tasks with a sequential Mambular Model.
+:class:`MambularRegressor`                  Regression tasks with a sequential Mambular Model.
 :class:`MambularLSS`                        Various statistical distribution families for different types of regression and classification tasks.
 :class:`FTTransformerClassifier`            FT transformer for classification tasks.
 :class:`FTTransformerRegressor`             FT transformer for regression tasks.
@@ -25,6 +25,12 @@ Modules                                     Description
 :class:`ResNetClassifier`                   Multi-class and binary classification tasks using ResNet.
 :class:`ResNetRegressor`                    Regression tasks using ResNet.
 :class:`ResNetLSS`                          Distributional tasks using ResNet.
+:class:`MambaTabClassifier`                 Multi-class and binary classification tasks using MambaTab.
+:class:`MambaTabRegressor`                  Regression tasks using MambaTab.
+:class:`MambaTabLSS`                        Distributional tasks using MambaTab.
+:class:`TabulaRNNClassifier`                Multi-class and binary classification tasks using a RNN.
+:class:`TabulaRNNRegressor`                 Regression tasks using a RNN.
+:class:`TabulaRNNLSS`                       Distributional tasks using a RNN.
 :class:`SklearnBaseClassifier`              Base class for classification tasks.
 :class:`SklearnBaseLSS`                     Base class for distributional tasks.
 :class:`SklearnBaseRegressor`               Base class for regression tasks.

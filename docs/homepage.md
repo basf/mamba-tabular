@@ -14,16 +14,15 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 
 ## Models
 
-| Model               | Description                                                                                      |
-|---------------------|--------------------------------------------------------------------------------------------------|
-| `Mambular`          | An advanced model using Mamba blocks  [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.       |
-| `FTTransformer`     | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data. |
-| `MLP`               | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                  |
-| `ResNet`            | An adaptation of the ResNet architecture for tabular data applications.                          |
-| `TabTransformer`    | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities. |
-
-All models are available for `regression`, `classification` and distributional regression, denoted by `LSS`.
-Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `MambularLSS`
+| Model            | Description                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Mambular`       | A sequential model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.         |
+| `FTTransformer`  | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data.                   |
+| `MLP`            | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                                                                     |
+| `ResNet`         | An adaptation of the ResNet architecture for tabular data applications.                                                                             |
+| `TabTransformer` | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities. |
+| `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.    |
+| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks                                                                     |
 
 
 
@@ -232,11 +231,14 @@ regressor.fit(X_train, y_train, max_epochs=50)
 
 If you find this project useful in your research, please consider cite:
 ```BibTeX
-@misc{2024,
-    title={Mambular: Tabular Deep Learning with Mamba Architectures},
-    author={Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken, Soheila Samiee},
-    howpublished = {\url{https://github.com/basf/mamba-tabular}},
-    year={2024}
+@misc{thielmann2024mambularsequentialmodeltabular,
+      title={Mambular: A Sequential Model for Tabular Deep Learning}, 
+      author={Anton Frederik Thielmann and Manish Kumar and Christoph Weisser and Arik Reuter and Benjamin Säfken and Soheila Samiee},
+      year={2024},
+      eprint={2408.06291},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2408.06291}, 
 }
 ```
 
