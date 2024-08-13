@@ -26,8 +26,6 @@ You can find our paper `Mambular: A Sequential Model for Tabular Deep Learning` 
   - [Features](#features)
   - [Models](#models)
   - [Results](#results)
-      - [Regression Results](#regression-results)
-      - [Classification Results](#classification-results)
   - [Documentation](#documentation)
   - [Installation](#installation)
 - [Usage](#usage)
@@ -83,49 +81,53 @@ The average rank table over all models and all datasets is given here:
 
 <div align="center">
 
-| **Model**            | **Avg. Rank**               |
-| -------------------- | --------------------------- |
-| **Mambular**         | **2.083** <sub>±1.037</sub> |
-| FT-Transformer       | 2.417 <sub>±1.256</sub>     |
-| XGBoost              | 3.167 <sub>±2.577</sub>     |
-| MambaTab*            | 4.333 <sub>±1.374</sub>     |
-| ResNet               | 4.750 <sub>±1.639</sub>     |
-| TabTransformer       | 6.222 <sub>±1.618</sub>     |
-| MLP                  | 6.500 <sub>±1.500</sub>     |
-| MambaTab             | 6.583 <sub>±1.801</sub>     |
-| MambaTab<sup>T</sup> | 7.917 <sub>±1.187</sub>     |
+<table>
+  <tr>
+    <th style="text-align:center;">Model</th>
+    <th style="text-align:center;">Avg. Rank</th>
+  </tr>
+  <tr>
+    <td style="text-align:center;"><strong style="color:#2e8b57;">Mambular</strong><br><br></td>
+    <td style="text-align:center;"><strong style="color:#2e8b57;">2.083</strong> <sub>±1.037</sub></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">FT-Transformer</td>
+    <td style="text-align:center;">2.417 <sub>±1.256</sub></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">XGBoost</td>
+    <td style="text-align:center;">3.167 <sub>±2.577</sub></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">MambaTab*</td>
+    <td style="text-align:center;">4.333 <sub>±1.374</sub></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">ResNet</td>
+    <td style="text-align:center;">4.750 <sub>±1.639</sub></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">TabTransformer</td>
+    <td style="text-align:center;">6.222 <sub>±1.618</sub></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">MLP</td>
+    <td style="text-align:center;">6.500 <sub>±1.500</sub></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">MambaTab</td>
+    <td style="text-align:center;">6.583 <sub>±1.801</sub></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">MambaTab<sup>T</sup></td>
+    <td style="text-align:center;">7.917 <sub>±1.187</sub></td>
+  </tr>
+</table>
 
 </div>
 
 
-The detailed results for different datasets are given below. 
 
-#### Regression Results
-The given values are MSE values. All results are achieved with 5-fold CV and the standard deviation is reported.
-
-
-| Models         | DI ↓                        | AB ↓                        | CA ↓                        | WI ↓                        | PA ↓                        | HS ↓                        | CP ↓                        |
-| -------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- |
-| XGBoost        | 0.019 <sub>±0.000</sub>     | 0.506 <sub>±0.044</sub>     | 0.171 <sub>±0.007</sub>     | **0.528** <sub>±0.008</sub> | 0.036 <sub>±0.004</sub>     | 0.119 <sub>±0.024</sub>     | **0.024** <sub>±0.004</sub> |
-| FT-Transformer | 0.018 <sub>±0.001</sub>     | 0.458 <sub>±0.055</sub>     | 0.169 <sub>±0.006</sub>     | 0.615 <sub>±0.012</sub>     | **0.024** <sub>±0.005</sub> | **0.111** <sub>±0.014</sub> | 0.024 <sub>±0.001</sub>     |
-| MLP            | 0.066 <sub>±0.003</sub>     | 0.462 <sub>±0.051</sub>     | 0.198 <sub>±0.011</sub>     | 0.654 <sub>±0.013</sub>     | 0.764 <sub>±0.023</sub>     | 0.147 <sub>±0.017</sub>     | 0.031 <sub>±0.001</sub>     |
-| TabTransformer | 0.065 <sub>±0.002</sub>     | 0.472 <sub>±0.057</sub>     | 0.247 <sub>±0.013</sub>     | -                           | 0.135 <sub>±0.001</sub>     | 0.160 <sub>±0.028</sub>     | -                           |
-| ResNet         | 0.039 <sub>±0.018</sub>     | 0.455 <sub>±0.045</sub>     | 0.178 <sub>±0.006</sub>     | 0.639 <sub>±0.013</sub>     | 0.606 <sub>±0.031</sub>     | 0.141 <sub>±0.017</sub>     | 0.030 <sub>±0.002</sub>     |
-| MambaTab*      | 0.040 <sub>±0.008</sub>     | 0.455 <sub>±0.043</sub>     | 0.180 <sub>±0.008</sub>     | 0.601 <sub>±0.010</sub>     | 0.571 <sub>±0.021</sub>     | 0.122 <sub>±0.017</sub>     | 0.030 <sub>±0.002</sub>     |
-| **Mambular**   | **0.018** <sub>±0.000</sub> | **0.452** <sub>±0.043</sub> | **0.167** <sub>±0.011</sub> | 0.628 <sub>±0.010</sub>     | 0.035 <sub>±0.005</sub>     | 0.132 <sub>±0.020</sub>     | 0.027 <sub>±0.002</sub>     |
-
-#### Classification Results
-The table reports AUC values for binary classification tasks
-
-| Models         | BA ↑                        | AD ↑                        | CH ↑                        | FI ↑                        | MA ↑                        |
-| -------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- |
-| XGBoost        | **0.928** <sub>±0.004</sub> | **0.929** <sub>±0.002</sub> | 0.845 <sub>±0.008</sub>     | 0.774 <sub>±0.009</sub>     | **0.922** <sub>±0.002</sub> |
-| FT-Transformer | 0.926 <sub>±0.003</sub>     | 0.926 <sub>±0.002</sub>     | **0.863** <sub>±0.007</sub> | 0.792 <sub>±0.011</sub>     | 0.916 <sub>±0.003</sub>     |
-| MLP            | 0.895 <sub>±0.004</sub>     | 0.914 <sub>±0.002</sub>     | 0.840 <sub>±0.005</sub>     | 0.793 <sub>±0.011</sub>     | 0.886 <sub>±0.003</sub>     |
-| TabTransformer | 0.921 <sub>±0.004</sub>     | 0.912 <sub>±0.002</sub>     | 0.835 <sub>±0.007</sub>     | -                           | 0.910 <sub>±0.002</sub>     |
-| ResNet         | 0.896 <sub>±0.006</sub>     | 0.917 <sub>±0.002</sub>     | 0.841 <sub>±0.006</sub>     | 0.793 <sub>±0.013</sub>     | 0.889 <sub>±0.003</sub>     |
-| MambaTab*      | 0.900 <sub>±0.004</sub>     | 0.916 <sub>±0.003</sub>     | 0.846 <sub>±0.007</sub>     | 0.792 <sub>±0.011</sub>     | 0.890 <sub>±0.003</sub>     |
-| **Mambular**   | 0.927 <sub>±0.006</sub>     | 0.928 <sub>±0.002</sub>     | 0.856 <sub>±0.004</sub>     | **0.795** <sub>±0.011</sub> | 0.917 <sub>±0.003</sub>     |
 
 
 ## Documentation
