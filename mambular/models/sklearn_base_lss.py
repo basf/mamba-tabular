@@ -31,6 +31,7 @@ from ..utils.distributions import (
     PoissonDistribution,
     StudentTDistribution,
 )
+from lightning.pytorch.callbacks import ModelSummary
 
 
 class SklearnBaseLSS(BaseEstimator):
@@ -57,7 +58,7 @@ class SklearnBaseLSS(BaseEstimator):
         }
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
-        self.model = None
+        self.task_model = None
 
         # Raise a warning if task is set to 'classification'
         if preprocessor_kwargs.get("task") == "classification":
@@ -70,23 +71,22 @@ class SklearnBaseLSS(BaseEstimator):
 
     def get_params(self, deep=True):
         """
-        Get parameters for this estimator. Overrides the BaseEstimator method.
+        Get parameters for this estimator.
 
         Parameters
         ----------
         deep : bool, default=True
-            If True, returns the parameters for this estimator and contained sub-objects that are estimators.
+            If True, will return the parameters for this estimator and contained subobjects that are estimators.
 
         Returns
         -------
         params : dict
             Parameter names mapped to their values.
         """
-        params = self.config_kwargs  # Parameters used to initialize DefaultConfig
+        params = {}
+        params.update(self.config_kwargs)
 
-        # If deep=True, include parameters from nested components like preprocessor
         if deep:
-            # Assuming Preprocessor has a get_params method
             preprocessor_params = {
                 "preprocessor__" + key: value
                 for key, value in self.preprocessor.get_params().items()
@@ -97,38 +97,168 @@ class SklearnBaseLSS(BaseEstimator):
 
     def set_params(self, **parameters):
         """
-        Set the parameters of this estimator. Overrides the BaseEstimator method.
+        Set the parameters of this estimator.
 
         Parameters
         ----------
         **parameters : dict
-            Estimator parameters to be set.
+            Estimator parameters.
 
         Returns
         -------
         self : object
-            The instance with updated parameters.
+            Estimator instance.
         """
-        # Update config_kwargs with provided parameters
-        valid_config_keys = self.config_kwargs.keys()
-        config_updates = {k: v for k, v in parameters.items() if k in valid_config_keys}
-        self.config_kwargs.update(config_updates)
-
-        # Update the config object
-        for key, value in config_updates.items():
-            setattr(self.config, key, value)
-
-        # Handle preprocessor parameters (prefixed with 'preprocessor__')
+        config_params = {
+            k: v for k, v in parameters.items() if not k.startswith("preprocessor__")
+        }
         preprocessor_params = {
             k.split("__")[1]: v
             for k, v in parameters.items()
             if k.startswith("preprocessor__")
         }
+
+        if config_params:
+            self.config_kwargs.update(config_params)
+            if self.config is not None:
+                for key, value in config_params.items():
+                    setattr(self.config, key, value)
+            else:
+                self.config = self.config_class(**self.config_kwargs)
+
         if preprocessor_params:
-            # Assuming Preprocessor has a set_params method
             self.preprocessor.set_params(**preprocessor_params)
 
         return self
+
+    def build_model(
+        self,
+        X,
+        y,
+        val_size: float = 0.2,
+        X_val=None,
+        y_val=None,
+        random_state: int = 101,
+        batch_size: int = 128,
+        shuffle: bool = True,
+        lr: float = 1e-4,
+        lr_patience: int = 10,
+        factor: float = 0.1,
+        weight_decay: float = 1e-06,
+        dataloader_kwargs={},
+    ):
+        """
+        Builds the model using the provided training data.
+
+        Parameters
+        ----------
+        X : DataFrame or array-like, shape (n_samples, n_features)
+            The training input samples.
+        y : array-like, shape (n_samples,) or (n_samples, n_targets)
+            The target values (real numbers).
+        val_size : float, default=0.2
+            The proportion of the dataset to include in the validation split if `X_val` is None. Ignored if `X_val` is provided.
+        X_val : DataFrame or array-like, shape (n_samples, n_features), optional
+            The validation input samples. If provided, `X` and `y` are not split and this data is used for validation.
+        y_val : array-like, shape (n_samples,) or (n_samples, n_targets), optional
+            The validation target values. Required if `X_val` is provided.
+        random_state : int, default=101
+            Controls the shuffling applied to the data before applying the split.
+        batch_size : int, default=64
+            Number of samples per gradient update.
+        shuffle : bool, default=True
+            Whether to shuffle the training data before each epoch.
+        lr : float, default=1e-3
+            Learning rate for the optimizer.
+        lr_patience : int, default=10
+            Number of epochs with no improvement on the validation loss to wait before reducing the learning rate.
+        factor : float, default=0.1
+            Factor by which the learning rate will be reduced.
+        weight_decay : float, default=0.025
+            Weight decay (L2 penalty) coefficient.
+        dataloader_kwargs: dict, default={}
+            The kwargs for the pytorch dataloader class.
+
+        Returns
+        -------
+        self : object
+            The built distributional regressor.
+        """
+        if not isinstance(X, pd.DataFrame):
+            X = pd.DataFrame(X)
+        if isinstance(y, pd.Series):
+            y = y.values
+        if X_val:
+            if not isinstance(X_val, pd.DataFrame):
+                X_val = pd.DataFrame(X_val)
+            if isinstance(y_val, pd.Series):
+                y_val = y_val.values
+
+        self.data_module = MambularDataModule(
+            preprocessor=self.preprocessor,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            X_val=X_val,
+            y_val=y_val,
+            val_size=val_size,
+            random_state=random_state,
+            regression=False,
+            **dataloader_kwargs
+        )
+
+        self.data_module.preprocess_data(
+            X, y, X_val, y_val, val_size=val_size, random_state=random_state
+        )
+
+        num_classes = len(np.unique(y))
+
+        self.task_model = TaskModel(
+            model_class=self.base_model,
+            num_classes=num_classes,
+            config=self.config,
+            cat_feature_info=self.data_module.cat_feature_info,
+            num_feature_info=self.data_module.num_feature_info,
+            lr=lr,
+            lr_patience=lr_patience,
+            lr_factor=factor,
+            weight_decay=weight_decay,
+        )
+
+        self.built = True
+
+        return self
+
+    def get_number_of_params(self, requires_grad=True):
+        """
+        Calculate the number of parameters in the model.
+
+        Parameters
+        ----------
+        requires_grad : bool, optional
+            If True, only count the parameters that require gradients (trainable parameters).
+            If False, count all parameters. Default is True.
+
+        Returns
+        -------
+        int
+            The total number of parameters in the model.
+
+        Raises
+        ------
+        ValueError
+            If the model has not been built prior to calling this method.
+        """
+        if not self.built:
+            raise ValueError(
+                "The model must be built before the number of parameters can be estimated"
+            )
+        else:
+            if requires_grad:
+                return sum(
+                    p.numel() for p in self.task_model.parameters() if p.requires_grad
+                )
+            else:
+                return sum(p.numel() for p in self.task_model.parameters())
 
     def fit(
         self,
@@ -253,7 +383,7 @@ class SklearnBaseLSS(BaseEstimator):
             X, y, X_val, y_val, val_size=val_size, random_state=random_state
         )
 
-        self.model = TaskModel(
+        self.task_model = TaskModel(
             model_class=self.base_model,
             num_classes=self.family.param_count,
             family=self.family,
@@ -280,17 +410,21 @@ class SklearnBaseLSS(BaseEstimator):
         )
 
         # Initialize the trainer and train the model
-        trainer = pl.Trainer(
+        self.trainer = pl.Trainer(
             max_epochs=max_epochs,
-            callbacks=[early_stop_callback, checkpoint_callback],
+            callbacks=[
+                early_stop_callback,
+                checkpoint_callback,
+                ModelSummary(max_depth=2),
+            ],
             **trainer_kwargs
         )
-        trainer.fit(self.model, self.data_module)
+        self.trainer.fit(self.task_model, self.data_module)
 
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
             checkpoint = torch.load(best_model_path)
-            self.model.load_state_dict(checkpoint["state_dict"])
+            self.task_model.load_state_dict(checkpoint["state_dict"])
 
         return self
 
@@ -310,14 +444,14 @@ class SklearnBaseLSS(BaseEstimator):
             The predicted target values.
         """
         # Ensure model and data module are initialized
-        if self.model is None or self.data_module is None:
+        if self.task_model is None or self.data_module is None:
             raise ValueError("The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
 
         # Move tensors to appropriate device
-        device = next(self.model.parameters()).device
+        device = next(self.task_model.parameters()).device
         if isinstance(cat_tensors, list):
             cat_tensors = [tensor.to(device) for tensor in cat_tensors]
         else:
@@ -329,14 +463,16 @@ class SklearnBaseLSS(BaseEstimator):
             num_tensors = num_tensors.to(device)
 
         # Set model to evaluation mode
-        self.model.eval()
+        self.task_model.eval()
 
         # Perform inference
         with torch.no_grad():
-            predictions = self.model(num_features=num_tensors, cat_features=cat_tensors)
+            predictions = self.task_model(
+                num_features=num_tensors, cat_features=cat_tensors
+            )
 
         if not raw:
-            return self.model.family(predictions).cpu().numpy()
+            return self.task_model.family(predictions).cpu().numpy()
 
         # Convert predictions to NumPy array and return
         else:
@@ -372,7 +508,9 @@ class SklearnBaseLSS(BaseEstimator):
         """
         # Infer distribution family from model settings if not provided
         if distribution_family is None:
-            distribution_family = getattr(self.model, "distribution_family", "normal")
+            distribution_family = getattr(
+                self.task_model, "distribution_family", "normal"
+            )
 
         # Setup default metrics if none are provided
         if metrics is None:
@@ -425,3 +563,25 @@ class SklearnBaseLSS(BaseEstimator):
             "categorical": {"Accuracy": accuracy_score},
         }
         return default_metrics.get(distribution_family, {})
+
+    def score(self, X, y, metric="NLL"):
+        """
+        Calculate the score of the model using the specified metric.
+
+        Parameters
+        ----------
+        X : array-like or pd.DataFrame of shape (n_samples, n_features)
+            The input samples to predict.
+        y : array-like of shape (n_samples,) or (n_samples, n_outputs)
+            The true target values against which to evaluate the predictions.
+        metric : str, default="NLL"
+            So far, only negative log-likelihood is supported
+
+        Returns
+        -------
+        score : float
+            The score calculated using the specified metric.
+        """
+        predictions = self.predict(X)
+        score = self.task_model.family.evaluate_nll(y, predictions)
+        return score

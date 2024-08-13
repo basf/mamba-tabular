@@ -41,6 +41,14 @@ class MLPRegressor(SklearnBaseRegressor):
         Whether to use batch normalization in the MLP layers.
     layer_norm : bool, default=False
         Whether to use layer normalization in the MLP layers.
+    use_embeddings : bool, default=False
+        Whether to use embedding layers for all features.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for  embeddings.
+    layer_norm_after_embedding : bool, default=False
+        Whether to apply layer normalization after embedding.
+    d_model : int, default=32
+        Dimensionality of the embeddings.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -124,6 +132,14 @@ class MLPClassifier(SklearnBaseClassifier):
         Whether to use batch normalization in the MLP layers.
     layer_norm : bool, default=False
         Whether to use layer normalization in the MLP layers.
+    use_embeddings : bool, default=False
+        Whether to use embedding layers for all features.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for  embeddings.
+    layer_norm_after_embedding : bool, default=False
+        Whether to apply layer normalization after embedding.
+    d_model : int, default=32
+        Dimensionality of the embeddings.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -207,6 +223,14 @@ class MLPLSS(SklearnBaseLSS):
         Whether to use batch normalization in the MLP layers.
     layer_norm : bool, default=False
         Whether to use layer normalization in the MLP layers.
+    use_embeddings : bool, default=False
+        Whether to use embedding layers for all features.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for  embeddings.
+    layer_norm_after_embedding : bool, default=False
+        Whether to apply layer normalization after embedding.
+    d_model : int, default=32
+        Dimensionality of the embeddings.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.

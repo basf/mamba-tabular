@@ -37,8 +37,8 @@ class TabTransformerRegressor(SklearnBaseRegressor):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the transformer.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -63,6 +63,8 @@ class TabTransformerRegressor(SklearnBaseRegressor):
         Epsilon value for layer normalization.
     transformer_dim_feedforward : int, default=512
         Dimensionality of the feed-forward layers in the transformer.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -144,8 +146,8 @@ class TabTransformerClassifier(SklearnBaseClassifier):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the transformer.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -170,6 +172,8 @@ class TabTransformerClassifier(SklearnBaseClassifier):
         Epsilon value for layer normalization.
     transformer_dim_feedforward : int, default=512
         Dimensionality of the feed-forward layers in the transformer.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -251,8 +255,8 @@ class TabTransformerLSS(SklearnBaseLSS):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the transformer.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -277,6 +281,8 @@ class TabTransformerLSS(SklearnBaseLSS):
         Epsilon value for layer normalization.
     transformer_dim_feedforward : int, default=512
         Dimensionality of the feed-forward layers in the transformer.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.

@@ -1,13 +1,23 @@
-from .fttransformer import (FTTransformerClassifier, FTTransformerLSS,
-                            FTTransformerRegressor)
+from .fttransformer import (
+    FTTransformerClassifier,
+    FTTransformerLSS,
+    FTTransformerRegressor,
+)
 from .mambular import MambularClassifier, MambularLSS, MambularRegressor
 from .mlp import MLPLSS, MLPClassifier, MLPRegressor
 from .resnet import ResNetClassifier, ResNetLSS, ResNetRegressor
 from .sklearn_base_classifier import SklearnBaseClassifier
 from .sklearn_base_lss import SklearnBaseLSS
 from .sklearn_base_regressor import SklearnBaseRegressor
-from .tabtransformer import (TabTransformerClassifier, TabTransformerLSS,
-                             TabTransformerRegressor)
+from .tabtransformer import (
+    TabTransformerClassifier,
+    TabTransformerLSS,
+    TabTransformerRegressor,
+)
+
+from .mambatab import MambaTabClassifier, MambaTabRegressor, MambaTabLSS
+from .tabularnn import TabulaRNNClassifier, TabulaRNNRegressor, TabulaRNNLSS
+
 
 __all__ = [
     "MambularClassifier",
@@ -28,4 +38,10 @@ __all__ = [
     "SklearnBaseClassifier",
     "SklearnBaseLSS",
     "SklearnBaseRegressor",
+    "MambaTabRegressor",
+    "MambaTabClassifier",
+    "MambaTabLSS",
+    "TabulaRNNClassifier",
+    "TabulaRNNRegressor",
+    "TabulaRNNLSS",
 ]

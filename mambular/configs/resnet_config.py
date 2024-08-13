@@ -37,13 +37,21 @@ class DefaultResNetConfig:
         Whether to use layer normalization in the ResNet layers.
     num_blocks : int, default=3
         Number of residual blocks in the ResNet.
+    use_embeddings : bool, default=False
+        Whether to use embedding layers for all features.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for  embeddings.
+    layer_norm_after_embedding : bool, default=False
+        Whether to apply layer normalization after embedding.
+    d_model : int, default=32
+        Dimensionality of the embeddings.
     """
 
     lr: float = 1e-04
     lr_patience: int = 10
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
-    layer_sizes: list = (128, 128, 32)
+    layer_sizes: list = (256, 128, 32)
     activation: callable = nn.SELU()
     skip_layers: bool = False
     dropout: float = 0.5
@@ -53,3 +61,7 @@ class DefaultResNetConfig:
     batch_norm: bool = True
     layer_norm: bool = False
     num_blocks: int = 3
+    use_embeddings: bool = False
+    embedding_activation: callable = nn.Identity()
+    layer_norm_after_embedding: bool = False
+    d_model: int = 32

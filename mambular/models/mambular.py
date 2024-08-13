@@ -55,8 +55,8 @@ class MambularRegressor(SklearnBaseRegressor):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the model.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -75,6 +75,18 @@ class MambularRegressor(SklearnBaseRegressor):
         Whether to use bidirectional processing of the input sequences.
     use_learnable_interaction : bool, default=False
         Whether to use learnable feature interactions before passing through mamba blocks.
+    use_cls : bool, default=True
+        Whether to append a cls to the end of each 'sequence'.
+    shuffle_embeddings : bool, default=False.
+        Whether to shuffle the embeddings before being passed to the Mamba layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=True
+        whether weight decay is also applied to A-D matrices.
+    BC_layer_norm: bool, default=False
+        whether to apply layer normalization to B-C matrices.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -172,8 +184,8 @@ class MambularClassifier(SklearnBaseClassifier):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the model.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -192,6 +204,16 @@ class MambularClassifier(SklearnBaseClassifier):
         Whether to use bidirectional processing of the input sequences.
     use_learnable_interaction : bool, default=False
         Whether to use learnable feature interactions before passing through mamba blocks.
+    shuffle_embeddings : bool, default=False.
+        Whether to shuffle the embeddings before being passed to the Mamba layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=True
+        whether weight decay is also applied to A-D matrices.
+    BC_layer_norm: bool, default=False
+        whether to apply layer normalization to B-C matrices.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -289,8 +311,8 @@ class MambularLSS(SklearnBaseLSS):
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the model.
-    num_embedding_activation : callable, default=nn.Identity()
-        Activation function for numerical embeddings.
+    embedding_activation : callable, default=nn.Identity()
+        Activation function for embeddings.
     head_layer_sizes : list, default=(128, 64, 32)
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -312,6 +334,16 @@ class MambularLSS(SklearnBaseLSS):
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
+    shuffle_embeddings : bool, default=False.
+        Whether to shuffle the embeddings before being passed to the Mamba layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=True
+        whether weight decay is also applied to A-D matrices.
+    BC_layer_norm: bool, default=False
+        whether to apply layer normalization to B-C matrices.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
         'binning', 'one_hot', 'standardization', and 'normalization'.
