@@ -87,8 +87,8 @@ The average rank table over all models and all datasets is given here:
     <th style="text-align:center;">Avg. Rank</th>
   </tr>
   <tr>
-    <td style="text-align:center;"><strong style="color:#2e8b57;">Mambular</strong><br><br></td>
-    <td style="text-align:center;"><strong style="color:#2e8b57;">2.083</strong> <sub>±1.037</sub></td>
+    <td style="text-align:center;"><strong>Mambular</strong></td>
+    <td style="text-align:center;"><strong>2.083</strong> <sub>±1.037</sub></td>
   </tr>
   <tr>
     <td style="text-align:center;">FT-Transformer</td>
