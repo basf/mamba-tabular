@@ -336,14 +336,11 @@ regressor.fit(X_train, y_train, max_epochs=50)
 
 If you find this project useful in your research, please consider cite:
 ```BibTeX
-@misc{thielmann2024mambularsequentialmodeltabular,
-      title={Mambular: A Sequential Model for Tabular Deep Learning}, 
-      author={Anton Frederik Thielmann and Manish Kumar and Christoph Weisser and Arik Reuter and Benjamin Säfken and Soheila Samiee},
-      year={2024},
-      eprint={2408.06291},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2408.06291}, 
+@article{thielmann2024mambular,
+  title={Mambular: A Sequential Model for Tabular Deep Learning},
+  author={Thielmann, Anton Frederik and Kumar, Manish and Weisser, Christoph and Reuter, Arik and S{\"a}fken, Benjamin and Samiee, Soheila},
+  journal={arXiv preprint arXiv:2408.06291},
+  year={2024}
 }
 ```
 
