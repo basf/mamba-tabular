@@ -15,19 +15,18 @@
 [🤔Report Issues](https://github.com/basf/mamba-tabular/issues)
 </div>
 
-# Mambular: Tabular Deep Learning with Mamba Architectures
+<h1>Mambular: Tabular Deep Learning with Mamba</h1>
 
-You can find our paper `Mambular: A Sequential Model for Tabular Deep Learning` [here](https://arxiv.org/abs/2408.06291).
+Mambular is a Python library for tabular deep learning. It includes models that leverage the Mamba (State Space Model) architecture, as well as other popular models like TabTransformer, FTTransformer, and tabular ResNets. Check out our paper `Mambular: A Sequential Model for Tabular Deep Learning`, available [here](https://arxiv.org/abs/2408.06291).
 
-# Table of Contents
-- [Mambular: Tabular Deep Learning with Mamba Architectures](#mambular-tabular-deep-learning-with-mamba-architectures)
-- [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
+<h3> Table of Contents </h3>
+
+- [Introduction](#introduction)
   - [Features](#features)
-  - [Models](#models)
-  - [Results](#results)
-  - [Documentation](#documentation)
-  - [Installation](#installation)
+- [Models](#models)
+- [Results](#results)
+- [Documentation](#documentation)
+- [Installation](#installation)
 - [Usage](#usage)
   - [Preprocessing](#preprocessing)
     - [Data Type Detection and Transformation](#data-type-detection-and-transformation)
@@ -37,13 +36,13 @@ You can find our paper `Mambular: A Sequential Model for Tabular Deep Learning` 
     - [Key Features of MambularLSS:](#key-features-of-mambularlss)
     - [Available Distribution Classes:](#available-distribution-classes)
     - [Getting Started with MambularLSS:](#getting-started-with-mambularlss)
-    - [Implement Your Own Model](#implement-your-own-model)
-  - [Citation](#citation)
-  - [License](#license)
+- [Implement Your Own Model](#implement-your-own-model)
+- [Citation](#citation)
+- [License](#license)
 
 
 
-## Introduction
+# Introduction
 Mambular is a Python package that brings the power of advanced deep learning architectures to tabular data, offering a suite of models for regression, classification, and distributional regression tasks. Designed with ease of use in mind, Mambular models adhere to scikit-learn's `BaseEstimator` interface, making them highly compatible with the familiar scikit-learn ecosystem. This means you can fit, predict, and evaluate using Mambular models just as you would with any traditional scikit-learn model, but with the added performance and flexibility of deep learning.
 
 ## Features
@@ -56,7 +55,7 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 - **PyTorch Lightning Under the Hood**: Built on top of PyTorch Lightning, Mambular models benefit from streamlined training processes, easy customization, and advanced features like distributed training and 16-bit precision.
 
 
-## Models
+# Models
 
 | Model            | Description                                                                                                                                         |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -73,7 +72,7 @@ All models are available for `regression`, `classification` and distributional r
 Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `MambularLSS`
 
 
-## Results
+# Results
 Detailed results for the available methods can be found [here](https://arxiv.org/abs/2408.06291).
 Note, that these are achieved results with default hyperparameter and for our splits. Performing hyperparameter optimization could improve the performance of all models.
 
@@ -130,11 +129,11 @@ The average rank table over all models and all datasets is given here:
 
 
 
-## Documentation
+# Documentation
 
 You can find the Mamba-Tabular API documentation [here](https://mambular.readthedocs.io/en/latest/).
 
-## Installation
+# Installation
 
 Install Mambular using pip:
 ```sh
@@ -253,7 +252,7 @@ model.fit(
 ```
 
 
-### Implement Your Own Model
+# Implement Your Own Model
 
 Mambular allows users to easily integrate their custom models into the existing logic. This process is designed to be straightforward, making it simple to create a PyTorch model and define its forward pass. Instead of inheriting from `nn.Module`, you inherit from Mambular's `BaseModel`. Each Mambular model takes three main arguments: the number of classes (e.g., 1 for regression or 2 for binary classification), `cat_feature_info`, and `num_feature_info` for categorical and numerical feature information, respectively. Additionally, you can provide a config argument, which can either be a custom configuration or one of the provided default configs.
 
@@ -332,7 +331,7 @@ regressor = MyRegressor(numerical_preprocessing="ple")
 regressor.fit(X_train, y_train, max_epochs=50)
 ```
 
-## Citation
+# Citation
 
 If you find this project useful in your research, please consider cite:
 ```BibTeX
@@ -344,6 +343,6 @@ If you find this project useful in your research, please consider cite:
 }
 ```
 
-## License
+# License
 
 The entire codebase is under MIT license.
