@@ -90,14 +90,14 @@ class DefaultMambAttentionConfig:
     d_model: int = 64
     n_layers: int = 4
     expand_factor: int = 2
-    n_heads: int = 4
+    n_heads: int = 8
     last_layer: str = "attn"
     n_mamba_per_attention: int = 1
     bias: bool = False
     d_conv: int = 4
     conv_bias: bool = True
     dropout: float = 0.0
-    attn_dropout: float = 0.1
+    attn_dropout: float = 0.2
     dt_rank: str = "auto"
     d_state: int = 128
     dt_scale: float = 1.0
