@@ -37,6 +37,8 @@ class TaskModel(pl.LightningModule):
         lss=False,
         family=None,
         loss_fct: callable = None,
+        early_pruning_threshold=None,
+        pruning_epoch=5,
         **kwargs,
     ):
         super().__init__()
@@ -44,6 +46,9 @@ class TaskModel(pl.LightningModule):
         self.lss = lss
         self.family = family
         self.loss_fct = loss_fct
+        self.early_pruning_threshold = early_pruning_threshold
+        self.pruning_epoch = pruning_epoch
+        self.val_losses = []
 
         if lss:
             pass
@@ -259,6 +264,83 @@ class TaskModel(pl.LightningModule):
                 )
 
         return test_loss
+
+    def on_validation_epoch_end(self):
+        """
+        Callback executed at the end of each validation epoch.
+
+        This method retrieves the current validation loss from the trainer's callback metrics
+        and stores it in a list for tracking validation losses across epochs. It also applies
+        pruning logic to stop training early if the validation loss exceeds a specified threshold.
+
+        Parameters
+        ----------
+        None
+
+        Attributes
+        ----------
+        val_loss : torch.Tensor or None
+            The validation loss for the current epoch, retrieved from `self.trainer.callback_metrics`.
+        val_loss_value : float
+            The validation loss for the current epoch, converted to a float.
+        val_losses : list of float
+            A list storing the validation losses for each epoch.
+        pruning_epoch : int
+            The epoch after which pruning logic will be applied.
+        early_pruning_threshold : float, optional
+            The threshold for early pruning based on validation loss. If the current validation
+            loss exceeds this value, training will be stopped early.
+
+        Notes
+        -----
+        If the current epoch is greater than or equal to `pruning_epoch`, and the validation
+        loss exceeds the `early_pruning_threshold`, the training is stopped early by setting
+        `self.trainer.should_stop` to True.
+        """
+        val_loss = self.trainer.callback_metrics.get("val_loss")
+        if val_loss is not None:
+            val_loss_value = val_loss.item()
+            self.val_losses.append(val_loss_value)  # Store val_loss for each epoch
+
+            # Apply pruning logic if needed
+            if self.current_epoch >= self.pruning_epoch:
+                if (
+                    self.early_pruning_threshold is not None
+                    and val_loss_value > self.early_pruning_threshold
+                ):
+                    print(
+                        f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}"
+                    )
+                    self.trainer.should_stop = True  # Stop training early
+
+    def epoch_val_loss_at(self, epoch):
+        """
+        Retrieve the validation loss at a specific epoch.
+
+        This method allows the user to query the validation loss for any given epoch,
+        provided the epoch exists within the range of completed epochs. If the epoch
+        exceeds the length of the `val_losses` list, a default value of infinity is returned.
+
+        Parameters
+        ----------
+        epoch : int
+            The epoch number for which the validation loss is requested.
+
+        Returns
+        -------
+        float
+            The validation loss for the requested epoch. If the epoch does not exist,
+            the method returns `float("inf")`.
+
+        Notes
+        -----
+        This method relies on `self.val_losses` which stores the validation loss values
+        at the end of each epoch during training.
+        """
+        if epoch < len(self.val_losses):
+            return self.val_losses[epoch]
+        else:
+            return float("inf")
 
     def configure_optimizers(self):
         """
