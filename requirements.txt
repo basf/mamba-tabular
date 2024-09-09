@@ -6,3 +6,5 @@ torch
 torchmetrics
 setuptools
 properscoring
+rotary-embedding-torch
+einops
