@@ -1,9 +1,8 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_classifier import SklearnBaseClassifier
-from .sklearn_base_lss import SklearnBaseLSS
-
 from ..base_models.tabularnn import TabulaRNN
 from ..configs.tabularnn_config import DefaultTabulaRNNConfig
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class TabulaRNNRegressor(SklearnBaseRegressor):

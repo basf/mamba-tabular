@@ -4,18 +4,14 @@ from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import (
-    KBinsDiscretizer,
-    MinMaxScaler,
-    StandardScaler,
-    QuantileTransformer,
-    PolynomialFeatures,
-    SplineTransformer,
-)
+from sklearn.preprocessing import (KBinsDiscretizer, MinMaxScaler,
+                                   PolynomialFeatures, QuantileTransformer,
+                                   SplineTransformer, StandardScaler)
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from .ple_encoding import PLE
-from .prepro_utils import ContinuousOrdinalEncoder, CustomBinner, OneHotFromOrdinal
+from .prepro_utils import (ContinuousOrdinalEncoder, CustomBinner,
+                           OneHotFromOrdinal)
 
 
 class Preprocessor:
@@ -186,7 +182,8 @@ class Preprocessor:
 
                 if self.numerical_preprocessing in ["binning", "one_hot"]:
                     bins = (
-                        self._get_decision_tree_bins(X[[feature]], y, [feature])
+                        self._get_decision_tree_bins(
+                            X[[feature]], y, [feature])
                         if self.use_decision_tree_bins
                         else self.n_bins
                     )
@@ -201,7 +198,8 @@ class Preprocessor:
                                         else len(bins) - 1,
                                         encode="ordinal",
                                         strategy=self.binning_strategy,
-                                        subsample=200_000 if len(X) > 200_000 else None,
+                                        subsample=200_000 if len(
+                                            X) > 200_000 else None,
                                     ),
                                 ),
                             ]
@@ -224,7 +222,8 @@ class Preprocessor:
                         )
 
                 elif self.numerical_preprocessing == "standardization":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(
+                        ("scaler", StandardScaler()))
 
                 elif self.numerical_preprocessing == "normalization":
                     numeric_transformer_steps.append(
@@ -242,11 +241,13 @@ class Preprocessor:
                     )
 
                 elif self.numerical_preprocessing == "polynomial":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(
+                        ("scaler", StandardScaler()))
                     numeric_transformer_steps.append(
                         (
                             "polynomial",
-                            PolynomialFeatures(self.degree, include_bias=False),
+                            PolynomialFeatures(
+                                self.degree, include_bias=False),
                         )
                     )
                     # if self.degree > 10:
@@ -274,7 +275,8 @@ class Preprocessor:
 
                 numeric_transformer = Pipeline(numeric_transformer_steps)
 
-                transformers.append((f"num_{feature}", numeric_transformer, [feature]))
+                transformers.append(
+                    (f"num_{feature}", numeric_transformer, [feature]))
 
         if categorical_features:
             for feature in categorical_features:
@@ -327,7 +329,8 @@ class Preprocessor:
             bin_edges = np.sort(np.unique(thresholds))
 
             bins.append(
-                np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()]))
+                np.concatenate(
+                    ([X[feature].min()], bin_edges, [X[feature].max()]))
             )
         return bins
 
@@ -394,7 +397,8 @@ class Preprocessor:
             if transformer != "drop":
                 end = start + transformer.transform(X[[columns[0]]]).shape[1]
                 dtype = int if "cat" in name else float
-                transformed_dict[name] = transformed_X[:, start:end].astype(dtype)
+                transformed_dict[name] = transformed_X[:,
+                                                       start:end].astype(dtype)
                 start = end
 
         return transformed_dict
@@ -459,7 +463,8 @@ class Preprocessor:
                 # Handle features processed with discretization
                 if "discretizer" in steps:
                     step = transformer_pipeline.named_steps["discretizer"]
-                    n_bins = step.n_bins_[0] if hasattr(step, "n_bins_") else None
+                    n_bins = step.n_bins_[0] if hasattr(
+                        step, "n_bins_") else None
 
                     # Check if discretization is followed by one-hot encoding
                     if "onehot_from_ordinal" in steps:
@@ -480,7 +485,8 @@ class Preprocessor:
                 # Handle features processed with continuous ordinal encoding
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
-                    n_categories = len(step.mapping_[columns.index(feature_name)])
+                    n_categories = len(
+                        step.mapping_[columns.index(feature_name)])
                     binned_or_ordinal_info[feature_name] = n_categories
                     print(
                         f"Categorical Feature (Ordinal Encoded): {feature_name}, Number of unique categories: {n_categories}"
@@ -489,7 +495,8 @@ class Preprocessor:
                 # Handle other numerical feature encodings
                 else:
                     last_step = transformer_pipeline.steps[-1][1]
-                    step_names = [step[0] for step in transformer_pipeline.steps]
+                    step_names = [step[0]
+                                  for step in transformer_pipeline.steps]
                     step_descriptions = " -> ".join(step_names)
                     if hasattr(last_step, "transform"):
                         transformed_feature = last_step.transform(

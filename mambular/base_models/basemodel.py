@@ -1,7 +1,8 @@
+import logging
+import os
+
 import torch
 import torch.nn as nn
-import os
-import logging
 
 
 class BaseModel(nn.Module):
@@ -26,7 +27,8 @@ class BaseModel(nn.Module):
         ignore : list, optional
             List of keys to ignore while saving hyperparameters, by default [].
         """
-        self.hparams = {k: v for k, v in self.hparams.items() if k not in ignore}
+        self.hparams = {k: v for k, v in self.hparams.items()
+                        if k not in ignore}
         for key, value in self.hparams.items():
             setattr(self, key, value)
 
@@ -98,7 +100,8 @@ class BaseModel(nn.Module):
         logger.info("Hyperparameters:")
         for key, value in self.hparams.items():
             logger.info(f"  {key}: {value}")
-        logger.info(f"Total number of trainable parameters: {self.count_parameters()}")
+        logger.info(
+            f"Total number of trainable parameters: {self.count_parameters()}")
 
     def parameter_count(self):
         """
@@ -142,7 +145,8 @@ class BaseModel(nn.Module):
         Print a summary of the model, including the architecture and parameter counts.
         """
         print(self)
-        print(f"\nTotal number of trainable parameters: {self.count_parameters()}")
+        print(
+            f"\nTotal number of trainable parameters: {self.count_parameters()}")
         print("\nParameter counts by layer:")
         for name, count in self.parameter_count().items():
             print(f"  {name}: {count}")

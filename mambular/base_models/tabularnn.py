@@ -1,17 +1,13 @@
 import torch
 import torch.nn as nn
+
+from ..arch_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mlp_utils import MLP
+from ..arch_utils.normalization_layers import (BatchNorm, GroupNorm,
+                                               InstanceNorm, LayerNorm,
+                                               LearnableLayerScaling, RMSNorm)
 from ..configs.tabularnn_config import DefaultTabulaRNNConfig
 from .basemodel import BaseModel
-from ..arch_utils.embedding_layer import EmbeddingLayer
-from ..arch_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
 
 
 class TabulaRNN(BaseModel):
@@ -24,13 +20,16 @@ class TabulaRNN(BaseModel):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(
+            ignore=["cat_feature_info", "num_feature_info"])
 
         self.lr = self.hparams.get("lr", config.lr)
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
+        self.weight_decay = self.hparams.get(
+            "weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
+        self.pooling_method = self.hparams.get(
+            "pooling_method", config.pooling_method)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -62,12 +61,15 @@ class TabulaRNN(BaseModel):
         else:
             self.norm_f = None
 
-        rnn_layer = {"RNN": nn.RNN, "LSTM": nn.LSTM, "GRU": nn.GRU}[config.model_type]
+        rnn_layer = {"RNN": nn.RNN, "LSTM": nn.LSTM,
+                     "GRU": nn.GRU}[config.model_type]
         self.rnn = rnn_layer(
             input_size=self.hparams.get("d_model", config.d_model),
-            hidden_size=self.hparams.get("dim_feedforward", config.dim_feedforward),
+            hidden_size=self.hparams.get(
+                "dim_feedforward", config.dim_feedforward),
             num_layers=self.hparams.get("n_layers", config.n_layers),
-            bidirectional=self.hparams.get("bidirectional", config.bidirectional),
+            bidirectional=self.hparams.get(
+                "bidirectional", config.bidirectional),
             batch_first=True,
             dropout=self.hparams.get("rnn_dropout", config.rnn_dropout),
             bias=self.hparams.get("bias", config.bias),
@@ -93,7 +95,8 @@ class TabulaRNN(BaseModel):
             cat_encoding=self.hparams.get("cat_encoding", config.cat_encoding),
         )
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
+        head_activation = self.hparams.get(
+            "head_activation", config.head_activation)
 
         self.tabular_head = MLP(
             self.hparams.get("dim_feedforward", config.dim_feedforward),

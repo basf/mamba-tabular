@@ -1,16 +1,17 @@
+import warnings
+
 import lightning as pl
+import numpy as np
 import pandas as pd
 import torch
-from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
+from lightning.pytorch.callbacks import (EarlyStopping, ModelCheckpoint,
+                                         ModelSummary)
 from sklearn.base import BaseEstimator
-from sklearn.metrics import accuracy_score
-import warnings
+from sklearn.metrics import accuracy_score, log_loss
+
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
-import numpy as np
-from lightning.pytorch.callbacks import ModelSummary
-from sklearn.metrics import log_loss
 
 
 class SklearnBaseClassifier(BaseEstimator):
@@ -405,7 +406,8 @@ class SklearnBaseClassifier(BaseEstimator):
         """
         # Ensure model and data module are initialized
         if self.task_model is None or self.data_module is None:
-            raise ValueError("The model or data module has not been fitted yet.")
+            raise ValueError(
+                "The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
@@ -427,7 +429,8 @@ class SklearnBaseClassifier(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            logits = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
+            logits = self.task_model(
+                num_features=num_tensors, cat_features=cat_tensors)
 
             # Check the shape of the logits to determine binary or multi-class classification
             if logits.shape[1] == 1:
@@ -501,7 +504,8 @@ class SklearnBaseClassifier(BaseEstimator):
 
         # Perform inference
         with torch.no_grad():
-            logits = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
+            logits = self.task_model(
+                num_features=num_tensors, cat_features=cat_tensors)
             if logits.shape[1] > 1:
                 probabilities = torch.softmax(logits, dim=1)
             else:

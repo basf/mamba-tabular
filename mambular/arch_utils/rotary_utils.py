@@ -1,8 +1,8 @@
+import numpy as np
 import torch
 import torch.nn as nn
-from rotary_embedding_torch import RotaryEmbedding
-import numpy as np
 from einops import rearrange
+from rotary_embedding_torch import RotaryEmbedding
 
 
 class RotaryEmbeddingLayer(nn.Module):
@@ -54,7 +54,8 @@ class RotaryTransformerEncoderLayer(nn.TransformerEncoderLayer):
         qkv = nn.Linear(d_model, d_model * 3, bias=False).to(device)(x)
         q, k, v = qkv.chunk(3, dim=-1)
         q, k, v = map(
-            lambda t: rearrange(t, "b n (h d) -> b h n d", h=self.nhead), (q, k, v)
+            lambda t: rearrange(t, "b n (h d) -> b h n d",
+                                h=self.nhead), (q, k, v)
         )
 
         # Apply rotary embeddings to queries and keys
@@ -77,10 +78,12 @@ class RotaryTransformerEncoderLayer(nn.TransformerEncoderLayer):
         device = src.device
         if self.norm_first:
             src = self.norm1(src)
-            src2 = self._sa_block(src, src_mask, src_key_padding_mask).to(device)
+            src2 = self._sa_block(
+                src, src_mask, src_key_padding_mask).to(device)
             src = src + self.dropout1(src2)
             src = self.norm2(src)
-            src2 = self.linear2(self.dropout(self.activation(self.linear1(src))))
+            src2 = self.linear2(self.dropout(
+                self.activation(self.linear1(src))))
             src = src + self.dropout2(src2)
         else:
             src2 = self._sa_block(self.norm1(src), src_mask, src_key_padding_mask).to(

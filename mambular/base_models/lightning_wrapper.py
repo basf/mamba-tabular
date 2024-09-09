@@ -1,8 +1,9 @@
+from typing import Type
+
 import lightning as pl
 import torch
 import torch.nn as nn
 import torchmetrics
-from typing import Type
 
 
 class TaskModel(pl.LightningModule):
@@ -74,7 +75,8 @@ class TaskModel(pl.LightningModule):
 
         self.lr = self.hparams.get("lr", config.lr)
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
+        self.weight_decay = self.hparams.get(
+            "weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
 
         if family is None and num_classes == 2:

@@ -64,7 +64,6 @@ def tree_to_code(tree, feature_names):
             # print(k,')',pathto[parent], tree_.value[node])
 
     recurse(0, 1, 0)
-
     return my_list
 
 

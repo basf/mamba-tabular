@@ -54,7 +54,8 @@ class Linear_skip_block(nn.Module):
         )  # Only use skip connection if input and output sizes are equal
 
         if use_batch_norm:
-            self.batch_norm = nn.BatchNorm1d(n_output)  # Initialize batch normalization
+            # Initialize batch normalization
+            self.batch_norm = nn.BatchNorm1d(n_output)
 
     def forward(self, x):
         """
@@ -76,7 +77,8 @@ class Linear_skip_block(nn.Module):
         x = self.act(x)
 
         if self.use_batch_norm:
-            x = self.batch_norm(x)  # Apply batch normalization after activation
+            # Apply batch normalization after activation
+            x = self.batch_norm(x)
 
         if self.use_skip:
             x = x + x0  # Add skip connection if applicable
@@ -223,7 +225,8 @@ class MLP(nn.Module):
             input_units = n_hidden_units  # Update input_units for the next layer
 
         self.hidden_layers = nn.Sequential(*layers)
-        self.linear_final = nn.Linear(input_units, n_output_units)  # Final layer
+        self.linear_final = nn.Linear(
+            input_units, n_output_units)  # Final layer
 
     def forward(self, x):
         """

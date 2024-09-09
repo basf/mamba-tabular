@@ -1,9 +1,9 @@
-import torch.nn as nn
-import torch
-from rotary_embedding_torch import RotaryEmbedding
-from einops import rearrange
-import torch.nn.functional as F
 import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from einops import rearrange
+from rotary_embedding_torch import RotaryEmbedding
 
 
 class GEGLU(nn.Module):
@@ -40,7 +40,8 @@ class Attention(nn.Module):
         h = self.heads
         x = self.norm(x)
         q, k, v = self.to_qkv(x).chunk(3, dim=-1)
-        q, k, v = map(lambda t: rearrange(t, "b n (h d) -> b h n d", h=h), (q, k, v))
+        q, k, v = map(lambda t: rearrange(
+            t, "b n (h d) -> b h n d", h=h), (q, k, v))
         if self.rotary:
             q = self.rotary_embedding.rotate_queries_or_keys(q)
             k = self.rotary_embedding.rotate_queries_or_keys(k)

@@ -1,4 +1,5 @@
 import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,7 +21,8 @@ class RMSNorm(nn.Module):
 
     def forward(self, x):
         output = (
-            x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps) * self.weight
+            x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) +
+                            self.eps) * self.weight
         )
 
         return output

@@ -10,7 +10,8 @@ class PeriodicLinearEncodingLayer(nn.Module):
 
         if self.learn_bins:
             # Learnable bin boundaries
-            self.bin_boundaries = nn.Parameter(torch.linspace(0, 1, self.bins + 1))
+            self.bin_boundaries = nn.Parameter(
+                torch.linspace(0, 1, self.bins + 1))
         else:
             self.bin_boundaries = torch.linspace(-1, 1, self.bins + 1)
 

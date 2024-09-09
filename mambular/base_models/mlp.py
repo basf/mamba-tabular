@@ -1,16 +1,12 @@
 import torch
 import torch.nn as nn
+
+from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.normalization_layers import (BatchNorm, GroupNorm,
+                                               InstanceNorm, LayerNorm,
+                                               LearnableLayerScaling, RMSNorm)
 from ..configs.mlp_config import DefaultMLPConfig
 from .basemodel import BaseModel
-from ..arch_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
-from ..arch_utils.embedding_layer import EmbeddingLayer
 
 
 class MLP(BaseModel):
@@ -38,11 +34,13 @@ class MLP(BaseModel):
             Configuration dataclass containing hyperparameters, by default DefaultMLPConfig().
         """
         super().__init__(**kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(
+            ignore=["cat_feature_info", "num_feature_info"])
 
         self.lr = self.hparams.get("lr", config.lr)
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
+        self.weight_decay = self.hparams.get(
+            "weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
@@ -54,7 +52,8 @@ class MLP(BaseModel):
         )
         self.use_glu = self.hparams.get("use_glu", config.use_glu)
         self.activation = self.hparams.get("activation", config.activation)
-        self.use_embeddings = self.hparams.get("use_embeddings", config.use_embeddings)
+        self.use_embeddings = self.hparams.get(
+            "use_embeddings", config.use_embeddings)
 
         input_dim = 0
         for feature_name, input_shape in num_feature_info.items():

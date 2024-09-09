@@ -1,18 +1,13 @@
 import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
 
+from .normalization_layers import (BatchNorm, GroupNorm, InstanceNorm,
+                                   LayerNorm, LearnableLayerScaling, RMSNorm)
 
-### Heavily inspired and mostly taken from https://github.com/alxndrTL/mamba.py
+# Heavily inspired and mostly taken from https://github.com/alxndrTL/mamba.py
 
 
 class Mamba(nn.Module):
@@ -236,11 +231,14 @@ class MambaBlock(nn.Module):
         self.activation = activation
 
         if self.use_learnable_interaction:
-            self.learnable_interaction = LearnableFeatureInteraction(self.d_inner)
+            self.learnable_interaction = LearnableFeatureInteraction(
+                self.d_inner)
 
-        self.x_proj_fwd = nn.Linear(self.d_inner, dt_rank + 2 * d_state, bias=False)
+        self.x_proj_fwd = nn.Linear(
+            self.d_inner, dt_rank + 2 * d_state, bias=False)
         if self.bidirectional:
-            self.x_proj_bwd = nn.Linear(self.d_inner, dt_rank + 2 * d_state, bias=False)
+            self.x_proj_bwd = nn.Linear(
+                self.d_inner, dt_rank + 2 * d_state, bias=False)
 
         self.dt_proj_fwd = nn.Linear(dt_rank, self.d_inner, bias=True)
         if self.bidirectional:
@@ -252,10 +250,12 @@ class MambaBlock(nn.Module):
             if self.bidirectional:
                 nn.init.constant_(self.dt_proj_bwd.weight, dt_init_std)
         elif dt_init == "random":
-            nn.init.uniform_(self.dt_proj_fwd.weight, -dt_init_std, dt_init_std)
+            nn.init.uniform_(self.dt_proj_fwd.weight, -
+                             dt_init_std, dt_init_std)
             if self.bidirectional:
 
-                nn.init.uniform_(self.dt_proj_bwd.weight, -dt_init_std, dt_init_std)
+                nn.init.uniform_(self.dt_proj_bwd.weight, -
+                                 dt_init_std, dt_init_std)
         else:
             raise NotImplementedError
 
@@ -269,14 +269,16 @@ class MambaBlock(nn.Module):
 
         if self.bidirectional:
             dt_bwd = torch.exp(
-                torch.rand(self.d_inner) * (math.log(dt_max) - math.log(dt_min))
+                torch.rand(self.d_inner) *
+                (math.log(dt_max) - math.log(dt_min))
                 + math.log(dt_min)
             ).clamp(min=dt_init_floor)
             inv_dt_bwd = dt_bwd + torch.log(-torch.expm1(-dt_bwd))
             with torch.no_grad():
                 self.dt_proj_bwd.bias.copy_(inv_dt_bwd)
 
-        A = torch.arange(1, d_state + 1, dtype=torch.float32).repeat(self.d_inner, 1)
+        A = torch.arange(
+            1, d_state + 1, dtype=torch.float32).repeat(self.d_inner, 1)
         self.A_log_fwd = nn.Parameter(torch.log(A))
         self.D_fwd = nn.Parameter(torch.ones(self.d_inner))
 
@@ -390,7 +392,8 @@ class MambaBlock(nn.Module):
 
         BX = deltaB * (x.unsqueeze(-1))
 
-        h = torch.zeros(x.size(0), self.d_inner, self.d_state, device=deltaA.device)
+        h = torch.zeros(x.size(0), self.d_inner,
+                        self.d_state, device=deltaA.device)
         hs = []
 
         for t in range(0, L):

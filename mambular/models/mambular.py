@@ -1,8 +1,8 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_lss import SklearnBaseLSS
-from .sklearn_base_classifier import SklearnBaseClassifier
 from ..base_models.mambular import Mambular
 from ..configs.mambular_config import DefaultMambularConfig
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class MambularRegressor(SklearnBaseRegressor):

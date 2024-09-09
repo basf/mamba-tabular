@@ -1,18 +1,14 @@
 import torch
 import torch.nn as nn
-from ..arch_utils.mlp_utils import MLP
-from ..arch_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
+
 from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.mlp_utils import MLP
+from ..arch_utils.normalization_layers import (BatchNorm, GroupNorm,
+                                               InstanceNorm, LayerNorm,
+                                               LearnableLayerScaling, RMSNorm)
+from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 from ..configs.tabtransformer_config import DefaultTabTransformerConfig
 from .basemodel import BaseModel
-from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 
 
 class TabTransformer(BaseModel):
@@ -75,7 +71,8 @@ class TabTransformer(BaseModel):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(
+            ignore=["cat_feature_info", "num_feature_info"])
         if cat_feature_info == {}:
             raise ValueError(
                 "You are trying to fit a TabTransformer with no categorical features. Try using a different model that is better suited for tasks without categorical features."
@@ -87,9 +84,11 @@ class TabTransformer(BaseModel):
 
         self.lr = self.hparams.get("lr", config.lr)
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
+        self.weight_decay = self.hparams.get(
+            "weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
+        self.pooling_method = self.hparams.get(
+            "pooling_method", config.pooling_method)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -104,7 +103,8 @@ class TabTransformer(BaseModel):
             activation=self.hparams.get(
                 "transformer_activation", config.transformer_activation
             ),
-            layer_norm_eps=self.hparams.get("layer_norm_eps", config.layer_norm_eps),
+            layer_norm_eps=self.hparams.get(
+                "layer_norm_eps", config.layer_norm_eps),
             norm_first=self.hparams.get("norm_first", config.norm_first),
             bias=self.hparams.get("bias", config.bias),
         )
@@ -125,7 +125,8 @@ class TabTransformer(BaseModel):
         else:
             self.norm_f = None
 
-        self.norm_embedding = LayerNorm(self.hparams.get("d_model", config.d_model))
+        self.norm_embedding = LayerNorm(
+            self.hparams.get("d_model", config.d_model))
         self.encoder = nn.TransformerEncoder(
             encoder_layer,
             num_layers=self.hparams.get("n_layers", config.n_layers),
@@ -147,7 +148,8 @@ class TabTransformer(BaseModel):
             cat_encoding=self.hparams.get("cat_encoding", config.cat_encoding),
         )
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
+        head_activation = self.hparams.get(
+            "head_activation", config.head_activation)
 
         mlp_input_dim = 0
         for feature_name, input_shape in num_feature_info.items():

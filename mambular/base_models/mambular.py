@@ -1,18 +1,14 @@
 import torch
 import torch.nn as nn
+
+from ..arch_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mamba_arch import Mamba
 from ..arch_utils.mlp_utils import MLP
-from ..arch_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
+from ..arch_utils.normalization_layers import (BatchNorm, GroupNorm,
+                                               InstanceNorm, LayerNorm,
+                                               LearnableLayerScaling, RMSNorm)
 from ..configs.mambular_config import DefaultMambularConfig
 from .basemodel import BaseModel
-from ..arch_utils.embedding_layer import EmbeddingLayer
 
 
 class Mambular(BaseModel):
@@ -75,13 +71,16 @@ class Mambular(BaseModel):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(
+            ignore=["cat_feature_info", "num_feature_info"])
 
         self.lr = self.hparams.get("lr", config.lr)
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
+        self.weight_decay = self.hparams.get(
+            "weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
+        self.pooling_method = self.hparams.get(
+            "pooling_method", config.pooling_method)
         self.shuffle_embeddings = self.hparams.get(
             "shuffle_embeddings", config.shuffle_embeddings
         )
@@ -91,7 +90,8 @@ class Mambular(BaseModel):
         self.mamba = Mamba(
             d_model=self.hparams.get("d_model", config.d_model),
             n_layers=self.hparams.get("n_layers", config.n_layers),
-            expand_factor=self.hparams.get("expand_factor", config.expand_factor),
+            expand_factor=self.hparams.get(
+                "expand_factor", config.expand_factor),
             bias=self.hparams.get("bias", config.bias),
             d_conv=self.hparams.get("d_conv", config.d_conv),
             conv_bias=self.hparams.get("conv_bias", config.conv_bias),
@@ -102,16 +102,21 @@ class Mambular(BaseModel):
             dt_init=self.hparams.get("dt_init", config.dt_init),
             dt_max=self.hparams.get("dt_max", config.dt_max),
             dt_min=self.hparams.get("dt_min", config.dt_min),
-            dt_init_floor=self.hparams.get("dt_init_floor", config.dt_init_floor),
+            dt_init_floor=self.hparams.get(
+                "dt_init_floor", config.dt_init_floor),
             norm=globals()[self.hparams.get("norm", config.norm)],
             activation=self.hparams.get("activation", config.activation),
-            bidirectional=self.hparams.get("bidiretional", config.bidirectional),
+            bidirectional=self.hparams.get(
+                "bidiretional", config.bidirectional),
             use_learnable_interaction=self.hparams.get(
                 "use_learnable_interactions", config.use_learnable_interaction
             ),
-            AD_weight_decay=self.hparams.get("AB_weight_decay", config.AD_weight_decay),
-            BC_layer_norm=self.hparams.get("AB_layer_norm", config.BC_layer_norm),
-            layer_norm_eps=self.hparams.get("layer_norm_eps", config.layer_norm_eps),
+            AD_weight_decay=self.hparams.get(
+                "AB_weight_decay", config.AD_weight_decay),
+            BC_layer_norm=self.hparams.get(
+                "AB_layer_norm", config.BC_layer_norm),
+            layer_norm_eps=self.hparams.get(
+                "layer_norm_eps", config.layer_norm_eps),
         )
         norm_layer = self.hparams.get("norm", config.norm)
         if norm_layer == "RMSNorm":
@@ -158,7 +163,8 @@ class Mambular(BaseModel):
             cat_encoding=self.hparams.get("cat_encoding", config.cat_encoding),
         )
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
+        head_activation = self.hparams.get(
+            "head_activation", config.head_activation)
 
         self.tabular_head = MLP(
             self.hparams.get("d_model", config.d_model),

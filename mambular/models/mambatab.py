@@ -1,8 +1,8 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_lss import SklearnBaseLSS
-from .sklearn_base_classifier import SklearnBaseClassifier
 from ..base_models.mambatab import MambaTab
 from ..configs.mambatab_config import DefaultMambaTabConfig
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class MambaTabRegressor(SklearnBaseRegressor):

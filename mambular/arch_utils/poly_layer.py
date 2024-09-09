@@ -1,7 +1,8 @@
+import numpy as np
 import torch
 import torch.nn as nn
-from sklearn.preprocessing import PolynomialFeatures, MinMaxScaler, SplineTransformer
-import numpy as np
+from sklearn.preprocessing import (MinMaxScaler, PolynomialFeatures,
+                                   SplineTransformer)
 
 
 class ScaledPolynomialLayer(nn.Module):
@@ -24,7 +25,8 @@ class ScaledPolynomialLayer(nn.Module):
         poly_features = self.poly.fit_transform(x_scaled)
 
         # Convert polynomial features back to tensor
-        poly_features = torch.tensor(poly_features, dtype=torch.float32).to(x.device)
+        poly_features = torch.tensor(
+            poly_features, dtype=torch.float32).to(x.device)
 
         # Apply the learnable scaling parameter
         output = poly_features * self.weights
@@ -49,7 +51,8 @@ class ScaledSplineLayer(nn.Module):
 
         if self.learn_knots:
             # Learnable knots
-            self.knots_positions = nn.Parameter(torch.linspace(-1, 1, self.knots))
+            self.knots_positions = nn.Parameter(
+                torch.linspace(-1, 1, self.knots))
         else:
             self.knots_positions = torch.linspace(-1, 1, self.knots)
 

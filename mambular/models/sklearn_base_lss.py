@@ -1,37 +1,28 @@
-import lightning as pl
-import pandas as pd
-import torch
-from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.base import BaseEstimator
-from sklearn.metrics import accuracy_score
 import warnings
+
+import lightning as pl
+import numpy as np
+import pandas as pd
+import properscoring as ps
+import torch
+from lightning.pytorch.callbacks import (EarlyStopping, ModelCheckpoint,
+                                         ModelSummary)
+from sklearn.base import BaseEstimator
+from sklearn.metrics import accuracy_score, mean_squared_error
+
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
-import numpy as np
-from ..utils.distributional_metrics import (
-    beta_brier_score,
-    dirichlet_error,
-    gamma_deviance,
-    inverse_gamma_loss,
-    negative_binomial_deviance,
-    poisson_deviance,
-    student_t_loss,
-)
-from sklearn.metrics import accuracy_score, mean_squared_error
-import properscoring as ps
-from ..utils.distributions import (
-    BetaDistribution,
-    CategoricalDistribution,
-    DirichletDistribution,
-    GammaDistribution,
-    InverseGammaDistribution,
-    NegativeBinomialDistribution,
-    NormalDistribution,
-    PoissonDistribution,
-    StudentTDistribution,
-)
-from lightning.pytorch.callbacks import ModelSummary
+from ..utils.distributional_metrics import (beta_brier_score, dirichlet_error,
+                                            gamma_deviance, inverse_gamma_loss,
+                                            negative_binomial_deviance,
+                                            poisson_deviance, student_t_loss)
+from ..utils.distributions import (BetaDistribution, CategoricalDistribution,
+                                   DirichletDistribution, GammaDistribution,
+                                   InverseGammaDistribution,
+                                   NegativeBinomialDistribution,
+                                   NormalDistribution, PoissonDistribution,
+                                   StudentTDistribution)
 
 
 class SklearnBaseLSS(BaseEstimator):
@@ -445,7 +436,8 @@ class SklearnBaseLSS(BaseEstimator):
         """
         # Ensure model and data module are initialized
         if self.task_model is None or self.data_module is None:
-            raise ValueError("The model or data module has not been fitted yet.")
+            raise ValueError(
+                "The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
@@ -548,7 +540,8 @@ class SklearnBaseLSS(BaseEstimator):
                 "MSE": lambda y, pred: mean_squared_error(y, pred[:, 0]),
                 "CRPS": lambda y, pred: np.mean(
                     [
-                        ps.crps_gaussian(y[i], mu=pred[i, 0], sig=np.sqrt(pred[i, 1]))
+                        ps.crps_gaussian(y[i], mu=pred[i, 0],
+                                         sig=np.sqrt(pred[i, 1]))
                         for i in range(len(y))
                     ]
                 ),

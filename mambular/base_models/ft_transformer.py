@@ -1,15 +1,11 @@
 import torch
 import torch.nn as nn
-from ..arch_utils.mlp_utils import MLP
-from ..arch_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
+
 from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.mlp_utils import MLP
+from ..arch_utils.normalization_layers import (BatchNorm, GroupNorm,
+                                               InstanceNorm, LayerNorm,
+                                               LearnableLayerScaling, RMSNorm)
 from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 from ..configs.fttransformer_config import DefaultFTTransformerConfig
 from .basemodel import BaseModel
@@ -75,13 +71,16 @@ class FTTransformer(BaseModel):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(
+            ignore=["cat_feature_info", "num_feature_info"])
 
         self.lr = self.hparams.get("lr", config.lr)
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
+        self.weight_decay = self.hparams.get(
+            "weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
+        self.pooling_method = self.hparams.get(
+            "pooling_method", config.pooling_method)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -96,7 +95,8 @@ class FTTransformer(BaseModel):
             activation=self.hparams.get(
                 "transformer_activation", config.transformer_activation
             ),
-            layer_norm_eps=self.hparams.get("layer_norm_eps", config.layer_norm_eps),
+            layer_norm_eps=self.hparams.get(
+                "layer_norm_eps", config.layer_norm_eps),
             norm_first=self.hparams.get("norm_first", config.norm_first),
             bias=self.hparams.get("bias", config.bias),
         )
@@ -105,13 +105,17 @@ class FTTransformer(BaseModel):
         if norm_layer == "RMSNorm":
             self.norm_f = RMSNorm(self.hparams.get("d_model", config.d_model))
         elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(self.hparams.get("d_model", config.d_model))
+            self.norm_f = LayerNorm(
+                self.hparams.get("d_model", config.d_model))
         elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(self.hparams.get("d_model", config.d_model))
+            self.norm_f = BatchNorm(
+                self.hparams.get("d_model", config.d_model))
         elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(self.hparams.get("d_model", config.d_model))
+            self.norm_f = InstanceNorm(
+                self.hparams.get("d_model", config.d_model))
         elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(1, self.hparams.get("d_model", config.d_model))
+            self.norm_f = GroupNorm(
+                1, self.hparams.get("d_model", config.d_model))
         elif norm_layer == "LearnableLayerScaling":
             self.norm_f = LearnableLayerScaling(
                 self.hparams.get("d_model", config.d_model)
@@ -140,7 +144,8 @@ class FTTransformer(BaseModel):
             cat_encoding=self.hparams.get("cat_encoding", config.cat_encoding),
         )
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
+        head_activation = self.hparams.get(
+            "head_activation", config.head_activation)
 
         self.tabular_head = MLP(
             self.hparams.get("d_model", config.d_model),

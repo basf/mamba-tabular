@@ -1,9 +1,10 @@
-import torch
-import pandas as pd
-import numpy as np
 import lightning as pl
-from torch.utils.data import DataLoader
+import numpy as np
+import pandas as pd
+import torch
 from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader
+
 from .dataset import MambularDataset
 
 
@@ -159,11 +160,13 @@ class MambularDataModule(pl.LightningDataModule):
                 )  # Assuming categorical keys are prefixed with 'cat_'
                 if cat_key in train_preprocessed_data:
                     train_cat_tensors.append(
-                        torch.tensor(train_preprocessed_data[cat_key], dtype=torch.long)
+                        torch.tensor(
+                            train_preprocessed_data[cat_key], dtype=torch.long)
                     )
                 if cat_key in val_preprocessed_data:
                     val_cat_tensors.append(
-                        torch.tensor(val_preprocessed_data[cat_key], dtype=torch.long)
+                        torch.tensor(
+                            val_preprocessed_data[cat_key], dtype=torch.long)
                     )
 
                 binned_key = "num_" + key  # for binned features
@@ -239,13 +242,15 @@ class MambularDataModule(pl.LightningDataModule):
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in test_preprocessed_data:
                 self.test_cat_tensors.append(
-                    torch.tensor(test_preprocessed_data[cat_key], dtype=torch.long)
+                    torch.tensor(
+                        test_preprocessed_data[cat_key], dtype=torch.long)
                 )
 
             binned_key = "num_" + key  # for binned features
             if binned_key in test_preprocessed_data:
                 self.test_cat_tensors.append(
-                    torch.tensor(test_preprocessed_data[binned_key], dtype=torch.long)
+                    torch.tensor(
+                        test_preprocessed_data[binned_key], dtype=torch.long)
                 )
 
         # Populate tensors for numerical features, if present in processed data
@@ -253,7 +258,8 @@ class MambularDataModule(pl.LightningDataModule):
             num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
             if num_key in test_preprocessed_data:
                 self.test_num_tensors.append(
-                    torch.tensor(test_preprocessed_data[num_key], dtype=torch.float32)
+                    torch.tensor(
+                        test_preprocessed_data[num_key], dtype=torch.float32)
                 )
 
         self.test_preprocessor_fitted = True

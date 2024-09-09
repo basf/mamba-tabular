@@ -1,7 +1,3 @@
-import torch.nn as nn
-import torch
-
-
 import torch
 import torch.nn as nn
 
@@ -21,7 +17,8 @@ class Reshape(nn.Module):
             self.layer = nn.Embedding(dim, j * dim)
         elif self.method == "conv1d":
             # Use nn.Conv1d approach
-            self.layer = nn.Conv1d(in_channels=dim, out_channels=j * dim, kernel_size=1)
+            self.layer = nn.Conv1d(
+                in_channels=dim, out_channels=j * dim, kernel_size=1)
         else:
             raise ValueError(f"Unsupported method '{method}' for reshaping.")
 

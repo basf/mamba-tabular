@@ -1,15 +1,16 @@
+import warnings
+
 import lightning as pl
 import pandas as pd
 import torch
-from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
+from lightning.pytorch.callbacks import (EarlyStopping, ModelCheckpoint,
+                                         ModelSummary)
 from sklearn.base import BaseEstimator
 from sklearn.metrics import mean_squared_error
-import warnings
+
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
-from lightning.pytorch.callbacks import ModelSummary
-from dataclasses import asdict, is_dataclass
 
 
 class SklearnBaseRegressor(BaseEstimator):
@@ -106,102 +107,6 @@ class SklearnBaseRegressor(BaseEstimator):
 
         if preprocessor_params:
             self.preprocessor.set_params(**preprocessor_params)
-
-        return self
-
-    def build_model(
-        self,
-        X,
-        y,
-        val_size: float = 0.2,
-        X_val=None,
-        y_val=None,
-        random_state: int = 101,
-        batch_size: int = 128,
-        shuffle: bool = True,
-        lr: float = 1e-4,
-        lr_patience: int = 10,
-        factor: float = 0.1,
-        weight_decay: float = 1e-06,
-        dataloader_kwargs={},
-    ):
-        """
-        Builds the model using the provided training data.
-
-        Parameters
-        ----------
-        X : DataFrame or array-like, shape (n_samples, n_features)
-            The training input samples.
-        y : array-like, shape (n_samples,) or (n_samples, n_targets)
-            The target values (real numbers).
-        val_size : float, default=0.2
-            The proportion of the dataset to include in the validation split if `X_val` is None. Ignored if `X_val` is provided.
-        X_val : DataFrame or array-like, shape (n_samples, n_features), optional
-            The validation input samples. If provided, `X` and `y` are not split and this data is used for validation.
-        y_val : array-like, shape (n_samples,) or (n_samples, n_targets), optional
-            The validation target values. Required if `X_val` is provided.
-        random_state : int, default=101
-            Controls the shuffling applied to the data before applying the split.
-        batch_size : int, default=64
-            Number of samples per gradient update.
-        shuffle : bool, default=True
-            Whether to shuffle the training data before each epoch.
-        lr : float, default=1e-3
-            Learning rate for the optimizer.
-        lr_patience : int, default=10
-            Number of epochs with no improvement on the validation loss to wait before reducing the learning rate.
-        factor : float, default=0.1
-            Factor by which the learning rate will be reduced.
-        weight_decay : float, default=0.025
-            Weight decay (L2 penalty) coefficient.
-        dataloader_kwargs: dict, default={}
-            The kwargs for the pytorch dataloader class.
-
-
-
-        Returns
-        -------
-        self : object
-            The built regressor.
-        """
-        if not isinstance(X, pd.DataFrame):
-            X = pd.DataFrame(X)
-        if isinstance(y, pd.Series):
-            y = y.values
-        if X_val:
-            if not isinstance(X_val, pd.DataFrame):
-                X_val = pd.DataFrame(X_val)
-            if isinstance(y_val, pd.Series):
-                y_val = y_val.values
-
-        self.data_module = MambularDataModule(
-            preprocessor=self.preprocessor,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            X_val=X_val,
-            y_val=y_val,
-            val_size=val_size,
-            random_state=random_state,
-            regression=True,
-            **dataloader_kwargs
-        )
-
-        self.data_module.preprocess_data(
-            X, y, X_val, y_val, val_size=val_size, random_state=random_state
-        )
-
-        self.task_model = TaskModel(
-            model_class=self.base_model,
-            config=self.config,
-            cat_feature_info=self.data_module.cat_feature_info,
-            num_feature_info=self.data_module.num_feature_info,
-            lr=lr,
-            lr_patience=lr_patience,
-            lr_factor=factor,
-            weight_decay=weight_decay,
-        )
-
-        self.built = True
 
         return self
 
@@ -398,7 +303,8 @@ class SklearnBaseRegressor(BaseEstimator):
         """
         # Ensure model and data module are initialized
         if self.task_model is None or self.data_module is None:
-            raise ValueError("The model or data module has not been fitted yet.")
+            raise ValueError(
+                "The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)

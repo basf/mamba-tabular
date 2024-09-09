@@ -1,6 +1,6 @@
-import pandas as pd
 import numpy as np
-from sklearn.base import TransformerMixin, BaseEstimator
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class CustomBinner(TransformerMixin):
@@ -80,7 +80,8 @@ class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
         # Transform the categories to their mapped integer values
         X_transformed = np.array(
             [
-                [self.mapping_[col].get(value, 0) for col, value in enumerate(row)]
+                [self.mapping_[col].get(value, 0)
+                 for col, value in enumerate(row)]
                 for row in X
             ]
         )
