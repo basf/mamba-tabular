@@ -1,14 +1,8 @@
-import numpy as np
-from tqdm import tqdm
-import pandas as pd
-import bisect
 import re
-from sklearn.tree import _tree
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-import pandas as pd
+
 import numpy as np
-from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, _tree
 
 
 def tree_to_code(tree, feature_names):
@@ -53,14 +47,16 @@ def tree_to_code(tree, feature_names):
             if node == 0:
                 pathto[node] = "(" + s + ")"
             else:
-                pathto[node] = "(" + pathto[parent] + ")" + " & " + "(" + s + ")"
+                pathto[node] = "(" + pathto[parent] + ")" + \
+                    " & " + "(" + s + ")"
 
             recurse(tree_.children_left[node], depth + 1, node)
             s = "{} > {}".format(name, threshold)
             if node == 0:
                 pathto[node] = s
             else:
-                pathto[node] = "(" + pathto[parent] + ")" + " & " + "(" + s + ")"
+                pathto[node] = "(" + pathto[parent] + ")" + \
+                    " & " + "(" + s + ")"
             recurse(tree_.children_right[node], depth + 1, node)
         else:
             k = k + 1
@@ -83,7 +79,8 @@ class PLE(BaseEstimator, TransformerMixin):
         self.n_bins = n_bins
         self.conditions = conditions
         self.pattern = (
-            r"-?\d+\.?\d*[eE]?[+-]?\d*"  # This pattern matches integers and floats
+            # This pattern matches integers and floats
+            r"-?\d+\.?\d*[eE]?[+-]?\d*"
         )
 
     def fit(self, feature, target):
@@ -108,7 +105,8 @@ class PLE(BaseEstimator, TransformerMixin):
         for idx, cond in enumerate(self.conditions):
             result_list.append(eval(cond) * (idx + 1))
 
-        encoded_feature = np.expand_dims(np.sum(np.stack(result_list).T, axis=1), 1)
+        encoded_feature = np.expand_dims(
+            np.sum(np.stack(result_list).T, axis=1), 1)
 
         encoded_feature = np.array(encoded_feature - 1, dtype=np.int64)
 
