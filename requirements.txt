@@ -8,3 +8,4 @@ setuptools
 properscoring
 rotary-embedding-torch
 einops
+tqdm
