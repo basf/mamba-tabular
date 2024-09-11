@@ -42,6 +42,7 @@ class MLP(BaseModel):
         self.weight_decay = self.hparams.get(
             "weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
+        self.layer_sizes = self.hparams.get("layer_sizes", self.layer_sizes)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -68,28 +69,28 @@ class MLP(BaseModel):
             )
 
         # Input layer
-        self.layers.append(nn.Linear(input_dim, config.layer_sizes[0]))
+        self.layers.append(nn.Linear(input_dim, self.layer_sizes[0]))
         if config.batch_norm:
-            self.layers.append(nn.BatchNorm1d(config.layer_sizes[0]))
+            self.layers.append(nn.BatchNorm1d(self.layer_sizes[0]))
 
         norm_layer = self.hparams.get("norm", config.norm)
         if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm(config.layer_sizes[0])
+            self.norm_f = RMSNorm(self.layer_sizes[0])
         elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(config.layer_sizes[0])
+            self.norm_f = LayerNorm(self.layer_sizes[0])
         elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(config.layer_sizes[0])
+            self.norm_f = BatchNorm(self.layer_sizes[0])
         elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(config.layer_sizes[0])
+            self.norm_f = InstanceNorm(self.layer_sizes[0])
         elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(1, config.layer_sizes[0])
+            self.norm_f = GroupNorm(1, self.layer_sizes[0])
         elif norm_layer == "LearnableLayerScaling":
-            self.norm_f = LearnableLayerScaling(config.layer_sizes[0])
+            self.norm_f = LearnableLayerScaling(self.layer_sizes[0])
         else:
             self.norm_f = None
 
         if self.norm_f is not None:
-            self.layers.append(self.norm_f(config.layer_sizes[0]))
+            self.layers.append(self.norm_f(self.layer_sizes[0]))
 
         if config.use_glu:
             self.layers.append(nn.GLU())
@@ -99,14 +100,12 @@ class MLP(BaseModel):
             self.layers.append(nn.Dropout(config.dropout))
 
         # Hidden layers
-        for i in range(1, len(config.layer_sizes)):
-            self.layers.append(
-                nn.Linear(config.layer_sizes[i - 1], config.layer_sizes[i])
-            )
+        for i in range(1, len(self.layer_sizes)):
+            self.layers.append(nn.Linear(self.layer_sizes[i - 1], self.layer_sizes[i]))
             if config.batch_norm:
-                self.layers.append(nn.BatchNorm1d(config.layer_sizes[i]))
+                self.layers.append(nn.BatchNorm1d(self.layer_sizes[i]))
             if config.layer_norm:
-                self.layers.append(nn.LayerNorm(config.layer_sizes[i]))
+                self.layers.append(nn.LayerNorm(self.layer_sizes[i]))
             if config.use_glu:
                 self.layers.append(nn.GLU())
             else:
@@ -115,7 +114,7 @@ class MLP(BaseModel):
                 self.layers.append(nn.Dropout(config.dropout))
 
         # Output layer
-        self.layers.append(nn.Linear(config.layer_sizes[-1], num_classes))
+        self.layers.append(nn.Linear(self.layer_sizes[-1], num_classes))
 
         if self.use_embeddings:
             self.embedding_layer = EmbeddingLayer(
