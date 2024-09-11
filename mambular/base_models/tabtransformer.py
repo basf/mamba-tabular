@@ -189,7 +189,7 @@ class TabTransformer(BaseModel):
         Tensor
             The output predictions of the model.
         """
-        cat_embeddings = self.embedding_layer({}, cat_features)
+        cat_embeddings = self.embedding_layer(None, cat_features)
 
         num_features = torch.cat(num_features, dim=1)
         num_embeddings = self.norm_f(num_features)
