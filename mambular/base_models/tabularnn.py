@@ -111,7 +111,10 @@ class TabulaRNN(BaseModel):
             n_output_units=num_classes,
         )
 
-        self.linear = nn.Linear(config.d_model, config.dim_feedforward)
+        self.linear = nn.Linear(
+            self.hparams.get("d_model", config.d_model),
+            self.hparams.get("dim_feedforward", config.dim_feedforward),
+        )
 
     def forward(self, num_features, cat_features):
         """
