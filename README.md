@@ -31,8 +31,6 @@ Mambular is a Python library for tabular deep learning. It includes models that 
 - [🛠️ Installation](#️-installation)
 - [🚀 Usage](#-usage)
 - [💻 Implement Your Own Model](#-implement-your-own-model)
-- [🏷️ Citation](#️-citation)
-- [License](#license)
 
 
 # 🏃 Quickstart
@@ -311,18 +309,4 @@ Here's how you can implement a custom model with Mambular:
    regressor.fit(X_train, y_train, max_epochs=50)
    ```
 
-# 🏷️ Citation
 
-If you find this project useful in your research, please consider cite:
-```BibTeX
-@article{thielmann2024mambular,
-  title={Mambular: A Sequential Model for Tabular Deep Learning},
-  author={Thielmann, Anton Frederik and Kumar, Manish and Weisser, Christoph and Reuter, Arik and S{\"a}fken, Benjamin and Samiee, Soheila},
-  journal={arXiv preprint arXiv:2408.06291},
-  year={2024}
-}
-```
-
-# License
-
-The entire codebase is under MIT license.
