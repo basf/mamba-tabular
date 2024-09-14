@@ -6,7 +6,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import (KBinsDiscretizer, MinMaxScaler,
                                    PolynomialFeatures, QuantileTransformer,
-                                   SplineTransformer, StandardScaler)
+                                   RobustScaler, SplineTransformer,
+                                   StandardScaler)
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from .ple_encoding import PLE
@@ -31,14 +32,14 @@ class Preprocessor:
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
-        'binning', 'one_hot', 'standardization', and 'normalization'.
+        'binning', 'one_hot', 'standardization', 'normalization', 'robust' etc.
     use_decision_tree_bins : bool, default=False
         If True, uses decision tree regression/classification to determine
         optimal bin edges for numerical feature binning. This parameter is
         relevant only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
     binning_strategy : str, default="uniform"
         Defines the strategy for binning numerical features. Options include 'uniform',
-        'quantile', or other sklearn-compatible strategies.
+        'quantile', and 'kmeans'.
     task : str, default="regression"
         Indicates the type of machine learning task ('regression' or 'classification'). This can
         influence certain preprocessing behaviors, especially when using decision tree-based binning.
@@ -228,6 +229,11 @@ class Preprocessor:
                 elif self.numerical_preprocessing == "normalization":
                     numeric_transformer_steps.append(
                         ("normalizer", MinMaxScaler(feature_range=(-1, 1)))
+                    )
+
+                elif self.numerical_preprocessing == "robust":
+                    numeric_transformer_steps.append(
+                        ("robust_scalar", RobustScaler())
                     )
 
                 elif self.numerical_preprocessing == "quantile":
