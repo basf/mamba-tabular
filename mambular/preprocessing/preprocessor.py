@@ -4,15 +4,19 @@ from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import (KBinsDiscretizer, MinMaxScaler,
-                                   PolynomialFeatures, QuantileTransformer,
-                                   RobustScaler, SplineTransformer,
-                                   StandardScaler)
+from sklearn.preprocessing import (
+    KBinsDiscretizer,
+    MinMaxScaler,
+    PolynomialFeatures,
+    QuantileTransformer,
+    RobustScaler,
+    SplineTransformer,
+    StandardScaler,
+)
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from .ple_encoding import PLE
-from .prepro_utils import (ContinuousOrdinalEncoder, CustomBinner,
-                           OneHotFromOrdinal)
+from .prepro_utils import ContinuousOrdinalEncoder, CustomBinner, OneHotFromOrdinal
 
 
 class Preprocessor:
@@ -27,7 +31,7 @@ class Preprocessor:
 
     Parameters
     ----------
-    n_bins : int, default=50
+    n_bins : int, default=25
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
     numerical_preprocessing : str, default="ple"
@@ -40,6 +44,8 @@ class Preprocessor:
     binning_strategy : str, default="uniform"
         Defines the strategy for binning numerical features. Options include 'uniform',
         'quantile', and 'kmeans'.
+    output_distribution : str, default="uniform"
+        The output distribution for the QuantileTransformer. Options include 'uniform' and 'normal'.
     task : str, default="regression"
         Indicates the type of machine learning task ('regression' or 'classification'). This can
         influence certain preprocessing behaviors, especially when using decision tree-based binning.
@@ -52,7 +58,7 @@ class Preprocessor:
         of their unique value count or proportion.
     degree : int, default=3
         The degree of the polynomial features to be used in preprocessing.
-    knots : int, default=12
+    knots : int, default=25
         The number of knots to be used in spline transformations.
 
     Attributes
@@ -66,15 +72,16 @@ class Preprocessor:
 
     def __init__(
         self,
-        n_bins=50,
+        n_bins=25,
         numerical_preprocessing="ple",
         use_decision_tree_bins=False,
         binning_strategy="uniform",
+        output_distribution="uniform",
         task="regression",
         cat_cutoff=0.03,
         treat_all_integers_as_numerical=False,
         degree=3,
-        knots=12,
+        knots=25,
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = numerical_preprocessing.lower()
@@ -84,18 +91,20 @@ class Preprocessor:
             "one_hot",
             "standardization",
             "normalization",
+            "robust",
             "quantile",
             "polynomial",
             "splines",
         ]:
             raise ValueError(
-                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', 'quantile', 'polynomial', 'splines' and 'normalization'."
+                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', 'quantile', 'robust', 'polynomial', 'splines' and 'normalization'."
             )
 
         self.use_decision_tree_bins = use_decision_tree_bins
         self.column_transformer = None
         self.fitted = False
         self.binning_strategy = binning_strategy
+        self.output_distribution = output_distribution
         self.task = task
         self.cat_cutoff = cat_cutoff
         self.treat_all_integers_as_numerical = treat_all_integers_as_numerical
@@ -241,8 +250,7 @@ class Preprocessor:
                         (
                             "quantile",
                             QuantileTransformer(
-                                n_quantiles=self.n_bins, random_state=101
-                            ),
+                                n_quantiles=self.n_bins, random_state=101, output_distribution=self.output_distribution),
                         )
                     )
 
@@ -260,6 +268,8 @@ class Preprocessor:
                     #    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
 
                 elif self.numerical_preprocessing == "splines":
+                    numeric_transformer_steps.append(
+                        ("scaler", StandardScaler()))
                     numeric_transformer_steps.append(
                         (
                             "splines",
