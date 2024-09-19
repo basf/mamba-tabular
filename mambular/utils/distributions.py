@@ -504,3 +504,52 @@ class CategoricalDistribution(BaseDistribution):
         # Compute the negative log-likelihood
         nll = -cat_dist.log_prob(y_true).mean()
         return nll
+
+
+class Quantile(BaseDistribution):
+    """
+    Quantile Regression Loss class.
+
+    This class computes the quantile loss (also known as pinball loss) for a set of quantiles.
+    It is used to handle quantile regression tasks where we aim to predict a given quantile of the target distribution.
+
+    Parameters
+    ----------
+    name : str, optional
+        The name of the distribution, by default "Quantile".
+    quantiles : list of float, optional
+        A list of quantiles to be used for computing the loss, by default [0.25, 0.5, 0.75].
+
+    Attributes
+    ----------
+    quantiles : list of float
+        List of quantiles for which the pinball loss is computed.
+
+    Methods
+    -------
+    compute_loss(predictions, y_true)
+        Computes the quantile regression loss between the predictions and true values.
+    """
+
+    def __init__(self, name="Quantile", quantiles=[0.25, 0.5, 0.75]):
+        param_names = [
+            f"q_{q}" for q in quantiles
+        ]  # Use string representations of quantiles
+        super().__init__(name, param_names)
+        self.quantiles = quantiles
+
+    def compute_loss(self, predictions, y_true):
+
+        assert not y_true.requires_grad  # Ensure y_true does not require gradients
+        assert predictions.size(0) == y_true.size(0)  # Ensure batch size matches
+
+        losses = []
+        for i, q in enumerate(self.quantiles):
+            errors = y_true - predictions[:, i]  # Calculate errors for each quantile
+            # Compute the pinball loss
+            quantile_loss = torch.max((q - 1) * errors, q * errors)
+            losses.append(quantile_loss)
+
+        # Sum losses across quantiles and compute mean
+        loss = torch.mean(torch.stack(losses, dim=1).sum(dim=1))
+        return loss

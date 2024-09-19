@@ -200,6 +200,7 @@ MambularLSS allows you to model the full distribution of a response variable, no
 - **negativebinom**: For over-dispersed count data.
 - **inversegamma**: Often used as a prior in Bayesian inference.
 - **categorical**: For data with more than two categories.
+- **Quantile**: For quantile regression using the pinball loss.
 
 These distribution classes make MambularLSS versatile in modeling various data types and distributions.
 
