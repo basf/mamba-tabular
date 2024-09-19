@@ -22,6 +22,7 @@ from ..utils.distributions import (
     NormalDistribution,
     PoissonDistribution,
     StudentTDistribution,
+    Quantile,
 )
 
 
