@@ -5,24 +5,24 @@ import numpy as np
 import pandas as pd
 import properscoring as ps
 import torch
-from lightning.pytorch.callbacks import (EarlyStopping, ModelCheckpoint,
-                                         ModelSummary)
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.base import BaseEstimator
 from sklearn.metrics import accuracy_score, mean_squared_error
 
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
-from ..utils.distributional_metrics import (beta_brier_score, dirichlet_error,
-                                            gamma_deviance, inverse_gamma_loss,
-                                            negative_binomial_deviance,
-                                            poisson_deviance, student_t_loss)
-from ..utils.distributions import (BetaDistribution, CategoricalDistribution,
-                                   DirichletDistribution, GammaDistribution,
-                                   InverseGammaDistribution,
-                                   NegativeBinomialDistribution,
-                                   NormalDistribution, PoissonDistribution,
-                                   StudentTDistribution)
+from ..utils.distributions import (
+    BetaDistribution,
+    CategoricalDistribution,
+    DirichletDistribution,
+    GammaDistribution,
+    InverseGammaDistribution,
+    NegativeBinomialDistribution,
+    NormalDistribution,
+    PoissonDistribution,
+    StudentTDistribution,
+)
 
 
 class SklearnBaseLSS(BaseEstimator):
@@ -201,11 +201,9 @@ class SklearnBaseLSS(BaseEstimator):
             X, y, X_val, y_val, val_size=val_size, random_state=random_state
         )
 
-        num_classes = len(np.unique(y))
-
         self.task_model = TaskModel(
             model_class=self.base_model,
-            num_classes=num_classes,
+            num_classes=self.family.param_count,
             config=self.config,
             cat_feature_info=self.data_module.cat_feature_info,
             num_feature_info=self.data_module.num_feature_info,
@@ -338,6 +336,7 @@ class SklearnBaseLSS(BaseEstimator):
             "negativebinom": NegativeBinomialDistribution,
             "inversegamma": InverseGammaDistribution,
             "categorical": CategoricalDistribution,
+            "quantile": Quantile,
         }
 
         if distributional_kwargs is None:
