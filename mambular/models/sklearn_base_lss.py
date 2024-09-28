@@ -32,6 +32,13 @@ from ..utils.distributions import (
     StudentTDistribution,
 )
 from lightning.pytorch.callbacks import ModelSummary
+from skopt import gp_minimize
+import warnings
+from ..utils.config_mapper import (
+    get_search_space,
+    activation_mapper,
+    round_to_nearest_16,
+)
 
 
 class SklearnBaseLSS(BaseEstimator):
@@ -203,7 +210,7 @@ class SklearnBaseLSS(BaseEstimator):
             val_size=val_size,
             random_state=random_state,
             regression=False,
-            **dataloader_kwargs
+            **dataloader_kwargs,
         )
 
         self.data_module.preprocess_data(
@@ -282,7 +289,7 @@ class SklearnBaseLSS(BaseEstimator):
         checkpoint_path="model_checkpoints",
         distributional_kwargs=None,
         dataloader_kwargs={},
-        **trainer_kwargs
+        **trainer_kwargs,
     ):
         """
         Trains the regression model using the provided training data. Optionally, a separate validation set can be used.
@@ -376,7 +383,7 @@ class SklearnBaseLSS(BaseEstimator):
             val_size=val_size,
             random_state=random_state,
             regression=True,
-            **dataloader_kwargs
+            **dataloader_kwargs,
         )
 
         self.data_module.preprocess_data(
@@ -417,7 +424,7 @@ class SklearnBaseLSS(BaseEstimator):
                 checkpoint_callback,
                 ModelSummary(max_depth=2),
             ],
-            **trainer_kwargs
+            **trainer_kwargs,
         )
         self.trainer.fit(self.task_model, self.data_module)
 
@@ -585,3 +592,171 @@ class SklearnBaseLSS(BaseEstimator):
         predictions = self.predict(X)
         score = self.task_model.family.evaluate_nll(y, predictions)
         return score
+
+    def optimize_hparams(
+        self,
+        X,
+        y,
+        X_val=None,
+        y_val=None,
+        time=100,
+        max_epochs=200,
+        prune_by_epoch=True,
+        prune_epoch=5,
+        **optimize_kwargs,
+    ):
+        """
+        Optimizes hyperparameters using Bayesian optimization with optional pruning.
+
+        Parameters
+        ----------
+        X : array-like
+            Training data.
+        y : array-like
+            Training labels.
+        X_val, y_val : array-like, optional
+            Validation data and labels.
+        time : int
+            The number of optimization trials to run.
+        max_epochs : int
+            Maximum number of epochs for training.
+        prune_by_epoch : bool
+            Whether to prune based on a specific epoch (True) or the best validation loss (False).
+        prune_epoch : int
+            The specific epoch to prune by when prune_by_epoch is True.
+        **optimize_kwargs : dict
+            Additional keyword arguments passed to the fit method.
+
+        Returns
+        -------
+        best_hparams : list
+            Best hyperparameters found during optimization.
+        """
+
+        # Define the hyperparameter search space from the model config
+        param_names, param_space = get_search_space(self.config)
+
+        # Initial model fitting to get the baseline validation loss
+        self.fit(X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs)
+        best_val_loss = float("inf")
+
+        if X_val is not None and y_val is not None:
+            val_loss = self.score(
+                X_val,
+                y_val,
+            )
+        else:
+            val_loss = self.trainer.validate(self.task_model, self.data_module)[0][
+                "val_loss"
+            ]
+
+        best_val_loss = val_loss
+        best_epoch_val_loss = self.task_model.epoch_val_loss_at(prune_epoch)
+
+        def _objective(hyperparams):
+            nonlocal best_val_loss, best_epoch_val_loss  # Access across trials
+
+            head_layer_sizes = []
+
+            for key, param_value in zip(param_names, hyperparams):
+                if key == "head_layer_size_length":
+                    head_layer_size_length = param_value
+                elif key.startswith("head_layer_size_"):
+                    head_layer_sizes.append(round_to_nearest_16(param_value))
+                else:
+                    field_type = self.config.__dataclass_fields__[key].type
+
+                    # Check if the field is a callable (e.g., activation function)
+                    if field_type == callable and isinstance(param_value, str):
+                        if param_value in activation_mapper:
+                            setattr(self.config, key, activation_mapper[param_value])
+                        else:
+                            raise ValueError(
+                                f"Unknown activation function: {param_value}"
+                            )
+                    else:
+                        setattr(self.config, key, param_value)
+
+            # Truncate or use part of head_layer_sizes based on the optimized length
+            if head_layer_size_length is not None:
+                setattr(
+                    self.config,
+                    "head_layer_sizes",
+                    head_layer_sizes[:head_layer_size_length],
+                )
+
+                print(head_layer_sizes)
+
+            # Build the model with updated hyperparameters
+            self.build_model(
+                X, y, X_val=X_val, y_val=y_val, lr=self.config.lr, **optimize_kwargs
+            )
+
+            # Dynamically set the early pruning threshold
+            if prune_by_epoch:
+                early_pruning_threshold = (
+                    best_epoch_val_loss * 1.5
+                )  # Prune based on specific epoch loss
+            else:
+                early_pruning_threshold = (
+                    best_val_loss * 1.5
+                )  # Prune based on the best overall validation loss
+
+            # Initialize the model with pruning
+            self.task_model.early_pruning_threshold = early_pruning_threshold
+            self.task_model.pruning_epoch = prune_epoch
+
+            # Fit the model (limit epochs for faster optimization)
+            self.fit(
+                X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs, rebuild=False
+            )
+
+            # Retrieve the current validation loss
+            if X_val is not None and y_val is not None:
+                val_loss = self.score(X_val, y_val)
+            else:
+                val_loss = self.trainer.validate(self.task_model, self.data_module)[0][
+                    "val_loss"
+                ]
+
+            # Retrieve validation loss at the specified epoch (e.g., epoch 5)
+            epoch_val_loss = self.task_model.epoch_val_loss_at(prune_epoch)
+
+            # Update the best validation loss at the specified epoch
+            if prune_by_epoch and epoch_val_loss < best_epoch_val_loss:
+                best_epoch_val_loss = epoch_val_loss
+
+            # Update the best overall validation loss
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+
+            return val_loss
+
+        # Perform Bayesian optimization using scikit-optimize
+        result = gp_minimize(_objective, param_space, n_calls=time, random_state=42)
+
+        # Update the model with the best-found hyperparameters
+        best_hparams = result.x
+        if "head_layer_sizes" in self.config.__dataclass_fields__:
+            head_layer_sizes = []
+
+        # Iterate over the best hyperparameters found by optimization
+        for key, param_value in zip(param_names, best_hparams):
+            if key.startswith("head_layer_size_"):
+                # These are the individual head layer sizes
+                head_layer_sizes.append(round_to_nearest_16(param_value))
+            else:
+                # For all other config values, update normally
+                field_type = self.config.__dataclass_fields__[key].type
+                if field_type == callable and isinstance(param_value, str):
+                    setattr(self.config, key, activation_mapper[param_value])
+                else:
+                    setattr(self.config, key, param_value)
+
+        # After the loop, set head_layer_sizes in the config
+        if head_layer_sizes:
+            setattr(self.config, "head_layer_sizes", head_layer_sizes)
+
+        print("Best hyperparameters found:", best_hparams)
+
+        return best_hparams
