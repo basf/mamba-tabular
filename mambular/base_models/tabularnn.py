@@ -3,9 +3,15 @@ import torch.nn as nn
 
 from ..arch_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mlp_utils import MLP
-from ..arch_utils.normalization_layers import (BatchNorm, GroupNorm,
-                                               InstanceNorm, LayerNorm,
-                                               LearnableLayerScaling, RMSNorm)
+from ..arch_utils.normalization_layers import (
+    BatchNorm,
+    GroupNorm,
+    InstanceNorm,
+    LayerNorm,
+    LearnableLayerScaling,
+    RMSNorm,
+)
+from ..arch_utils.rnn_utils import ConvRNN
 from ..configs.tabularnn_config import DefaultTabulaRNNConfig
 from .basemodel import BaseModel
 
@@ -61,23 +67,21 @@ class TabulaRNN(BaseModel):
         else:
             self.norm_f = None
 
-        rnn_layer = {"RNN": nn.RNN, "LSTM": nn.LSTM,
-                     "GRU": nn.GRU}[config.model_type]
-        self.rnn = rnn_layer(
+        self.rnn = ConvRNN(
+            model_type=self.hparams.get("model_type", config.model_type),
             input_size=self.hparams.get("d_model", config.d_model),
             hidden_size=self.hparams.get(
                 "dim_feedforward", config.dim_feedforward),
             num_layers=self.hparams.get("n_layers", config.n_layers),
             bidirectional=self.hparams.get(
                 "bidirectional", config.bidirectional),
-            batch_first=True,
-            dropout=self.hparams.get("rnn_dropout", config.rnn_dropout),
+            rnn_dropout=self.hparams.get("rnn_dropout", config.rnn_dropout),
             bias=self.hparams.get("bias", config.bias),
-            nonlinearity=(
-                self.hparams.get("rnn_activation", config.rnn_activation)
-                if config.model_type == "RNN"
-                else None
-            ),
+            conv_bias=self.hparams.get("conv_bias", config.conv_bias),
+            rnn_activation=self.hparams.get(
+                "rnn_activation", config.rnn_activation),
+            d_conv=self.hparams.get("d_conv", config.d_conv),
+            residuals=self.hparams.get("residuals", config.residuals),
         )
 
         self.embedding_layer = EmbeddingLayer(
