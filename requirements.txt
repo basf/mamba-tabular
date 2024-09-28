@@ -6,3 +6,4 @@ torch
 torchmetrics
 setuptools
 properscoring
+scikit-optimize

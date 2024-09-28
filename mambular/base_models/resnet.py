@@ -45,6 +45,7 @@ class ResNet(BaseModel):
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
         self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
+        self.layer_sizes = self.hparams.get("layer_sizes", self.layer_sizes)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
         self.activation = config.activation
@@ -78,15 +79,15 @@ class ResNet(BaseModel):
         else:
             self.norm_f = None
 
-        self.initial_layer = nn.Linear(input_dim, config.layer_sizes[0])
+        self.initial_layer = nn.Linear(input_dim, self.layer_sizes[0])
 
         self.blocks = nn.ModuleList()
         for i in range(config.num_blocks):
-            input_dim = config.layer_sizes[i]
+            input_dim = self.layer_sizes[i]
             output_dim = (
-                config.layer_sizes[i + 1]
-                if i + 1 < len(config.layer_sizes)
-                else config.layer_sizes[-1]
+                self.layer_sizes[i + 1]
+                if i + 1 < len(self.layer_sizes)
+                else self.layer_sizes[-1]
             )
             block = ResidualBlock(
                 input_dim,
@@ -97,7 +98,7 @@ class ResNet(BaseModel):
             )
             self.blocks.append(block)
 
-        self.output_layer = nn.Linear(config.layer_sizes[-1], num_classes)
+        self.output_layer = nn.Linear(self.layer_sizes[-1], num_classes)
 
         if self.use_embeddings:
             self.embedding_layer = EmbeddingLayer(

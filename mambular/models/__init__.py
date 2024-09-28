@@ -17,6 +17,11 @@ from .tabtransformer import (
 
 from .mambatab import MambaTabClassifier, MambaTabRegressor, MambaTabLSS
 from .tabularnn import TabulaRNNClassifier, TabulaRNNRegressor, TabulaRNNLSS
+from .mambattention import (
+    MambAttentionClassifier,
+    MambAttentionRegressor,
+    MambAttentionLSS,
+)
 
 
 __all__ = [
@@ -44,4 +49,7 @@ __all__ = [
     "TabulaRNNClassifier",
     "TabulaRNNRegressor",
     "TabulaRNNLSS",
+    "MambAttentionClassifier",
+    "MambAttentionRegressor",
+    "MambAttentionLSS",
 ]
