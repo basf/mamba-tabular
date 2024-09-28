@@ -78,7 +78,7 @@ class SklearnBaseLSS(BaseEstimator):
                 UserWarning,
             )
 
-        self.optimizer_type = kwargs.get("optimizer_type", "adam")
+        self.optimizer_type = kwargs.get("optimizer_type", "Adam")
 
         self.optimizer_kwargs = {
             k: v
