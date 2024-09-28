@@ -219,7 +219,7 @@ class Mambular(BaseModel):
             x, _ = torch.max(x, dim=1)
         elif self.pooling_method == "sum":
             x = torch.sum(x, dim=1)
-        elif self.pooling_method == "cls_token":
+        elif self.pooling_method == "cls":
             x = x[:, -1]
         elif self.pooling_method == "last":
             x = x[:, -1]
