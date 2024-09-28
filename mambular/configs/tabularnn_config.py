@@ -81,3 +81,6 @@ class DefaultTabulaRNNConfig:
     numerical_embedding: str = "ple"
     bidirectional: bool = False
     cat_encoding: str = "int"
+    d_conv: int = 4
+    conv_bias: bool = True
+    residuals: bool = False
