@@ -47,7 +47,9 @@ class SklearnBaseLSS(BaseEstimator):
         ]
 
         self.config_kwargs = {
-            k: v for k, v in kwargs.items() if k not in preprocessor_arg_names
+            k: v
+            for k, v in kwargs.items()
+            if k not in self.preprocessor_arg_names and not k.startswith("optimizer")
         }
         self.config = config(**self.config_kwargs)
 
@@ -57,6 +59,8 @@ class SklearnBaseLSS(BaseEstimator):
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
         self.task_model = None
+        self.base_model = model
+        self.built = False
 
         # Raise a warning if task is set to 'classification'
         if preprocessor_kwargs.get("task") == "classification":
@@ -65,7 +69,15 @@ class SklearnBaseLSS(BaseEstimator):
                 UserWarning,
             )
 
-        self.base_model = model
+        self.optimizer_type = kwargs.get("optimizer_type", "adam")
+
+        self.optimizer_kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if k
+            not in ["lr", "weight_decay", "patience", "lr_patience", "optimizer_type"]
+            and k.startswith("optimizer_")
+        }
 
     def get_params(self, deep=True):
         """
@@ -218,6 +230,8 @@ class SklearnBaseLSS(BaseEstimator):
             lr_patience=lr_patience,
             lr_factor=factor,
             weight_decay=weight_decay,
+            optimizer_type=self.optimizer_type,
+            optimizer_args=self.optimizer_kwargs,
         )
 
         self.built = True
@@ -392,6 +406,8 @@ class SklearnBaseLSS(BaseEstimator):
             lr_factor=factor,
             weight_decay=weight_decay,
             lss=True,
+            optimizer_type=self.optimizer_type,
+            optimizer_args=self.optimizer_kwargs,
         )
 
         early_stop_callback = EarlyStopping(
