@@ -40,9 +40,12 @@ class TaskModel(pl.LightningModule):
         loss_fct: callable = None,
         early_pruning_threshold=None,
         pruning_epoch=5,
+        optimizer_type: str = "Adam",
+        optimizer_args: dict = None,
         **kwargs,
     ):
         super().__init__()
+        self.optimizer_type = optimizer_type
         self.num_classes = num_classes
         self.lss = lss
         self.family = family
@@ -50,6 +53,12 @@ class TaskModel(pl.LightningModule):
         self.early_pruning_threshold = early_pruning_threshold
         self.pruning_epoch = pruning_epoch
         self.val_losses = []
+
+        self.optimizer_params = {
+            k.replace("optimizer_", ""): v
+            for k, v in optimizer_args.items()
+            if k.startswith("optimizer_")
+        }
 
         if lss:
             pass
@@ -347,17 +356,20 @@ class TaskModel(pl.LightningModule):
     def configure_optimizers(self):
         """
         Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
-
-        Returns
-        -------
-        dict
-            A dictionary containing the optimizer and lr_scheduler configurations.
+        The optimizer type can be chosen by the user (Adam, SGD, etc.).
         """
-        optimizer = torch.optim.Adam(
+        # Dynamically choose the optimizer based on the passed optimizer_type
+        optimizer_class = getattr(torch.optim, self.optimizer_type)
+
+        # Initialize the optimizer with the chosen class and parameters
+        optimizer = optimizer_class(
             self.base_model.parameters(),
             lr=self.lr,
             weight_decay=self.weight_decay,
+            **self.optimizer_params,  # Pass any additional optimizer-specific parameters
         )
+
+        # Define learning rate scheduler
         scheduler = {
             "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer,
