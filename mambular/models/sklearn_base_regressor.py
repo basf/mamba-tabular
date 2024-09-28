@@ -36,7 +36,9 @@ class SklearnBaseRegressor(BaseEstimator):
         ]
 
         self.config_kwargs = {
-            k: v for k, v in kwargs.items() if k not in self.preprocessor_arg_names
+            k: v
+            for k, v in kwargs.items()
+            if k not in self.preprocessor_arg_names and not k.startswith("optimizer")
         }
         self.config = config(**self.config_kwargs)
 
@@ -55,6 +57,16 @@ class SklearnBaseRegressor(BaseEstimator):
                 "The task is set to 'classification'. The Regressor is designed for regression tasks.",
                 UserWarning,
             )
+
+        self.optimizer_type = kwargs.get("optimizer_type", "adam")
+
+        self.optimizer_kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if k
+            not in ["lr", "weight_decay", "patience", "lr_patience", "optimizer_type"]
+            and k.startswith("optimizer_")
+        }
 
     def get_params(self, deep=True):
         """
@@ -208,6 +220,8 @@ class SklearnBaseRegressor(BaseEstimator):
             lr_patience=lr_patience,
             lr_factor=factor,
             weight_decay=weight_decay,
+            optimizer_type=self.optimizer_type,
+            optimizer_args=self.optimizer_kwargs,
         )
 
         self.built = True
@@ -354,6 +368,8 @@ class SklearnBaseRegressor(BaseEstimator):
                 lr_patience=lr_patience,
                 lr_factor=factor,
                 weight_decay=weight_decay,
+                optimizer_type=self.optimizer_type,
+                optimizer_args=self.optimizer_kwargs,
             )
 
         else:
