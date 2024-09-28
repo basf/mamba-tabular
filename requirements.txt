@@ -9,3 +9,4 @@ properscoring
 rotary-embedding-torch
 einops
 tqdm
+scikit-optimize
