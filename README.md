@@ -58,7 +58,6 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 | `ResNet`         | An adaptation of the ResNet architecture for tabular data applications.                                                                             |
 | `TabTransformer` | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities. |
 | `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.    |
-| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks                                                                     |
 
 
 All models are available for `regression`, `classification` and distributional regression, denoted by `LSS`.
@@ -131,7 +130,7 @@ MambularLSS allows you to model the full distribution of a response variable, no
 - **normal**: For continuous data with a symmetric distribution.
 - **poisson**: For count data within a fixed interval.
 - **gamma**: For skewed continuous data, often used for waiting times.
-- **beta**: For data bounded between 0 and 1, like proportions.
+- **beta**: For data bound between 0 and 1, like proportions.
 - **dirichlet**: For multivariate data with correlated components.
 - **studentt**: For data with heavier tails, useful with small samples.
 - **negativebinom**: For over-dispersed count data.
