@@ -19,19 +19,16 @@
     <h1>Mambular: Tabular Deep Learning (with Mamba)</h1>
 </div>
 
-Mambular is a Python library for tabular deep learning. It includes models that leverage the Mamba (State Space Model) architecture, as well as other popular models like TabTransformer, FTTransformer, and tabular ResNets. Check out our paper `Mambular: A Sequential Model for Tabular Deep Learning`, available [here](https://arxiv.org/abs/2408.06291).
+Mambular is a Python library for tabular deep learning. It includes models that leverage the Mamba (State Space Model) architecture, as well as other popular models like TabTransformer, FTTransformer, and tabular ResNets. 
 
 <h3> Table of Contents </h3>
 
 - [🏃 Quickstart](#-quickstart)
 - [📖 Introduction](#-introduction)
 - [🤖 Models](#-models)
-- [🏆 Results](#-results)
-- [📚 Documentation](#-documentation)
 - [🛠️ Installation](#️-installation)
 - [🚀 Usage](#-usage)
 - [💻 Implement Your Own Model](#-implement-your-own-model)
-- [🏷️ Citation](#️-citation)
 - [License](#license)
 
 
@@ -67,66 +64,6 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 All models are available for `regression`, `classification` and distributional regression, denoted by `LSS`.
 Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `MambularLSS`
 
-
-# 🏆 Results
-Detailed results for the available methods can be found [here](https://arxiv.org/abs/2408.06291).
-Note, that these are achieved results with default hyperparameter and for our splits. Performing hyperparameter optimization could improve the performance of all models.
-
-The average rank table over all models and all datasets is given here:
-
-<div align="center">
-
-<table>
-  <tr>
-    <th style="text-align:center;">Model</th>
-    <th style="text-align:center;">Avg. Rank</th>
-  </tr>
-  <tr>
-    <td style="text-align:center;"><strong>Mambular</strong></td>
-    <td style="text-align:center;"><strong>2.083</strong> <sub>±1.037</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">FT-Transformer</td>
-    <td style="text-align:center;">2.417 <sub>±1.256</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">XGBoost</td>
-    <td style="text-align:center;">3.167 <sub>±2.577</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab*</td>
-    <td style="text-align:center;">4.333 <sub>±1.374</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">ResNet</td>
-    <td style="text-align:center;">4.750 <sub>±1.639</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">TabTransformer</td>
-    <td style="text-align:center;">6.222 <sub>±1.618</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MLP</td>
-    <td style="text-align:center;">6.500 <sub>±1.500</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab</td>
-    <td style="text-align:center;">6.583 <sub>±1.801</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab<sup>T</sup></td>
-    <td style="text-align:center;">7.917 <sub>±1.187</sub></td>
-  </tr>
-</table>
-
-</div>
-
-
-
-
-# 📚 Documentation
-
-You can find the Mamba-Tabular API documentation [here](https://mambular.readthedocs.io/en/latest/).
 
 # 🛠️ Installation
 
@@ -311,17 +248,7 @@ Here's how you can implement a custom model with Mambular:
    regressor.fit(X_train, y_train, max_epochs=50)
    ```
 
-# 🏷️ Citation
 
-If you find this project useful in your research, please consider cite:
-```BibTeX
-@article{thielmann2024mambular,
-  title={Mambular: A Sequential Model for Tabular Deep Learning},
-  author={Thielmann, Anton Frederik and Kumar, Manish and Weisser, Christoph and Reuter, Arik and S{\"a}fken, Benjamin and Samiee, Soheila},
-  journal={arXiv preprint arXiv:2408.06291},
-  year={2024}
-}
-```
 
 # License
 
