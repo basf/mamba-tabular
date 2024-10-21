@@ -1,18 +1,12 @@
 import torch
 import torch.nn as nn
-from ..arch_utils.mamba_arch import Mamba
+from ..arch_utils.mamba_utils.mamba_arch import Mamba
 from ..arch_utils.mlp_utils import MLP
-from ..arch_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
 from ..configs.mambular_config import DefaultMambularConfig
 from .basemodel import BaseModel
 from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.get_norm_fn import get_normalization_layer
+from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 
 
 class Mambular(BaseModel):
@@ -88,60 +82,11 @@ class Mambular(BaseModel):
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
-        self.mamba = Mamba(
-            d_model=self.hparams.get("d_model", config.d_model),
-            n_layers=self.hparams.get("n_layers", config.n_layers),
-            expand_factor=self.hparams.get("expand_factor", config.expand_factor),
-            bias=self.hparams.get("bias", config.bias),
-            d_conv=self.hparams.get("d_conv", config.d_conv),
-            conv_bias=self.hparams.get("conv_bias", config.conv_bias),
-            dropout=self.hparams.get("dropout", config.dropout),
-            dt_rank=self.hparams.get("dt_rank", config.dt_rank),
-            d_state=self.hparams.get("d_state", config.d_state),
-            dt_scale=self.hparams.get("dt_scale", config.dt_scale),
-            dt_init=self.hparams.get("dt_init", config.dt_init),
-            dt_max=self.hparams.get("dt_max", config.dt_max),
-            dt_min=self.hparams.get("dt_min", config.dt_min),
-            dt_init_floor=self.hparams.get("dt_init_floor", config.dt_init_floor),
-            norm=globals()[self.hparams.get("norm", config.norm)],
-            activation=self.hparams.get("activation", config.activation),
-            bidirectional=self.hparams.get("bidiretional", config.bidirectional),
-            use_learnable_interaction=self.hparams.get(
-                "use_learnable_interactions", config.use_learnable_interaction
-            ),
-            AD_weight_decay=self.hparams.get("AB_weight_decay", config.AD_weight_decay),
-            BC_layer_norm=self.hparams.get("AB_layer_norm", config.BC_layer_norm),
-            layer_norm_eps=self.hparams.get("layer_norm_eps", config.layer_norm_eps),
-        )
-        norm_layer = self.hparams.get("norm", config.norm)
-        if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm(
-                self.hparams.get("d_model", config.d_model), eps=config.layer_norm_eps
-            )
-        elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(
-                self.hparams.get("d_model", config.d_model), eps=config.layer_norm_eps
-            )
-        elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(
-                self.hparams.get("d_model", config.d_model), eps=config.layer_norm_eps
-            )
-        elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(
-                self.hparams.get("d_model", config.d_model), eps=config.layer_norm_eps
-            )
-        elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(
-                1,
-                self.hparams.get("d_model", config.d_model),
-                eps=config.layer_norm_eps,
-            )
-        elif norm_layer == "LearnableLayerScaling":
-            self.norm_f = LearnableLayerScaling(
-                self.hparams.get("d_model", config.d_model)
-            )
+        if config.use_mamba_ssm:
+            self.mamba = MambaOriginal(config)
         else:
-            raise ValueError(f"Unsupported normalization layer: {norm_layer}")
+            self.mamba = Mamba(config)
+        self.norm_f = get_normalization_layer(config)
 
         self.embedding_layer = EmbeddingLayer(
             num_feature_info=num_feature_info,

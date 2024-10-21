@@ -81,6 +81,8 @@ class DefaultMambAttentionConfig:
         whether to apply layer normalization to B-C matrices.
     cat_encoding : str, default="int"
         whether to use integer encoding or one-hot encoding for cat features.
+    use_pscan : bool, default=False
+        whether to use pscan for the ssm
     """
 
     lr: float = 1e-04
@@ -123,3 +125,4 @@ class DefaultMambAttentionConfig:
     AD_weight_decay: bool = True
     BC_layer_norm: bool = False
     cat_encoding: str = "int"
+    use_pscan: bool = False
