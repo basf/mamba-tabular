@@ -9,7 +9,7 @@ from ..normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
-
+from ..get_norm_fn import get_normalization_layer
 
 try:
     from mamba_ssm.ops.triton.layer_norm import RMSNorm, layer_norm_fn, rms_norm_fn
@@ -163,6 +163,7 @@ class MambaOriginal(nn.Module):
                     d_model=config.d_model,
                     d_state=config.d_state,
                     d_conv=config.d_conv,
+                    norm=get_normalization_layer(config),
                     expand_factor=config.expand_factor,
                     dt_rank=config.dt_rank,
                     dt_min=config.dt_min,
