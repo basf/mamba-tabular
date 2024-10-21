@@ -1,8 +1,6 @@
 import math
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 from ..normalization_layers import (
     RMSNorm,
     LayerNorm,
@@ -11,6 +9,7 @@ from ..normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
+
 
 try:
     from mamba_ssm.ops.triton.layer_norm import RMSNorm, layer_norm_fn, rms_norm_fn
@@ -57,6 +56,80 @@ def _init_weights(
                     p /= math.sqrt(n_residuals_per_layer * n_layer)
 
 
+class ResidualBlock(nn.Module):
+    """Residual block composed of a MambaBlock and a normalization layer.
+
+    Attributes:
+        layers (MambaBlock): MambaBlock layers.
+        norm (RMSNorm): Normalization layer.
+    """
+
+    def __init__(
+        self,
+        d_model=32,
+        expand_factor=2,
+        bias=False,
+        d_conv=16,
+        conv_bias=True,
+        dt_rank="auto",
+        d_state=32,
+        dt_scale=1.0,
+        dt_init="random",
+        dt_max=0.1,
+        dt_min=1e-03,
+        dt_init_floor=1e-04,
+        norm=RMSNorm,
+        layer_idx=0,
+    ):
+        super().__init__()
+
+        VALID_NORMALIZATION_LAYERS = {
+            "RMSNorm": RMSNorm,
+            "LayerNorm": LayerNorm,
+            "LearnableLayerScaling": LearnableLayerScaling,
+            "BatchNorm": BatchNorm,
+            "InstanceNorm": InstanceNorm,
+            "GroupNorm": GroupNorm,
+        }
+
+        # Check if the provided normalization layer is valid
+        if isinstance(norm, type) and norm.__name__ not in VALID_NORMALIZATION_LAYERS:
+            raise ValueError(
+                f"Invalid normalization layer: {norm.__name__}. "
+                f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
+            )
+        elif isinstance(norm, str) and norm not in VALID_NORMALIZATION_LAYERS:
+            raise ValueError(
+                f"Invalid normalization layer: {norm}. "
+                f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
+            )
+
+        if dt_rank == "auto":
+            dt_rank = math.ceil(d_model / 16)
+
+        self.layers = Mamba(
+            d_model=d_model,
+            d_state=d_state,
+            d_conv=d_conv,
+            expand=expand_factor,
+            dt_rank=dt_rank,
+            dt_min=dt_min,
+            dt_max=dt_max,
+            dt_init=dt_init,
+            dt_scale=dt_scale,
+            dt_init_floor=dt_init_floor,
+            conv_bias=conv_bias,
+            bias=bias,
+            use_fast_path=True,  # Fused kernel options
+            layer_idx=layer_idx,
+        )
+        self.norm = norm
+
+    def forward(self, x):
+        output = self.layers(self.norm(x)) + x
+        return output
+
+
 class MambaOriginal(nn.Module):
     def __init__(self, config):
         super().__init__()
@@ -85,7 +158,7 @@ class MambaOriginal(nn.Module):
         # Initialize Mamba layers based on the configuration
         self.layers = nn.ModuleList(
             [
-                Mamba(
+                ResidualBlock(
                     d_model=config.d_model,
                     d_state=config.d_state,
                     d_conv=config.d_conv,
@@ -123,29 +196,7 @@ class MambaOriginal(nn.Module):
         }
 
     def forward(self, x):
-        residual = None
-
         for layer in self.layers:
-            hidden_states, residual = layer(
-                x,
-                residual,
-            )
+            x = layer(x)
 
-        if not self.fused_add_norm:
-            residual = (
-                (hidden_states + residual) if residual is not None else hidden_states
-            )
-            hidden_states = self.norm_f(residual.to(dtype=self.norm_f.weight.dtype))
-        else:
-            hidden_states = layer_norm_fn(
-                hidden_states,
-                self.norm_f.weight,
-                self.norm_f.bias,
-                eps=self.norm_f.eps,
-                residual=residual,
-                prenorm=False,
-                residual_in_fp32=self.residual_in_fp32,
-                is_rms_norm=isinstance(self.norm_f, RMSNorm),
-            )
-
-        return hidden_states
+        return x
