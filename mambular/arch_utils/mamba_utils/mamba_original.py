@@ -122,13 +122,12 @@ class MambaOriginal(nn.Module):
             for i, layer in enumerate(self.layers)
         }
 
-    def forward(self, input_ids, inference_params=None, **mixer_kwargs):
-        hidden_states = self.embedding(input_ids)
+    def forward(self, x, inference_params=None, **mixer_kwargs):
         residual = None
 
         for layer in self.layers:
             hidden_states, residual = layer(
-                hidden_states,
+                x,
                 residual,
                 inference_params=inference_params,
                 **mixer_kwargs,
