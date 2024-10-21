@@ -19,6 +19,8 @@ except ImportError:
 
 try:
     from mamba_ssm import Mamba
+
+    print("successfully imported Mamba from mamba-ssm")
 except ImportError:
     Mamba = None
 
@@ -108,7 +110,7 @@ class MambaOriginal(nn.Module):
             lambda m: _init_weights(
                 m,
                 n_layer=config.n_layers,
-                n_residuals_per_layer=1 if config.d_intermediate == 0 else 2,
+                n_residuals_per_layer=1 if config.d_state == 0 else 2,
             )
         )
 
