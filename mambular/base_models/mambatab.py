@@ -69,6 +69,7 @@ class MambaTab(BaseModel):
             n_output_units=num_classes,
         )
 
+<<<<<<< HEAD
         self.mamba = Mamba(
             d_model=self.hparams.get("d_model", config.d_model),
             n_layers=self.hparams.get("n_layers", config.n_layers),
@@ -90,6 +91,9 @@ class MambaTab(BaseModel):
             bidirectional=False,
             use_learnable_interaction=False,
         )
+=======
+        self.mamba = Mamba(config)
+>>>>>>> 85a468b (fix import and config)
 
     def forward(self, num_features, cat_features):
         x = num_features + cat_features

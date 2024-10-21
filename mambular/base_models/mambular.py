@@ -1,8 +1,11 @@
 import torch
+<<<<<<< HEAD
 import torch.nn as nn
 
 from ..arch_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.get_norm_fn import get_normalization_layer
+=======
+>>>>>>> 85a468b (fix import and config)
 from ..arch_utils.mamba_utils.mamba_arch import Mamba
 from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 from ..arch_utils.mlp_utils import MLP
