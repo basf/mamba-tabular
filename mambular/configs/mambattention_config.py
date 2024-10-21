@@ -126,3 +126,4 @@ class DefaultMambAttentionConfig:
     BC_layer_norm: bool = False
     cat_encoding: str = "int"
     use_pscan: bool = False
+    n_attention_layers: int = 1
