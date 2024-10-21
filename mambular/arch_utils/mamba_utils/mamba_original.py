@@ -122,15 +122,13 @@ class MambaOriginal(nn.Module):
             for i, layer in enumerate(self.layers)
         }
 
-    def forward(self, x, inference_params=None, **mixer_kwargs):
+    def forward(self, x):
         residual = None
 
         for layer in self.layers:
             hidden_states, residual = layer(
                 x,
                 residual,
-                inference_params=inference_params,
-                **mixer_kwargs,
             )
 
         if not self.fused_add_norm:
