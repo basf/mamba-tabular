@@ -4,8 +4,23 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .normalization_layers import (BatchNorm, GroupNorm, InstanceNorm,
-                                   LayerNorm, LearnableLayerScaling, RMSNorm)
+from ..get_norm_fn import get_normalization_layer
+from ..normalization_layers import (
+    BatchNorm,
+    GroupNorm,
+    InstanceNorm,
+    LayerNorm,
+    LearnableLayerScaling,
+    RMSNorm,
+)
+from .normalization_layers import (
+    BatchNorm,
+    GroupNorm,
+    InstanceNorm,
+    LayerNorm,
+    LearnableLayerScaling,
+    RMSNorm,
+)
 
 # Heavily inspired and mostly taken from https://github.com/alxndrTL/mamba.py
 
@@ -20,55 +35,36 @@ class Mamba(nn.Module):
 
     def __init__(
         self,
-        d_model=32,
-        n_layers=8,
-        expand_factor=2,
-        bias=False,
-        d_conv=8,
-        conv_bias=True,
-        dropout=0.01,
-        dt_rank="auto",
-        d_state=16,
-        dt_scale=1.0,
-        dt_init="random",
-        dt_max=0.1,
-        dt_min=1e-03,
-        dt_init_floor=1e-04,
-        norm=RMSNorm,
-        activation=F.silu,
-        bidirectional=False,
-        use_learnable_interaction=False,
-        layer_norm_eps=1e-05,
-        AD_weight_decay=False,
-        BC_layer_norm=True,
+        config,
     ):
         super().__init__()
 
         self.layers = nn.ModuleList(
             [
                 ResidualBlock(
-                    d_model,
-                    expand_factor,
-                    bias,
-                    d_conv,
-                    conv_bias,
-                    dropout,
-                    dt_rank,
-                    d_state,
-                    dt_scale,
-                    dt_init,
-                    dt_max,
-                    dt_min,
-                    dt_init_floor,
-                    norm,
-                    activation,
-                    bidirectional,
-                    use_learnable_interaction,
-                    layer_norm_eps,
-                    AD_weight_decay,
-                    BC_layer_norm,
+                    d_model=config.d_model,
+                    expand_factor=config.expand_factor,
+                    bias=config.bias,
+                    d_conv=config.d_conv,
+                    conv_bias=config.conv_bias,
+                    dropout=config.dropout,
+                    dt_rank=config.dt_rank,
+                    d_state=config.d_state,
+                    dt_scale=config.dt_scale,
+                    dt_init=config.dt_init,
+                    dt_max=config.dt_max,
+                    dt_min=config.dt_min,
+                    dt_init_floor=config.dt_init_floor,
+                    norm=get_normalization_layer(config),
+                    activation=config.activation,
+                    bidirectional=config.bidirectional,
+                    use_learnable_interaction=config.use_learnable_interaction,
+                    layer_norm_eps=config.layer_norm_eps,
+                    AD_weight_decay=config.AD_weight_decay,
+                    BC_layer_norm=config.BC_layer_norm,
+                    use_pscan=config.use_pscan,
                 )
-                for _ in range(n_layers)
+                for _ in range(config.n_layers)
             ]
         )
 
@@ -109,6 +105,7 @@ class ResidualBlock(nn.Module):
         layer_norm_eps=1e-05,
         AD_weight_decay=False,
         BC_layer_norm=False,
+        use_pscan=False,
     ):
         super().__init__()
 
@@ -127,7 +124,7 @@ class ResidualBlock(nn.Module):
                 f"Invalid normalization layer: {norm.__name__}. "
                 f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
             )
-        elif isinstance(norm, str) and norm not in self.VALID_NORMALIZATION_LAYERS:
+        elif isinstance(norm, str) and norm not in VALID_NORMALIZATION_LAYERS:
             raise ValueError(
                 f"Invalid normalization layer: {norm}. "
                 f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
@@ -156,8 +153,9 @@ class ResidualBlock(nn.Module):
             layer_norm_eps=layer_norm_eps,
             AD_weight_decay=AD_weight_decay,
             BC_layer_norm=BC_layer_norm,
+            use_pscan=use_pscan,
         )
-        self.norm = norm(d_model, eps=layer_norm_eps)
+        self.norm = norm
 
     def forward(self, x):
         output = self.layers(self.norm(x)) + x
@@ -199,8 +197,26 @@ class MambaBlock(nn.Module):
         layer_norm_eps=1e-05,
         AD_weight_decay=False,
         BC_layer_norm=False,
+        use_pscan=False,
     ):
         super().__init__()
+
+        self.use_pscan = use_pscan
+
+        if self.use_pscan:
+            try:
+                from mambapy.pscan import pscan
+
+                self.pscan = pscan  # Store the imported pscan function
+            except ImportError:
+                self.pscan = None  # Set to None if pscan is not available
+                print(
+                    "The 'mambapy' package is not installed. Please install it by running:\n"
+                    "pip install mambapy"
+                )
+        else:
+            self.pscan = None
+
         self.d_inner = d_model * expand_factor
         self.bidirectional = bidirectional
         self.use_learnable_interaction = use_learnable_interaction
@@ -392,15 +408,19 @@ class MambaBlock(nn.Module):
 
         BX = deltaB * (x.unsqueeze(-1))
 
-        h = torch.zeros(x.size(0), self.d_inner,
-                        self.d_state, device=deltaA.device)
-        hs = []
+        if self.use_pscan:
+            hs = self.pscan(deltaA, BX)
+        else:
 
-        for t in range(0, L):
-            h = deltaA[:, t] * h + BX[:, t]
-            hs.append(h)
+            h = torch.zeros(x.size(0), self.d_inner,
+                            self.d_state, device=deltaA.device)
+            hs = []
 
-        hs = torch.stack(hs, dim=1)
+            for t in range(0, L):
+                h = deltaA[:, t] * h + BX[:, t]
+                hs.append(h)
+
+            hs = torch.stack(hs, dim=1)
 
         y = (hs @ C.unsqueeze(-1)).squeeze(3)
 
