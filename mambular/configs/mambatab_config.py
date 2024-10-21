@@ -92,3 +92,4 @@ class DefaultMambaTabConfig:
     head_use_batch_norm: bool = False
     norm: str = "LayerNorm"
     axis: int = 1
+    use_pscan: bool = False

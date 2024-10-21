@@ -66,25 +66,7 @@ class MambaTab(BaseModel):
             n_output_units=num_classes,
         )
 
-        self.mamba = Mamba(
-            d_model=self.hparams.get("d_model", config.d_model),
-            n_layers=self.hparams.get("n_layers", config.n_layers),
-            expand_factor=self.hparams.get("expand_factor", config.expand_factor),
-            bias=self.hparams.get("bias", config.bias),
-            d_conv=self.hparams.get("d_conv", config.d_conv),
-            conv_bias=self.hparams.get("conv_bias", config.conv_bias),
-            dropout=self.hparams.get("dropout", config.dropout),
-            dt_rank=self.hparams.get("dt_rank", config.dt_rank),
-            d_state=self.hparams.get("d_state", config.d_state),
-            dt_scale=self.hparams.get("dt_scale", config.dt_scale),
-            dt_init=self.hparams.get("dt_init", config.dt_init),
-            dt_max=self.hparams.get("dt_max", config.dt_max),
-            dt_min=self.hparams.get("dt_min", config.dt_min),
-            dt_init_floor=self.hparams.get("dt_init_floor", config.dt_init_floor),
-            activation=self.hparams.get("activation", config.activation),
-            bidirectional=False,
-            use_learnable_interaction=False,
-        )
+        self.mamba = Mamba(config)
 
     def forward(self, num_features, cat_features):
         x = num_features + cat_features
