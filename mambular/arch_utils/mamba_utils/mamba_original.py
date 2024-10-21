@@ -156,13 +156,14 @@ class MambaOriginal(nn.Module):
             )
 
         # Initialize Mamba layers based on the configuration
+
         self.layers = nn.ModuleList(
             [
                 ResidualBlock(
                     d_model=config.d_model,
                     d_state=config.d_state,
                     d_conv=config.d_conv,
-                    expand=config.expand_factor,
+                    expand_factor=config.expand_factor,
                     dt_rank=config.dt_rank,
                     dt_min=config.dt_min,
                     dt_max=config.dt_max,
@@ -171,7 +172,6 @@ class MambaOriginal(nn.Module):
                     dt_init_floor=config.dt_init_floor,
                     conv_bias=config.conv_bias,
                     bias=config.bias,
-                    use_fast_path=True,  # Fused kernel options
                     layer_idx=i,
                 )
                 for i in range(config.n_layers)
