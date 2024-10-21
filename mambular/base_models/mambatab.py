@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from ..arch_utils.mamba_arch import Mamba
+from ..arch_utils.mamba_utils.mamba_arch import Mamba
 from ..arch_utils.mlp_utils import MLP
 from ..arch_utils.normalization_layers import (
     RMSNorm,
