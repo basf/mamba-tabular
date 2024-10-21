@@ -179,7 +179,7 @@ class SklearnBaseLSS(BaseEstimator):
             X = pd.DataFrame(X)
         if isinstance(y, pd.Series):
             y = y.values
-        if X_val:
+        if X_val is not None:
             if not isinstance(X_val, pd.DataFrame):
                 X_val = pd.DataFrame(X_val)
             if isinstance(y_val, pd.Series):
@@ -351,7 +351,7 @@ class SklearnBaseLSS(BaseEstimator):
             X = pd.DataFrame(X)
         if isinstance(y, pd.Series):
             y = y.values
-        if X_val:
+        if X_val is not None:
             if not isinstance(X_val, pd.DataFrame):
                 X_val = pd.DataFrame(X_val)
             if isinstance(y_val, pd.Series):
