@@ -21,6 +21,8 @@ class ResidualBlock(nn.Module):
         norm (RMSNorm): Normalization layer.
     """
 
+    MambaBlock = None  # Declare MambaBlock at the class level
+
     def __init__(
         self,
         d_model=32,
@@ -40,6 +42,10 @@ class ResidualBlock(nn.Module):
         mamba_version="mamba1",
     ):
         super().__init__()
+
+        # Lazy import for Mamba and only import if it's None
+        if ResidualBlock.MambaBlock is None:
+            self._lazy_import_mamba(mamba_version)
 
         VALID_NORMALIZATION_LAYERS = {
             "RMSNorm": RMSNorm,
@@ -65,10 +71,8 @@ class ResidualBlock(nn.Module):
         if dt_rank == "auto":
             dt_rank = math.ceil(d_model / 16)
 
-        # Lazy import for Mamba and only import if it's None
-        self._lazy_import_mamba(mamba_version)
-
-        self.layers = MambaBlock(
+        # Use the imported MambaBlock to create layers
+        self.layers = ResidualBlock.MambaBlock(
             d_model=d_model,
             d_state=d_state,
             d_conv=d_conv,
@@ -88,16 +92,17 @@ class ResidualBlock(nn.Module):
 
     def _lazy_import_mamba(self, mamba_version):
         """Lazily import Mamba or Mamba2 based on the provided version and alias it."""
-        global MambaBlock
-        if MambaBlock is None:
+        if ResidualBlock.MambaBlock is None:
             try:
                 if mamba_version == "mamba1":
                     from mamba_ssm import Mamba as MambaBlock
 
+                    ResidualBlock.MambaBlock = MambaBlock
                     print("Successfully imported Mamba (version 1)")
                 elif mamba_version == "mamba2":
                     from mamba_ssm import Mamba2 as MambaBlock
 
+                    ResidualBlock.MambaBlock = MambaBlock
                     print("Successfully imported Mamba2")
                 else:
                     raise ValueError(
@@ -105,7 +110,7 @@ class ResidualBlock(nn.Module):
                     )
             except ImportError:
                 raise ImportError(
-                    f"Failed to import {mamba_version}. Please ensure the correct version is installed. Install it via pip install mamba-ssm"
+                    f"Failed to import {mamba_version}. Please ensure the correct version is installed."
                 )
 
     def forward(self, x):
