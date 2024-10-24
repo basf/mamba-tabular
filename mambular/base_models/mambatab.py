@@ -7,11 +7,18 @@ from ..arch_utils.mamba_arch import Mamba
 from ..arch_utils.mamba_utils.mamba_arch import Mamba
 >>>>>>> df60c1c (fix import)
 from ..arch_utils.mlp_utils import MLP
+<<<<<<< HEAD
 from ..arch_utils.normalization_layers import (BatchNorm, GroupNorm,
                                                InstanceNorm, LayerNorm,
                                                LearnableLayerScaling, RMSNorm)
+=======
+from ..arch_utils.normalization_layers import (
+    LayerNorm,
+)
+>>>>>>> 426e6c6 (delete unnecessary imports in mambatab)
 from ..configs.mambatab_config import DefaultMambaTabConfig
 from .basemodel import BaseModel
+from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 
 
 class MambaTab(BaseModel):
@@ -70,6 +77,7 @@ class MambaTab(BaseModel):
         )
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         self.mamba = Mamba(
             d_model=self.hparams.get("d_model", config.d_model),
             n_layers=self.hparams.get("n_layers", config.n_layers),
@@ -94,6 +102,12 @@ class MambaTab(BaseModel):
 =======
         self.mamba = Mamba(config)
 >>>>>>> 85a468b (fix import and config)
+=======
+        if config.mamba_version == "mamba-torch":
+            self.mamba = Mamba(config)
+        else:
+            self.mamba = MambaOriginal(config)
+>>>>>>> 426e6c6 (delete unnecessary imports in mambatab)
 
     def forward(self, num_features, cat_features):
         x = num_features + cat_features
