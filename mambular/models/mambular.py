@@ -87,6 +87,10 @@ class MambularRegressor(SklearnBaseRegressor):
         whether to apply layer normalization to B-C matrices.
     cat_encoding : str, default="int"
         whether to use integer encoding or one-hot encoding for cat features.
+    use_pscan : bool, default=False
+        whether to use pscan for the ssm
+    mamba_version : str, default="mamba-torch"
+        options are "mamba-torch", "mamba1" and "mamba2"
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -214,6 +218,10 @@ class MambularClassifier(SklearnBaseClassifier):
         whether to apply layer normalization to B-C matrices.
     cat_encoding : str, default="int"
         whether to use integer encoding or one-hot encoding for cat features.
+    use_pscan : bool, default=False
+        whether to use pscan for the ssm
+    mamba_version : str, default="mamba-torch"
+        options are "mamba-torch", "mamba1" and "mamba2"
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -333,6 +341,20 @@ class MambularLSS(SklearnBaseLSS):
         Whether to use bidirectional processing of the input sequences.
     use_learnable_interaction : bool, default=False
         Whether to use learnable feature interactions before passing through mamba blocks.
+    shuffle_embeddings : bool, default=False.
+        Whether to shuffle the embeddings before being passed to the Mamba layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=True
+        whether weight decay is also applied to A-D matrices.
+    BC_layer_norm: bool, default=False
+        whether to apply layer normalization to B-C matrices.
+    cat_encoding : str, default="int"
+        whether to use integer encoding or one-hot encoding for cat features.
+    use_pscan : bool, default=False
+        whether to use pscan for the ssm
+    mamba_version : str, default="mamba-torch"
+        options are "mamba-torch", "mamba1" and "mamba2"
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.

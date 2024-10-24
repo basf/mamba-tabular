@@ -71,6 +71,10 @@ class MambaTabRegressor(SklearnBaseRegressor):
         Normalization method to be used.
     axis : int, default=1
         Axis over which Mamba iterates. If 1, it iterates over the rows; if 0, it iterates over the columns.
+    use_pscan : bool, default=False
+        whether to use pscan for the ssm
+    mamba_version : str, default="mamba-torch"
+        options are "mamba-torch", "mamba1" and "mamba2"
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -167,6 +171,10 @@ class MambaTabClassifier(SklearnBaseClassifier):
         Normalization method to be used.
     axis : int, default=1
         Axis over which Mamba iterates. If 1, it iterates over the rows; if 0, it iterates over the columns.
+    use_pscan : bool, default=False
+        whether to use pscan for the ssm
+    mamba_version : str, default="mamba-torch"
+        options are "mamba-torch", "mamba1" and "mamba2"
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -265,6 +273,10 @@ class MambaTabLSS(SklearnBaseLSS):
         Normalization method to be used.
     axis : int, default=1
         Axis over which Mamba iterates. If 1, it iterates over the rows; if 0, it iterates over the columns.
+    use_pscan : bool, default=False
+        whether to use pscan for the ssm
+    mamba_version : str, default="mamba-torch"
+        options are "mamba-torch", "mamba1" and "mamba2"
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
