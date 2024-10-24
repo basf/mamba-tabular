@@ -81,10 +81,10 @@ class Mambular(BaseModel):
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
-        if config.use_mamba_ssm:
-            self.mamba = MambaOriginal(config)
-        else:
+        if config.mamba_version == "mamba-torch":
             self.mamba = Mamba(config)
+        else:
+            self.mamba = MambaOriginal(config)
         self.norm_f = get_normalization_layer(config)
 
         self.embedding_layer = EmbeddingLayer(

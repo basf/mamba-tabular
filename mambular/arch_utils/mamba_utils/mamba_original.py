@@ -10,50 +10,7 @@ from ..normalization_layers import (
     GroupNorm,
 )
 from ..get_norm_fn import get_normalization_layer
-
-try:
-    from mamba_ssm.ops.triton.layer_norm import RMSNorm, layer_norm_fn, rms_norm_fn
-except ImportError:
-    RMSNorm, layer_norm_fn, rms_norm_fn = None, None, None
-
-try:
-    from mamba_ssm import Mamba
-
-    print("successfully imported Mamba from mamba-ssm")
-except ImportError:
-    Mamba = None
-
-
-def _init_weights(
-    module,
-    n_layer,
-    initializer_range=0.02,  # Now only used for embedding layer.
-    rescale_prenorm_residual=True,
-    n_residuals_per_layer=1,  # Change to 2 if we have MLP
-):
-    if isinstance(module, nn.Linear):
-        if module.bias is not None:
-            if not getattr(module.bias, "_no_reinit", False):
-                nn.init.zeros_(module.bias)
-    elif isinstance(module, nn.Embedding):
-        nn.init.normal_(module.weight, std=initializer_range)
-
-    if rescale_prenorm_residual:
-        # Reinitialize selected weights subject to the OpenAI GPT-2 Paper Scheme:
-        #   > A modified initialization which accounts for the accumulation on the residual path with model depth. Scale
-        #   > the weights of residual layers at initialization by a factor of 1/√N where N is the # of residual layers.
-        #   >   -- GPT-2 :: https://openai.com/blog/better-language-models/
-        #
-        # Reference (Megatron-LM): https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/gpt_model.py
-        for name, p in module.named_parameters():
-            if name in ["out_proj.weight", "fc2.weight"]:
-                # Special Scaled Initialization --> There are 2 Layer Norms per Transformer Block
-                # Following Pytorch init, except scale by 1/sqrt(2 * n_layer)
-                # We need to reinit p since this code could be called multiple times
-                # Having just p *= scale would repeatedly scale it down
-                nn.init.kaiming_uniform_(p, a=math.sqrt(5))
-                with torch.no_grad():
-                    p /= math.sqrt(n_residuals_per_layer * n_layer)
+from .init_weights import _init_weights
 
 
 class ResidualBlock(nn.Module):
@@ -80,6 +37,7 @@ class ResidualBlock(nn.Module):
         dt_init_floor=1e-04,
         norm=RMSNorm,
         layer_idx=0,
+        mamba_version="mamba1",
     ):
         super().__init__()
 
@@ -107,7 +65,10 @@ class ResidualBlock(nn.Module):
         if dt_rank == "auto":
             dt_rank = math.ceil(d_model / 16)
 
-        self.layers = Mamba(
+        # Lazy import for Mamba and only import if it's None
+        self._lazy_import_mamba(mamba_version)
+
+        self.layers = MambaBlock(
             d_model=d_model,
             d_state=d_state,
             d_conv=d_conv,
@@ -124,6 +85,28 @@ class ResidualBlock(nn.Module):
             layer_idx=layer_idx,
         )
         self.norm = norm
+
+    def _lazy_import_mamba(self, mamba_version):
+        """Lazily import Mamba or Mamba2 based on the provided version and alias it."""
+        global OriginalMambaBlock
+        if MambaBlock is None:
+            try:
+                if mamba_version == "mamba1":
+                    from mamba_ssm import Mamba as MambaBlock
+
+                    print("Successfully imported Mamba (version 1)")
+                elif mamba_version == "mamba2":
+                    from mamba_ssm import Mamba2 as MambaBlock
+
+                    print("Successfully imported Mamba2")
+                else:
+                    raise ValueError(
+                        f"Invalid mamba_version: {mamba_version}. Choose 'mamba1' or 'mamba2'."
+                    )
+            except ImportError:
+                raise ImportError(
+                    f"Failed to import {mamba_version}. Please ensure the correct version is installed. Install it via pip install mamba-ssm"
+                )
 
     def forward(self, x):
         output = self.layers(self.norm(x)) + x
@@ -145,6 +128,7 @@ class MambaOriginal(nn.Module):
 
         # Get normalization layer from config
         norm = config.norm
+        self.bidirectional = config.bidirectional
         if isinstance(norm, str) and norm in VALID_NORMALIZATION_LAYERS:
             self.norm_f = VALID_NORMALIZATION_LAYERS[norm](
                 config.d_model, eps=config.layer_norm_eps
@@ -157,9 +141,10 @@ class MambaOriginal(nn.Module):
 
         # Initialize Mamba layers based on the configuration
 
-        self.layers = nn.ModuleList(
+        self.fwd_layers = nn.ModuleList(
             [
                 ResidualBlock(
+                    mamba_version=config.mamba_version,
                     d_model=config.d_model,
                     d_state=config.d_state,
                     d_conv=config.d_conv,
@@ -179,6 +164,30 @@ class MambaOriginal(nn.Module):
             ]
         )
 
+        if self.bidirectional:
+            self.bckwd_layers = nn.ModuleList(
+                [
+                    ResidualBlock(
+                        mamba_version=config.mamba_version,
+                        d_model=config.d_model,
+                        d_state=config.d_state,
+                        d_conv=config.d_conv,
+                        norm=get_normalization_layer(config),
+                        expand_factor=config.expand_factor,
+                        dt_rank=config.dt_rank,
+                        dt_min=config.dt_min,
+                        dt_max=config.dt_max,
+                        dt_init=config.dt_init,
+                        dt_scale=config.dt_scale,
+                        dt_init_floor=config.dt_init_floor,
+                        conv_bias=config.conv_bias,
+                        bias=config.bias,
+                        layer_idx=i + config.n_layers,
+                    )
+                    for i in range(config.n_layers)
+                ]
+            )
+
         # Apply weight initialization
         self.apply(
             lambda m: _init_weights(
@@ -197,7 +206,22 @@ class MambaOriginal(nn.Module):
         }
 
     def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
+        if self.bidirectional:
+            # Reverse input and pass through backward layers
+            x_reversed = torch.flip(x, [1])
+        # Forward pass through forward layers
+        for layer in self.fwd_layers:
+            x = layer(x)  # Update x in-place as each forward layer processes it
 
+        if self.bidirectional:
+            for layer in self.bckwd_layers:
+                x_reversed = layer(x_reversed)
+
+            # Reverse the output of the backward pass to original order
+            x_reversed = torch.flip(x_reversed, [1])
+
+            # Combine forward and backward outputs by averaging
+            return (x + x_reversed) / 2
+
+        # Return forward output only if not bidirectional
         return x
