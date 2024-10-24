@@ -88,7 +88,7 @@ class ResidualBlock(nn.Module):
 
     def _lazy_import_mamba(self, mamba_version):
         """Lazily import Mamba or Mamba2 based on the provided version and alias it."""
-        global OriginalMambaBlock
+        global MambaBlock
         if MambaBlock is None:
             try:
                 if mamba_version == "mamba1":
