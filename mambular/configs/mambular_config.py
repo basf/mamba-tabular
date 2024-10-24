@@ -83,8 +83,8 @@ class DefaultMambularConfig:
         whether to use integer encoding or one-hot encoding for cat features.
     use_pscan : bool, default=False
         whether to use pscan for the ssm
-    use_mamba_ssm : bool, default=False
-        whether to use mamba_ssm with Triton for the ssm
+    mamba_version : str, default="mamba-torch"
+        options are "mamba-torch", "mamba1" and "mamba2"
     """
 
     lr: float = 1e-04
@@ -124,4 +124,4 @@ class DefaultMambularConfig:
     BC_layer_norm: bool = False
     cat_encoding: str = "int"
     use_pscan: bool = False
-    use_mamba_ssm: bool = False
+    mamba_version: str = "mamba-torch"
