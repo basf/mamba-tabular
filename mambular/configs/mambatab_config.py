@@ -63,6 +63,10 @@ class DefaultMambaTabConfig:
         Whether to use batch normalization in the head layers.
     layer_norm_after_embedding : bool, default=False
         Whether to apply layer normalization after embedding.
+    use_pscan : bool, default=False
+        whether to use pscan for the ssm
+    mamba_version : str, default="mamba-torch"
+        options are "mamba-torch", "mamba1" and "mamba2"
     """
 
     lr: float = 1e-04
@@ -93,3 +97,4 @@ class DefaultMambaTabConfig:
     norm: str = "LayerNorm"
     axis: int = 1
     use_pscan: bool = False
+    mamba_version: str = "mamba-torch"
