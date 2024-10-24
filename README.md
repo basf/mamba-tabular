@@ -31,6 +31,8 @@ Mambular is a Python library for tabular deep learning. It includes models that 
 - [🛠️ Installation](#️-installation)
 - [🚀 Usage](#-usage)
 - [💻 Implement Your Own Model](#-implement-your-own-model)
+- [🏷️ Citation](#️-citation)
+- [License](#license)
 
 
 # 🏃 Quickstart
@@ -51,15 +53,17 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 
 # 🤖 Models
 
-| Model            | Description                                                                                                                                         |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Mambular`       | A sequential model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.         |
-| `FTTransformer`  | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data.                   |
-| `MLP`            | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                                                                     |
-| `ResNet`         | An adaptation of the ResNet architecture for tabular data applications.                                                                             |
-| `TabTransformer` | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities. |
-| `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.    |
-| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks                                                                     |
+| Model            | Description                                                                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Mambular`       | A sequential model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.             |
+| `FTTransformer`  | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data.                       |
+| `MLP`            | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                                                                         |
+| `ResNet`         | An adaptation of the ResNet architecture for tabular data applications.                                                                                 |
+| `TabTransformer` | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities.     |
+| `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.        |
+| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks                                                                         |
+| `MambAttention`  | A combination between Mamba and Transformers, similar to Jamba by [Lieber et al.](https://arxiv.org/abs/2403.19887). Not yet included in the benchmarks |
+
 
 
 All models are available for `regression`, `classification` and distributional regression, denoted by `LSS`.
@@ -198,6 +202,7 @@ MambularLSS allows you to model the full distribution of a response variable, no
 - **negativebinom**: For over-dispersed count data.
 - **inversegamma**: Often used as a prior in Bayesian inference.
 - **categorical**: For data with more than two categories.
+- **Quantile**: For quantile regression using the pinball loss.
 
 These distribution classes make MambularLSS versatile in modeling various data types and distributions.
 
@@ -308,4 +313,18 @@ Here's how you can implement a custom model with Mambular:
    regressor.fit(X_train, y_train, max_epochs=50)
    ```
 
+# 🏷️ Citation
 
+If you find this project useful in your research, please consider cite:
+```BibTeX
+@article{thielmann2024mambular,
+  title={Mambular: A Sequential Model for Tabular Deep Learning},
+  author={Thielmann, Anton Frederik and Kumar, Manish and Weisser, Christoph and Reuter, Arik and S{\"a}fken, Benjamin and Samiee, Soheila},
+  journal={arXiv preprint arXiv:2408.06291},
+  year={2024}
+}
+```
+
+# License
+
+The entire codebase is under MIT license.
