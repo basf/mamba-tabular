@@ -3,15 +3,11 @@ import torch.nn as nn
 from ..arch_utils.mamba_utils.mamba_arch import Mamba
 from ..arch_utils.mlp_utils import MLP
 from ..arch_utils.normalization_layers import (
-    RMSNorm,
     LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
 )
 from ..configs.mambatab_config import DefaultMambaTabConfig
 from .basemodel import BaseModel
+from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 
 
 class MambaTab(BaseModel):
@@ -66,7 +62,10 @@ class MambaTab(BaseModel):
             n_output_units=num_classes,
         )
 
-        self.mamba = Mamba(config)
+        if config.mamba_version == "mamba-torch":
+            self.mamba = Mamba(config)
+        else:
+            self.mamba = MambaOriginal(config)
 
     def forward(self, num_features, cat_features):
         x = num_features + cat_features
