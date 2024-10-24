@@ -2,7 +2,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .normalization_layers import (
+from ..normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
@@ -10,6 +10,7 @@ from .normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
+from ..get_norm_fn import get_normalization_layer
 
 
 ### Heavily inspired and mostly taken from https://github.com/alxndrTL/mamba.py
@@ -25,55 +26,36 @@ class Mamba(nn.Module):
 
     def __init__(
         self,
-        d_model=32,
-        n_layers=8,
-        expand_factor=2,
-        bias=False,
-        d_conv=8,
-        conv_bias=True,
-        dropout=0.01,
-        dt_rank="auto",
-        d_state=16,
-        dt_scale=1.0,
-        dt_init="random",
-        dt_max=0.1,
-        dt_min=1e-03,
-        dt_init_floor=1e-04,
-        norm=RMSNorm,
-        activation=F.silu,
-        bidirectional=False,
-        use_learnable_interaction=False,
-        layer_norm_eps=1e-05,
-        AD_weight_decay=False,
-        BC_layer_norm=True,
+        config,
     ):
         super().__init__()
 
         self.layers = nn.ModuleList(
             [
                 ResidualBlock(
-                    d_model,
-                    expand_factor,
-                    bias,
-                    d_conv,
-                    conv_bias,
-                    dropout,
-                    dt_rank,
-                    d_state,
-                    dt_scale,
-                    dt_init,
-                    dt_max,
-                    dt_min,
-                    dt_init_floor,
-                    norm,
-                    activation,
-                    bidirectional,
-                    use_learnable_interaction,
-                    layer_norm_eps,
-                    AD_weight_decay,
-                    BC_layer_norm,
+                    d_model=config.d_model,
+                    expand_factor=config.expand_factor,
+                    bias=config.bias,
+                    d_conv=config.d_conv,
+                    conv_bias=config.conv_bias,
+                    dropout=config.dropout,
+                    dt_rank=config.dt_rank,
+                    d_state=config.d_state,
+                    dt_scale=config.dt_scale,
+                    dt_init=config.dt_init,
+                    dt_max=config.dt_max,
+                    dt_min=config.dt_min,
+                    dt_init_floor=config.dt_init_floor,
+                    norm=get_normalization_layer(config),
+                    activation=config.activation,
+                    bidirectional=config.bidirectional,
+                    use_learnable_interaction=config.use_learnable_interaction,
+                    layer_norm_eps=config.layer_norm_eps,
+                    AD_weight_decay=config.AD_weight_decay,
+                    BC_layer_norm=config.BC_layer_norm,
+                    use_pscan=config.use_pscan,
                 )
-                for _ in range(n_layers)
+                for _ in range(config.n_layers)
             ]
         )
 
@@ -85,11 +67,70 @@ class Mamba(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-    """Residual block composed of a MambaBlock and a normalization layer.
+    """
+    Residual block composed of a MambaBlock and a normalization layer.
 
-    Attributes:
-        layers (MambaBlock): MambaBlock layers.
-        norm (RMSNorm): Normalization layer.
+    Parameters
+    ----------
+    d_model : int, optional
+        Dimension of the model input, by default 32.
+    expand_factor : int, optional
+        Expansion factor for the model, by default 2.
+    bias : bool, optional
+        Whether to use bias in the MambaBlock, by default False.
+    d_conv : int, optional
+        Dimension of the convolution layer in the MambaBlock, by default 16.
+    conv_bias : bool, optional
+        Whether to use bias in the convolution layer, by default True.
+    dropout : float, optional
+        Dropout rate for the layers, by default 0.01.
+    dt_rank : Union[str, int], optional
+        Rank for dynamic time components, 'auto' or an integer, by default 'auto'.
+    d_state : int, optional
+        Dimension of the state vector, by default 32.
+    dt_scale : float, optional
+        Scale factor for dynamic time components, by default 1.0.
+    dt_init : str, optional
+        Initialization strategy for dynamic time components, by default 'random'.
+    dt_max : float, optional
+        Maximum value for dynamic time components, by default 0.1.
+    dt_min : float, optional
+        Minimum value for dynamic time components, by default 1e-03.
+    dt_init_floor : float, optional
+        Floor value for initialization of dynamic time components, by default 1e-04.
+    norm : callable, optional
+        Normalization layer, by default RMSNorm.
+    activation : callable, optional
+        Activation function used in the MambaBlock, by default `F.silu`.
+    bidirectional : bool, optional
+        Whether the block is bidirectional, by default False.
+    use_learnable_interaction : bool, optional
+        Whether to use learnable interactions, by default False.
+    layer_norm_eps : float, optional
+        Epsilon for layer normalization, by default 1e-05.
+    AD_weight_decay : bool, optional
+        Whether to apply weight decay in adaptive dynamics, by default False.
+    BC_layer_norm : bool, optional
+        Whether to use layer normalization for batch compatibility, by default False.
+    use_pscan : bool, optional
+        Whether to use PSCAN, by default False.
+
+    Attributes
+    ----------
+    layers : MambaBlock
+        The main MambaBlock layers for processing input.
+    norm : callable
+        Normalization layer applied before the MambaBlock.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the block and returns the output.
+
+    Raises
+    ------
+    ValueError
+        If the provided normalization layer is not valid.
     """
 
     def __init__(
@@ -114,6 +155,7 @@ class ResidualBlock(nn.Module):
         layer_norm_eps=1e-05,
         AD_weight_decay=False,
         BC_layer_norm=False,
+        use_pscan=False,
     ):
         super().__init__()
 
@@ -132,7 +174,7 @@ class ResidualBlock(nn.Module):
                 f"Invalid normalization layer: {norm.__name__}. "
                 f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
             )
-        elif isinstance(norm, str) and norm not in self.VALID_NORMALIZATION_LAYERS:
+        elif isinstance(norm, str) and norm not in VALID_NORMALIZATION_LAYERS:
             raise ValueError(
                 f"Invalid normalization layer: {norm}. "
                 f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
@@ -161,26 +203,99 @@ class ResidualBlock(nn.Module):
             layer_norm_eps=layer_norm_eps,
             AD_weight_decay=AD_weight_decay,
             BC_layer_norm=BC_layer_norm,
+            use_pscan=use_pscan,
         )
-        self.norm = norm(d_model, eps=layer_norm_eps)
+        self.norm = norm
 
     def forward(self, x):
+        """
+        Forward pass through the residual block.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor to the block.
+
+        Returns
+        -------
+        torch.Tensor
+            Output tensor after applying the residual connection and MambaBlock.
+        """
         output = self.layers(self.norm(x)) + x
         return output
 
 
 class MambaBlock(nn.Module):
-    """MambaBlock module containing the main computational components.
+    """
+    MambaBlock module containing the main computational components for processing input.
 
-    Attributes:
-        in_proj (nn.Linear): Linear projection for input.
-        conv1d (nn.Conv1d): 1D convolutional layer.
-        x_proj (nn.Linear): Linear projection for input-dependent tensors.
-        dt_proj (nn.Linear): Linear projection for dynamical time.
-        A_log (nn.Parameter): Logarithmically stored A tensor.
-        D (nn.Parameter): Tensor for D component.
-        out_proj (nn.Linear): Linear projection for output.
-        learnable_interaction (LearnableFeatureInteraction): Learnable feature interaction layer.
+    Parameters
+    ----------
+    d_model : int, optional
+        Dimension of the model input, by default 32.
+    expand_factor : int, optional
+        Factor by which the input is expanded in the block, by default 2.
+    bias : bool, optional
+        Whether to use bias in the linear projections, by default False.
+    d_conv : int, optional
+        Dimension of the convolution layer, by default 16.
+    conv_bias : bool, optional
+        Whether to use bias in the convolution layer, by default True.
+    dropout : float, optional
+        Dropout rate applied to the layers, by default 0.01.
+    dt_rank : Union[str, int], optional
+        Rank for dynamic time components, either 'auto' or an integer, by default 'auto'.
+    d_state : int, optional
+        Dimensionality of the state vector, by default 32.
+    dt_scale : float, optional
+        Scale factor applied to the dynamic time component, by default 1.0.
+    dt_init : str, optional
+        Initialization strategy for the dynamic time component, by default 'random'.
+    dt_max : float, optional
+        Maximum value for dynamic time component initialization, by default 0.1.
+    dt_min : float, optional
+        Minimum value for dynamic time component initialization, by default 1e-03.
+    dt_init_floor : float, optional
+        Floor value for dynamic time component initialization, by default 1e-04.
+    activation : callable, optional
+        Activation function applied in the block, by default `F.silu`.
+    bidirectional : bool, optional
+        Whether the block is bidirectional, by default False.
+    use_learnable_interaction : bool, optional
+        Whether to use learnable feature interaction, by default False.
+    layer_norm_eps : float, optional
+        Epsilon for layer normalization, by default 1e-05.
+    AD_weight_decay : bool, optional
+        Whether to apply weight decay in adaptive dynamics, by default False.
+    BC_layer_norm : bool, optional
+        Whether to use layer normalization for batch compatibility, by default False.
+    use_pscan : bool, optional
+        Whether to use the PSCAN mechanism, by default False.
+
+    Attributes
+    ----------
+    in_proj : nn.Linear
+        Linear projection applied to the input tensor.
+    conv1d : nn.Conv1d
+        1D convolutional layer for processing input.
+    x_proj : nn.Linear
+        Linear projection applied to input-dependent tensors.
+    dt_proj : nn.Linear
+        Linear projection for the dynamical time component.
+    A_log : nn.Parameter
+        Logarithmically stored tensor A for internal dynamics.
+    D : nn.Parameter
+        Tensor for the D component of the model's dynamics.
+    out_proj : nn.Linear
+        Linear projection applied to the output.
+    learnable_interaction : LearnableFeatureInteraction
+        Layer for learnable feature interactions, if `use_learnable_interaction` is True.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the MambaBlock.
+
     """
 
     def __init__(
@@ -204,8 +319,26 @@ class MambaBlock(nn.Module):
         layer_norm_eps=1e-05,
         AD_weight_decay=False,
         BC_layer_norm=False,
+        use_pscan=False,
     ):
         super().__init__()
+
+        self.use_pscan = use_pscan
+
+        if self.use_pscan:
+            try:
+                from mambapy.pscan import pscan
+
+                self.pscan = pscan  # Store the imported pscan function
+            except ImportError:
+                self.pscan = None  # Set to None if pscan is not available
+                print(
+                    "The 'mambapy' package is not installed. Please install it by running:\n"
+                    "pip install mambapy"
+                )
+        else:
+            self.pscan = None
+
         self.d_inner = d_model * expand_factor
         self.bidirectional = bidirectional
         self.use_learnable_interaction = use_learnable_interaction
@@ -339,6 +472,7 @@ class MambaBlock(nn.Module):
             x_bwd = self.dropout(x_bwd)
             y_bwd = self.ssm(torch.flip(x_bwd, [1]), forward=False)
             y = y_fwd + torch.flip(y_bwd, [1])
+            y = y / 2
         else:
             y = y_fwd
 
@@ -390,14 +524,18 @@ class MambaBlock(nn.Module):
 
         BX = deltaB * (x.unsqueeze(-1))
 
-        h = torch.zeros(x.size(0), self.d_inner, self.d_state, device=deltaA.device)
-        hs = []
+        if self.use_pscan:
+            hs = self.pscan(deltaA, BX)
+        else:
 
-        for t in range(0, L):
-            h = deltaA[:, t] * h + BX[:, t]
-            hs.append(h)
+            h = torch.zeros(x.size(0), self.d_inner, self.d_state, device=deltaA.device)
+            hs = []
 
-        hs = torch.stack(hs, dim=1)
+            for t in range(0, L):
+                h = deltaA[:, t] * h + BX[:, t]
+                hs.append(h)
+
+            hs = torch.stack(hs, dim=1)
 
         y = (hs @ C.unsqueeze(-1)).squeeze(3)
 
