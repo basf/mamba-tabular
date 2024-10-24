@@ -137,6 +137,19 @@ Install Mambular using pip:
 pip install mambular
 ```
 
+If you want to use the original mamba and mamba2 implementations, additionally install mamba-ssm via:
+
+```sh
+pip install mamba-ssm
+```
+
+Be careful to use the correct torch and cuda versions: 
+
+```sh
+pip install torch==2.0.0+cu118 torchvision==0.15.0+cu118 torchaudio==2.0.0+cu118 -f https://download.pytorch.org/whl/cu118/torch_stable.html
+pip install mamba-ssm
+```
+
 # 🚀 Usage
 
 <h2> Preprocessing </h2>
