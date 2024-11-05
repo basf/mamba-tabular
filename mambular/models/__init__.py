@@ -24,6 +24,7 @@ from .mambattention import (
 )
 
 from .ndtf import NDTFClassifier, NDTFRegressor, NDTFLSS
+from .node import NODEClassifier, NODERegressor, NODELSS
 
 
 __all__ = [
@@ -57,4 +58,7 @@ __all__ = [
     "NDTFClassifier",
     "NDTFRegressor",
     "NDTFLSS",
+    "NODEClassifier",
+    "NODERegressor",
+    "NODELSS",
 ]

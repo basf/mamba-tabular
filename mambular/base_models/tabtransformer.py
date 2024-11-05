@@ -1,18 +1,12 @@
 import torch
 import torch.nn as nn
 from ..arch_utils.mlp_utils import MLP
-from ..arch_utils.layer_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
+from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..configs.tabtransformer_config import DefaultTabTransformerConfig
 from .basemodel import BaseModel
 from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
+from ..arch_utils.layer_utils.normalization_layers import LayerNorm
 
 
 class TabTransformer(BaseModel):
@@ -109,21 +103,7 @@ class TabTransformer(BaseModel):
             bias=self.hparams.get("bias", config.bias),
         )
 
-        norm_layer = self.hparams.get("norm", config.norm)
-        if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm(layer_norm_dim)
-        elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(layer_norm_dim)
-        elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(layer_norm_dim)
-        elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(layer_norm_dim)
-        elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(1, layer_norm_dim)
-        elif norm_layer == "LearnableLayerScaling":
-            self.norm_f = LearnableLayerScaling(layer_norm_dim)
-        else:
-            self.norm_f = None
+        self.norm_f = get_normalization_layer(config)
 
         self.norm_embedding = LayerNorm(self.hparams.get("d_model", config.d_model))
         self.encoder = nn.TransformerEncoder(
