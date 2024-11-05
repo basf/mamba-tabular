@@ -6,6 +6,7 @@ from .basemodel import BaseModel
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.rnn_utils import ConvRNN
 from ..arch_utils.get_norm_fn import get_normalization_layer
+from dataclasses import replace
 
 
 class TabulaRNN(BaseModel):
@@ -27,8 +28,6 @@ class TabulaRNN(BaseModel):
         self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-
-        self.norm_f = get_normalization_layer(config)
 
         self.rnn = ConvRNN(
             model_type=self.hparams.get("model_type", config.model_type),
@@ -81,6 +80,9 @@ class TabulaRNN(BaseModel):
             self.hparams.get("d_model", config.d_model),
             self.hparams.get("dim_feedforward", config.dim_feedforward),
         )
+
+        temp_config = replace(config, d_model=config.dim_feedforward)
+        self.norm_f = get_normalization_layer(temp_config)
 
     def forward(self, num_features, cat_features):
         """
