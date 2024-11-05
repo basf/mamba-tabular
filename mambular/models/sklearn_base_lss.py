@@ -44,7 +44,7 @@ from ..utils.config_mapper import (
 
 class SklearnBaseLSS(BaseEstimator):
     def __init__(self, model, config, **kwargs):
-        preprocessor_arg_names = [
+        self.preprocessor_arg_names = [
             "n_bins",
             "numerical_preprocessing",
             "use_decision_tree_bins",
@@ -64,7 +64,7 @@ class SklearnBaseLSS(BaseEstimator):
         self.config = config(**self.config_kwargs)
 
         preprocessor_kwargs = {
-            k: v for k, v in kwargs.items() if k in preprocessor_arg_names
+            k: v for k, v in kwargs.items() if k in self.preprocessor_arg_names
         }
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
