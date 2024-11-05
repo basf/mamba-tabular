@@ -2,14 +2,7 @@ import torch
 import torch.nn as nn
 from ..configs.mlp_config import DefaultMLPConfig
 from .basemodel import BaseModel
-from ..arch_utils.layer_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
+from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
 
@@ -74,21 +67,7 @@ class MLP(BaseModel):
         if config.batch_norm:
             self.layers.append(nn.BatchNorm1d(self.layer_sizes[0]))
 
-        norm_layer = self.hparams.get("norm", config.norm)
-        if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm(self.layer_sizes[0])
-        elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(self.layer_sizes[0])
-        elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(self.layer_sizes[0])
-        elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(self.layer_sizes[0])
-        elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(1, self.layer_sizes[0])
-        elif norm_layer == "LearnableLayerScaling":
-            self.norm_f = LearnableLayerScaling(self.layer_sizes[0])
-        else:
-            self.norm_f = None
+        self.norm_f = get_normalization_layer(config)
 
         if self.norm_f is not None:
             self.layers.append(self.norm_f(self.layer_sizes[0]))
