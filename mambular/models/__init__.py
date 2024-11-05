@@ -23,6 +23,8 @@ from .mambattention import (
     MambAttentionLSS,
 )
 
+from .ndtf import NDTFClassifier, NDTFRegressor, NDTFLSS
+
 
 __all__ = [
     "MambularClassifier",
@@ -52,4 +54,7 @@ __all__ = [
     "MambAttentionClassifier",
     "MambAttentionRegressor",
     "MambAttentionLSS",
+    "NDTFClassifier",
+    "NDTFRegressor",
+    "NDTFLSS",
 ]
