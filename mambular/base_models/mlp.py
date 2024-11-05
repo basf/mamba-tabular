@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from ..configs.mlp_config import DefaultMLPConfig
 from .basemodel import BaseModel
-from ..arch_utils.normalization_layers import (
+from ..arch_utils.layer_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
@@ -10,7 +10,7 @@ from ..arch_utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
-from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
 
 class MLP(BaseModel):

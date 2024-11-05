@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from ..arch_utils.mlp_utils import MLP
-from ..arch_utils.normalization_layers import (
+from ..arch_utils.layer_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
@@ -9,7 +9,7 @@ from ..arch_utils.normalization_layers import (
     InstanceNorm,
     GroupNorm,
 )
-from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..configs.tabtransformer_config import DefaultTabTransformerConfig
 from .basemodel import BaseModel
 from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
