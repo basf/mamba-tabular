@@ -172,7 +172,7 @@ class MLPClassifier(SklearnBaseClassifier):
 
     See Also
     --------
-    mambular.models.SklearnBaseRegressor : The parent class for MLPClassifier.
+    mambular.models.SklearnBaseClassifier : The parent class for MLPClassifier.
 
     Examples
     --------
