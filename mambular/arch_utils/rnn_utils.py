@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from .lstm_utils import mLSTMblock, sLSTMblock
 
 
 class ConvRNN(nn.Module):
@@ -20,7 +21,13 @@ class ConvRNN(nn.Module):
         super(ConvRNN, self).__init__()
 
         # Choose RNN layer based on model_type
-        rnn_layer = {"RNN": nn.RNN, "LSTM": nn.LSTM, "GRU": nn.GRU}[model_type]
+        rnn_layer = {
+            "RNN": nn.RNN,
+            "LSTM": nn.LSTM,
+            "GRU": nn.GRU,
+            "mLSTM": mLSTMblock,
+            "sLSTM": sLSTMblock,
+        }[model_type]
 
         self.input_size = input_size  # Number of input features (128 in your case)
         self.hidden_size = hidden_size  # Number of hidden units in RNN
@@ -31,6 +38,7 @@ class ConvRNN(nn.Module):
 
         # Convolutional layers
         self.convs = nn.ModuleList()
+        self.layernorms_conv = nn.ModuleList()  # LayerNorms for Conv layers
 
         if self.residuals:
             self.residual_matrix = nn.ParameterList(
@@ -43,59 +51,62 @@ class ConvRNN(nn.Module):
         # First Conv1d layer uses input_size
         self.convs.append(
             nn.Conv1d(
-                in_channels=self.input_size,  # Input size for first layer
-                out_channels=self.input_size,  # Output channels (128)
+                in_channels=self.input_size,
+                out_channels=self.input_size,
                 kernel_size=d_conv,
-                padding=d_conv - 1,  # Padding to maintain sequence length
+                padding=d_conv - 1,
                 bias=conv_bias,
-                groups=self.input_size,  # Depthwise convolution, each channel independent
+                groups=self.input_size,
             )
         )
+        self.layernorms_conv.append(
+            nn.LayerNorm(self.input_size)
+        )  # LayerNorm for first Conv layer
 
         # Subsequent Conv1d layers use hidden_size as input
         for i in range(self.num_layers - 1):
             self.convs.append(
                 nn.Conv1d(
-                    in_channels=self.hidden_size,  # Hidden size for subsequent layers
-                    out_channels=self.hidden_size,  # Output channels
+                    in_channels=self.hidden_size,
+                    out_channels=self.hidden_size,
                     kernel_size=d_conv,
-                    padding=d_conv - 1,  # Padding to maintain sequence length
+                    padding=d_conv - 1,
                     bias=conv_bias,
-                    groups=self.hidden_size,  # Depthwise convolution
+                    groups=self.hidden_size,
                 )
             )
+            self.layernorms_conv.append(
+                nn.LayerNorm(self.hidden_size)
+            )  # LayerNorm for Conv layers
 
         # Initialize the RNN layers
         self.rnns = nn.ModuleList()
+        self.layernorms_rnn = nn.ModuleList()  # LayerNorms for RNN layers
+
         for i in range(self.num_layers):
-            if model_type == "RNN":
+            if model_type in ["RNN"]:
                 rnn = rnn_layer(
-                    input_size=(
-                        self.input_size if i == 0 else self.hidden_size
-                    ),  # First layer uses input_size
+                    input_size=(self.input_size if i == 0 else self.hidden_size),
                     hidden_size=self.hidden_size,
-                    num_layers=1,  # One RNN layer at a time
+                    num_layers=1,
                     bidirectional=self.bidirectional,
                     batch_first=True,
                     dropout=rnn_dropout if i < self.num_layers - 1 else 0,
                     bias=bias,
-                    nonlinearity=(
-                        rnn_activation if model_type == "RNN" else None
-                    ),  # Only RNN uses nonlinearity
+                    nonlinearity=rnn_activation,
                 )
-            else:  # For LSTM or GRU
+            else:
                 rnn = rnn_layer(
-                    input_size=(
-                        self.input_size if i == 0 else self.hidden_size
-                    ),  # First layer uses input_size
+                    input_size=(self.input_size if i == 0 else self.hidden_size),
                     hidden_size=self.hidden_size,
-                    num_layers=1,  # One RNN layer at a time
+                    num_layers=1,
                     bidirectional=self.bidirectional,
                     batch_first=True,
                     dropout=rnn_dropout if i < self.num_layers - 1 else 0,
                     bias=bias,
                 )
             self.rnns.append(rnn)
+            self.layernorms_rnn.append(nn.LayerNorm(self.hidden_size))
 
     def forward(self, x):
         """
@@ -118,6 +129,7 @@ class ConvRNN(nn.Module):
         # Loop through the RNN layers and apply 1D convolution before each
         for i in range(self.num_layers):
             # Transpose to (batch_size, input_size, seq_length) for Conv1d
+            x = self.layernorms_conv[i](x)
             x = x.transpose(1, 2)
 
             # Apply the 1D convolution

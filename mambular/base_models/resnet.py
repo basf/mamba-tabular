@@ -3,7 +3,7 @@ import torch.nn as nn
 from typing import Any
 from ..configs.resnet_config import DefaultResNetConfig
 from .basemodel import BaseModel
-from ..arch_utils.normalization_layers import (
+from ..arch_utils.layer_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
@@ -12,7 +12,7 @@ from ..arch_utils.normalization_layers import (
     GroupNorm,
 )
 from ..arch_utils.resnet_utils import ResidualBlock
-from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
 
 class ResNet(BaseModel):

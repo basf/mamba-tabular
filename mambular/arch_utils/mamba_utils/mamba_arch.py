@@ -2,7 +2,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..normalization_layers import (
+from ..layer_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
@@ -387,7 +387,6 @@ class MambaBlock(nn.Module):
         elif dt_init == "random":
             nn.init.uniform_(self.dt_proj_fwd.weight, -dt_init_std, dt_init_std)
             if self.bidirectional:
-
                 nn.init.uniform_(self.dt_proj_bwd.weight, -dt_init_std, dt_init_std)
         else:
             raise NotImplementedError
@@ -422,7 +421,6 @@ class MambaBlock(nn.Module):
             self.D_fwd._no_weight_decay = True
 
         if self.bidirectional:
-
             if not AD_weight_decay:
                 self.A_log_bwd._no_weight_decay = True
                 self.D_bwd._no_weight_decay = True
@@ -527,7 +525,6 @@ class MambaBlock(nn.Module):
         if self.use_pscan:
             hs = self.pscan(deltaA, BX)
         else:
-
             h = torch.zeros(x.size(0), self.d_inner, self.d_state, device=deltaA.device)
             hs = []
 

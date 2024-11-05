@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from .embedding_tree import NeuralEmbeddingTree
 
 
 class EmbeddingLayer(nn.Module):
@@ -13,6 +14,7 @@ class EmbeddingLayer(nn.Module):
         use_cls=False,
         cls_position=0,
         cat_encoding="int",
+        embedding_layer="linear",
     ):
         """
         Embedding layer that handles numerical and categorical embeddings.
@@ -46,16 +48,28 @@ class EmbeddingLayer(nn.Module):
         self.layer_norm_after_embedding = layer_norm_after_embedding
         self.use_cls = use_cls
         self.cls_position = cls_position
+        if embedding_layer == "ndt":
+            self.num_embeddings = nn.ModuleList(
+                [
+                    nn.Sequential(
+                        NeuralEmbeddingTree(
+                            input_dim=1, output_dim=d_model, temperature=0.3
+                        ),
+                    )
+                    for feature_name, input_shape in num_feature_info.items()
+                ]
+            )
 
-        self.num_embeddings = nn.ModuleList(
-            [
-                nn.Sequential(
-                    nn.Linear(input_shape, d_model, bias=False),
-                    self.embedding_activation,
-                )
-                for feature_name, input_shape in num_feature_info.items()
-            ]
-        )
+        else:
+            self.num_embeddings = nn.ModuleList(
+                [
+                    nn.Sequential(
+                        nn.Linear(input_shape, d_model, bias=False),
+                        self.embedding_activation,
+                    )
+                    for feature_name, input_shape in num_feature_info.items()
+                ]
+            )
 
         self.cat_embeddings = nn.ModuleList()
         for feature_name, num_categories in cat_feature_info.items():

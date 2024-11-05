@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from ..normalization_layers import (
+from ..layer_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,

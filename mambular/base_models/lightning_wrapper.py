@@ -147,7 +147,7 @@ class TaskModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         """
-        Training step for a single batch.
+        Training step for a single batch, incorporating penalty if the model has a penalty_forward method.
 
         Parameters
         ----------
@@ -161,11 +161,19 @@ class TaskModel(pl.LightningModule):
         Tensor
             Training loss.
         """
-
         cat_features, num_features, labels = batch
-        preds = self(num_features=num_features, cat_features=cat_features)
-        loss = self.compute_loss(preds, labels)
 
+        # Check if the model has a `penalty_forward` method
+        if hasattr(self.base_model, "penalty_forward"):
+            preds, penalty = self.base_model.penalty_forward(
+                num_features=num_features, cat_features=cat_features
+            )
+            loss = self.compute_loss(preds, labels) + penalty
+        else:
+            preds = self(num_features=num_features, cat_features=cat_features)
+            loss = self.compute_loss(preds, labels)
+
+        # Log the training loss
         self.log(
             "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )

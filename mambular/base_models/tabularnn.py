@@ -3,9 +3,9 @@ import torch.nn as nn
 from ..arch_utils.mlp_utils import MLP
 from ..configs.tabularnn_config import DefaultTabulaRNNConfig
 from .basemodel import BaseModel
-from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.rnn_utils import ConvRNN
-from ..arch_utils.normalization_layers import (
+from ..arch_utils.layer_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,

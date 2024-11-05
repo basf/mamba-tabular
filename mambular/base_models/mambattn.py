@@ -5,7 +5,7 @@ from ..arch_utils.mlp_utils import MLP
 from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..configs.mambattention_config import DefaultMambAttentionConfig
 from .basemodel import BaseModel
-from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
 
 class MambAttention(BaseModel):
