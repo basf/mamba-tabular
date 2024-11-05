@@ -7,6 +7,7 @@ from .mambatab_config import DefaultMambaTabConfig
 from .tabularnn_config import DefaultTabulaRNNConfig
 from .mambattention_config import DefaultMambAttentionConfig
 from .ndtf_config import DefaultNDTFConfig
+from .node_config import DefaultNODEConfig
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "DefaultTabulaRNNConfig",
     "DefaultMambAttentionConfig",
     "DefaultNDTFConfig",
+    "DefaultNODEConfig",
 ]
