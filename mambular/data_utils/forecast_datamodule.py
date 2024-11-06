@@ -59,9 +59,10 @@ class ForecastMambularDataModule(pl.LightningDataModule):
 
         # Fit the preprocessor on the training data only
         self.preprocessor.fit(train_data)
-        self.cat_feature_info, self.num_feature_info = (
-            self.preprocessor.get_feature_info()
-        )
+        (
+            self.cat_feature_info,
+            self.num_feature_info,
+        ) = self.preprocessor.get_feature_info()
 
         # Transform the data
         train_preprocessed = self.preprocessor.transform(train_data)
@@ -73,6 +74,13 @@ class ForecastMambularDataModule(pl.LightningDataModule):
         )
         self.val_cat_tensors, self.val_num_tensors = self._convert_to_tensor(
             val_preprocessed
+        )
+
+    def preprocess_test_data(self, test_data):
+        test_preprocessed = self.preprocessor.transform(test_data)
+
+        self.test_cat_tensors, self.test_num_tensors = self._convert_to_tensor(
+            test_preprocessed
         )
 
     def setup(self, stage: str):
@@ -92,6 +100,15 @@ class ForecastMambularDataModule(pl.LightningDataModule):
             self.val_dataset = ForecastMambularDataset(
                 cat_features_list=self.val_cat_tensors,
                 num_features_list=self.val_num_tensors,
+                time_steps=self.time_steps,
+                forecast_horizon=self.forecast_horizon,
+            )
+
+        elif stage == "test":
+            # Create test dataset with transformed tensors
+            self.test_dataset = ForecastMambularDataset(
+                cat_features_list=self.test_cat_tensors,
+                num_features_list=self.test_num_tensors,
                 time_steps=self.time_steps,
                 forecast_horizon=self.forecast_horizon,
             )
@@ -134,6 +151,17 @@ class ForecastMambularDataModule(pl.LightningDataModule):
         """
         return DataLoader(
             self.val_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,  # Sequential order for time series
+            **self.dataloader_kwargs,
+        )
+
+    def test_dataloader(self):
+        """
+        Returns the test DataLoader with time series windowing.
+        """
+        return DataLoader(
+            self.test_dataset,
             batch_size=self.batch_size,
             shuffle=False,  # Sequential order for time series
             **self.dataloader_kwargs,
