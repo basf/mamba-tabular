@@ -1,5 +1,6 @@
 import lightning as pl
 import pandas as pd
+import numpy as np
 import torch
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.base import BaseEstimator
@@ -268,9 +269,11 @@ class SklearnBaseTimeSeriesForecaster(BaseEstimator):
 
         # Concatenate predictions and convert to NumPy array
         predictions = torch.cat(predictions).cpu().numpy()
-        return predictions
+        data = {X.columns[0]: predictions}
+        true_predictions = self.data_module.preprocessor.inverse_transform(data)
+        return true_predictions[X.columns[0]]
 
-    def evaluate(self, X):
+    def evaluate(self, X, metrics=None):
         """
         Predicts target values for the given input samples.
 
@@ -284,6 +287,8 @@ class SklearnBaseTimeSeriesForecaster(BaseEstimator):
         predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
             The predicted target values.
         """
+        if metrics is None:
+            metrics = {"Mean Squared Error": mean_squared_error}
         # Ensure model and data module are initialized
         if self.forecast_model is None or self.data_module is None:
             raise ValueError("The model or data module has not been fitted yet.")
@@ -294,7 +299,24 @@ class SklearnBaseTimeSeriesForecaster(BaseEstimator):
         test_loader = self.data_module.test_dataloader()
 
         # Perform predictions on the test DataLoader
-        self.trainer.test(self.forecast_model, test_loader)
+        predictions = self.trainer.predict(self.forecast_model, test_loader)
+
+        # Concatenate predictions and convert to NumPy array
+        predictions = torch.cat(predictions).cpu().numpy()
+        data = {X.columns[0]: predictions}
+        true_predictions = self.data_module.preprocessor.inverse_transform(data)
+        true_predictions = np.array(list(true_predictions.values())).squeeze(0)
+        # Initialize dictionary to store results
+        scores = {}
+
+        # Compute each metric
+        for metric_name, metric_func in metrics.items():
+            scores[metric_name] = metric_func(
+                X.values.squeeze(-1)[self.config.time_steps :],
+                true_predictions.squeeze(-1),
+            )
+
+        return scores
 
     def optimize_hparams(
         self,

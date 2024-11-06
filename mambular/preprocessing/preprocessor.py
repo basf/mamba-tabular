@@ -181,7 +181,7 @@ class Preprocessor:
         if numerical_features:
             for feature in numerical_features:
                 numeric_transformer_steps = [
-                    ("imputer", SimpleImputer(strategy="mean"))
+                    ("imputer", SimpleImputer(strategy="mean", add_indicator=True))
                 ]
 
                 if self.numerical_preprocessing in ["binning", "one_hot"]:
@@ -281,7 +281,10 @@ class Preprocessor:
                 # Create a pipeline for each categorical feature
                 categorical_transformer = Pipeline(
                     [
-                        ("imputer", SimpleImputer(strategy="most_frequent")),
+                        (
+                            "imputer",
+                            SimpleImputer(strategy="most_frequent", add_indicator=True),
+                        ),
                         (
                             "continuous_ordinal",
                             ContinuousOrdinalEncoder(),
@@ -364,6 +367,46 @@ class Preprocessor:
         # Now let's convert this into a dictionary of arrays, one per column
         transformed_dict = self._split_transformed_output(X, transformed_X)
         return transformed_dict
+
+    def inverse_transform(self, X_transformed):
+        """
+        Reverts the transformation applied to the numerical features, returning them to their original scale.
+
+        Parameters
+        ----------
+        X_transformed : dict or DataFrame
+            The transformed data to be inversely transformed. This should match the format produced by `transform`.
+
+        Returns
+        -------
+        DataFrame
+            The data with transformations reverted for supported preprocessing methods.
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor has not been fitted yet.
+        """
+        if not self.fitted:
+            raise NotFittedError(
+                "The preprocessor must be fitted before inverse transforming data."
+            )
+
+        inversed_data = {}
+        for name, transformer, columns in self.column_transformer.transformers_:
+            name = name.split("_")[1]
+            # Check if the transformer has an inverse_transform method
+            if hasattr(transformer, "inverse_transform"):
+                inversed_data[columns[0]] = transformer.inverse_transform(
+                    X_transformed[name].reshape(-1, 1)
+                )
+            else:
+                # Skip or warn for non-compatible transformers like 'ple'
+                print(
+                    f"Warning: Transformer {name} does not support inverse_transform."
+                )
+
+        return inversed_data
 
     def _split_transformed_output(self, X, transformed_X):
         """
