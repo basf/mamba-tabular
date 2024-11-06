@@ -76,7 +76,6 @@ class EmbeddingLayer(nn.Module):
             )
 
     def forward(self, num_features=None, cat_features=None):
-        print(num_features[0].shape)
         if self.use_cls:
             batch_size = (
                 cat_features[0].size(0)
