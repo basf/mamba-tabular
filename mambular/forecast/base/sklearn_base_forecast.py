@@ -34,10 +34,14 @@ class SklearnBaseTimeSeriesForecaster(BaseEstimator):
             "degree",
         ]
 
+        time_series_args = ["time_steps", "max_seq_length", "forecast_horizon"]
+
         self.config_kwargs = {
             k: v
             for k, v in kwargs.items()
-            if k not in self.preprocessor_arg_names and not k.startswith("optimizer")
+            if k not in self.preprocessor_arg_names
+            and not k.startswith("optimizer")
+            and k not in time_series_args
         }
         self.config = config(**self.config_kwargs)
 
@@ -161,8 +165,7 @@ class SklearnBaseTimeSeriesForecaster(BaseEstimator):
             config=self.config,
             cat_feature_info=self.data_module.cat_feature_info,
             num_feature_info=self.data_module.num_feature_info,
-            time_steps=self.config.time_steps,
-            forecast_horizon=self.config.forecast_horizon,
+            num_classes=self.config.forecast_horizon,
             lr=lr,
             lr_patience=lr_patience,
             lr_factor=factor,
@@ -236,6 +239,62 @@ class SklearnBaseTimeSeriesForecaster(BaseEstimator):
             self.forecast_model.load_state_dict(checkpoint["state_dict"])
 
         return self
+
+    def predict(self, X):
+        """
+        Predicts target values for the given input samples.
+
+        Parameters
+        ----------
+        X : DataFrame or array-like, shape (n_samples, n_features)
+            The input samples for which to predict target values.
+
+        Returns
+        -------
+        predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
+            The predicted target values.
+        """
+        # Ensure model and data module are initialized
+        if self.forecast_model is None or self.data_module is None:
+            raise ValueError("The model or data module has not been fitted yet.")
+
+        # Preprocess and set up test data
+        self.data_module.preprocess_test_data(X)
+        self.data_module.setup("test")
+        test_loader = self.data_module.test_dataloader()
+
+        # Perform predictions on the test DataLoader
+        predictions = self.trainer.predict(self.forecast_model, test_loader)
+
+        # Concatenate predictions and convert to NumPy array
+        predictions = torch.cat(predictions).cpu().numpy()
+        return predictions
+
+    def evaluate(self, X):
+        """
+        Predicts target values for the given input samples.
+
+        Parameters
+        ----------
+        X : DataFrame or array-like, shape (n_samples, n_features)
+            The input samples for which to predict target values.
+
+        Returns
+        -------
+        predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
+            The predicted target values.
+        """
+        # Ensure model and data module are initialized
+        if self.forecast_model is None or self.data_module is None:
+            raise ValueError("The model or data module has not been fitted yet.")
+
+        # Preprocess and set up test data
+        self.data_module.preprocess_test_data(X)
+        self.data_module.setup("test")
+        test_loader = self.data_module.test_dataloader()
+
+        # Perform predictions on the test DataLoader
+        self.trainer.test(self.forecast_model, test_loader)
 
     def optimize_hparams(
         self,

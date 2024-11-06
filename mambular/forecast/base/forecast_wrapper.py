@@ -37,9 +37,9 @@ class ForecastingTaskModel(pl.LightningModule):
         config,
         cat_feature_info,
         num_feature_info,
-        num_classes=1,
         early_pruning_threshold=None,
         pruning_epoch=5,
+        num_classes=1,
         optimizer_type: str = "Adam",
         optimizer_args: dict = None,
         **kwargs,
@@ -68,14 +68,14 @@ class ForecastingTaskModel(pl.LightningModule):
             config=config,
             num_feature_info=num_feature_info,
             cat_feature_info=cat_feature_info,
-            num_classes=num_classes,
+            num_classes=self.num_classes,
             **kwargs,
         )
         # Define metrics for forecasting
         self.mae = torchmetrics.MeanAbsoluteError()
         self.rmse = torchmetrics.MeanSquaredError(squared=False)  # RMSE
 
-        self.loss_fct = nn.MSELoss()
+        self.loss_fn = nn.MSELoss()
 
     def forward(self, num_features, cat_features):
         """
@@ -128,6 +128,8 @@ class ForecastingTaskModel(pl.LightningModule):
             Training loss.
         """
         cat_features, num_features, targets = batch
+        if targets.dim() == 3:
+            targets = targets.squeeze(-1)
         preds = self(num_features=num_features, cat_features=cat_features)
         loss = self.compute_loss(preds, targets)
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
@@ -150,6 +152,8 @@ class ForecastingTaskModel(pl.LightningModule):
             Validation loss.
         """
         cat_features, num_features, targets = batch
+        if targets.dim() == 3:
+            targets = targets.squeeze(-1)
         preds = self(num_features=num_features, cat_features=cat_features)
         val_loss = self.compute_loss(preds, targets)
         self.log("val_loss", val_loss, on_epoch=True, prog_bar=True)
@@ -176,6 +180,8 @@ class ForecastingTaskModel(pl.LightningModule):
             Test loss.
         """
         cat_features, num_features, targets = batch
+        if targets.dim() == 3:
+            targets = targets.squeeze(-1)
         preds = self(num_features=num_features, cat_features=cat_features)
         test_loss = self.compute_loss(preds, targets)
         self.log("test_loss", test_loss, on_epoch=True, prog_bar=True)
@@ -184,6 +190,29 @@ class ForecastingTaskModel(pl.LightningModule):
         self.log("test_mae", self.mae(preds, targets), on_epoch=True, prog_bar=True)
         self.log("test_rmse", self.rmse(preds, targets), on_epoch=True, prog_bar=True)
         return test_loss
+
+    def predict_step(self, batch, batch_idx):
+        """
+        Test step for a single batch.
+
+        Parameters
+        ----------
+        batch : tuple
+            Batch of data containing historical and target sequences.
+        batch_idx : int
+            Index of the batch.
+
+        Returns
+        -------
+        Tensor
+            Test loss.
+        """
+        cat_features, num_features, targets = batch
+        if targets.dim() == 3:
+            targets = targets.squeeze(-1)
+        preds = self(num_features=num_features, cat_features=cat_features)
+
+        return preds
 
     def configure_optimizers(self):
         """
