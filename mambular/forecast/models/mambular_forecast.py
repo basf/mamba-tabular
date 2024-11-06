@@ -137,4 +137,4 @@ class MambularForecast(SklearnBaseTimeSeriesForecaster):
         self.config.forecast = True
         self.config.max_seq_length = kwargs.get("max_seq_length", 100)
         self.config.time_steps = kwargs.get("time_steps", 30)
-        self.config.forecast_horizon = kwargs.get("forecast_horizon", 5)
+        self.config.forecast_horizon = kwargs.get("forecast_horizon", 1)
