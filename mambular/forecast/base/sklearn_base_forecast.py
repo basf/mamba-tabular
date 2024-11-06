@@ -268,55 +268,16 @@ class SklearnBaseTimeSeriesForecaster(BaseEstimator):
         predictions = self.trainer.predict(self.forecast_model, test_loader)
 
         # Concatenate predictions and convert to NumPy array
-        predictions = torch.cat(predictions).cpu().numpy()
-        data = {X.columns[0]: predictions}
-        true_predictions = self.data_module.preprocessor.inverse_transform(data)
-        return true_predictions[X.columns[0]]
+        return torch.cat(predictions).cpu().numpy()
 
-    def evaluate(self, X, metrics=None):
-        """
-        Predicts target values for the given input samples.
-
-        Parameters
-        ----------
-        X : DataFrame or array-like, shape (n_samples, n_features)
-            The input samples for which to predict target values.
-
-        Returns
-        -------
-        predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
-            The predicted target values.
-        """
-        if metrics is None:
-            metrics = {"Mean Squared Error": mean_squared_error}
-        # Ensure model and data module are initialized
-        if self.forecast_model is None or self.data_module is None:
-            raise ValueError("The model or data module has not been fitted yet.")
-
-        # Preprocess and set up test data
+    def evaluate(self, X):
         self.data_module.preprocess_test_data(X)
         self.data_module.setup("test")
         test_loader = self.data_module.test_dataloader()
 
-        # Perform predictions on the test DataLoader
-        predictions = self.trainer.predict(self.forecast_model, test_loader)
+        self.forecast_model.set_preprocessor(self.data_module.get_preprocessor())
 
-        # Concatenate predictions and convert to NumPy array
-        predictions = torch.cat(predictions).cpu().numpy()
-        data = {X.columns[0]: predictions}
-        true_predictions = self.data_module.preprocessor.inverse_transform(data)
-        true_predictions = np.array(list(true_predictions.values())).squeeze(0)
-        # Initialize dictionary to store results
-        scores = {}
-
-        # Compute each metric
-        for metric_name, metric_func in metrics.items():
-            scores[metric_name] = metric_func(
-                X.values.squeeze(-1)[self.config.time_steps :],
-                true_predictions.squeeze(-1),
-            )
-
-        return scores
+        return self.trainer.test(self.forecast_model, test_loader)
 
     def optimize_hparams(
         self,
