@@ -8,8 +8,8 @@ from .forecast_dataset import ForecastMambularDataset
 
 class ForecastMambularDataModule(pl.LightningDataModule):
     """
-    A PyTorch Lightning data module for managing time series data in a structured way.
-    Applies sliding window processing for time series forecasting.
+    A PyTorch Lightning data module for time series forecasting with options for temporal, lagged, and rolling features,
+    and flexible forecast horizon configurations.
 
     Parameters:
         preprocessor: object
@@ -26,6 +26,20 @@ class ForecastMambularDataModule(pl.LightningDataModule):
             Proportion of data to use in validation if no validation set is provided.
         random_state: int, optional
             Random seed for reproducibility in data splitting.
+        include_timestamps: bool, optional
+            Whether to include timestamps for time-based features.
+        include_time_embeddings: bool, optional
+            Whether to include cyclical time embeddings (e.g., day of week).
+        include_lagged_features: list of int, optional
+            Lags to include as additional numerical features.
+        include_rolling_stats: dict, optional
+            Specifies rolling window sizes and statistics (e.g., {'window_size': [mean, std]}).
+        external_features: dict, optional
+            External time-dependent features (e.g., weather).
+        scaling: str, optional
+            Type of scaling to apply ("standard", "minmax" or None).
+        variable_horizon: bool, optional
+            If True, dynamically adjusts forecast horizon.
     """
 
     def __init__(
@@ -37,6 +51,14 @@ class ForecastMambularDataModule(pl.LightningDataModule):
         data,
         val_size=0.2,
         random_state=101,
+        include_timestamps=False,
+        include_time_embeddings=False,
+        include_lagged_features=None,
+        include_rolling_stats=None,
+        include_holiday_indicator=False,
+        external_features=None,
+        scaling=None,
+        variable_horizon=False,
         **dataloader_kwargs,
     ):
         super().__init__()
@@ -44,20 +66,27 @@ class ForecastMambularDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.time_steps = time_steps
         self.forecast_horizon = forecast_horizon
-        self.data = data  # Continuous time series dataset with features and target(s)
+        self.data = data
         self.val_size = val_size
         self.random_state = random_state
+        self.include_timestamps = include_timestamps
+        self.include_time_embeddings = include_time_embeddings
+        self.include_lagged_features = include_lagged_features
+        self.include_rolling_stats = include_rolling_stats
+        self.include_holiday_indicator = include_holiday_indicator
+        self.external_features = external_features
+        self.scaling = scaling
+        self.variable_horizon = variable_horizon
         self.dataloader_kwargs = dataloader_kwargs
 
     def preprocess_data(self):
         """
-        Preprocesses the continuous dataset using a sequential train-validation split.
+        Preprocesses the dataset with a sequential train-validation split.
         """
-        # Perform sequential split for time series
         split_idx = int(len(self.data) * (1 - self.val_size))
         train_data, val_data = self.data.iloc[:split_idx], self.data.iloc[split_idx:]
 
-        # Fit the preprocessor on the training data only
+        # Fit the preprocessor on training data only
         self.preprocessor.fit(train_data)
         (
             self.cat_feature_info,
@@ -68,7 +97,7 @@ class ForecastMambularDataModule(pl.LightningDataModule):
         train_preprocessed = self.preprocessor.transform(train_data)
         val_preprocessed = self.preprocessor.transform(val_data)
 
-        # Convert preprocessed data to tensors for categorical and numerical features
+        # Convert preprocessed data to tensors
         self.train_cat_tensors, self.train_num_tensors = self._convert_to_tensor(
             train_preprocessed
         )
@@ -76,57 +105,78 @@ class ForecastMambularDataModule(pl.LightningDataModule):
             val_preprocessed
         )
 
+        # Extract timestamps if enabled
+        self.train_timestamps = train_data.index if self.include_timestamps else None
+        self.val_timestamps = val_data.index if self.include_timestamps else None
+
     def preprocess_test_data(self, test_data):
         test_preprocessed = self.preprocessor.transform(test_data)
-
         self.test_cat_tensors, self.test_num_tensors = self._convert_to_tensor(
             test_preprocessed
         )
+        self.test_timestamps = test_data.index if self.include_timestamps else None
 
     def setup(self, stage: str):
         """
-        Create time series datasets for training and validation.
+        Sets up datasets for training, validation, and testing.
         """
         if stage == "fit":
             self.preprocess_data()
 
-            # Create time series datasets with the transformed tensors
             self.train_dataset = ForecastMambularDataset(
                 cat_features_list=self.train_cat_tensors,
                 num_features_list=self.train_num_tensors,
                 time_steps=self.time_steps,
                 forecast_horizon=self.forecast_horizon,
+                timestamps=self.train_timestamps,
+                include_time_embeddings=self.include_time_embeddings,
+                include_lagged_features=self.include_lagged_features,
+                include_rolling_stats=self.include_rolling_stats,
+                include_holiday_indicator=self.include_holiday_indicator,
+                external_features=self.external_features,
+                scaling=self.scaling,
             )
+
             self.val_dataset = ForecastMambularDataset(
                 cat_features_list=self.val_cat_tensors,
                 num_features_list=self.val_num_tensors,
                 time_steps=self.time_steps,
                 forecast_horizon=self.forecast_horizon,
+                timestamps=self.val_timestamps,
+                include_time_embeddings=self.include_time_embeddings,
+                include_lagged_features=self.include_lagged_features,
+                include_rolling_stats=self.include_rolling_stats,
+                include_holiday_indicator=self.include_holiday_indicator,
+                external_features=self.external_features,
+                scaling=self.scaling,
             )
 
         elif stage == "test":
-            # Create test dataset with transformed tensors
             self.test_dataset = ForecastMambularDataset(
                 cat_features_list=self.test_cat_tensors,
                 num_features_list=self.test_num_tensors,
                 time_steps=self.time_steps,
                 forecast_horizon=self.forecast_horizon,
+                timestamps=self.test_timestamps,
+                include_time_embeddings=self.include_time_embeddings,
+                include_lagged_features=self.include_lagged_features,
+                include_rolling_stats=self.include_rolling_stats,
+                include_holiday_indicator=self.include_holiday_indicator,
+                external_features=self.external_features,
+                scaling=self.scaling,
             )
 
     def _convert_to_tensor(self, data):
         """
-        Helper method to convert preprocessed data into lists of categorical and numerical feature tensors.
+        Converts preprocessed data into lists of categorical and numerical feature tensors.
         """
-        cat_tensors = []
-        num_tensors = []
+        cat_tensors, num_tensors = [], []
 
-        # Populate tensors for categorical features
         for key in self.cat_feature_info:
             cat_key = "cat_" + key
             if cat_key in data:
                 cat_tensors.append(torch.tensor(data[cat_key], dtype=torch.long))
 
-        # Populate tensors for numerical features
         for key in self.num_feature_info:
             num_key = "num_" + key
             if num_key in data:
@@ -136,33 +186,37 @@ class ForecastMambularDataModule(pl.LightningDataModule):
 
     def train_dataloader(self):
         """
-        Returns the training DataLoader with time series windowing.
+        Returns the training DataLoader with sequential ordering.
         """
         return DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
-            shuffle=False,  # Sequential order for time series
+            shuffle=False,
             **self.dataloader_kwargs,
         )
 
     def val_dataloader(self):
         """
-        Returns the validation DataLoader with time series windowing.
+        Returns the validation DataLoader with sequential ordering.
         """
         return DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
-            shuffle=False,  # Sequential order for time series
+            shuffle=False,
             **self.dataloader_kwargs,
         )
 
     def test_dataloader(self):
         """
-        Returns the test DataLoader with time series windowing.
+        Returns the test DataLoader with sequential ordering.
         """
         return DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            shuffle=False,  # Sequential order for time series
+            shuffle=False,
             **self.dataloader_kwargs,
         )
+
+    def get_preprocessor(self):
+        """Returns the preprocessor with scaling parameters for rescaling in evaluation."""
+        return self.preprocessor
