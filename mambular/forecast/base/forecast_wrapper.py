@@ -2,33 +2,15 @@ import lightning as pl
 import torch
 import torch.nn as nn
 import torchmetrics
-from typing import Type
+from typing import Type, Optional, Dict, Callable
+import numpy as np
+import pandas as pd
 
 
 class ForecastingTaskModel(pl.LightningModule):
     """
-    PyTorch Lightning Module for training and evaluating a forecasting model.
-
-    Parameters
-    ----------
-    model_class : Type[nn.Module]
-        The model class to be instantiated and trained.
-    config : dataclass
-        Configuration dataclass containing model hyperparameters.
-    loss_fn : callable, optional
-        Loss function to be used during training and evaluation.
-    time_steps : int
-        Number of past time steps to use as input.
-    forecast_horizon : int
-        Number of future time steps to predict.
-    lr : float, optional
-        Learning rate for the optimizer (default is 1e-3).
-    optimizer_type : str, optional
-        Type of optimizer to use (default is "Adam").
-    optimizer_args : dict, optional
-        Additional arguments for the optimizer.
-    **kwargs : dict
-        Additional keyword arguments.
+    PyTorch Lightning Module for a flexible time series forecasting model with added support
+    for temporal embeddings, uncertainty estimation, variable self.horizons, custom metrics, and temporal regularization.
     """
 
     def __init__(
@@ -37,33 +19,35 @@ class ForecastingTaskModel(pl.LightningModule):
         config,
         cat_feature_info,
         num_feature_info,
-        early_pruning_threshold=None,
-        pruning_epoch=5,
-        num_classes=1,
+        loss_fn: Optional[Callable] = None,
+        early_pruning_threshold: Optional[float] = None,
+        pruning_epoch: int = 5,
+        num_classes: int = 1,
         optimizer_type: str = "Adam",
-        optimizer_args: dict = None,
+        optimizer_args: Optional[Dict] = None,
+        include_time_embeddings: bool = False,
+        include_uncertainty: bool = False,
+        forecast_horizon: int = 1,
+        lr: float = 1e-3,
+        horizons=[1, 2, 3, 5, 10],
         **kwargs,
     ):
         super().__init__()
+        self.save_hyperparameters(ignore=["model_class", "loss_fn", "config"])
+
+        # Set up model parameters
         self.optimizer_type = optimizer_type
         self.num_classes = num_classes
         self.early_pruning_threshold = early_pruning_threshold
         self.pruning_epoch = pruning_epoch
+        self.include_time_embeddings = include_time_embeddings
+        self.include_uncertainty = include_uncertainty
+        self.forecast_horizon = forecast_horizon
+        self.horizons = horizons
         self.val_losses = []
+        self.lr = lr
 
-        self.optimizer_params = {
-            k.replace("optimizer_", ""): v
-            for k, v in optimizer_args.items()
-            if k.startswith("optimizer_")
-        }
-
-        self.save_hyperparameters(ignore=["model_class", "loss_fn"])
-
-        self.lr = self.hparams.get("lr", config.lr)
-        self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
-        self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
-
+        # Model setup
         self.base_model = model_class(
             config=config,
             num_feature_info=num_feature_info,
@@ -71,101 +55,95 @@ class ForecastingTaskModel(pl.LightningModule):
             num_classes=self.num_classes,
             **kwargs,
         )
-        # Define metrics for forecasting
+
+        # Loss and metrics
+        self.loss_fn = loss_fn or nn.MSELoss()
         self.mae = torchmetrics.MeanAbsoluteError()
         self.rmse = torchmetrics.MeanSquaredError(squared=False)  # RMSE
+        self.mase = torchmetrics.MeanAbsoluteError()  # Proxy for MASE calculation
 
-        self.loss_fn = nn.MSELoss()
+        # Default optimizer parameters
+        self.optimizer_params = optimizer_args or {}
+        self.lr_scheduler_params = {
+            "patience": config.lr_patience,
+            "factor": config.lr_factor,
+            "threshold": 0.0001,
+            "cooldown": 1,
+            "min_lr": 1e-6,
+        }
 
-    def forward(self, num_features, cat_features):
+    def set_preprocessor(self, preprocessor):
+        """Sets the preprocessor to access scaling parameters for rescaling."""
+        self.preprocessor = preprocessor
+
+    def forward(self, num_features, cat_features, time_embedding=None):
         """
         Forward pass through the forecasting model.
-
-        Parameters
-        ----------
-        x : Tensor
-            Input tensor with past time steps.
-
-        Returns
-        -------
-        Tensor
-            Model predictions for future time steps.
         """
-        return self.base_model(num_features=num_features, cat_features=cat_features)
+        inputs = {"num_features": num_features, "cat_features": cat_features}
+        if self.include_time_embeddings and time_embedding is not None:
+            inputs["time_embedding"] = time_embedding
+        return self.base_model(**inputs)
 
     def compute_loss(self, predictions, targets):
         """
         Compute the loss for the given predictions and true labels.
-
-        Parameters
-        ----------
-        predictions : Tensor
-            Model predictions.
-        targets : Tensor
-            True future values.
-
-        Returns
-        -------
-        Tensor
-            Computed loss.
         """
+        if self.include_uncertainty:
+            preds_mean, preds_var = predictions
+            mse_loss = self.loss_fn(preds_mean, targets)
+            variance_loss = torch.mean(preds_var)
+            return (
+                mse_loss + 0.1 * variance_loss
+            )  # 0.1 as weighting for uncertainty penalty
         return self.loss_fn(predictions, targets)
 
-    def training_step(self, batch, batch_idx):
+    def compute_mase(self, predictions, targets):
         """
-        Training step for a single batch.
-
-        Parameters
-        ----------
-        batch : tuple
-            Batch of data containing historical and target sequences.
-        batch_idx : int
-            Index of the batch.
-
-        Returns
-        -------
-        Tensor
-            Training loss.
+        Compute MASE: Mean Absolute Scaled Error for time series evaluation.
         """
+        naive_forecast = targets[..., :-1]  # Shifted version of target series
+        scaled_error = torch.mean(torch.abs(targets - predictions)) / torch.mean(
+            torch.abs(targets[..., 1:] - naive_forecast) + 1e-08
+        )
+        return scaled_error
+
+    def step(self, batch, batch_idx):
         cat_features, num_features, targets = batch
-        if targets.dim() == 3:
-            targets = targets.squeeze(-1)
-        preds = self(num_features=num_features, cat_features=cat_features)
+        time_embedding = (
+            self._create_time_embeddings(num_features)
+            if self.include_time_embeddings
+            else None
+        )
+        preds = self(
+            num_features=num_features,
+            cat_features=cat_features,
+            time_embedding=time_embedding,
+        )
         loss = self.compute_loss(preds, targets)
+        metrics = {
+            "mae": self.mae(preds, targets),
+            "rmse": self.rmse(preds, targets),
+            "mase": self.compute_mase(preds, targets),
+        }
+        return loss, metrics
+
+    def training_step(self, batch, batch_idx):
+        loss, metrics = self.step(batch, batch_idx)
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train_mae", metrics["mae"], on_epoch=True, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        """
-        Validation step for a single batch.
-
-        Parameters
-        ----------
-        batch : tuple
-            Batch of data containing historical and target sequences.
-        batch_idx : int
-            Index of the batch.
-
-        Returns
-        -------
-        Tensor
-            Validation loss.
-        """
-        cat_features, num_features, targets = batch
-        if targets.dim() == 3:
-            targets = targets.squeeze(-1)
-        preds = self(num_features=num_features, cat_features=cat_features)
-        val_loss = self.compute_loss(preds, targets)
-        self.log("val_loss", val_loss, on_epoch=True, prog_bar=True)
-
-        # Log metrics
-        self.log("val_mae", self.mae(preds, targets), on_epoch=True, prog_bar=True)
-        self.log("val_rmse", self.rmse(preds, targets), on_epoch=True, prog_bar=True)
-        return val_loss
+        loss, metrics = self.step(batch, batch_idx)
+        self.log("val_loss", loss, on_epoch=True, prog_bar=True)
+        self.log("val_mae", metrics["mae"], on_epoch=True, prog_bar=True)
+        return loss
 
     def test_step(self, batch, batch_idx):
         """
-        Test step for a single batch.
+        Test step for evaluating the time series model with iterative forecasting, where each predicted step
+        is used as input for the next forecasted step.
 
         Parameters
         ----------
@@ -176,57 +154,163 @@ class ForecastingTaskModel(pl.LightningModule):
 
         Returns
         -------
-        Tensor
-            Test loss.
+        dict
+            Dictionary of evaluation metrics for the batch.
         """
         cat_features, num_features, targets = batch
-        if targets.dim() == 3:
-            targets = targets.squeeze(-1)
-        preds = self(num_features=num_features, cat_features=cat_features)
-        test_loss = self.compute_loss(preds, targets)
-        self.log("test_loss", test_loss, on_epoch=True, prog_bar=True)
+        time_embedding = (
+            self._create_time_embeddings(num_features)
+            if self.include_time_embeddings
+            else None
+        )
 
-        # Log metrics
-        self.log("test_mae", self.mae(preds, targets), on_epoch=True, prog_bar=True)
-        self.log("test_rmse", self.rmse(preds, targets), on_epoch=True, prog_bar=True)
-        return test_loss
+        # Initialize metrics and storage for recursive predictions
+        results = {}
+        predictions = []  # To store iterative predictions
+
+        # Initial step: predict t+1 using the true input
+        preds = self(
+            num_features=num_features,
+            cat_features=cat_features,
+            time_embedding=time_embedding,
+        )
+        predictions.append(preds)
+
+        # Recursive prediction for subsequent steps
+        current_num_features = [
+            nf.clone() for nf in num_features
+        ]  # Clone each tensor in num_features list
+        for step in range(1, max(self.horizons)):
+            # Update each feature in current_num_features with the latest prediction at the last time step
+            current_num_features[-1][:, -1] = preds
+            preds = self(
+                num_features=current_num_features,
+                cat_features=cat_features,
+                time_embedding=time_embedding,
+            )
+            predictions.append(preds)
+
+        # Concatenate predictions along the time dimension
+        predictions = torch.cat(
+            predictions, dim=1
+        )  # Shape: (batch_size, max(self.horizons))
+
+        # Evaluate each horizon individually, comparing each step prediction with single-step target
+        cat_feature_info, num_feature_info = self.preprocessor.get_feature_info(
+            verbose=False
+        )
+        feature_names = list(
+            num_feature_info.keys()
+        )  # Extract feature names from num_feature_info
+
+        for horizon in self.horizons:
+            if horizon > predictions.size(
+                1
+            ):  # Skip if horizon exceeds generated predictions
+                continue
+
+            # Select predictions for this horizon
+            preds_horizon = predictions[
+                :,
+                horizon - 1,
+            ]
+
+            # Construct a DataFrame with one column per feature
+            preds_df = pd.DataFrame(preds_horizon.cpu().numpy(), columns=feature_names)
+
+            # Apply inverse transformation
+            preds_rescaled_df = self.preprocessor.inverse_transform(preds_df)
+
+            # Convert the rescaled DataFrame back to a tensor for metric calculations
+            preds_rescaled = torch.tensor(
+                preds_rescaled_df.values, device=preds_horizon.device
+            )
+            targets_horizon = targets  # Flatten targets to (batch_size,)
+
+            # Basic metrics: MAE, RMSE
+            results[
+                f"test_mae_{horizon}"
+            ] = torchmetrics.functional.mean_absolute_error(
+                preds_rescaled, targets_horizon
+            )
+            results[
+                f"test_rmse_{horizon}"
+            ] = torchmetrics.functional.mean_squared_error(
+                preds_rescaled, targets_horizon, squared=False
+            )
+
+            # SMAPE (Symmetric Mean Absolute Percentage Error)
+            smape = torch.mean(
+                2
+                * torch.abs(preds_rescaled - targets_horizon)
+                / (torch.abs(preds_rescaled) + torch.abs(targets_horizon) + 1e-8)
+            )
+            results[f"test_smape_{horizon}"] = smape
+
+            # Coverage for interval-based forecasts (if applicable for probabilistic models)
+            if self.include_uncertainty:
+                preds_mean, preds_std = (
+                    preds_rescaled,
+                    preds_rescaled[:, horizon:],  # Assuming std if available
+                )
+                lower_bound, upper_bound = (
+                    preds_mean - 1.96 * preds_std,
+                    preds_mean + 1.96 * preds_std,
+                )
+                coverage = torch.mean(
+                    (targets_horizon >= lower_bound)
+                    & (targets_horizon <= upper_bound).float()
+                )
+                results[f"test_coverage_{horizon}"] = coverage
+
+        # Log each metric for the current batch
+        for metric_name, value in results.items():
+            self.log(metric_name, value, on_epoch=True, prog_bar=True)
+
+        return results
 
     def predict_step(self, batch, batch_idx):
-        """
-        Test step for a single batch.
+        cat_features, num_features, _ = batch
+        time_embedding = (
+            self._create_time_embeddings(num_features)
+            if self.include_time_embeddings
+            else None
+        )
+        preds = self(
+            num_features=num_features,
+            cat_features=cat_features,
+            time_embedding=time_embedding,
+        )
 
-        Parameters
-        ----------
-        batch : tuple
-            Batch of data containing historical and target sequences.
-        batch_idx : int
-            Index of the batch.
+        cat_feature_info, num_feature_info = self.preprocessor.get_feature_info(
+            verbose=False
+        )
+        feature_names = list(
+            num_feature_info.keys()
+        )  # Extract feature names from num_feature_info
 
-        Returns
-        -------
-        Tensor
-            Test loss.
-        """
-        cat_features, num_features, targets = batch
-        if targets.dim() == 3:
-            targets = targets.squeeze(-1)
-        preds = self(num_features=num_features, cat_features=cat_features)
+        # Construct a DataFrame with one column per feature
+        preds_df = pd.DataFrame(preds.cpu().numpy(), columns=feature_names)
 
-        return preds
+        # Apply inverse transformation
+        preds_rescaled_df = self.preprocessor.inverse_transform(preds_df)
+
+        # Convert the rescaled DataFrame back to a tensor for metric calculations
+        preds_rescaled = torch.tensor(preds_rescaled_df.values, device=preds.device)
+        return preds_rescaled
 
     def configure_optimizers(self):
         """
-        Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
+        Set up the optimizer and learning rate scheduler.
         """
         optimizer_class = getattr(torch.optim, self.optimizer_type)
         optimizer = optimizer_class(
             self.base_model.parameters(), lr=self.lr, **self.optimizer_params
         )
 
-        # Scheduler (optional, adjust as needed)
         scheduler = {
             "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(
-                optimizer, mode="min"
+                optimizer, **self.lr_scheduler_params
             ),
             "monitor": "val_loss",
             "interval": "epoch",
@@ -234,3 +318,16 @@ class ForecastingTaskModel(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
+    def _create_time_embeddings(self, num_features):
+        """
+        Create cyclical embeddings for time-related features (day of the week, month of the year).
+        """
+        # Example cyclical embeddings for temporal data
+        days = torch.arange(0, num_features[0].shape[1]) % 7  # Weekly cycle
+        months = torch.arange(0, num_features[0].shape[1]) % 12  # Monthly cycle
+        day_embedding = torch.sin(2 * np.pi * days / 7).unsqueeze(0)
+        month_embedding = torch.sin(2 * np.pi * months / 12).unsqueeze(0)
+        return torch.cat([day_embedding, month_embedding], dim=-1).to(
+            num_features.device
+        )
