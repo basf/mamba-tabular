@@ -90,16 +90,7 @@ class Mambular(BaseModel):
         self.embedding_layer = EmbeddingLayer(
             num_feature_info=num_feature_info,
             cat_feature_info=cat_feature_info,
-            d_model=self.hparams.get("d_model", config.d_model),
-            embedding_activation=self.hparams.get(
-                "embedding_activation", config.embedding_activation
-            ),
-            layer_norm_after_embedding=self.hparams.get(
-                "layer_norm_after_embedding", config.layer_norm_after_embedding
-            ),
-            use_cls=False,
-            cls_position=-1,
-            cat_encoding=self.hparams.get("cat_encoding", config.cat_encoding),
+            config=config,
         )
 
         head_activation = self.hparams.get("head_activation", config.head_activation)

@@ -10,7 +10,6 @@ from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
 from lightning.pytorch.callbacks import ModelSummary
 from skopt import gp_minimize
-from skopt.space import Real, Integer, Categorical
 import torch.nn as nn
 from sklearn.metrics import mean_squared_error
 import warnings
