@@ -87,32 +87,48 @@ class EmbeddingLayer(nn.Module):
         # Process categorical features
         if self.cat_embeddings and cat_features is not None:
             cat_embeddings = [
-                emb(cat_features[:, :, i]) if self.forecast else emb(cat_features[:, i])
+                emb(cat_features[i]) if self.forecast else emb(cat_features[i])
                 for i, emb in enumerate(self.cat_embeddings)
             ]
-            cat_embeddings = torch.stack(cat_embeddings, dim=1)
+            cat_embeddings = torch.stack(
+                cat_embeddings, dim=1
+            )  # Shape (B, N, S, D) when forecast
             if self.forecast:
-                cat_embeddings = cat_embeddings.squeeze(3)
-            if self.layer_norm_after_embedding:
-                cat_embeddings = self.embedding_norm(cat_embeddings)
+                cat_embeddings = cat_embeddings.mean(
+                    dim=1
+                )  # Aggregate across N to get (B, S, D)
+            else:
+                cat_embeddings = torch.stack(cat_embeddings, dim=1)  # Shape (B, N, D)
+                if self.layer_norm_after_embedding:
+                    cat_embeddings = self.embedding_norm(cat_embeddings)
         else:
             cat_embeddings = None
 
         # Process numerical features
         if self.num_embeddings and num_features is not None:
             num_embeddings = [
-                emb(num_features[:, :, i]) if self.forecast else emb(num_features[:, i])
+                emb(num_features[i]) if self.forecast else emb(num_features[i])
                 for i, emb in enumerate(self.num_embeddings)
             ]
-            num_embeddings = torch.stack(num_embeddings, dim=1)
-            if self.layer_norm_after_embedding:
-                num_embeddings = self.embedding_norm(num_embeddings)
+            num_embeddings = torch.stack(
+                num_embeddings, dim=1
+            )  # Shape (B, N, S, D) when forecast
+            if self.forecast:
+                num_embeddings = num_embeddings.mean(
+                    dim=1
+                )  # Aggregate across N to get (B, S, D)
+            else:
+                num_embeddings = torch.stack(num_embeddings, dim=1)  # Shape (B, N, D)
+                if self.layer_norm_after_embedding:
+                    num_embeddings = self.embedding_norm(num_embeddings)
         else:
             num_embeddings = None
 
         # Combine embeddings
         if cat_embeddings is not None and num_embeddings is not None:
-            x = torch.cat([cat_embeddings, num_embeddings], dim=1)
+            x = torch.cat(
+                [cat_embeddings, num_embeddings], dim=1 if not self.forecast else 2
+            )
         elif cat_embeddings is not None:
             x = cat_embeddings
         elif num_embeddings is not None:
@@ -134,7 +150,7 @@ class EmbeddingLayer(nn.Module):
         # Add positional encoding if forecast=True
         if self.forecast:
             seq_len = x.size(1)
-            x = x + self.positional_encoding[:seq_len].unsqueeze(0).unsqueeze(2)
+            x = x + self.positional_encoding[:seq_len].unsqueeze(0)
 
         return x
 
