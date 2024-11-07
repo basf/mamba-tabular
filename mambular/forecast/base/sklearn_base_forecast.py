@@ -270,14 +270,27 @@ class SklearnBaseTimeSeriesForecaster(BaseEstimator):
         # Concatenate predictions and convert to NumPy array
         return torch.cat(predictions).cpu().numpy()
 
-    def evaluate(self, X):
+    def evaluate(self, X, iterative=False, horizons=[1]):
         self.data_module.preprocess_test_data(X)
         self.data_module.setup("test")
         test_loader = self.data_module.test_dataloader()
 
         self.forecast_model.set_preprocessor(self.data_module.get_preprocessor())
+        self.forecast_model.iterative = iterative
+        self.forecast_model.horizons = horizons
 
-        return self.trainer.test(self.forecast_model, test_loader)
+        results = self.trainer.test(self.forecast_model, test_loader)[0]
+
+        rmse = np.sqrt(
+            mean_squared_error(
+                np.array(self.forecast_model.test_predictions).squeeze(-1),
+                np.array(self.forecast_model.test_targets).squeeze(-1),
+            )
+        )
+
+        results["complete_rmse"] = rmse
+
+        return results
 
     def optimize_hparams(
         self,

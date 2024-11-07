@@ -212,7 +212,7 @@ class ForecastMambularDataModule(pl.LightningDataModule):
         """
         return DataLoader(
             self.test_dataset,
-            batch_size=self.batch_size,
+            batch_size=self.test_dataset.time_steps,
             shuffle=False,
             **self.dataloader_kwargs,
         )

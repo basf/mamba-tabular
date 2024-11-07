@@ -46,6 +46,8 @@ class ForecastingTaskModel(pl.LightningModule):
         self.horizons = horizons
         self.val_losses = []
         self.lr = lr
+        self.test_predictions = []
+        self.test_targets = []
 
         # Model setup
         self.base_model = model_class(
@@ -142,8 +144,7 @@ class ForecastingTaskModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         """
-        Test step for evaluating the time series model with iterative forecasting, where each predicted step
-        is used as input for the next forecasted step.
+        Test step for evaluating the time series model with iterative forecasting (if enabled) or the default sliding window approach.
 
         Parameters
         ----------
@@ -157,113 +158,142 @@ class ForecastingTaskModel(pl.LightningModule):
         dict
             Dictionary of evaluation metrics for the batch.
         """
+
         cat_features, num_features, targets = batch
+        # Evaluate each horizon individually
+        cat_feature_info, num_feature_info = self.preprocessor.get_feature_info(
+            verbose=False
+        )
+        feature_names = list(num_feature_info.keys())
+
+        targets_df = pd.DataFrame(targets.cpu().numpy(), columns=feature_names)
+        targets_rescaled_df = self.preprocessor.inverse_transform(targets_df)
+        targets = torch.tensor(targets_rescaled_df.values, device=targets.device)
+
         time_embedding = (
             self._create_time_embeddings(num_features)
             if self.include_time_embeddings
             else None
         )
 
-        # Initialize metrics and storage for recursive predictions
         results = {}
-        predictions = []  # To store iterative predictions
+        predictions = []
 
-        # Initial step: predict t+1 using the true input
-        preds = self(
-            num_features=num_features,
-            cat_features=cat_features,
-            time_embedding=time_embedding,
-        )
-        predictions.append(preds)
-
-        # Recursive prediction for subsequent steps
-        current_num_features = [
-            nf.clone() for nf in num_features
-        ]  # Clone each tensor in num_features list
-        for step in range(1, max(self.horizons)):
-            # Update each feature in current_num_features with the latest prediction at the last time step
-            current_num_features[-1][:, -1] = preds
+        if self.iterative:
+            # Iterative forecasting: each prediction is fed as input for the next time step
             preds = self(
-                num_features=current_num_features,
+                num_features=num_features,
                 cat_features=cat_features,
                 time_embedding=time_embedding,
             )
             predictions.append(preds)
 
-        # Concatenate predictions along the time dimension
-        predictions = torch.cat(
-            predictions, dim=1
-        )  # Shape: (batch_size, max(self.horizons))
+            # Initialize current features for iterative prediction
+            current_num_features = [nf.clone() for nf in num_features]
+            for step in range(1, max(self.horizons)):
+                current_num_features[-1][:, -1] = preds
+                preds = self(
+                    num_features=current_num_features,
+                    cat_features=cat_features,
+                    time_embedding=time_embedding,
+                )
+                predictions.append(preds)
+        else:
+            # Default sliding window approach, using model's normal prediction method
+            preds = self(
+                num_features=num_features,
+                cat_features=cat_features,
+                time_embedding=time_embedding,
+            )
+            predictions.append(preds)
 
-        # Evaluate each horizon individually, comparing each step prediction with single-step target
-        cat_feature_info, num_feature_info = self.preprocessor.get_feature_info(
-            verbose=False
-        )
-        feature_names = list(
-            num_feature_info.keys()
-        )  # Extract feature names from num_feature_info
+        # Concatenate predictions along the time dimension if using iterative
+        predictions = torch.cat(predictions, dim=1)
 
-        for horizon in self.horizons:
-            if horizon > predictions.size(
-                1
-            ):  # Skip if horizon exceeds generated predictions
-                continue
+        if self.iterative:
+            # Evaluate each horizon individually
+            for horizon in self.horizons:
+                if horizon > predictions.size(1):
+                    continue
 
-            # Select predictions for this horizon
-            preds_horizon = predictions[
-                :,
-                horizon - 1,
-            ]
+                preds_horizon = predictions[:, horizon - 1]
+                preds_df = pd.DataFrame(
+                    preds_horizon.cpu().numpy(), columns=feature_names
+                )
+                preds_rescaled_df = self.preprocessor.inverse_transform(preds_df)
+                preds_rescaled = torch.tensor(
+                    preds_rescaled_df.values, device=preds_horizon.device
+                )
+                targets_horizon = targets
 
-            # Construct a DataFrame with one column per feature
-            preds_df = pd.DataFrame(preds_horizon.cpu().numpy(), columns=feature_names)
+                # Metrics: MAE, RMSE, SMAPE
+                results[
+                    f"test_mae_{horizon}"
+                ] = torchmetrics.functional.mean_absolute_error(
+                    preds_rescaled, targets_horizon
+                )
+                results[
+                    f"test_rmse_{horizon}"
+                ] = torchmetrics.functional.mean_squared_error(
+                    preds_rescaled, targets_horizon, squared=False
+                )
 
-            # Apply inverse transformation
+                smape = torch.mean(
+                    2
+                    * torch.abs(preds_rescaled - targets_horizon)
+                    / (torch.abs(preds_rescaled) + torch.abs(targets_horizon) + 1e-8)
+                )
+                results[f"test_smape_{horizon}"] = smape
+
+                # Uncertainty Coverage (if applicable)
+                if self.include_uncertainty:
+                    preds_mean, preds_std = preds_rescaled, preds_rescaled[:, horizon:]
+                    lower_bound, upper_bound = (
+                        preds_mean - 1.96 * preds_std,
+                        preds_mean + 1.96 * preds_std,
+                    )
+                    coverage = torch.mean(
+                        (targets_horizon >= lower_bound)
+                        & (targets_horizon <= upper_bound).float()
+                    )
+                    results[f"test_coverage_{horizon}"] = coverage
+        else:
+            # Single-horizon evaluation for sliding window approach
+            preds_df = pd.DataFrame(predictions.cpu().numpy(), columns=feature_names)
             preds_rescaled_df = self.preprocessor.inverse_transform(preds_df)
-
-            # Convert the rescaled DataFrame back to a tensor for metric calculations
             preds_rescaled = torch.tensor(
-                preds_rescaled_df.values, device=preds_horizon.device
-            )
-            targets_horizon = targets  # Flatten targets to (batch_size,)
-
-            # Basic metrics: MAE, RMSE
-            results[
-                f"test_mae_{horizon}"
-            ] = torchmetrics.functional.mean_absolute_error(
-                preds_rescaled, targets_horizon
-            )
-            results[
-                f"test_rmse_{horizon}"
-            ] = torchmetrics.functional.mean_squared_error(
-                preds_rescaled, targets_horizon, squared=False
+                preds_rescaled_df.values, device=predictions.device
             )
 
-            # SMAPE (Symmetric Mean Absolute Percentage Error)
+            results["test_mae"] = torchmetrics.functional.mean_absolute_error(
+                preds_rescaled, targets
+            )
+            results["test_rmse"] = torchmetrics.functional.mean_squared_error(
+                preds_rescaled, targets, squared=False
+            )
+
             smape = torch.mean(
                 2
-                * torch.abs(preds_rescaled - targets_horizon)
-                / (torch.abs(preds_rescaled) + torch.abs(targets_horizon) + 1e-8)
+                * torch.abs(preds_rescaled - targets)
+                / (torch.abs(preds_rescaled) + torch.abs(targets) + 1e-8)
             )
-            results[f"test_smape_{horizon}"] = smape
+            results["test_smape"] = smape
 
-            # Coverage for interval-based forecasts (if applicable for probabilistic models)
+            # Single uncertainty coverage calculation if applicable
             if self.include_uncertainty:
-                preds_mean, preds_std = (
-                    preds_rescaled,
-                    preds_rescaled[:, horizon:],  # Assuming std if available
-                )
+                preds_mean, preds_std = preds_rescaled, preds_rescaled[:, 1:]
                 lower_bound, upper_bound = (
                     preds_mean - 1.96 * preds_std,
                     preds_mean + 1.96 * preds_std,
                 )
                 coverage = torch.mean(
-                    (targets_horizon >= lower_bound)
-                    & (targets_horizon <= upper_bound).float()
+                    (targets >= lower_bound) & (targets <= upper_bound).float()
                 )
-                results[f"test_coverage_{horizon}"] = coverage
+                results["test_coverage"] = coverage
 
         # Log each metric for the current batch
+        self.test_predictions.append(preds_rescaled.cpu().numpy())
+        self.test_targets.append(targets.cpu().numpy())
         for metric_name, value in results.items():
             self.log(metric_name, value, on_epoch=True, prog_bar=True)
 
