@@ -104,14 +104,7 @@ class ResNet(BaseModel):
             self.embedding_layer = EmbeddingLayer(
                 num_feature_info=num_feature_info,
                 cat_feature_info=cat_feature_info,
-                d_model=self.hparams.get("d_model", config.d_model),
-                embedding_activation=self.hparams.get(
-                    "embedding_activation", config.embedding_activation
-                ),
-                layer_norm_after_embedding=self.hparams.get(
-                    "layer_norm_after_embedding"
-                ),
-                use_cls=False,
+                config=config,
             )
 
     def forward(self, num_features, cat_features):

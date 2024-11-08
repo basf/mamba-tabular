@@ -37,7 +37,7 @@ class MLP(BaseModel):
         self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
         self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
         self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
-        self.layer_sizes = self.hparams.get("layer_sizes", self.layer_sizes)
+        self.layer_sizes = self.hparams.get("layer_sizes", config.layer_sizes)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -70,7 +70,7 @@ class MLP(BaseModel):
         self.norm_f = get_normalization_layer(config)
 
         if self.norm_f is not None:
-            self.layers.append(self.norm_f(self.layer_sizes[0]))
+            self.layers.append(self.norm_f)
 
         if config.use_glu:
             self.layers.append(nn.GLU())
@@ -100,14 +100,7 @@ class MLP(BaseModel):
             self.embedding_layer = EmbeddingLayer(
                 num_feature_info=num_feature_info,
                 cat_feature_info=cat_feature_info,
-                d_model=self.hparams.get("d_model", config.d_model),
-                embedding_activation=self.hparams.get(
-                    "embedding_activation", config.embedding_activation
-                ),
-                layer_norm_after_embedding=self.hparams.get(
-                    "layer_norm_after_embedding"
-                ),
-                use_cls=False,
+                config=config,
             )
 
     def forward(self, num_features, cat_features) -> torch.Tensor:
@@ -127,7 +120,7 @@ class MLP(BaseModel):
         if self.use_embeddings:
             x = self.embedding_layer(num_features, cat_features)
             B, S, D = x.shape
-            x = x.reshape(B, S * D)
+            x = x.mean(axis=1)
         else:
             x = num_features + cat_features
             x = torch.cat(x, dim=1)
