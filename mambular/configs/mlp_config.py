@@ -61,4 +61,6 @@ class DefaultMLPConfig:
     use_embeddings: bool = False
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
+    layer_norm_eps: float = 1e-05
+    norm: str = None
     d_model: int = 32
