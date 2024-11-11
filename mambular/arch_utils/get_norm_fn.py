@@ -28,10 +28,9 @@ def get_normalization_layer(config):
         If an unsupported normalization layer is specified in the config.
     """
 
-    norm_layer = config.norm
-
-    d_model = config.d_model
-    layer_norm_eps = config.layer_norm_eps
+    norm_layer = getattr(config, "norm", None)
+    d_model = getattr(config, "d_model", 128)
+    layer_norm_eps = getattr(config, "layer_norm_eps", 1e-05)
 
     if norm_layer == "RMSNorm":
         return RMSNorm(d_model, eps=layer_norm_eps)

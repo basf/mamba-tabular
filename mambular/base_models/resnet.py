@@ -69,7 +69,7 @@ class ResNet(BaseModel):
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.layer_sizes = self.hparams.get("layer_sizes", self.layer_sizes)
+        self.layer_sizes = self.hparams.get("layer_sizes", config.layer_sizes)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
         self.activation = config.activation
@@ -80,6 +80,8 @@ class ResNet(BaseModel):
             input_dim += input_shape
         for feature_name, input_shape in cat_feature_info.items():
             input_dim += 1
+
+        self.norm_f = get_normalization_layer(config)
 
         if self.use_embeddings:
             input_dim = (
@@ -113,8 +115,6 @@ class ResNet(BaseModel):
             self.blocks.append(block)
 
         self.output_layer = nn.Linear(self.layer_sizes[-1], num_classes)
-
-        self.norm_f = get_normalization_layer(config)
 
     def forward(self, num_features, cat_features):
         if self.use_embeddings:

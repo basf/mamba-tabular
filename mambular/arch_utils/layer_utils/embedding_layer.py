@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from .embedding_tree import NeuralEmbeddingTree
+from .plr_layer import PeriodicEmbeddings
 
 
 class EmbeddingLayer(nn.Module):
@@ -19,7 +20,7 @@ class EmbeddingLayer(nn.Module):
         """
         super(EmbeddingLayer, self).__init__()
 
-        self.d_model = config.d_model
+        self.d_model = getattr(config, "d_model", 128)
         self.embedding_activation = getattr(
             config, "embedding_activation", nn.Identity()
         )
@@ -34,16 +35,42 @@ class EmbeddingLayer(nn.Module):
             if getattr(config, "embedding_dropout", None) is not None
             else None
         )
+        self.embedding_type = getattr(config, "embedding_type", "standard")
 
-        self.num_embeddings = nn.ModuleList(
-            [
-                nn.Sequential(
-                    nn.Linear(input_shape, self.d_model, bias=False),
-                    self.embedding_activation,
-                )
-                for feature_name, input_shape in num_feature_info.items()
-            ]
-        )
+        # Sequence length
+        self.seq_len = len(num_feature_info) + len(cat_feature_info)
+
+        # Initialize numerical embeddings based on embedding_type
+        if self.embedding_type == "ndt":
+            self.num_embeddings = nn.ModuleList(
+                [
+                    NeuralEmbeddingTree(input_shape, self.d_model)
+                    for feature_name, input_shape in num_feature_info.items()
+                ]
+            )
+        elif self.embedding_type == "plr":
+            self.num_embeddings = PeriodicEmbeddings(
+                n_features=self.seq_len,
+                d_embedding=self.d_model,
+                n_frequencies=getattr(config, "n_frequencies", 48),
+                frequency_init_scale=getattr(config, "frequency_init_scale", 0.01),
+                activation=self.embedding_activation,
+                lite=getattr(config, "plr_lite", False),
+            )
+        elif self.embedding_type == "standard":
+            self.num_embeddings = nn.ModuleList(
+                [
+                    nn.Sequential(
+                        nn.Linear(input_shape, self.d_model, bias=False),
+                        self.embedding_activation,
+                    )
+                    for feature_name, input_shape in num_feature_info.items()
+                ]
+            )
+        else:
+            raise ValueError(
+                "Invalid embedding_type. Choose from 'standard', 'ndt', or 'plr'."
+            )
 
         # Initialize categorical embeddings
         self.cat_embeddings = nn.ModuleList()
@@ -71,9 +98,6 @@ class EmbeddingLayer(nn.Module):
         # Layer normalization if required
         if self.layer_norm_after_embedding:
             self.embedding_norm = nn.LayerNorm(self.d_model)
-
-        # Sequence length
-        self.seq_len = len(self.num_embeddings) + len(self.cat_embeddings)
 
     def forward(self, num_features=None, cat_features=None):
         """
@@ -117,16 +141,31 @@ class EmbeddingLayer(nn.Module):
         else:
             cat_embeddings = None
 
-        # Process numerical embeddings
-        if self.num_embeddings and num_features is not None:
-            num_embeddings = [
-                emb(num_features[i]) for i, emb in enumerate(self.num_embeddings)
-            ]
-            num_embeddings = torch.stack(num_embeddings, dim=1)
-            if self.layer_norm_after_embedding:
-                num_embeddings = self.embedding_norm(num_embeddings)
+        # Process numerical embeddings based on embedding_type
+        if self.embedding_type == "plr":
+            # For PLR, pass all numerical features together
+            if num_features is not None:
+                num_features = torch.stack(num_features, dim=1).squeeze(
+                    -1
+                )  # Stack features along the feature dimension
+                num_embeddings = self.num_embeddings(
+                    num_features
+                )  # Use the single PLR layer for all features
+                if self.layer_norm_after_embedding:
+                    num_embeddings = self.embedding_norm(num_embeddings)
+            else:
+                num_embeddings = None
         else:
-            num_embeddings = None
+            # For standard and ndt embeddings, handle each feature individually
+            if self.num_embeddings and num_features is not None:
+                num_embeddings = [
+                    emb(num_features[i]) for i, emb in enumerate(self.num_embeddings)
+                ]
+                num_embeddings = torch.stack(num_embeddings, dim=1)
+                if self.layer_norm_after_embedding:
+                    num_embeddings = self.embedding_norm(num_embeddings)
+            else:
+                num_embeddings = None
 
         # Combine categorical and numerical embeddings
         if cat_embeddings is not None and num_embeddings is not None:

@@ -86,7 +86,7 @@ class DefaultBatchTabRNNConfig:
     residuals: bool = False
 
     # Batch ensembling specific configurations
-    ensemble_size: int = 16
+    ensemble_size: int = 32
     ensemble_scaling_in: bool = True
     ensemble_scaling_out: bool = True
     ensemble_bias: bool = True

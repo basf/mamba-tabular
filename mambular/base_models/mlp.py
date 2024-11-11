@@ -67,7 +67,7 @@ class MLP(BaseModel):
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.layer_sizes = self.hparams.get("layer_sizes", self.layer_sizes)
+        self.layer_sizes = self.hparams.get("layer_sizes", config.layer_sizes)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -87,7 +87,11 @@ class MLP(BaseModel):
             input_dim += 1
 
         if self.use_embeddings:
-            self.embedding_layer = EmbeddingLayer(config)
+            self.embedding_layer = EmbeddingLayer(
+                num_feature_info=num_feature_info,
+                cat_feature_info=cat_feature_info,
+                config=config,
+            )
             input_dim = (
                 len(num_feature_info) * config.d_model
                 + len(cat_feature_info) * config.d_model
