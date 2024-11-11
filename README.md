@@ -56,12 +56,15 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 | Model            | Description                                                                                                                                             |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Mambular`       | A sequential model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.             |
+| `TabM`           | Batch Ensembling for a MLP as introduced by [Gorishniy et al.](https://arxiv.org/abs/2410.24210)                                                        |
+| `NODE`           | Neural Oblivious Decision Ensembles as introduced by [Popov et al.](https://arxiv.org/abs/1909.06312)                                                   |
+| `BatchTabRNN`    | A sequential model using RNN and batch ensembling. [TBD]()                                                                                              |
 | `FTTransformer`  | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data.                       |
 | `MLP`            | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                                                                         |
 | `ResNet`         | An adaptation of the ResNet architecture for tabular data applications.                                                                                 |
 | `TabTransformer` | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities.     |
 | `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.        |
-| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks                                                                         |
+| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks. Paper Link will follow                                                 |
 | `MambAttention`  | A combination between Mamba and Transformers, similar to Jamba by [Lieber et al.](https://arxiv.org/abs/2403.19887). Not yet included in the benchmarks |
 
 
@@ -325,6 +328,51 @@ Here's how you can implement a custom model with Mambular:
    regressor = MyRegressor(numerical_preprocessing="ple")
    regressor.fit(X_train, y_train, max_epochs=50)
    ```
+
+# Custom Training
+If you prefer to setup custom training, preprocessing and evaluation, you can simply use the `mambular.base_models`.
+Just be careful that all basemodels expect lists of features as inputs. More precisely as list for numerical features and a list for categorical features. A custom training loop, with random data could look like this.
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from mambular.base_models import Mambular
+from mambular.configs import DefaultMambularConfig
+
+# Dummy data and configuration
+cat_feature_info = {"cat1": 5, "cat2": 5}  # Example categorical feature information
+num_feature_info = {"num1": 1, "num2": 1}  # Example numerical feature information
+num_classes = 1
+config = DefaultMambularConfig()  # Use the desired configuration
+
+# Initialize model, loss function, and optimizer
+model = Mambular(cat_feature_info, num_feature_info, num_classes, config)
+criterion = nn.MSELoss()  # Use MSE for regression; change as appropriate for your task
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Example training loop
+for epoch in range(10):  # Number of epochs
+    model.train()
+    optimizer.zero_grad()
+
+    # Dummy Data
+    num_features = [torch.randn(32, 1) for _ in num_feature_info]
+    cat_features = [torch.randint(0, 5, (32,)) for _ in cat_feature_info]
+    labels = torch.randn(32, num_classes)  
+
+    # Forward pass
+    outputs = model(num_features, cat_features)
+    loss = criterion(outputs, labels)
+
+    # Backward pass and optimization
+    loss.backward()
+    optimizer.step()
+
+    # Print loss for monitoring
+    print(f"Epoch [{epoch+1}/10], Loss: {loss.item():.4f}")
+
+```
 
 # 🏷️ Citation
 

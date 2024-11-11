@@ -3,59 +3,51 @@ from ..configs.node_config import DefaultNODEConfig
 import torch
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.node_utils import DenseBlock
-from ..arch_utils.mlp_utils import MLP
+from ..arch_utils.mlp_utils import MLPhead
 
 
 class NODE(BaseModel):
     """
-    Neural Oblivious Decision Ensemble (NODE) Model. Slightly different with a MLP as a tabular task specific head.
-
-    NODE is a neural decision tree model that processes both categorical and numerical features.
-    This class combines embedding layers, a dense decision tree block, and an MLP head for tabular
-    data prediction tasks.
+    A Neural Oblivious Decision Ensemble (NODE) model for tabular data, integrating feature embeddings, dense blocks,
+    and customizable heads for predictions.
 
     Parameters
     ----------
     cat_feature_info : dict
-        Dictionary mapping categorical feature names to their input shapes.
+        Dictionary containing information about categorical features, including their names and dimensions.
     num_feature_info : dict
-        Dictionary mapping numerical feature names to their input shapes.
+        Dictionary containing information about numerical features, including their names and dimensions.
     num_classes : int, optional
-        Number of output classes. Default is 1.
+        The number of output classes or target dimensions for regression, by default 1.
     config : DefaultNODEConfig, optional
-        Configuration object that holds model hyperparameters. Default is `DefaultNODEConfig`.
+        Configuration object containing model hyperparameters such as the number of dense layers, layer dimensions,
+        tree depth, embedding settings, and head layer configurations, by default DefaultNODEConfig().
     **kwargs : dict
-        Additional arguments for the base model.
+        Additional keyword arguments for the BaseModel class.
 
     Attributes
     ----------
-    lr : float
-        Learning rate for the optimizer.
-    lr_patience : int
-        Number of epochs without improvement before reducing the learning rate.
-    weight_decay : float
-        Weight decay factor for regularization.
-    lr_factor : float
-        Factor by which to reduce the learning rate.
     cat_feature_info : dict
-        Information about categorical features.
+        Stores categorical feature information.
     num_feature_info : dict
-        Information about numerical features.
+        Stores numerical feature information.
     use_embeddings : bool
-        Whether to use embeddings for categorical and numerical features.
+        Flag indicating if embeddings should be used for categorical and numerical features.
     embedding_layer : EmbeddingLayer, optional
-        Embedding layer for feature transformation.
+        Embedding layer for features, used if `use_embeddings` is enabled.
     d_out : int
-        Output dimensionality.
+        The output dimension, usually set to `num_classes`.
     block : DenseBlock
-        DenseBlock layer that implements the decision tree ensemble.
-    tabular_head : MLP
-        MLP layer that serves as the output head of the model.
+        Dense block layer for feature transformations based on the NODE approach.
+    tabular_head : MLPhead
+        MLPhead layer to produce the final prediction based on the output of the dense block.
 
     Methods
     -------
     forward(num_features, cat_features)
-        Performs the forward pass, processing numerical and categorical features to produce predictions.
+        Perform a forward pass through the model, including embedding (if enabled), dense transformations,
+        and prediction steps.
+
     """
 
     def __init__(
@@ -69,10 +61,6 @@ class NODE(BaseModel):
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.lr = self.hparams.get("lr", config.lr)
-        self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
-        self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
         self.use_embeddings = self.hparams.get("use_embeddings", config.use_embeddings)
@@ -89,18 +77,7 @@ class NODE(BaseModel):
                 + len(cat_feature_info) * config.d_model
             )
 
-            self.embedding_layer = EmbeddingLayer(
-                num_feature_info=num_feature_info,
-                cat_feature_info=cat_feature_info,
-                d_model=self.hparams.get("d_model", config.d_model),
-                embedding_activation=self.hparams.get(
-                    "embedding_activation", config.embedding_activation
-                ),
-                layer_norm_after_embedding=self.hparams.get(
-                    "layer_norm_after_embedding"
-                ),
-                use_cls=False,
-            )
+            self.embedding_layer = EmbeddingLayer(config)
 
         self.d_out = num_classes
         self.block = DenseBlock(
@@ -114,20 +91,10 @@ class NODE(BaseModel):
 
         head_activation = self.hparams.get("head_activation", config.head_activation)
 
-        self.tabular_head = MLP(
-            config.num_layers * config.layer_dim,
-            hidden_units_list=self.hparams.get(
-                "head_layer_sizes", config.head_layer_sizes
-            ),
-            dropout_rate=self.hparams.get("head_dropout", config.head_dropout),
-            use_skip_layers=self.hparams.get(
-                "head_skip_layers", config.head_skip_layers
-            ),
-            activation_fn=head_activation,
-            use_batch_norm=self.hparams.get(
-                "head_use_batch_norm", config.head_use_batch_norm
-            ),
-            n_output_units=num_classes,
+        self.tabular_head = MLPhead(
+            input_dim=config.num_layers * config.layer_dim,
+            config=config,
+            output_dim=num_classes,
         )
 
     def forward(self, num_features, cat_features):

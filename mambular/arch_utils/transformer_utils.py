@@ -24,23 +24,32 @@ class GLU(nn.Module):
 
 
 class CustomTransformerEncoderLayer(nn.TransformerEncoderLayer):
-    def __init__(self, *args, activation=F.relu, **kwargs):
-        super(CustomTransformerEncoderLayer, self).__init__(
-            *args, activation=activation, **kwargs
+    def __init__(self, config):
+        super().__init__(
+            d_model=getattr(config, "d_model", 128),
+            nhead=getattr(config, "n_heads", 8),
+            dim_feedforward=getattr(config, "transformer_dim_feedforward", 2048),
+            dropout=getattr(config, "attn_dropout", 0.1),
+            activation=getattr(config, "transformer_activation", F.relu),
+            layer_norm_eps=getattr(config, "layer_norm_eps", 1e-5),
+            norm_first=getattr(config, "norm_first", False),
         )
-        self.custom_activation = activation
+        self.bias = getattr(config, "bias", True)
+        self.custom_activation = getattr(config, "transformer_activation", F.relu)
 
-        # Check if the activation function is an instance of a GLU variant
-        if activation in [ReGLU, GLU] or isinstance(activation, (ReGLU, GLU)):
+        # Additional setup based on the activation function
+        if self.custom_activation in [ReGLU, GLU] or isinstance(
+            self.custom_activation, (ReGLU, GLU)
+        ):
             self.linear1 = nn.Linear(
                 self.linear1.in_features,
                 self.linear1.out_features * 2,
-                bias=kwargs.get("bias", True),
+                bias=self.bias,
             )
             self.linear2 = nn.Linear(
                 self.linear2.in_features,
                 self.linear2.out_features,
-                bias=kwargs.get("bias", True),
+                bias=self.bias,
             )
 
     def forward(self, src, src_mask=None, src_key_padding_mask=None, is_causal=False):

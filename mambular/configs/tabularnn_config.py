@@ -79,7 +79,6 @@ class DefaultTabulaRNNConfig:
     layer_norm_eps: float = 1e-05
     dim_feedforward: int = 256
     numerical_embedding: str = "ple"
-    bidirectional: bool = False
     cat_encoding: str = "int"
     d_conv: int = 4
     conv_bias: bool = True

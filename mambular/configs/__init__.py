@@ -8,6 +8,8 @@ from .tabularnn_config import DefaultTabulaRNNConfig
 from .mambattention_config import DefaultMambAttentionConfig
 from .ndtf_config import DefaultNDTFConfig
 from .node_config import DefaultNODEConfig
+from .tabm_config import DefaultTabMConfig
+from .batchtabrnn_config import DefaultBatchTabRNNConfig
 
 
 __all__ = [
@@ -21,4 +23,6 @@ __all__ = [
     "DefaultMambAttentionConfig",
     "DefaultNDTFConfig",
     "DefaultNODEConfig",
+    "DefaultTabMConfig",
+    "DefaultBatchTabRNNConfig",
 ]

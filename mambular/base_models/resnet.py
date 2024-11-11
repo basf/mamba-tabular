@@ -3,19 +3,61 @@ import torch.nn as nn
 from typing import Any
 from ..configs.resnet_config import DefaultResNetConfig
 from .basemodel import BaseModel
-from ..arch_utils.layer_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
+from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.resnet_utils import ResidualBlock
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
 
 class ResNet(BaseModel):
+    """
+    A ResNet model for tabular data, combining feature embeddings, residual blocks, and customizable architecture
+    for processing categorical and numerical features.
+
+    Parameters
+    ----------
+    cat_feature_info : dict
+        Dictionary containing information about categorical features, including their names and dimensions.
+    num_feature_info : dict
+        Dictionary containing information about numerical features, including their names and dimensions.
+    num_classes : int, optional
+        The number of output classes or target dimensions for regression, by default 1.
+    config : DefaultResNetConfig, optional
+        Configuration object containing model hyperparameters such as layer sizes, number of residual blocks,
+        dropout rates, activation functions, and normalization settings, by default DefaultResNetConfig().
+    **kwargs : dict
+        Additional keyword arguments for the BaseModel class.
+
+    Attributes
+    ----------
+    layer_sizes : list of int
+        List specifying the number of units in each layer of the ResNet.
+    cat_feature_info : dict
+        Stores categorical feature information.
+    num_feature_info : dict
+        Stores numerical feature information.
+    activation : callable
+        Activation function used in the residual blocks.
+    use_embeddings : bool
+        Flag indicating if embeddings should be used for categorical and numerical features.
+    embedding_layer : EmbeddingLayer, optional
+        Embedding layer for features, used if `use_embeddings` is enabled.
+    initial_layer : nn.Linear
+        Initial linear layer to project input features into the model's hidden dimension.
+    blocks : nn.ModuleList
+        List of residual blocks to process the hidden representations.
+    output_layer : nn.Linear
+        Output layer that produces the final prediction.
+    norm_f : nn.Module, optional
+        Normalization layer applied in each residual block, if specified in the configuration.
+
+    Methods
+    -------
+    forward(num_features, cat_features)
+        Perform a forward pass through the model, including embedding (if enabled), residual blocks,
+        and prediction steps.
+
+    """
+
     def __init__(
         self,
         cat_feature_info,
@@ -24,27 +66,9 @@ class ResNet(BaseModel):
         config: DefaultResNetConfig = DefaultResNetConfig(),
         **kwargs,
     ):
-        """
-        ResNet model for structured data.
-
-        Parameters
-        ----------
-        cat_feature_info : Any
-            Information about categorical features.
-        num_feature_info : Any
-            Information about numerical features.
-        num_classes : int, optional
-            Number of output classes, by default 1.
-        config : DefaultResNetConfig, optional
-            Configuration dataclass containing hyperparameters, by default DefaultResNetConfig().
-        """
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.lr = self.hparams.get("lr", config.lr)
-        self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
-        self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
         self.layer_sizes = self.hparams.get("layer_sizes", self.layer_sizes)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
@@ -62,22 +86,12 @@ class ResNet(BaseModel):
                 len(num_feature_info) * config.d_model
                 + len(cat_feature_info) * config.d_model
             )
-
-        norm_layer = self.hparams.get("norm", config.norm)
-        if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm
-        elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm
-        elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm
-        elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm
-        elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm
-        elif norm_layer == "LearnableLayerScaling":
-            self.norm_f = LearnableLayerScaling
-        else:
-            self.norm_f = None
+            # embedding layer
+            self.embedding_layer = EmbeddingLayer(
+                num_feature_info=num_feature_info,
+                cat_feature_info=cat_feature_info,
+                config=config,
+            )
 
         self.initial_layer = nn.Linear(input_dim, self.layer_sizes[0])
 
@@ -100,36 +114,9 @@ class ResNet(BaseModel):
 
         self.output_layer = nn.Linear(self.layer_sizes[-1], num_classes)
 
-        if self.use_embeddings:
-            self.embedding_layer = EmbeddingLayer(
-                num_feature_info=num_feature_info,
-                cat_feature_info=cat_feature_info,
-                d_model=self.hparams.get("d_model", config.d_model),
-                embedding_activation=self.hparams.get(
-                    "embedding_activation", config.embedding_activation
-                ),
-                layer_norm_after_embedding=self.hparams.get(
-                    "layer_norm_after_embedding"
-                ),
-                use_cls=False,
-            )
+        self.norm_f = get_normalization_layer(config)
 
     def forward(self, num_features, cat_features):
-        """
-        Forward pass of the ResNet model.
-
-        Parameters
-        ----------
-        num_features : torch.Tensor
-            Tensor of numerical features.
-        cat_features : torch.Tensor, optional
-            Tensor of categorical features.
-
-        Returns
-        -------
-        torch.Tensor
-            Output tensor.
-        """
         if self.use_embeddings:
             x = self.embedding_layer(num_features, cat_features)
             B, S, D = x.shape
