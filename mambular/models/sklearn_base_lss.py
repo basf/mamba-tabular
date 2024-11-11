@@ -161,10 +161,10 @@ class SklearnBaseLSS(BaseEstimator):
         random_state: int = 101,
         batch_size: int = 128,
         shuffle: bool = True,
-        lr: float = 1e-4,
-        lr_patience: int = 10,
-        factor: float = 0.1,
-        weight_decay: float = 1e-06,
+        lr: float = None,
+        lr_patience: int = None,
+        lr_factor: float = None,
+        weight_decay: float = None,
         dataloader_kwargs={},
     ):
         """
@@ -233,13 +233,19 @@ class SklearnBaseLSS(BaseEstimator):
         self.task_model = TaskModel(
             model_class=self.base_model,
             num_classes=self.family.param_count,
+            family=self.family,
             config=self.config,
             cat_feature_info=self.data_module.cat_feature_info,
             num_feature_info=self.data_module.num_feature_info,
-            lr=lr,
-            lr_patience=lr_patience,
-            lr_factor=factor,
-            weight_decay=weight_decay,
+            lr=lr if lr is not None else self.config.lr,
+            lr_patience=lr_patience
+            if lr_patience is not None
+            else self.config.lr_patience,
+            lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
+            weight_decay=weight_decay
+            if weight_decay is not None
+            else self.config.weight_decay,
+            lss=True,
             optimizer_type=self.optimizer_type,
             optimizer_args=self.optimizer_kwargs,
         )
@@ -295,10 +301,10 @@ class SklearnBaseLSS(BaseEstimator):
         patience: int = 15,
         monitor: str = "val_loss",
         mode: str = "min",
-        lr: float = 1e-4,
-        lr_patience: int = 10,
-        factor: float = 0.1,
-        weight_decay: float = 1e-06,
+        lr: float = None,
+        lr_patience: int = None,
+        lr_factor: float = None,
+        weight_decay: float = None,
         checkpoint_path="model_checkpoints",
         distributional_kwargs=None,
         dataloader_kwargs={},
@@ -411,10 +417,14 @@ class SklearnBaseLSS(BaseEstimator):
             config=self.config,
             cat_feature_info=self.data_module.cat_feature_info,
             num_feature_info=self.data_module.num_feature_info,
-            lr=lr,
-            lr_patience=lr_patience,
-            lr_factor=factor,
-            weight_decay=weight_decay,
+            lr=lr if lr is not None else self.config.lr,
+            lr_patience=lr_patience
+            if lr_patience is not None
+            else self.config.lr_patience,
+            lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
+            weight_decay=weight_decay
+            if weight_decay is not None
+            else self.config.weight_decay,
             lss=True,
             optimizer_type=self.optimizer_type,
             optimizer_args=self.optimizer_kwargs,
