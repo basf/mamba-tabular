@@ -90,7 +90,12 @@ class TabM(BaseModel):
 
         # Embedding layer
         if self.use_embeddings:
-            self.embedding_layer = EmbeddingLayer(config)
+            self.embedding_layer = EmbeddingLayer(
+                num_feature_info=num_feature_info,
+                cat_feature_info=cat_feature_info,
+                config=config,
+            )
+
             if self.hparams.get("average_embeddings", config.average_embeddings):
                 input_dim = self.hparams.get("d_model", config.d_model)
             else:
