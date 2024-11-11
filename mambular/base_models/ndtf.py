@@ -7,6 +7,50 @@ import numpy as np
 
 
 class NDTF(BaseModel):
+    """
+    A Neural Decision Tree Forest (NDTF) model for tabular data, composed of an ensemble of neural decision trees
+    with convolutional feature interactions, capable of producing predictions and penalty-based regularization.
+
+    Parameters
+    ----------
+    cat_feature_info : dict
+        Dictionary containing information about categorical features, including their names and dimensions.
+    num_feature_info : dict
+        Dictionary containing information about numerical features, including their names and dimensions.
+    num_classes : int, optional
+        The number of output classes or target dimensions for regression, by default 1.
+    config : DefaultNDTFConfig, optional
+        Configuration object containing model hyperparameters such as the number of ensembles, tree depth, penalty factor,
+        sampling settings, and temperature, by default DefaultNDTFConfig().
+    **kwargs : dict
+        Additional keyword arguments for the BaseModel class.
+
+    Attributes
+    ----------
+    cat_feature_info : dict
+        Stores categorical feature information.
+    num_feature_info : dict
+        Stores numerical feature information.
+    penalty_factor : float
+        Scaling factor for the penalty applied during training, specified in the config.
+    input_dimensions : list of int
+        List of input dimensions for each tree in the ensemble, with random sampling.
+    trees : nn.ModuleList
+        List of neural decision trees used in the ensemble.
+    conv_layer : nn.Conv1d
+        Convolutional layer for feature interactions before passing inputs to trees.
+    tree_weights : nn.Parameter
+        Learnable parameter to weight each tree's output in the ensemble.
+
+    Methods
+    -------
+    forward(num_features, cat_features) -> torch.Tensor
+        Perform a forward pass through the model, producing predictions based on an ensemble of neural decision trees.
+    penalty_forward(num_features, cat_features) -> tuple of torch.Tensor
+        Perform a forward pass with penalty regularization, returning predictions and the calculated penalty term.
+
+    """
+
     def __init__(
         self,
         cat_feature_info,
@@ -15,28 +59,9 @@ class NDTF(BaseModel):
         config: DefaultNDTFConfig = DefaultNDTFConfig(),
         **kwargs,
     ):
-        """
-        Initializes the NDTF model with the given configuration.
-
-        Parameters
-        ----------
-        cat_feature_info : Any
-            Information about categorical features.
-        num_feature_info : Any
-            Information about numerical features.
-
-        num_classes : int, optional
-            Number of output classes, by default 1.
-        config : DefaultNDTFConfig, optional
-            Configuration dataclass containing hyperparameters, by default DefaultNDTFConfig().
-        """
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.lr = self.hparams.get("lr", config.lr)
-        self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
-        self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
         self.penalty_factor = config.penalty_factor

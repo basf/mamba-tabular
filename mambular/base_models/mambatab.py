@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from ..arch_utils.mamba_utils.mamba_arch import Mamba
-from ..arch_utils.mlp_utils import MLP
+from ..arch_utils.mlp_utils import MLPhead
 from ..arch_utils.layer_utils.normalization_layers import (
     LayerNorm,
 )
@@ -11,6 +11,51 @@ from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 
 
 class MambaTab(BaseModel):
+    """
+    A MambaTab model for tabular data processing, integrating feature embeddings, normalization, and a configurable
+    architecture for flexible deployment of Mamba-based feature transformation layers.
+
+    Parameters
+    ----------
+    cat_feature_info : dict
+        Dictionary containing information about categorical features, including their names and dimensions.
+    num_feature_info : dict
+        Dictionary containing information about numerical features, including their names and dimensions.
+    num_classes : int, optional
+        The number of output classes or target dimensions for regression, by default 1.
+    config : DefaultMambaTabConfig, optional
+        Configuration object with model hyperparameters such as dropout rates, hidden layer sizes, Mamba version, and
+        other architectural configurations, by default DefaultMambaTabConfig().
+    **kwargs : dict
+        Additional keyword arguments for the BaseModel class.
+
+    Attributes
+    ----------
+    cat_feature_info : dict
+        Stores categorical feature information.
+    num_feature_info : dict
+        Stores numerical feature information.
+    initial_layer : nn.Linear
+        Linear layer for the initial transformation of concatenated feature embeddings.
+    norm_f : LayerNorm
+        Layer normalization applied after the initial transformation.
+    embedding_activation : callable
+        Activation function applied to the embedded features.
+    axis : int
+        Axis used to adjust the shape of features during transformation.
+    tabular_head : MLPhead
+        MLPhead layer to produce the final prediction based on transformed features.
+    mamba : Mamba or MambaOriginal
+        Mamba-based feature transformation layer based on the version specified in config.
+
+    Methods
+    -------
+    forward(num_features, cat_features)
+        Perform a forward pass through the model, including feature concatenation, initial transformation,
+        Mamba processing, and prediction steps.
+
+    """
+
     def __init__(
         self,
         cat_feature_info,
@@ -28,10 +73,6 @@ class MambaTab(BaseModel):
         for feature_name, input_shape in cat_feature_info.items():
             input_dim += 1
 
-        self.lr = self.hparams.get("lr", config.lr)
-        self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
-        self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -46,20 +87,10 @@ class MambaTab(BaseModel):
 
         head_activation = self.hparams.get("head_activation", config.head_activation)
 
-        self.tabular_head = MLP(
-            self.hparams.get("d_model", config.d_model),
-            hidden_units_list=self.hparams.get(
-                "head_layer_sizes", config.head_layer_sizes
-            ),
-            dropout_rate=self.hparams.get("head_dropout", config.head_dropout),
-            use_skip_layers=self.hparams.get(
-                "head_skip_layers", config.head_skip_layers
-            ),
-            activation_fn=head_activation,
-            use_batch_norm=self.hparams.get(
-                "head_use_batch_norm", config.head_use_batch_norm
-            ),
-            n_output_units=num_classes,
+        self.tabular_head = MLPhead(
+            input_dim=self.hparams.get("d_model", config.d_model),
+            config=config,
+            output_dim=num_classes,
         )
 
         if config.mamba_version == "mamba-torch":
