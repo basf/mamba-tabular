@@ -45,5 +45,7 @@ def get_normalization_layer(config):
         return GroupNorm(1, d_model, eps=layer_norm_eps)
     elif norm_layer == "LearnableLayerScaling":
         return LearnableLayerScaling(d_model)
+    elif norm_layer is None:
+        return None
     else:
         raise ValueError(f"Unsupported normalization layer: {norm_layer}")
