@@ -146,3 +146,86 @@ class BaseModel(nn.Module):
         print("\nParameter counts by layer:")
         for name, count in self.parameter_count().items():
             print(f"  {name}: {count}")
+
+    def initialize_pooling_layers(self, config, n_inputs):
+        """
+        Initializes the layers needed for learnable pooling methods based on self.pooling_method.
+        """
+        if self.pooling_method == "learned_flatten":
+            # Flattening + Linear layer
+            self.learned_flatten_pooling = nn.Linear(
+                n_inputs * config.dim_feedforward, config.dim_feedforward
+            )
+
+        elif self.pooling_method == "attention":
+            # Attention-based pooling with learnable attention weights
+            self.attention_weights = nn.Parameter(torch.randn(config.dim_feedforward))
+
+        elif self.pooling_method == "gated":
+            # Gated pooling with a learned gating layer
+            self.gate_layer = nn.Linear(config.dim_feedforward, config.dim_feedforward)
+
+        elif self.pooling_method == "rnn":
+            # RNN-based pooling: Use a small RNN (e.g., LSTM)
+            self.pooling_rnn = nn.LSTM(
+                input_size=config.dim_feedforward,
+                hidden_size=config.dim_feedforward,
+                num_layers=1,
+                batch_first=True,
+                bidirectional=False,
+            )
+
+        elif self.pooling_method == "conv":
+            # Conv1D-based pooling with global max pooling
+            self.conv1d_pooling = nn.Conv1d(
+                in_channels=config.dim_feedforward,
+                out_channels=config.dim_feedforward,
+                kernel_size=3,  # or a configurable kernel size
+                padding=1,  # ensures output has the same sequence length
+            )
+
+    def pool_sequence(self, out):
+        """
+        Pools the sequence dimension based on self.pooling_method.
+        """
+
+        if self.pooling_method == "avg":
+            return out.mean(
+                dim=1
+            )  # Shape: (batch_size, ensemble_size, hidden_size) or (batch_size, hidden_size)
+        elif self.pooling_method == "max":
+            return out.max(dim=1)[0]
+        elif self.pooling_method == "sum":
+            return out.sum(dim=1)
+        elif self.pooling_method == "last":
+            return out[:, -1, :]
+        elif self.pooling_method == "cls":
+            return out[:, 0, :]
+        elif self.pooling_method == "learned_flatten":
+            # Flatten sequence and apply a learned linear layer
+            batch_size, seq_len, hidden_size = out.shape
+            out = out.reshape(
+                batch_size, -1
+            )  # Shape: (batch_size, seq_len * hidden_size)
+            return self.learned_flatten_pooling(out)  # Shape: (batch_size, hidden_size)
+        elif self.pooling_method == "attention":
+            # Attention-based pooling
+            attention_scores = torch.einsum(
+                "bsh,h->bs", out, self.attention_weights
+            )  # Shape: (batch_size, seq_len)
+            attention_weights = torch.softmax(attention_scores, dim=1).unsqueeze(
+                -1
+            )  # Shape: (batch_size, seq_len, 1)
+            out = (out * attention_weights).sum(
+                dim=1
+            )  # Weighted sum across the sequence, Shape: (batch_size, hidden_size)
+            return out
+        elif self.pooling_method == "gated":
+            # Gated pooling
+            gates = torch.sigmoid(
+                self.gate_layer(out)
+            )  # Shape: (batch_size, seq_len, hidden_size)
+            out = (out * gates).sum(dim=1)  # Shape: (batch_size, hidden_size)
+            return out
+        else:
+            raise ValueError(f"Invalid pooling method: {self.pooling_method}")
