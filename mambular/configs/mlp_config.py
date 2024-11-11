@@ -63,3 +63,5 @@ class DefaultMLPConfig:
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
     d_model: int = 32
+    embedding_type: float = "plr"
+    plr_lite: bool = False

@@ -72,7 +72,11 @@ class DefaultTabMConfig:
     batch_norm: bool = False
     layer_norm: bool = False
     layer_norm_eps: float = 1e-05
-    use_embeddings: bool = False
+
+    # embedding params
+    use_embeddings: bool = True
+    embedding_type: float = "plr"
+    plr_lite: bool = False
     average_embeddings: bool = True
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False

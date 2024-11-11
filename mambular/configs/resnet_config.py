@@ -60,8 +60,14 @@ class DefaultResNetConfig:
     skip_connections: bool = True
     batch_norm: bool = True
     layer_norm: bool = False
+    layer_norm_eps: float = 1e-05
     num_blocks: int = 3
-    use_embeddings: bool = False
+
+    # embedding params
+    use_embeddings: bool = True
+    embedding_type: float = "plr"
+    plr_lite: bool = False
+    average_embeddings: bool = True
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
-    d_model: int = 32
+    d_model: int = 64
