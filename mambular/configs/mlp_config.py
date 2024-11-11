@@ -58,6 +58,7 @@ class DefaultMLPConfig:
     skip_connections: bool = False
     batch_norm: bool = False
     layer_norm: bool = False
+    layer_norm_eps: float = 1e-05
     use_embeddings: bool = False
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
