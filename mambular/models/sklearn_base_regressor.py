@@ -189,7 +189,7 @@ class SklearnBaseRegressor(BaseEstimator):
             X = pd.DataFrame(X)
         if isinstance(y, pd.Series):
             y = y.values
-        if X_val:
+        if X_val is not None:
             if not isinstance(X_val, pd.DataFrame):
                 X_val = pd.DataFrame(X_val)
             if isinstance(y_val, pd.Series):
@@ -217,13 +217,13 @@ class SklearnBaseRegressor(BaseEstimator):
             cat_feature_info=self.data_module.cat_feature_info,
             num_feature_info=self.data_module.num_feature_info,
             lr=lr if lr is not None else self.config.lr,
-            lr_patience=lr_patience
-            if lr_patience is not None
-            else self.config.lr_patience,
+            lr_patience=(
+                lr_patience if lr_patience is not None else self.config.lr_patience
+            ),
             lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
-            weight_decay=weight_decay
-            if weight_decay is not None
-            else self.config.weight_decay,
+            weight_decay=(
+                weight_decay if weight_decay is not None else self.config.weight_decay
+            ),
             optimizer_type=self.optimizer_type,
             optimizer_args=self.optimizer_kwargs,
         )
@@ -341,7 +341,7 @@ class SklearnBaseRegressor(BaseEstimator):
                 X = pd.DataFrame(X)
             if isinstance(y, pd.Series):
                 y = y.values
-            if X_val:
+            if X_val is not None:
                 if not isinstance(X_val, pd.DataFrame):
                     X_val = pd.DataFrame(X_val)
                 if isinstance(y_val, pd.Series):
@@ -369,13 +369,15 @@ class SklearnBaseRegressor(BaseEstimator):
                 cat_feature_info=self.data_module.cat_feature_info,
                 num_feature_info=self.data_module.num_feature_info,
                 lr=lr if lr is not None else self.config.lr,
-                lr_patience=lr_patience
-                if lr_patience is not None
-                else self.config.lr_patience,
+                lr_patience=(
+                    lr_patience if lr_patience is not None else self.config.lr_patience
+                ),
                 lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
-                weight_decay=weight_decay
-                if weight_decay is not None
-                else self.config.weight_decay,
+                weight_decay=(
+                    weight_decay
+                    if weight_decay is not None
+                    else self.config.weight_decay
+                ),
                 optimizer_type=self.optimizer_type,
                 optimizer_args=self.optimizer_kwargs,
             )
