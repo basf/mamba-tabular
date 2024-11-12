@@ -77,7 +77,6 @@ class ResidualBlock(nn.Module):
             d_state=d_state,
             d_conv=d_conv,
             expand=expand_factor,
-            dt_rank=dt_rank,
             dt_min=dt_min,
             dt_max=dt_max,
             dt_init=dt_init,
@@ -85,7 +84,6 @@ class ResidualBlock(nn.Module):
             dt_init_floor=dt_init_floor,
             conv_bias=conv_bias,
             bias=bias,
-            use_fast_path=True,  # Fused kernel options
             layer_idx=layer_idx,
         )
         self.norm = norm
