@@ -7,6 +7,7 @@ from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.rnn_utils import EnsembleConvRNN
 from ..arch_utils.get_norm_fn import get_normalization_layer
 from dataclasses import replace
+from ..arch_utils.layer_utils.sn_linear import SNLinear
 
 
 class BatchTabRNN(BaseModel):
@@ -80,8 +81,6 @@ class BatchTabRNN(BaseModel):
         )
         self.rnn = EnsembleConvRNN(config=config)
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
-
         self.tabular_head = MLPhead(
             input_dim=self.hparams.get("dim_feedforward", config.dim_feedforward),
             config=config,
@@ -97,7 +96,9 @@ class BatchTabRNN(BaseModel):
         self.norm_f = get_normalization_layer(temp_config)
 
         if not self.hparams.get("average_ensembles", True):
-            self.ensemble_linear = nn.Linear(config.ensemble_size, 1)
+            self.ensemble_linear = SNLinear(
+                config.ensemble_size, config.dim_feedforward, num_classes
+            )
 
         n_inputs = len(num_feature_info) + len(cat_feature_info)
         self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
@@ -136,13 +137,11 @@ class BatchTabRNN(BaseModel):
             if self.hparams.get("average_ensembles", True):
                 # Simple average over ensembles
                 out = out.mean(dim=1)  # Shape: (batch_size, hidden_size)
+                # Final prediction head
+                preds = self.tabular_head(out)
 
             else:
                 # Apply the learned linear combination over ensembles
-                out = self.ensemble_linear(out.permute(0, 2, 1)).squeeze(
-                    -1
-                )  # Shape: (batch_size, hidden_size)
+                preds = self.ensemble_linear(out)  # Shape: (batch_size, hidden_size)
 
-        # Final prediction head
-        preds = self.tabular_head(out)
         return preds

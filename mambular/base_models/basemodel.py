@@ -5,28 +5,46 @@ import logging
 
 
 class BaseModel(nn.Module):
-    def __init__(self, **kwargs):
+    def __init__(self, config=None, **kwargs):
         """
-        Initializes the BaseModel with given hyperparameters.
+        Initializes the BaseModel with a configuration file and optional extra parameters.
 
         Parameters
         ----------
+        config : object, optional
+            Configuration object with model hyperparameters.
         **kwargs : dict
-            Hyperparameters to be saved and used in the model.
+            Additional hyperparameters to be saved.
         """
         super(BaseModel, self).__init__()
-        self.hparams = kwargs
+
+        # Store the configuration object
+        self.config = config if config is not None else {}
+
+        # Store any additional keyword arguments
+        self.extra_hparams = kwargs
 
     def save_hyperparameters(self, ignore=[]):
         """
-        Saves the hyperparameters while ignoring specified keys.
+        Saves the configuration and additional hyperparameters while ignoring specified keys.
 
         Parameters
         ----------
         ignore : list, optional
             List of keys to ignore while saving hyperparameters, by default [].
         """
-        self.hparams = {k: v for k, v in self.hparams.items() if k not in ignore}
+        # Filter the config and extra hparams for ignored keys
+        config_hparams = (
+            {k: v for k, v in vars(self.config).items() if k not in ignore}
+            if self.config
+            else {}
+        )
+        extra_hparams = {k: v for k, v in self.extra_hparams.items() if k not in ignore}
+
+        # Merge config and extra hparams
+        self.hparams = {**config_hparams, **extra_hparams}
+
+        # Set each hyperparameter as an attribute
         for key, value in self.hparams.items():
             setattr(self, key, value)
 

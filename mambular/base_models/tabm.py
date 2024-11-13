@@ -9,61 +9,6 @@ from ..arch_utils.layer_utils.sn_linear import SNLinear
 
 
 class TabM(BaseModel):
-    """
-    A TabM model for tabular data, integrating feature embeddings, batch ensemble layers, and configurable
-    architecture for processing categorical and numerical features with options for skip connections, GLU activation,
-    and dropout.
-
-    Parameters
-    ----------
-    cat_feature_info : dict
-        Dictionary containing information about categorical features, including their names and dimensions.
-    num_feature_info : dict
-        Dictionary containing information about numerical features, including their names and dimensions.
-    num_classes : int, optional
-        The number of output classes or target dimensions for regression, by default 1.
-    config : DefaultTabMConfig, optional
-        Configuration object containing model hyperparameters such as layer sizes, dropout rates, batch ensemble
-        settings, activation functions, and normalization settings, by default DefaultTabMConfig().
-    **kwargs : dict
-        Additional keyword arguments for the BaseModel class.
-
-    Attributes
-    ----------
-    layer_sizes : list of int
-        List specifying the number of units in each layer of the TabM model.
-    cat_feature_info : dict
-        Stores categorical feature information.
-    num_feature_info : dict
-        Stores numerical feature information.
-    config : DefaultTabMConfig
-        Stores the configuration for the TabM model.
-    layers : nn.ModuleList
-        List containing the layers of the TabM model, including LinearBatchEnsembleLayer, normalization, activation,
-        and dropout layers.
-    skip_connections : bool
-        Flag indicating whether skip connections are enabled between layers.
-    use_glu : bool
-        Flag indicating if gated linear units (GLU) should be used as the activation function.
-    activation : callable
-        Activation function applied between layers.
-    use_embeddings : bool
-        Flag indicating if embeddings should be used for categorical and numerical features.
-    embedding_layer : EmbeddingLayer, optional
-        Embedding layer for features, used if `use_embeddings` is enabled.
-    norm_f : nn.Module, optional
-        Normalization layer applied in each batch ensemble layer, if specified in the configuration.
-    final_layer : nn.Linear, optional
-        Final linear layer applied when ensemble outputs are not averaged.
-
-    Methods
-    -------
-    forward(num_features, cat_features) -> torch.Tensor
-        Perform a forward pass through the model, including embedding (if enabled), batch ensemble layers,
-        optional skip connections, and prediction steps.
-
-    """
-
     def __init__(
         self,
         cat_feature_info,
@@ -72,22 +17,24 @@ class TabM(BaseModel):
         config: DefaultTabMConfig = DefaultTabMConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        # Pass config to BaseModel
+        super().__init__(config=config, **kwargs)
+
+        # Save hparams including config attributes
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.layer_sizes = self.hparams.get("layer_sizes", config.layer_sizes)
+        # Use self.hparams for configuration attributes
+        self.layer_sizes = self.hparams.get("layer_sizes", [256, 256])
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-        self.config = config
+        self.average_ensembles = self.hparams.get("average_ensembles", True)
+        self.average_embeddings = self.hparams.get("average_embeddings", False)
 
         # Initialize layers
         self.layers = nn.ModuleList()
-        self.skip_connections = self.hparams.get(
-            "skip_connections", config.skip_connections
-        )
-        self.use_glu = self.hparams.get("use_glu", config.use_glu)
-        self.activation = self.hparams.get("activation", config.activation)
-        self.use_embeddings = self.hparams.get("use_embeddings", config.use_embeddings)
+        self.use_glu = self.hparams.get("use_glu", False)
+        self.activation = self.hparams.get("activation", nn.SELU())
+        self.use_embeddings = self.hparams.get("use_embeddings", True)
 
         # Embedding layer
         if self.use_embeddings:
@@ -115,14 +62,18 @@ class TabM(BaseModel):
             LinearBatchEnsembleLayer(
                 in_features=input_dim,
                 out_features=self.layer_sizes[0],
-                ensemble_size=config.ensemble_size,
-                ensemble_scaling_in=config.ensemble_scaling_in,
-                ensemble_scaling_out=config.ensemble_scaling_out,
-                ensemble_bias=config.ensemble_bias,
-                scaling_init=config.scaling_init,
+                ensemble_size=self.hparams.get("ensemble_size", config.ensemble_size),
+                ensemble_scaling_in=self.hparams.get(
+                    "ensemble_scaling_in", config.ensemble_scaling_in
+                ),
+                ensemble_scaling_out=self.hparams.get(
+                    "ensemble_scaling_out", config.ensemble_scaling_out
+                ),
+                ensemble_bias=self.hparams.get("ensemble_bias", config.ensemble_bias),
+                scaling_init=self.hparams.get("scaling_init", config.scaling_init),
             )
         )
-        if config.batch_norm:
+        if self.hparams.get("batch_norm", config.batch_norm):
             self.layers.append(nn.BatchNorm1d(self.layer_sizes[0]))
 
         self.norm_f = get_normalization_layer(config)
@@ -130,24 +81,28 @@ class TabM(BaseModel):
             self.layers.append(self.norm_f(self.layer_sizes[0]))
 
         # Optional activation and dropout
-        if config.use_glu:
+        if self.hparams.get("use_glu", config.use_glu):
             self.layers.append(nn.GLU())
         else:
             self.layers.append(self.activation)
-        if config.dropout > 0.0:
-            self.layers.append(nn.Dropout(config.dropout))
+        if self.hparams.get("dropout", config.dropout) > 0.0:
+            self.layers.append(nn.Dropout(self.hparams.get("dropout", config.dropout)))
 
         # Hidden layers with batch ensembling
         for i in range(1, len(self.layer_sizes)):
-            if config.model_type == "mini":
+            if self.hparams.get("model_type", config.model_type) == "mini":
                 self.layers.append(
                     LinearBatchEnsembleLayer(
                         in_features=self.layer_sizes[i - 1],
                         out_features=self.layer_sizes[i],
-                        ensemble_size=config.ensemble_size,
+                        ensemble_size=self.hparams.get(
+                            "ensemble_size", config.ensemble_size
+                        ),
                         ensemble_scaling_in=False,
                         ensemble_scaling_out=False,
-                        ensemble_bias=config.ensemble_bias,
+                        ensemble_bias=self.hparams.get(
+                            "ensemble_bias", config.ensemble_bias
+                        ),
                         scaling_init="ones",
                     )
                 )
@@ -156,24 +111,38 @@ class TabM(BaseModel):
                     LinearBatchEnsembleLayer(
                         in_features=self.layer_sizes[i - 1],
                         out_features=self.layer_sizes[i],
-                        ensemble_size=config.ensemble_size,
-                        ensemble_scaling_in=config.ensemble_scaling_in,
-                        ensemble_scaling_out=config.ensemble_scaling_out,
-                        ensemble_bias=config.ensemble_bias,
+                        ensemble_size=self.hparams.get(
+                            "ensemble_size", config.ensemble_size
+                        ),
+                        ensemble_scaling_in=self.hparams.get(
+                            "ensemble_scaling_in", config.ensemble_scaling_in
+                        ),
+                        ensemble_scaling_out=self.hparams.get(
+                            "ensemble_scaling_out", config.ensemble_scaling_out
+                        ),
+                        ensemble_bias=self.hparams.get(
+                            "ensemble_bias", config.ensemble_bias
+                        ),
                         scaling_init="ones",
                     )
                 )
 
-            if config.use_glu:
+            if self.hparams.get("use_glu", config.use_glu):
                 self.layers.append(nn.GLU())
             else:
                 self.layers.append(self.activation)
-            if config.dropout > 0.0:
-                self.layers.append(nn.Dropout(config.dropout))
+            if self.hparams.get("dropout", config.dropout) > 0.0:
+                self.layers.append(
+                    nn.Dropout(self.hparams.get("dropout", config.dropout))
+                )
 
-        if not self.hparams.get("average_ensembles", True):
+        if self.average_ensembles:
+            self.final_layer = nn.Linear(self.layer_sizes[-1], num_classes)
+        else:
             self.final_layer = SNLinear(
-                config.ensemble_size, self.layer_sizes[-1], num_classes
+                self.hparams.get("ensemble_size", config.ensemble_size),
+                self.layer_sizes[-1],
+                num_classes,
             )
 
     def forward(self, num_features, cat_features) -> torch.Tensor:
@@ -196,7 +165,7 @@ class TabM(BaseModel):
         if self.use_embeddings:
             x = self.embedding_layer(num_features, cat_features)
             # Option 1: Average over feature dimension (N)
-            if self.hparams.get("average_embeddings", self.config.average_embeddings):
+            if self.average_embeddings:
                 x = x.mean(dim=1)  # Shape: (B, D)
             # Option 2: Flatten feature and embedding dimensions
             else:
@@ -223,12 +192,10 @@ class TabM(BaseModel):
         x = self.layers[-1](x)  # Shape (batch_size, ensemble_size, num_classes)
 
         # Option 1: Averaging across ensemble outputs
-        if self.hparams.get("average_ensembles", True):
+        if self.average_ensembles:
             x = x.mean(dim=1)  # Shape (batch_size, num_classes)
 
-        # Option 2: Adding a final layer to map to `num_classes`
-        else:
-            # x = x.view(x.size(0), -1)  # Flatten ensemble dimension if not averaging
-            x = self.final_layer(x)  # Shape (batch_size, num_classes)
+        x = self.final_layer(x)  # Shape (batch_size, num_classes)
 
+        print(x.shape)
         return x

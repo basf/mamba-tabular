@@ -156,6 +156,7 @@ class EnsembleConvRNN(nn.Module):
         self.ensemble_scaling_out = getattr(config, "ensemble_scaling_out", True)
         self.ensemble_bias = getattr(config, "ensemble_bias", False)
         self.scaling_init = getattr(config, "scaling_init", "ones")
+        self.model_type = getattr(config, "model_type", "full")
 
         # Convolutional layers
         self.convs = nn.ModuleList()
@@ -185,9 +186,9 @@ class EnsembleConvRNN(nn.Module):
         self.rnns = nn.ModuleList()
         self.layernorms_rnn = nn.ModuleList()  # LayerNorms for RNN layers
 
-        for i in range(self.num_layers):
-            rnn = RNNBatchEnsembleLayer(
-                input_size=(self.input_size if i == 0 else self.hidden_size),
+        self.rnns.append(
+            RNNBatchEnsembleLayer(
+                input_size=self.input_size,
                 hidden_size=self.hidden_size,
                 ensemble_size=self.ensemble_size,
                 ensemble_scaling_in=self.ensemble_scaling_in,
@@ -195,11 +196,37 @@ class EnsembleConvRNN(nn.Module):
                 ensemble_bias=self.ensemble_bias,
                 dropout=self.rnn_dropout if i < self.num_layers - 1 else 0,
                 nonlinearity=self.rnn_activation,
-                scaling_init=self.scaling_init,
+                scaling_init="normal",
             )
+        )
+
+        for i in range(1, self.num_layers):
+            if self.model_type == "mini":
+                rnn = RNNBatchEnsembleLayer(
+                    input_size=self.hidden_size,
+                    hidden_size=self.hidden_size,
+                    ensemble_size=self.ensemble_size,
+                    ensemble_scaling_in=False,
+                    ensemble_scaling_out=False,
+                    ensemble_bias=self.ensemble_bias,
+                    dropout=self.rnn_dropout if i < self.num_layers - 1 else 0,
+                    nonlinearity=self.rnn_activation,
+                    scaling_init=self.scaling_init,
+                )
+            else:
+                rnn = RNNBatchEnsembleLayer(
+                    input_size=self.hidden_size,
+                    hidden_size=self.hidden_size,
+                    ensemble_size=self.ensemble_size,
+                    ensemble_scaling_in=self.ensemble_scaling_in,
+                    ensemble_scaling_out=self.ensemble_scaling_out,
+                    ensemble_bias=self.ensemble_bias,
+                    dropout=self.rnn_dropout if i < self.num_layers - 1 else 0,
+                    nonlinearity=self.rnn_activation,
+                    scaling_init=self.scaling_init,
+                )
 
             self.rnns.append(rnn)
-            self.layernorms_rnn.append(nn.LayerNorm(self.hidden_size))
 
     def forward(self, x):
         """

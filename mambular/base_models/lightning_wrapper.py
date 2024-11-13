@@ -142,7 +142,9 @@ class TaskModel(pl.LightningModule):
         if self.lss:
             return self.family.compute_loss(predictions, y_true.squeeze(-1))
         else:
-            loss = self.loss_fct(predictions, y_true)
+            loss = self.loss_fct(
+                predictions, y_true.unsqueeze(1).expand_as(predictions)
+            )
             return loss
 
     def training_step(self, batch, batch_idx):

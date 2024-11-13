@@ -116,7 +116,7 @@ class RNNBatchEnsembleLayer(nn.Module):
         ensemble_scaling_in: bool = True,
         ensemble_scaling_out: bool = True,
         ensemble_bias: bool = False,
-        scaling_init: Literal["ones", "random-signs"] = "ones",
+        scaling_init: Literal["ones", "random-signs", "normal"] = "ones",
     ):
         """
         A batch ensemble RNN layer with optional bidirectionality and shared weights.
@@ -173,11 +173,12 @@ class RNNBatchEnsembleLayer(nn.Module):
         # Initialize parameters
         self.reset_parameters(scaling_init)
 
-    def reset_parameters(self, scaling_init: Literal["ones", "random-signs"]):
+    def reset_parameters(self, scaling_init: Literal["ones", "random-signs", "normal"]):
         # Initialize scaling factors r and s based on selected initialization
         scaling_init_fn = {
             "ones": nn.init.ones_,
             "random-signs": lambda x: torch.sign(torch.randn_like(x)),
+            "normal": lambda x: nn.init.normal_(x, mean=0.0, std=1.0),
         }
 
         if self.r is not None:
