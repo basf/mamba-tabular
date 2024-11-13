@@ -87,5 +87,6 @@ class DefaultTabMConfig:
     ensemble_scaling_in: bool = True
     ensemble_scaling_out: bool = True
     ensemble_bias: bool = True
-    scaling_init: Literal["ones", "random-signs"] = "ones"
+    scaling_init: Literal["ones", "random-signs", "normal"] = "normal"
     average_ensembles: bool = True
+    model_type: Literal["mini", "full"] = "full"

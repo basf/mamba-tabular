@@ -44,15 +44,17 @@ class LinearBatchEnsembleLayer(nn.Module):
         self.bias = (
             nn.Parameter(torch.empty(out_features))
             if not ensemble_bias and out_features > 0
-            else nn.Parameter(torch.empty(ensemble_size, out_features))
-            if ensemble_bias
-            else None
+            else (
+                nn.Parameter(torch.empty(ensemble_size, out_features))
+                if ensemble_bias
+                else None
+            )
         )
 
         # Initialize parameters
         self.reset_parameters(scaling_init)
 
-    def reset_parameters(self, scaling_init: Literal["ones", "random-signs"]):
+    def reset_parameters(self, scaling_init: Literal["ones", "random-signs", "normal"]):
         # Initialize W using a uniform distribution
         nn.init.kaiming_uniform_(self.W, a=math.sqrt(5))
 
@@ -60,6 +62,7 @@ class LinearBatchEnsembleLayer(nn.Module):
         scaling_init_fn = {
             "ones": nn.init.ones_,
             "random-signs": lambda x: torch.sign(torch.randn_like(x)),
+            "normal": lambda x: nn.init.normal_(x, mean=0.0, std=1.0),
         }
 
         if self.r is not None:

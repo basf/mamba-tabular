@@ -5,6 +5,7 @@ from .basemodel import BaseModel
 from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.layer_utils.batch_ensemble_layer import LinearBatchEnsembleLayer
+from ..arch_utils.layer_utils.sn_linear import SNLinear
 
 
 class TabM(BaseModel):
@@ -138,21 +139,30 @@ class TabM(BaseModel):
 
         # Hidden layers with batch ensembling
         for i in range(1, len(self.layer_sizes)):
-            self.layers.append(
-                LinearBatchEnsembleLayer(
-                    in_features=self.layer_sizes[i - 1],
-                    out_features=self.layer_sizes[i],
-                    ensemble_size=config.ensemble_size,
-                    ensemble_scaling_in=config.ensemble_scaling_in,
-                    ensemble_scaling_out=config.ensemble_scaling_out,
-                    ensemble_bias=config.ensemble_bias,
-                    scaling_init=config.scaling_init,
+            if config.model_type == "mini":
+                self.layers.append(
+                    LinearBatchEnsembleLayer(
+                        in_features=self.layer_sizes[i - 1],
+                        out_features=self.layer_sizes[i],
+                        ensemble_size=config.ensemble_size,
+                        ensemble_scaling_in=False,
+                        ensemble_scaling_out=False,
+                        ensemble_bias=config.ensemble_bias,
+                        scaling_init="ones",
+                    )
                 )
-            )
-            if config.batch_norm:
-                self.layers.append(nn.BatchNorm1d(self.layer_sizes[i]))
-            if config.layer_norm:
-                self.layers.append(nn.LayerNorm(self.layer_sizes[i]))
+            else:
+                self.layers.append(
+                    LinearBatchEnsembleLayer(
+                        in_features=self.layer_sizes[i - 1],
+                        out_features=self.layer_sizes[i],
+                        ensemble_size=config.ensemble_size,
+                        ensemble_scaling_in=config.ensemble_scaling_in,
+                        ensemble_scaling_out=config.ensemble_scaling_out,
+                        ensemble_bias=config.ensemble_bias,
+                        scaling_init="ones",
+                    )
+                )
 
             if config.use_glu:
                 self.layers.append(nn.GLU())
@@ -161,22 +171,9 @@ class TabM(BaseModel):
             if config.dropout > 0.0:
                 self.layers.append(nn.Dropout(config.dropout))
 
-        # Output layer
-        self.layers.append(
-            LinearBatchEnsembleLayer(
-                in_features=self.layer_sizes[-1],
-                out_features=num_classes,
-                ensemble_size=config.ensemble_size,
-                ensemble_scaling_in=config.ensemble_scaling_in,
-                ensemble_scaling_out=config.ensemble_scaling_out,
-                ensemble_bias=config.ensemble_bias,
-                scaling_init=config.scaling_init,
-            )
-        )
-
         if not self.hparams.get("average_ensembles", True):
-            self.final_layer = nn.Linear(
-                self.layer_sizes[-1] * config.ensemble_size, num_classes
+            self.final_layer = SNLinear(
+                config.ensemble_size, self.layer_sizes[-1], num_classes
             )
 
     def forward(self, num_features, cat_features) -> torch.Tensor:
@@ -231,7 +228,7 @@ class TabM(BaseModel):
 
         # Option 2: Adding a final layer to map to `num_classes`
         else:
-            x = x.view(x.size(0), -1)  # Flatten ensemble dimension if not averaging
+            # x = x.view(x.size(0), -1)  # Flatten ensemble dimension if not averaging
             x = self.final_layer(x)  # Shape (batch_size, num_classes)
 
         return x

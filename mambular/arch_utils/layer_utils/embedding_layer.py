@@ -50,7 +50,7 @@ class EmbeddingLayer(nn.Module):
             )
         elif self.embedding_type == "plr":
             self.num_embeddings = PeriodicEmbeddings(
-                n_features=self.seq_len,
+                n_features=len(num_feature_info),
                 d_embedding=self.d_model,
                 n_frequencies=getattr(config, "n_frequencies", 48),
                 frequency_init_scale=getattr(config, "frequency_init_scale", 0.01),
