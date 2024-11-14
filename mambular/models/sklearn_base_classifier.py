@@ -466,6 +466,10 @@ class SklearnBaseClassifier(BaseEstimator):
             if self.task_model.base_model.returns_ensemble:  # If using ensemble
                 # Average logits across the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
                 logits = logits.mean(dim=1)
+                if (
+                    logits.dim() == 1
+                ):  # Check if logits has only one dimension (shape (N,))
+                    logits = logits.unsqueeze(1)
 
             # Check the shape of the logits to determine binary or multi-class classification
             if logits.shape[1] == 1:
@@ -480,7 +484,7 @@ class SklearnBaseClassifier(BaseEstimator):
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()
 
-    def predict_proba(self, X):
+    def predict_proba(self, X, device=None):
         """
         Predict class probabilities for the given input samples.
 
@@ -540,6 +544,14 @@ class SklearnBaseClassifier(BaseEstimator):
         # Perform inference
         with torch.no_grad():
             logits = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
+            # Check if ensemble is used
+            if self.task_model.base_model.returns_ensemble:  # If using ensemble
+                # Average logits across the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
+                logits = logits.mean(dim=1)
+                if (
+                    logits.dim() == 1
+                ):  # Check if logits has only one dimension (shape (N,))
+                    logits = logits.unsqueeze(1)
             if logits.shape[1] > 1:
                 probabilities = torch.softmax(logits, dim=1)
             else:
