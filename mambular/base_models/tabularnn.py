@@ -1,18 +1,12 @@
 import torch
 import torch.nn as nn
-from ..arch_utils.mlp_utils import MLP
+from ..arch_utils.mlp_utils import MLPhead
 from ..configs.tabularnn_config import DefaultTabulaRNNConfig
 from .basemodel import BaseModel
-from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.rnn_utils import ConvRNN
-from ..arch_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
+from ..arch_utils.get_norm_fn import get_normalization_layer
+from dataclasses import replace
 
 
 class TabulaRNN(BaseModel):
@@ -35,85 +29,33 @@ class TabulaRNN(BaseModel):
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
-        norm_layer = self.hparams.get("norm", config.norm)
-        if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm(
-                self.hparams.get("dim_feedforward", config.dim_feedforward)
-            )
-        elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(
-                self.hparams.get("dim_feedforward", config.dim_feedforward)
-            )
-        elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(
-                self.hparams.get("dim_feedforward", config.dim_feedforward)
-            )
-        elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(
-                self.hparams.get("dim_feedforward", config.dim_feedforward)
-            )
-        elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(
-                1, self.hparams.get("dim_feedforward", config.dim_feedforward)
-            )
-        elif norm_layer == "LearnableLayerScaling":
-            self.norm_f = LearnableLayerScaling(
-                self.hparams.get("dim_feedforward", config.dim_feedforward)
-            )
-        else:
-            self.norm_f = None
-
-        self.rnn = ConvRNN(
-            model_type=self.hparams.get("model_type", config.model_type),
-            input_size=self.hparams.get("d_model", config.d_model),
-            hidden_size=self.hparams.get("dim_feedforward", config.dim_feedforward),
-            num_layers=self.hparams.get("n_layers", config.n_layers),
-            bidirectional=self.hparams.get("bidirectional", config.bidirectional),
-            rnn_dropout=self.hparams.get("rnn_dropout", config.rnn_dropout),
-            bias=self.hparams.get("bias", config.bias),
-            conv_bias=self.hparams.get("conv_bias", config.conv_bias),
-            rnn_activation=self.hparams.get("rnn_activation", config.rnn_activation),
-            d_conv=self.hparams.get("d_conv", config.d_conv),
-            residuals=self.hparams.get("residuals", config.residuals),
-        )
+        self.rnn = ConvRNN(config)
 
         self.embedding_layer = EmbeddingLayer(
             num_feature_info=num_feature_info,
             cat_feature_info=cat_feature_info,
-            d_model=self.hparams.get("d_model", config.d_model),
-            embedding_activation=self.hparams.get(
-                "embedding_activation", config.embedding_activation
-            ),
-            layer_norm_after_embedding=self.hparams.get(
-                "layer_norm_after_embedding", config.layer_norm_after_embedding
-            ),
-            use_cls=False,
-            cls_position=-1,
-            cat_encoding=self.hparams.get("cat_encoding", config.cat_encoding),
+            config=config,
         )
 
         head_activation = self.hparams.get("head_activation", config.head_activation)
 
-        self.tabular_head = MLP(
-            self.hparams.get("dim_feedforward", config.dim_feedforward),
-            hidden_units_list=self.hparams.get(
-                "head_layer_sizes", config.head_layer_sizes
-            ),
-            dropout_rate=self.hparams.get("head_dropout", config.head_dropout),
-            use_skip_layers=self.hparams.get(
-                "head_skip_layers", config.head_skip_layers
-            ),
-            activation_fn=head_activation,
-            use_batch_norm=self.hparams.get(
-                "head_use_batch_norm", config.head_use_batch_norm
-            ),
-            n_output_units=num_classes,
+        self.tabular_head = MLPhead(
+            input_dim=self.hparams.get("dim_feedforward", config.dim_feedforward),
+            config=config,
+            output_dim=num_classes,
         )
 
         self.linear = nn.Linear(
             self.hparams.get("d_model", config.d_model),
             self.hparams.get("dim_feedforward", config.dim_feedforward),
         )
+
+        temp_config = replace(config, d_model=config.dim_feedforward)
+        self.norm_f = get_normalization_layer(temp_config)
+
+        # pooling
+        n_inputs = len(num_feature_info) + len(cat_feature_info)
+        self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
 
     def forward(self, num_features, cat_features):
         """
@@ -137,16 +79,7 @@ class TabulaRNN(BaseModel):
         out, _ = self.rnn(x)
         z = self.linear(torch.mean(x, dim=1))
 
-        if self.pooling_method == "avg":
-            x = torch.mean(out, dim=1)
-        elif self.pooling_method == "max":
-            x, _ = torch.max(out, dim=1)
-        elif self.pooling_method == "sum":
-            x = torch.sum(out, dim=1)
-        elif self.pooling_method == "last":
-            x = x[:, -1, :]
-        else:
-            raise ValueError(f"Invalid pooling method: {self.pooling_method}")
+        x = self.pool_sequence(out)
         x = x + z
         if self.norm_f is not None:
             x = self.norm_f(x)

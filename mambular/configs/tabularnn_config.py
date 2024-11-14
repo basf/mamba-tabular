@@ -12,7 +12,7 @@ class DefaultTabulaRNNConfig:
     lr : float, default=1e-04
         Learning rate for the optimizer.
     model_type : str, default="RNN"
-        type of model, one of "RNN", "LSTM", "GRU"
+        type of model, one of "RNN", "LSTM", "GRU", "mLSTM", "sLSTM"
     lr_patience : int, default=10
         Number of epochs with no improvement after which learning rate will be reduced.
     weight_decay : float, default=1e-06
@@ -79,7 +79,6 @@ class DefaultTabulaRNNConfig:
     layer_norm_eps: float = 1e-05
     dim_feedforward: int = 256
     numerical_embedding: str = "ple"
-    bidirectional: bool = False
     cat_encoding: str = "int"
     d_conv: int = 4
     conv_bias: bool = True

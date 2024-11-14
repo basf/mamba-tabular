@@ -2,18 +2,60 @@ import torch
 import torch.nn as nn
 from ..configs.mlp_config import DefaultMLPConfig
 from .basemodel import BaseModel
-from ..arch_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
-)
-from ..arch_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.get_norm_fn import get_normalization_layer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
 
 class MLP(BaseModel):
+    """
+    A multi-layer perceptron (MLP) model for tabular data processing, with options for embedding, normalization,
+    skip connections, and customizable activation functions.
+
+    Parameters
+    ----------
+    cat_feature_info : dict
+        Dictionary containing information about categorical features, including their names and dimensions.
+    num_feature_info : dict
+        Dictionary containing information about numerical features, including their names and dimensions.
+    num_classes : int, optional
+        The number of output classes or target dimensions for regression, by default 1.
+    config : DefaultMLPConfig, optional
+        Configuration object with model hyperparameters such as layer sizes, dropout rates, activation functions,
+        embedding settings, and normalization options, by default DefaultMLPConfig().
+    **kwargs : dict
+        Additional keyword arguments for the BaseModel class.
+
+    Attributes
+    ----------
+    layer_sizes : list of int
+        List specifying the number of units in each layer of the MLP.
+    cat_feature_info : dict
+        Stores categorical feature information.
+    num_feature_info : dict
+        Stores numerical feature information.
+    layers : nn.ModuleList
+        List containing the layers of the MLP, including linear layers, normalization layers, and activations.
+    skip_connections : bool
+        Flag indicating whether skip connections are enabled between layers.
+    use_glu : bool
+        Flag indicating if gated linear units (GLU) should be used as the activation function.
+    activation : callable
+        Activation function applied between layers.
+    use_embeddings : bool
+        Flag indicating if embeddings should be used for categorical and numerical features.
+    embedding_layer : EmbeddingLayer, optional
+        Embedding layer for features, used if `use_embeddings` is enabled.
+    norm_f : nn.Module, optional
+        Normalization layer applied to the output of the first layer, if specified in the configuration.
+
+    Methods
+    -------
+    forward(num_features, cat_features)
+        Perform a forward pass through the model, including embedding (if enabled), linear transformations,
+        activation, normalization, and prediction steps.
+
+    """
+
     def __init__(
         self,
         cat_feature_info,
@@ -22,29 +64,10 @@ class MLP(BaseModel):
         config: DefaultMLPConfig = DefaultMLPConfig(),
         **kwargs,
     ):
-        """
-        Initializes the MLP model with the given configuration.
-
-        Parameters
-        ----------
-        cat_feature_info : Any
-            Information about categorical features.
-        num_feature_info : Any
-            Information about numerical features.
-
-        num_classes : int, optional
-            Number of output classes, by default 1.
-        config : DefaultMLPConfig, optional
-            Configuration dataclass containing hyperparameters, by default DefaultMLPConfig().
-        """
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.lr = self.hparams.get("lr", config.lr)
-        self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
-        self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
-        self.layer_sizes = self.hparams.get("layer_sizes", self.layer_sizes)
+        self.layer_sizes = self.hparams.get("layer_sizes", config.layer_sizes)
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -64,6 +87,11 @@ class MLP(BaseModel):
             input_dim += 1
 
         if self.use_embeddings:
+            self.embedding_layer = EmbeddingLayer(
+                num_feature_info=num_feature_info,
+                cat_feature_info=cat_feature_info,
+                config=config,
+            )
             input_dim = (
                 len(num_feature_info) * config.d_model
                 + len(cat_feature_info) * config.d_model
@@ -74,21 +102,7 @@ class MLP(BaseModel):
         if config.batch_norm:
             self.layers.append(nn.BatchNorm1d(self.layer_sizes[0]))
 
-        norm_layer = self.hparams.get("norm", config.norm)
-        if norm_layer == "RMSNorm":
-            self.norm_f = RMSNorm(self.layer_sizes[0])
-        elif norm_layer == "LayerNorm":
-            self.norm_f = LayerNorm(self.layer_sizes[0])
-        elif norm_layer == "BatchNorm":
-            self.norm_f = BatchNorm(self.layer_sizes[0])
-        elif norm_layer == "InstanceNorm":
-            self.norm_f = InstanceNorm(self.layer_sizes[0])
-        elif norm_layer == "GroupNorm":
-            self.norm_f = GroupNorm(1, self.layer_sizes[0])
-        elif norm_layer == "LearnableLayerScaling":
-            self.norm_f = LearnableLayerScaling(self.layer_sizes[0])
-        else:
-            self.norm_f = None
+        self.norm_f = get_normalization_layer(config)
 
         if self.norm_f is not None:
             self.layers.append(self.norm_f(self.layer_sizes[0]))
@@ -116,20 +130,6 @@ class MLP(BaseModel):
 
         # Output layer
         self.layers.append(nn.Linear(self.layer_sizes[-1], num_classes))
-
-        if self.use_embeddings:
-            self.embedding_layer = EmbeddingLayer(
-                num_feature_info=num_feature_info,
-                cat_feature_info=cat_feature_info,
-                d_model=self.hparams.get("d_model", config.d_model),
-                embedding_activation=self.hparams.get(
-                    "embedding_activation", config.embedding_activation
-                ),
-                layer_norm_after_embedding=self.hparams.get(
-                    "layer_norm_after_embedding"
-                ),
-                use_cls=False,
-            )
 
     def forward(self, num_features, cat_features) -> torch.Tensor:
         """

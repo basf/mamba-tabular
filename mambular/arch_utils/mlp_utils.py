@@ -151,7 +151,7 @@ class Linear_block(nn.Module):
         return self.block(x)
 
 
-class MLP(nn.Module):
+class MLPhead(nn.Module):
     """
     A multi-layer perceptron (MLP) for regression tasks, configurable with optional skip connections and batch normalization.
 
@@ -180,34 +180,27 @@ class MLP(nn.Module):
         The final linear layer of the MLP.
     """
 
-    def __init__(
-        self,
-        n_input_units,
-        hidden_units_list=[64, 32, 32],
-        n_output_units: int = 1,
-        dropout_rate: float = 0.1,
-        use_skip_layers: bool = False,
-        activation_fn=nn.LeakyReLU(),
-        use_batch_norm: bool = False,
-    ):
-        super(MLP, self).__init__()
-        self.n_input_units = n_input_units
-        self.hidden_units_list = hidden_units_list
-        self.dropout_rate = dropout_rate
-        self.n_output_units = n_output_units
+    def __init__(self, input_dim, output_dim, config):
+        super(MLPhead, self).__init__()
+
+        self.hidden_units_list = getattr(config, "head_layer_sizes", [128, 64])
+        self.dropout_rate = getattr(config, "head_dropout", 0.5)
+        self.skip_layers = getattr(config, "head_skip_layers", False)
+        self.batch_norm = getattr(config, "head_use_batch_norm", False)
+        self.activation = getattr(config, "head_activation", nn.ReLU())
 
         layers = []
-        input_units = n_input_units
+        input_units = input_dim
 
-        for n_hidden_units in hidden_units_list:
-            if use_skip_layers and input_units == n_hidden_units:
+        for n_hidden_units in self.hidden_units_list:
+            if self.skip_layers and input_units == n_hidden_units:
                 layers.append(
                     Linear_skip_block(
                         input_units,
                         n_hidden_units,
-                        dropout_rate,
-                        activation_fn,
-                        use_batch_norm,
+                        self.dropout_rate,
+                        self.activation,
+                        self.batch_norm,
                     )
                 )
             else:
@@ -215,15 +208,15 @@ class MLP(nn.Module):
                     Linear_block(
                         input_units,
                         n_hidden_units,
-                        dropout_rate,
-                        activation_fn,
-                        use_batch_norm,
+                        self.dropout_rate,
+                        self.activation,
+                        self.batch_norm,
                     )
                 )
             input_units = n_hidden_units  # Update input_units for the next layer
 
         self.hidden_layers = nn.Sequential(*layers)
-        self.linear_final = nn.Linear(input_units, n_output_units)  # Final layer
+        self.linear_final = nn.Linear(input_units, output_dim)  # Final layer
 
     def forward(self, x):
         """

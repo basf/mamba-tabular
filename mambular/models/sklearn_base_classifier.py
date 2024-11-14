@@ -22,7 +22,7 @@ from ..utils.config_mapper import (
 
 class SklearnBaseClassifier(BaseEstimator):
     def __init__(self, model, config, **kwargs):
-        preprocessor_arg_names = [
+        self.preprocessor_arg_names = [
             "n_bins",
             "numerical_preprocessing",
             "use_decision_tree_bins",
@@ -42,7 +42,7 @@ class SklearnBaseClassifier(BaseEstimator):
         self.config = config(**self.config_kwargs)
 
         preprocessor_kwargs = {
-            k: v for k, v in kwargs.items() if k in preprocessor_arg_names
+            k: v for k, v in kwargs.items() if k in self.preprocessor_arg_names
         }
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
@@ -139,10 +139,10 @@ class SklearnBaseClassifier(BaseEstimator):
         random_state: int = 101,
         batch_size: int = 128,
         shuffle: bool = True,
-        lr: float = 1e-4,
-        lr_patience: int = 10,
-        factor: float = 0.1,
-        weight_decay: float = 1e-06,
+        lr: float = None,
+        lr_patience: int = None,
+        lr_factor: float = None,
+        weight_decay: float = None,
         dataloader_kwargs={},
     ):
         """
@@ -188,7 +188,7 @@ class SklearnBaseClassifier(BaseEstimator):
             X = pd.DataFrame(X)
         if isinstance(y, pd.Series):
             y = y.values
-        if X_val:
+        if X_val is not None:
             if not isinstance(X_val, pd.DataFrame):
                 X_val = pd.DataFrame(X_val)
             if isinstance(y_val, pd.Series):
@@ -218,10 +218,14 @@ class SklearnBaseClassifier(BaseEstimator):
             config=self.config,
             cat_feature_info=self.data_module.cat_feature_info,
             num_feature_info=self.data_module.num_feature_info,
-            lr=lr,
-            lr_patience=lr_patience,
-            lr_factor=factor,
-            weight_decay=weight_decay,
+            lr_patience=(
+                lr_patience if lr_patience is not None else self.config.lr_patience
+            ),
+            lr=lr if lr is not None else self.config.lr,
+            lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
+            weight_decay=(
+                weight_decay if weight_decay is not None else self.config.weight_decay
+            ),
             optimizer_type=self.optimizer_type,
             optimizer_args=self.optimizer_kwargs,
         )
@@ -276,10 +280,10 @@ class SklearnBaseClassifier(BaseEstimator):
         patience: int = 15,
         monitor: str = "val_loss",
         mode: str = "min",
-        lr: float = 1e-4,
-        lr_patience: int = 10,
-        factor: float = 0.1,
-        weight_decay: float = 1e-06,
+        lr: float = None,
+        lr_patience: int = None,
+        lr_factor: float = None,
+        weight_decay: float = None,
         checkpoint_path="model_checkpoints",
         dataloader_kwargs={},
         rebuild=True,
@@ -341,7 +345,7 @@ class SklearnBaseClassifier(BaseEstimator):
                 X = pd.DataFrame(X)
             if isinstance(y, pd.Series):
                 y = y.values
-            if X_val:
+            if X_val is not None:
                 if not isinstance(X_val, pd.DataFrame):
                     X_val = pd.DataFrame(X_val)
                 if isinstance(y_val, pd.Series):
@@ -371,10 +375,16 @@ class SklearnBaseClassifier(BaseEstimator):
                 config=self.config,
                 cat_feature_info=self.data_module.cat_feature_info,
                 num_feature_info=self.data_module.num_feature_info,
-                lr=lr,
-                lr_patience=lr_patience,
-                lr_factor=factor,
-                weight_decay=weight_decay,
+                lr_patience=(
+                    lr_patience if lr_patience is not None else self.config.lr_patience
+                ),
+                lr=lr if lr is not None else self.config.lr,
+                lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
+                weight_decay=(
+                    weight_decay
+                    if weight_decay is not None
+                    else self.config.weight_decay
+                ),
                 optimizer_type=self.optimizer_type,
                 optimizer_args=self.optimizer_kwargs,
             )

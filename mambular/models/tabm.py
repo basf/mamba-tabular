@@ -1,16 +1,16 @@
 from .sklearn_base_regressor import SklearnBaseRegressor
 from .sklearn_base_classifier import SklearnBaseClassifier
 from .sklearn_base_lss import SklearnBaseLSS
-from ..base_models.mlp import MLP
-from ..configs.mlp_config import DefaultMLPConfig
+from ..base_models.tabm import TabM
+from ..configs.tabm_config import DefaultTabMConfig
 
 
-class MLPRegressor(SklearnBaseRegressor):
+class TabMRegressor(SklearnBaseRegressor):
     """
-    Multi-Layer Perceptron regressor. This class extends the SklearnBaseRegressor class and uses the MLP model
-    with the default MLP configuration.
+    Multi-Layer Perceptron regressor. This class extends the SklearnBaseRegressor class and uses the TabM model
+    with the default TabM configuration.
 
-    The accepted arguments to the MLPRegressor class include both the attributes in the DefaultMLPConfig dataclass
+    The accepted arguments to the TabMRegressor class include both the attributes in the DefaultTabMConfig dataclass
     and the parameters for the Preprocessor class.
 
     Parameters
@@ -24,23 +24,23 @@ class MLPRegressor(SklearnBaseRegressor):
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
     layer_sizes : list, default=(128, 128, 32)
-        Sizes of the layers in the MLP.
+        Sizes of the layers in the TabM.
     activation : callable, default=nn.SELU()
-        Activation function for the MLP layers.
+        Activation function for the TabM layers.
     skip_layers : bool, default=False
-        Whether to skip layers in the MLP.
+        Whether to skip layers in the TabM.
     dropout : float, default=0.5
         Dropout rate for regularization.
     norm : str, default=None
         Normalization method to be used, if any.
     use_glu : bool, default=False
-        Whether to use Gated Linear Units (GLU) in the MLP.
+        Whether to use Gated Linear Units (GLU) in the TabM.
     skip_connections : bool, default=False
-        Whether to use skip connections in the MLP.
+        Whether to use skip connections in the TabM.
     batch_norm : bool, default=False
-        Whether to use batch normalization in the MLP layers.
+        Whether to use batch normalization in the TabM layers.
     layer_norm : bool, default=False
-        Whether to use layer normalization in the MLP layers.
+        Whether to use layer normalization in the TabM layers.
     use_embeddings : bool, default=False
         Whether to use embedding layers for all features.
     embedding_activation : callable, default=nn.Identity()
@@ -76,32 +76,32 @@ class MLPRegressor(SklearnBaseRegressor):
 
     Notes
     -----
-    - The accepted arguments to the MLPRegressor class are the same as the attributes in the DefaultMLPConfig dataclass.
-    - MLPRegressor uses SklearnBaseRegressor as the parent class. The methods for fitting, predicting, and evaluating the model are inherited from the parent class. Please refer to the parent class for more information.
+    - The accepted arguments to the TabMRegressor class are the same as the attributes in the DefaultTabMConfig dataclass.
+    - TabMRegressor uses SklearnBaseRegressor as the parent class. The methods for fitting, predicting, and evaluating the model are inherited from the parent class. Please refer to the parent class for more information.
 
     See Also
     --------
-    mambular.models.SklearnBaseRegressor : The parent class for MLPRegressor.
+    mambular.models.SklearnBaseRegressor : The parent class for TabMRegressor.
 
     Examples
     --------
-    >>> from mambular.models import MLPRegressor
-    >>> model = MLPRegressor(layer_sizes=[128, 128, 64], activation=nn.ReLU())
+    >>> from mambular.models import TabMRegressor
+    >>> model = TabMRegressor(layer_sizes=[128, 128, 64], activation=nn.ReLU())
     >>> model.fit(X_train, y_train)
     >>> preds = model.predict(X_test)
     >>> model.evaluate(X_test, y_test)
     """
 
     def __init__(self, **kwargs):
-        super().__init__(model=MLP, config=DefaultMLPConfig, **kwargs)
+        super().__init__(model=TabM, config=DefaultTabMConfig, **kwargs)
 
 
-class MLPClassifier(SklearnBaseClassifier):
+class TabMClassifier(SklearnBaseClassifier):
     """
-    Multi-Layer Perceptron classifier. This class extends the SklearnBaseClassifier class and uses the MLP model
-    with the default MLP configuration.
+    Multi-Layer Perceptron classifier. This class extends the SklearnBaseClassifier class and uses the TabM model
+    with the default TabM configuration.
 
-    The accepted arguments to the MLPClassifier class include both the attributes in the DefaultMLPConfig dataclass
+    The accepted arguments to the TabMClassifier class include both the attributes in the DefaultTabMConfig dataclass
     and the parameters for the Preprocessor class.
 
     Parameters
@@ -115,23 +115,23 @@ class MLPClassifier(SklearnBaseClassifier):
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
     layer_sizes : list, default=(128, 128, 32)
-        Sizes of the layers in the MLP.
+        Sizes of the layers in the TabM.
     activation : callable, default=nn.SELU()
-        Activation function for the MLP layers.
+        Activation function for the TabM layers.
     skip_layers : bool, default=False
-        Whether to skip layers in the MLP.
+        Whether to skip layers in the TabM.
     dropout : float, default=0.5
         Dropout rate for regularization.
     norm : str, default=None
         Normalization method to be used, if any.
     use_glu : bool, default=False
-        Whether to use Gated Linear Units (GLU) in the MLP.
+        Whether to use Gated Linear Units (GLU) in the TabM.
     skip_connections : bool, default=False
-        Whether to use skip connections in the MLP.
+        Whether to use skip connections in the TabM.
     batch_norm : bool, default=False
-        Whether to use batch normalization in the MLP layers.
+        Whether to use batch normalization in the TabM layers.
     layer_norm : bool, default=False
-        Whether to use layer normalization in the MLP layers.
+        Whether to use layer normalization in the TabM layers.
     use_embeddings : bool, default=False
         Whether to use embedding layers for all features.
     embedding_activation : callable, default=nn.Identity()
@@ -167,32 +167,32 @@ class MLPClassifier(SklearnBaseClassifier):
 
     Notes
     -----
-    - The accepted arguments to the MLPClassifier class are the same as the attributes in the DefaultMLPConfig dataclass.
-    - MLPClassifier uses SklearnBaseClassifieras the parent class. The methods for fitting, predicting, and evaluating the model are inherited from the parent class. Please refer to the parent class for more information.
+    - The accepted arguments to the TabMClassifier class are the same as the attributes in the DefaultTabMConfig dataclass.
+    - TabMClassifier uses SklearnBaseClassifieras the parent class. The methods for fitting, predicting, and evaluating the model are inherited from the parent class. Please refer to the parent class for more information.
 
     See Also
     --------
-    mambular.models.SklearnBaseClassifier : The parent class for MLPClassifier.
+    mambular.models.SklearnBaseClassifier : The parent class for TabMClassifier.
 
     Examples
     --------
-    >>> from mambular.models import MLPClassifier
-    >>> model = MLPClassifier(layer_sizes=[128, 128, 64], activation=nn.ReLU())
+    >>> from mambular.models import TabMClassifier
+    >>> model = TabMClassifier(layer_sizes=[128, 128, 64], activation=nn.ReLU())
     >>> model.fit(X_train, y_train)
     >>> preds = model.predict(X_test)
     >>> model.evaluate(X_test, y_test)
     """
 
     def __init__(self, **kwargs):
-        super().__init__(model=MLP, config=DefaultMLPConfig, **kwargs)
+        super().__init__(model=TabM, config=DefaultTabMConfig, **kwargs)
 
 
-class MLPLSS(SklearnBaseLSS):
+class TabMLSS(SklearnBaseLSS):
     """
-    Multi-Layer Perceptron for distributional regression. This class extends the SklearnBaseLSS class and uses the MLP model
-    with the default MLP configuration.
+    Multi-Layer Perceptron for distributional regression. This class extends the SklearnBaseLSS class and uses the TabM model
+    with the default TabM configuration.
 
-    The accepted arguments to the MLPLSS class include both the attributes in the DefaultMLPConfig dataclass
+    The accepted arguments to the TabMLSS class include both the attributes in the DefaultTabMConfig dataclass
     and the parameters for the Preprocessor class.
 
     Parameters
@@ -208,23 +208,23 @@ class MLPLSS(SklearnBaseLSS):
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
     layer_sizes : list, default=(128, 128, 32)
-        Sizes of the layers in the MLP.
+        Sizes of the layers in the TabM.
     activation : callable, default=nn.SELU()
-        Activation function for the MLP layers.
+        Activation function for the TabM layers.
     skip_layers : bool, default=False
-        Whether to skip layers in the MLP.
+        Whether to skip layers in the TabM.
     dropout : float, default=0.5
         Dropout rate for regularization.
     norm : str, default=None
         Normalization method to be used, if any.
     use_glu : bool, default=False
-        Whether to use Gated Linear Units (GLU) in the MLP.
+        Whether to use Gated Linear Units (GLU) in the TabM.
     skip_connections : bool, default=False
-        Whether to use skip connections in the MLP.
+        Whether to use skip connections in the TabM.
     batch_norm : bool, default=False
-        Whether to use batch normalization in the MLP layers.
+        Whether to use batch normalization in the TabM layers.
     layer_norm : bool, default=False
-        Whether to use layer normalization in the MLP layers.
+        Whether to use layer normalization in the TabM layers.
     use_embeddings : bool, default=False
         Whether to use embedding layers for all features.
     embedding_activation : callable, default=nn.Identity()
@@ -263,21 +263,21 @@ class MLPLSS(SklearnBaseLSS):
 
     Notes
     -----
-    - The accepted arguments to the MLPLSS class are the same as the attributes in the DefaultMLPConfig dataclass.
-    - MLPLSS uses SklearnBaseLSS as the parent class. The methods for fitting, predicting, and evaluating the model are inherited from the parent class. Please refer to the parent class for more information.
+    - The accepted arguments to the TabMLSS class are the same as the attributes in the DefaultTabMConfig dataclass.
+    - TabMLSS uses SklearnBaseLSS as the parent class. The methods for fitting, predicting, and evaluating the model are inherited from the parent class. Please refer to the parent class for more information.
 
     See Also
     --------
-    mambular.models.SklearnBaseLSS : The parent class for MLPLSS.
+    mambular.models.SklearnBaseLSS : The parent class for TabMLSS.
 
     Examples
     --------
-    >>> from mambular.models import MLPLSS
-    >>> model = MLPLSS(layer_sizes=[128, 128, 64], activation=nn.ReLU())
+    >>> from mambular.models import TabMLSS
+    >>> model = TabMLSS(layer_sizes=[128, 128, 64], activation=nn.ReLU())
     >>> model.fit(X_train, y_train)
     >>> preds = model.predict(X_test)
     >>> model.evaluate(X_test, y_test)
     """
 
     def __init__(self, **kwargs):
-        super().__init__(model=MLP, config=DefaultMLPConfig, **kwargs)
+        super().__init__(model=TabM, config=DefaultTabMConfig, **kwargs)
