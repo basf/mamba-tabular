@@ -58,41 +58,41 @@ class NODE(BaseModel):
         config: DefaultNODEConfig = DefaultNODEConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+
+        self.returns_ensemble = False
 
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-        self.use_embeddings = self.hparams.get("use_embeddings", config.use_embeddings)
 
-        input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            input_dim += input_shape
-        for feature_name, input_shape in cat_feature_info.items():
-            input_dim += 1
-
-        if self.use_embeddings:
+        if self.hparams.use_embeddings:
             input_dim = (
-                len(num_feature_info) * config.d_model
-                + len(cat_feature_info) * config.d_model
+                len(num_feature_info) * self.hparams.d_model
+                + len(cat_feature_info) * self.hparams.d_model
             )
 
             self.embedding_layer = EmbeddingLayer(config)
 
+        else:
+            input_dim = 0
+            for feature_name, input_shape in num_feature_info.items():
+                input_dim += input_shape
+            for feature_name, input_shape in cat_feature_info.items():
+                input_dim += 1
+
         self.d_out = num_classes
         self.block = DenseBlock(
             input_dim=input_dim,
-            num_layers=config.num_layers,
-            layer_dim=config.layer_dim,
-            depth=config.depth,
-            tree_dim=config.tree_dim,
+            num_layers=self.hparams.num_layers,
+            layer_dim=self.hparams.layer_dim,
+            depth=self.hparams.depth,
+            tree_dim=self.hparams.tree_dim,
             flatten_output=True,
         )
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
-
         self.tabular_head = MLPhead(
-            input_dim=config.num_layers * config.layer_dim,
+            input_dim=self.hparams.num_layers * self.hparams.layer_dim,
             config=config,
             output_dim=num_classes,
         )
@@ -113,7 +113,7 @@ class NODE(BaseModel):
         torch.Tensor
             Model output of shape [batch_size, num_classes].
         """
-        if self.use_embeddings:
+        if self.hparams.use_embeddings:
             x = self.embedding_layer(num_features, cat_features)
             B, S, D = x.shape
             x = x.reshape(B, S * D)

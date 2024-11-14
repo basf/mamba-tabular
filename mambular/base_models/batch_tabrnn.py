@@ -66,13 +66,16 @@ class BatchTabRNN(BaseModel):
         config: DefaultBatchTabRNNConfig = DefaultBatchTabRNNConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+
+        if not self.hparams.average_ensembles:
+            self.returns_ensemble = True  # Directly set ensemble flag
+        else:
+            self.returns_ensemble = False
 
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
-        self.ensemble_first = self.hparams.get("ensemble_first", config.ensemble_first)
 
         self.embedding_layer = EmbeddingLayer(
             num_feature_info=num_feature_info,
@@ -81,23 +84,23 @@ class BatchTabRNN(BaseModel):
         )
         self.rnn = EnsembleConvRNN(config=config)
 
-        self.tabular_head = MLPhead(
-            input_dim=self.hparams.get("dim_feedforward", config.dim_feedforward),
-            config=config,
-            output_dim=num_classes,
-        )
-
         self.linear = nn.Linear(
-            self.hparams.get("d_model", config.d_model),
-            self.hparams.get("dim_feedforward", config.dim_feedforward),
+            self.hparams.d_model,
+            self.hparams.dim_feedforward,
         )
 
         temp_config = replace(config, d_model=config.dim_feedforward)
         self.norm_f = get_normalization_layer(temp_config)
 
-        if not self.hparams.get("average_ensembles", True):
-            self.ensemble_linear = SNLinear(
+        if not self.hparams.average_ensembles:
+            self.tabular_head = SNLinear(
                 config.ensemble_size, config.dim_feedforward, num_classes
+            )
+        else:
+            self.tabular_head = MLPhead(
+                input_dim=self.hparams.dim_feedforward,
+                config=config,
+                output_dim=num_classes,
             )
 
         n_inputs = len(num_feature_info) + len(cat_feature_info)
@@ -111,37 +114,15 @@ class BatchTabRNN(BaseModel):
             x
         )  # Shape: (batch_size, sequence_length, ensemble_size, hidden_size)
 
-        if self.ensemble_first:
-            # Combine or average over ensembles first, then pool over the sequence
-            if self.hparams.get("average_ensembles", True):
-                # Simple average over ensembles
-                out = out.mean(
-                    dim=2
-                )  # Shape: (batch_size, sequence_length, hidden_size)
+        out = self.pool_sequence(out)  # Shape: (batch_size, ensemble_size, hidden_size)
+        if self.hparams.average_ensembles:
+            # Simple average over ensembles
+            out = out.mean(dim=1)  # Shape: (batch_size, hidden_size)
+            # Final prediction head
 
-            else:
-                # Apply the learned linear combination over ensembles
-                out = self.ensemble_linear(out.permute(0, 1, 3, 2)).squeeze(
-                    -1
-                )  # Shape: (batch_size, sequence_length, hidden_size)
+        preds = self.tabular_head(out)  #
 
-            # Now pool over the sequence
-            out = self.pool_sequence(out)  # Shape: (batch_size, hidden_size)
-
-        else:
-            # Pool over the sequence first, then combine or average over ensembles
-            out = self.pool_sequence(
-                out
-            )  # Shape: (batch_size, ensemble_size, hidden_size)
-
-            if self.hparams.get("average_ensembles", True):
-                # Simple average over ensembles
-                out = out.mean(dim=1)  # Shape: (batch_size, hidden_size)
-                # Final prediction head
-                preds = self.tabular_head(out)
-
-            else:
-                # Apply the learned linear combination over ensembles
-                preds = self.ensemble_linear(out)  # Shape: (batch_size, hidden_size)
+        if not self.hparams.average_ensembles:
+            preds = preds.squeeze(-1)
 
         return preds

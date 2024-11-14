@@ -64,7 +64,7 @@ class MambaTab(BaseModel):
         config: DefaultMambaTabConfig = DefaultMambaTabConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
         input_dim = 0
@@ -75,20 +75,19 @@ class MambaTab(BaseModel):
 
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
+        self.returns_ensemble = False
 
         self.initial_layer = nn.Linear(input_dim, config.d_model)
         self.norm_f = LayerNorm(config.d_model)
 
-        self.embedding_activation = self.hparams.get(
-            "num_embedding_activation", config.num_embedding_activation
-        )
+        self.embedding_activation = self.hparams.num_embedding_activation
 
         self.axis = config.axis
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
+        head_activation = self.hparams.head_activation
 
         self.tabular_head = MLPhead(
-            input_dim=self.hparams.get("d_model", config.d_model),
+            input_dim=self.hparams.d_model,
             config=config,
             output_dim=num_classes,
         )

@@ -68,14 +68,14 @@ class TabTransformer(BaseModel):
         config: DefaultTabTransformerConfig = DefaultTabTransformerConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
         if cat_feature_info == {}:
             raise ValueError(
                 "You are trying to fit a TabTransformer with no categorical features. Try using a different model that is better suited for tasks without categorical features."
             )
 
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
+        self.returns_ensemble = False
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -91,25 +91,19 @@ class TabTransformer(BaseModel):
         encoder_layer = CustomTransformerEncoderLayer(config=config)
         self.encoder = nn.TransformerEncoder(
             encoder_layer,
-            num_layers=self.hparams.get("n_layers", config.n_layers),
+            num_layers=self.hparams.n_layers,
             norm=self.norm_f,
         )
-
-        head_activation = self.hparams.get("head_activation", config.head_activation)
 
         mlp_input_dim = 0
         for feature_name, input_shape in num_feature_info.items():
             mlp_input_dim += input_shape
-        mlp_input_dim += config.d_model
+        mlp_input_dim += self.hparams.d_model
 
         self.tabular_head = MLPhead(
             input_dim=mlp_input_dim,
             config=config,
             output_dim=num_classes,
-        )
-
-        self.cls_token = nn.Parameter(
-            torch.zeros(1, 1, self.hparams.get("d_model", config.d_model))
         )
 
         # pooling

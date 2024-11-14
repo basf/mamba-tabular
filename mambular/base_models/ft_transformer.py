@@ -59,10 +59,9 @@ class FTTransformer(BaseModel):
         config: DefaultFTTransformerConfig = DefaultFTTransformerConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
-
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
+        self.returns_ensemble = False
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -78,15 +77,12 @@ class FTTransformer(BaseModel):
         encoder_layer = CustomTransformerEncoderLayer(config=config)
         self.encoder = nn.TransformerEncoder(
             encoder_layer,
-            num_layers=self.hparams.get("n_layers", config.n_layers),
+            num_layers=self.hparams.n_layers,
             norm=self.norm_f,
         )
 
-        # tabular head
-        head_activation = self.hparams.get("head_activation", config.head_activation)
-
         self.tabular_head = MLPhead(
-            input_dim=self.hparams.get("d_model", config.d_model),
+            input_dim=self.hparams.d_model,
             config=config,
             output_dim=num_classes,
         )

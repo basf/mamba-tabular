@@ -60,13 +60,10 @@ class Mambular(BaseModel):
         config: DefaultMambularConfig = DefaultMambularConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
-        self.shuffle_embeddings = self.hparams.get(
-            "shuffle_embeddings", config.shuffle_embeddings
-        )
+        self.returns_ensemble = False
 
         # embedding layer
         self.embedding_layer = EmbeddingLayer(
@@ -82,12 +79,12 @@ class Mambular(BaseModel):
         self.norm_f = get_normalization_layer(config)
 
         self.tabular_head = MLPhead(
-            input_dim=self.hparams.get("d_model", config.d_model),
+            input_dim=self.hparams.d_model,
             config=config,
             output_dim=num_classes,
         )
 
-        if self.shuffle_embeddings:
+        if self.hparams.shuffle_embeddings:
             self.perm = torch.randperm(self.embedding_layer.seq_len)
 
         # pooling
@@ -112,7 +109,7 @@ class Mambular(BaseModel):
         """
         x = self.embedding_layer(num_features, cat_features)
 
-        if self.shuffle_embeddings:
+        if self.hparams.shuffle_embeddings:
             x = x[:, self.perm, :]
 
         x = self.mamba(x)
