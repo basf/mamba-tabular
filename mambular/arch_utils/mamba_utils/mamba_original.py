@@ -30,7 +30,6 @@ class ResidualBlock(nn.Module):
         bias=False,
         d_conv=16,
         conv_bias=True,
-        dt_rank="auto",
         d_state=32,
         dt_scale=1.0,
         dt_init="random",
@@ -147,23 +146,22 @@ class MambaOriginal(nn.Module):
         self.fwd_layers = nn.ModuleList(
             [
                 ResidualBlock(
-                    mamba_version=config.mamba_version,
-                    d_model=config.d_model,
-                    d_state=config.d_state,
-                    d_conv=config.d_conv,
+                    mamba_version=getattr(config, "mamba_version", "mamba2"),
+                    d_model=getattr(config, "d_model", 128),
+                    d_state=getattr(config, "d_state", 256),
+                    d_conv=getattr(config, "d_conv", 4),
                     norm=get_normalization_layer(config),
-                    expand_factor=config.expand_factor,
-                    dt_rank=config.dt_rank,
-                    dt_min=config.dt_min,
-                    dt_max=config.dt_max,
-                    dt_init=config.dt_init,
-                    dt_scale=config.dt_scale,
-                    dt_init_floor=config.dt_init_floor,
-                    conv_bias=config.conv_bias,
-                    bias=config.bias,
+                    expand_factor=getattr(config, "expand_factor", 2),
+                    dt_min=getattr(config, "dt_min", 1e-04),
+                    dt_max=getattr(config, "dt_max", 0.1),
+                    dt_init=getattr(config, "dt_init", "random"),
+                    dt_scale=getattr(config, "dt_scale", 1.0),
+                    dt_init_floor=getattr(config, "dt_init_floor", 1e-04),
+                    conv_bias=getattr(config, "conv_bias", False),
+                    bias=getattr(config, "bias", True),
                     layer_idx=i,
                 )
-                for i in range(config.n_layers)
+                for i in range(getattr(config, "n_layers", 6))
             ]
         )
 
