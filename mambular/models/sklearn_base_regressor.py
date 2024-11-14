@@ -416,7 +416,7 @@ class SklearnBaseRegressor(BaseEstimator):
 
         return self
 
-    def predict(self, X):
+    def predict(self, X, device=None):
         """
         Predicts target values for the given input samples.
 
@@ -439,7 +439,8 @@ class SklearnBaseRegressor(BaseEstimator):
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
 
         # Move tensors to appropriate device
-        device = next(self.task_model.parameters()).device
+        if device is None:
+            qdevice = next(self.task_model.parameters()).device
         if isinstance(cat_tensors, list):
             cat_tensors = [tensor.to(device) for tensor in cat_tensors]
         else:
@@ -458,6 +459,11 @@ class SklearnBaseRegressor(BaseEstimator):
             predictions = self.task_model(
                 num_features=num_tensors, cat_features=cat_tensors
             )
+
+        # Check if ensemble is used
+        if self.task_model.base_model.returns_ensemble:  # If using ensemble
+            # Average over the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
+            predictions = predictions.mean(dim=1)
 
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()

@@ -461,7 +461,7 @@ class SklearnBaseLSS(BaseEstimator):
 
         return self
 
-    def predict(self, X, raw=False):
+    def predict(self, X, raw=False, device=None):
         """
         Predicts target values for the given input samples.
 
@@ -484,7 +484,8 @@ class SklearnBaseLSS(BaseEstimator):
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
 
         # Move tensors to appropriate device
-        device = next(self.task_model.parameters()).device
+        if device is not None:
+            device = next(self.task_model.parameters()).device
         if isinstance(cat_tensors, list):
             cat_tensors = [tensor.to(device) for tensor in cat_tensors]
         else:
@@ -503,6 +504,11 @@ class SklearnBaseLSS(BaseEstimator):
             predictions = self.task_model(
                 num_features=num_tensors, cat_features=cat_tensors
             )
+
+        # Check if ensemble is used
+        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
+            # Average over the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
+            predictions = predictions.mean(dim=1)
 
         if not raw:
             return self.task_model.family(predictions).cpu().numpy()
