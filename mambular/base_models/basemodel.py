@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import os
+from argparse import Namespace
 import logging
 
 
@@ -40,13 +40,10 @@ class BaseModel(nn.Module):
             else {}
         )
         extra_hparams = {k: v for k, v in self.extra_hparams.items() if k not in ignore}
+        config_hparams.update(extra_hparams)
 
-        # Merge config and extra hparams
-        self.hparams = {**config_hparams, **extra_hparams}
-
-        # Set each hyperparameter as an attribute
-        for key, value in self.hparams.items():
-            setattr(self, key, value)
+        # Merge config and extra hparams and convert to Namespace for dot notation
+        self.hparams = Namespace(**config_hparams)
 
     def save_model(self, path):
         """
@@ -167,23 +164,23 @@ class BaseModel(nn.Module):
 
     def initialize_pooling_layers(self, config, n_inputs):
         """
-        Initializes the layers needed for learnable pooling methods based on self.pooling_method.
+        Initializes the layers needed for learnable pooling methods based on self.hparams.pooling_method.
         """
-        if self.pooling_method == "learned_flatten":
+        if self.hparams.pooling_method == "learned_flatten":
             # Flattening + Linear layer
             self.learned_flatten_pooling = nn.Linear(
                 n_inputs * config.dim_feedforward, config.dim_feedforward
             )
 
-        elif self.pooling_method == "attention":
+        elif self.hparams.pooling_method == "attention":
             # Attention-based pooling with learnable attention weights
             self.attention_weights = nn.Parameter(torch.randn(config.dim_feedforward))
 
-        elif self.pooling_method == "gated":
+        elif self.hparams.pooling_method == "gated":
             # Gated pooling with a learned gating layer
             self.gate_layer = nn.Linear(config.dim_feedforward, config.dim_feedforward)
 
-        elif self.pooling_method == "rnn":
+        elif self.hparams.pooling_method == "rnn":
             # RNN-based pooling: Use a small RNN (e.g., LSTM)
             self.pooling_rnn = nn.LSTM(
                 input_size=config.dim_feedforward,
@@ -193,7 +190,7 @@ class BaseModel(nn.Module):
                 bidirectional=False,
             )
 
-        elif self.pooling_method == "conv":
+        elif self.hparams.pooling_method == "conv":
             # Conv1D-based pooling with global max pooling
             self.conv1d_pooling = nn.Conv1d(
                 in_channels=config.dim_feedforward,
@@ -204,29 +201,29 @@ class BaseModel(nn.Module):
 
     def pool_sequence(self, out):
         """
-        Pools the sequence dimension based on self.pooling_method.
+        Pools the sequence dimension based on self.hparams.pooling_method.
         """
 
-        if self.pooling_method == "avg":
+        if self.hparams.pooling_method == "avg":
             return out.mean(
                 dim=1
             )  # Shape: (batch_size, ensemble_size, hidden_size) or (batch_size, hidden_size)
-        elif self.pooling_method == "max":
+        elif self.hparams.pooling_method == "max":
             return out.max(dim=1)[0]
-        elif self.pooling_method == "sum":
+        elif self.hparams.pooling_method == "sum":
             return out.sum(dim=1)
-        elif self.pooling_method == "last":
+        elif self.hparams.pooling_method == "last":
             return out[:, -1, :]
-        elif self.pooling_method == "cls":
+        elif self.hparams.pooling_method == "cls":
             return out[:, 0, :]
-        elif self.pooling_method == "learned_flatten":
+        elif self.hparams.pooling_method == "learned_flatten":
             # Flatten sequence and apply a learned linear layer
             batch_size, seq_len, hidden_size = out.shape
             out = out.reshape(
                 batch_size, -1
             )  # Shape: (batch_size, seq_len * hidden_size)
             return self.learned_flatten_pooling(out)  # Shape: (batch_size, hidden_size)
-        elif self.pooling_method == "attention":
+        elif self.hparams.pooling_method == "attention":
             # Attention-based pooling
             attention_scores = torch.einsum(
                 "bsh,h->bs", out, self.attention_weights
@@ -238,7 +235,7 @@ class BaseModel(nn.Module):
                 dim=1
             )  # Weighted sum across the sequence, Shape: (batch_size, hidden_size)
             return out
-        elif self.pooling_method == "gated":
+        elif self.hparams.pooling_method == "gated":
             # Gated pooling
             gates = torch.sigmoid(
                 self.gate_layer(out)
@@ -246,4 +243,4 @@ class BaseModel(nn.Module):
             out = (out * gates).sum(dim=1)  # Shape: (batch_size, hidden_size)
             return out
         else:
-            raise ValueError(f"Invalid pooling method: {self.pooling_method}")
+            raise ValueError(f"Invalid pooling method: {self.hparams.pooling_method}")
