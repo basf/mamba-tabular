@@ -91,6 +91,5 @@ class DefaultBatchTabRNNConfig:
     ensemble_scaling_out: bool = True
     ensemble_bias: bool = True
     scaling_init: Literal["ones", "random-signs", "normal"] = "ones"
-    average_ensembles: bool = True
-    ensemble_first: bool = True
-    model_type: Literal["mini", "full"] = "full"
+    average_ensembles: bool = False
+    model_type: Literal["mini", "full"] = "mini"

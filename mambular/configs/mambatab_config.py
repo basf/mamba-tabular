@@ -98,3 +98,4 @@ class DefaultMambaTabConfig:
     axis: int = 1
     use_pscan: bool = False
     mamba_version: str = "mamba-torch"
+    bidirectional = False
