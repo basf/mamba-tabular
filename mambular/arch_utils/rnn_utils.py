@@ -194,7 +194,7 @@ class EnsembleConvRNN(nn.Module):
                 ensemble_scaling_in=self.ensemble_scaling_in,
                 ensemble_scaling_out=self.ensemble_scaling_out,
                 ensemble_bias=self.ensemble_bias,
-                dropout=self.rnn_dropout if i < self.num_layers - 1 else 0,
+                dropout=self.rnn_dropout,
                 nonlinearity=self.rnn_activation,
                 scaling_init="normal",
             )
