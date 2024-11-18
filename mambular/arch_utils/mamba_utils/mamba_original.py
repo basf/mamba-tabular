@@ -31,8 +31,6 @@ class ResidualBlock(nn.Module):
         d_conv=16,
         conv_bias=True,
         d_state=32,
-        dt_scale=1.0,
-        dt_init="random",
         dt_max=0.1,
         dt_min=1e-03,
         dt_init_floor=1e-04,
@@ -67,9 +65,6 @@ class ResidualBlock(nn.Module):
                 f"Valid options are: {', '.join(VALID_NORMALIZATION_LAYERS.keys())}"
             )
 
-        if dt_rank == "auto":
-            dt_rank = math.ceil(d_model / 16)
-
         # Use the imported MambaBlock to create layers
         self.layers = ResidualBlock.MambaBlock(
             d_model=d_model,
@@ -78,8 +73,6 @@ class ResidualBlock(nn.Module):
             expand=expand_factor,
             dt_min=dt_min,
             dt_max=dt_max,
-            dt_init=dt_init,
-            dt_scale=dt_scale,
             dt_init_floor=dt_init_floor,
             conv_bias=conv_bias,
             bias=bias,
@@ -154,8 +147,6 @@ class MambaOriginal(nn.Module):
                     expand_factor=getattr(config, "expand_factor", 2),
                     dt_min=getattr(config, "dt_min", 1e-04),
                     dt_max=getattr(config, "dt_max", 0.1),
-                    dt_init=getattr(config, "dt_init", "random"),
-                    dt_scale=getattr(config, "dt_scale", 1.0),
                     dt_init_floor=getattr(config, "dt_init_floor", 1e-04),
                     conv_bias=getattr(config, "conv_bias", False),
                     bias=getattr(config, "bias", True),
@@ -175,11 +166,8 @@ class MambaOriginal(nn.Module):
                         d_conv=config.d_conv,
                         norm=get_normalization_layer(config),
                         expand_factor=config.expand_factor,
-                        dt_rank=config.dt_rank,
                         dt_min=config.dt_min,
                         dt_max=config.dt_max,
-                        dt_init=config.dt_init,
-                        dt_scale=config.dt_scale,
                         dt_init_floor=config.dt_init_floor,
                         conv_bias=config.conv_bias,
                         bias=config.bias,
