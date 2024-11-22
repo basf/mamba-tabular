@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from ..arch_utils.mlp_utils import MLPhead
+from ..arch_utils.layer_utils.sn_linear import SNLinear
 from ..configs.batchtabrnn_config import DefaultBatchTabRNNConfig
 from .basemodel import BaseModel
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
@@ -92,15 +92,13 @@ class BatchTabRNN(BaseModel):
         temp_config = replace(config, d_model=config.dim_feedforward)
         self.norm_f = get_normalization_layer(temp_config)
 
-        if not self.hparams.average_ensembles:
-            self.tabular_head = SNLinear(
-                config.ensemble_size, config.dim_feedforward, num_classes
-            )
+        if self.hparams.average_ensembles:
+            self.final_layer = nn.Linear(self.hparams.dim_feedforward, num_classes)
         else:
-            self.tabular_head = MLPhead(
-                input_dim=self.hparams.dim_feedforward,
-                config=config,
-                output_dim=num_classes,
+            self.final_layer = SNLinear(
+                self.hparams.ensemble_size,
+                self.hparams.dim_feedforward,
+                num_classes,
             )
 
         n_inputs = len(num_feature_info) + len(cat_feature_info)
@@ -115,14 +113,15 @@ class BatchTabRNN(BaseModel):
         )  # Shape: (batch_size, sequence_length, ensemble_size, hidden_size)
 
         out = self.pool_sequence(out)  # Shape: (batch_size, ensemble_size, hidden_size)
-        if self.hparams.average_ensembles:
-            # Simple average over ensembles
-            out = out.mean(dim=1)  # Shape: (batch_size, hidden_size)
-            # Final prediction head
 
-        preds = self.tabular_head(out)  #
+        if self.hparams.average_ensembles:
+            x = out.mean(axis=1)  # Shape (batch_size, num_classes)
+
+        x = self.final_layer(
+            out
+        )  # Shape (batch_size, (ensemble_size), num_classes) if not averaged
 
         if not self.hparams.average_ensembles:
-            preds = preds.squeeze(-1)
+            x = x.squeeze(-1)
 
-        return preds
+        return x

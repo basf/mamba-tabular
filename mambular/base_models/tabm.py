@@ -178,7 +178,6 @@ class TabM(BaseModel):
         # Final ensemble output from the last ConfigurableBatchEnsembleLayer
         x = self.layers[-1](x)  # Shape (batch_size, ensemble_size, num_classes)
 
-        # Option 1: Averaging across ensemble outputs
         if self.hparams.average_ensembles:
             x = x.mean(axis=1)  # Shape (batch_size, num_classes)
 
