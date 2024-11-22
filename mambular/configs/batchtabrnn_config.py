@@ -30,16 +30,6 @@ class DefaultBatchTabRNNConfig:
         Activation function for the transformer.
     embedding_activation : callable, default=nn.Identity()
         Activation function for numerical embeddings.
-    head_layer_sizes : list, default=(128, 64, 32)
-        Sizes of the layers in the head of the model.
-    head_dropout : float, default=0.5
-        Dropout rate for the head layers.
-    head_skip_layers : bool, default=False
-        Whether to skip layers in the head.
-    head_activation : callable, default=nn.SELU()
-        Activation function for the head layers.
-    head_use_batch_norm : bool, default=False
-        Whether to use batch normalization in the head layers.
     layer_norm_after_embedding : bool, default=False
         Whether to apply layer normalization after embedding.
     pooling_method : str, default="cls"
@@ -67,11 +57,6 @@ class DefaultBatchTabRNNConfig:
     activation: callable = nn.SELU()
     embedding_activation: callable = nn.Identity()
     embedding_dropout: float = None
-    head_layer_sizes: list = ()
-    head_dropout: float = 0.5
-    head_skip_layers: bool = False
-    head_activation: callable = nn.SELU()
-    head_use_batch_norm: bool = False
     layer_norm_after_embedding: bool = False
     pooling_method: str = "avg"
     norm_first: bool = False

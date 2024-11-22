@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from ..configs.mlp_config import DefaultMLPConfig
 from .basemodel import BaseModel
-from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
 
@@ -95,11 +94,6 @@ class MLP(BaseModel):
         self.layers.append(nn.Linear(input_dim, self.hparams.layer_sizes[0]))
         if self.hparams.batch_norm:
             self.layers.append(nn.BatchNorm1d(self.hparams.layer_sizes[0]))
-
-        self.norm_f = get_normalization_layer(config)
-
-        if self.norm_f is not None:
-            self.layers.append(self.norm_f(self.hparams.layer_sizes[0]))
 
         if self.hparams.use_glu:
             self.layers.append(nn.GLU())

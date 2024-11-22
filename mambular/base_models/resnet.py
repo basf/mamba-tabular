@@ -3,7 +3,6 @@ import torch.nn as nn
 from typing import Any
 from ..configs.resnet_config import DefaultResNetConfig
 from .basemodel import BaseModel
-from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.resnet_utils import ResidualBlock
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
@@ -47,8 +46,6 @@ class ResNet(BaseModel):
         List of residual blocks to process the hidden representations.
     output_layer : nn.Linear
         Output layer that produces the final prediction.
-    norm_f : nn.Module, optional
-        Normalization layer applied in each residual block, if specified in the configuration.
 
     Methods
     -------
@@ -72,8 +69,6 @@ class ResNet(BaseModel):
         self.returns_ensemble = False
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-
-        self.norm_f = get_normalization_layer(config)
 
         if self.hparams.use_embeddings:
             input_dim = (
@@ -108,7 +103,7 @@ class ResNet(BaseModel):
                 input_dim,
                 output_dim,
                 self.hparams.activation,
-                self.norm_f,
+                self.hparams.norm,
                 self.hparams.dropout,
             )
             self.blocks.append(block)

@@ -25,8 +25,6 @@ class DefaultMLPConfig:
         Whether to skip layers in the MLP.
     dropout : float, default=0.5
         Dropout rate for regularization.
-    norm : str, default=None
-        Normalization method to be used, if any.
     use_glu : bool, default=False
         Whether to use Gated Linear Units (GLU) in the MLP.
     skip_connections : bool, default=False
@@ -53,7 +51,6 @@ class DefaultMLPConfig:
     activation: callable = nn.SELU()
     skip_layers: bool = False
     dropout: float = 0.5
-    norm: str = None
     use_glu: bool = False
     skip_connections: bool = False
     batch_norm: bool = False

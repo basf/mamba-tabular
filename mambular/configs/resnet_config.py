@@ -55,7 +55,7 @@ class DefaultResNetConfig:
     activation: callable = nn.SELU()
     skip_layers: bool = False
     dropout: float = 0.5
-    norm: str = None
+    norm: bool = False
     use_glu: bool = False
     skip_connections: bool = True
     batch_norm: bool = True
