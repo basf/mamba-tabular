@@ -58,75 +58,18 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 | `Mambular`       | A sequential model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.             |
 | `TabM`           | Batch Ensembling for a MLP as introduced by [Gorishniy et al.](https://arxiv.org/abs/2410.24210)                                                        |
 | `NODE`           | Neural Oblivious Decision Ensembles as introduced by [Popov et al.](https://arxiv.org/abs/1909.06312)                                                   |
-| `BatchTabRNN`    | A sequential model using RNN and batch ensembling. [TBD]()                                                                                              |
 | `FTTransformer`  | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data.                       |
 | `MLP`            | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                                                                         |
 | `ResNet`         | An adaptation of the ResNet architecture for tabular data applications.                                                                                 |
 | `TabTransformer` | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities.     |
 | `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.        |
-| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks. Paper Link will follow                                                 |
+| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks. Paper Link will follow.                                                 |
 | `MambAttention`  | A combination between Mamba and Transformers, similar to Jamba by [Lieber et al.](https://arxiv.org/abs/2403.19887). Not yet included in the benchmarks |
 
 
 
 All models are available for `regression`, `classification` and distributional regression, denoted by `LSS`.
 Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `MambularLSS`
-
-
-# 🏆 Results
-Detailed results for the available methods can be found [here](https://arxiv.org/abs/2408.06291).
-Note, that these are achieved results with default hyperparameter and for our splits. Performing hyperparameter optimization could improve the performance of all models.
-
-The average rank table over all models and all datasets is given here:
-
-<div align="center">
-
-<table>
-  <tr>
-    <th style="text-align:center;">Model</th>
-    <th style="text-align:center;">Avg. Rank</th>
-  </tr>
-  <tr>
-    <td style="text-align:center;"><strong>Mambular</strong></td>
-    <td style="text-align:center;"><strong>2.083</strong> <sub>±1.037</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">FT-Transformer</td>
-    <td style="text-align:center;">2.417 <sub>±1.256</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">XGBoost</td>
-    <td style="text-align:center;">3.167 <sub>±2.577</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab*</td>
-    <td style="text-align:center;">4.333 <sub>±1.374</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">ResNet</td>
-    <td style="text-align:center;">4.750 <sub>±1.639</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">TabTransformer</td>
-    <td style="text-align:center;">6.222 <sub>±1.618</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MLP</td>
-    <td style="text-align:center;">6.500 <sub>±1.500</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab</td>
-    <td style="text-align:center;">6.583 <sub>±1.801</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab<sup>T</sup></td>
-    <td style="text-align:center;">7.917 <sub>±1.187</sub></td>
-  </tr>
-</table>
-
-</div>
-
-
 
 
 # 📚 Documentation
@@ -164,7 +107,7 @@ Mambular simplifies data preprocessing with a range of tools designed for easy t
 - **Ordinal & One-Hot Encoding**: Automatically transforms categorical data into numerical formats.
 - **Binning**: Discretizes numerical features; can use decision trees for optimal binning.
 - **Normalization & Standardization**: Scales numerical data appropriately.
-- **Periodic Linear Encoding (PLE)**: Encodes periodicity in numerical data.
+- **Piecewise Linear Encodings (PLE)**: Encodes periodicity in numerical data.
 - **Quantile & Spline Transformations**: Applies advanced transformations to handle nonlinearity and distributional shifts.
 - **Polynomial Features**: Generates polynomial and interaction terms to capture complex relationships.
 
