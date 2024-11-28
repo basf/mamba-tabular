@@ -52,7 +52,7 @@ class DefaultBatchTabRNNConfig:
     lr_factor: float = 0.1
     d_model: int = 128
     n_layers: int = 4
-    rnn_dropout: float = 0.5
+    rnn_dropout: float = 0.3
     norm: str = "RMSNorm"
     activation: callable = nn.SELU()
     embedding_activation: callable = nn.Identity()
@@ -64,7 +64,7 @@ class DefaultBatchTabRNNConfig:
     rnn_activation: callable = nn.ReLU()
     layer_norm_eps: float = 1e-05
     dim_feedforward: int = 256
-    numerical_embedding: str = "ple"
+    embedding_type: float = "standard"
     cat_encoding: str = "int"
     d_conv: int = 4
     conv_bias: bool = True

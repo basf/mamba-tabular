@@ -18,9 +18,9 @@ class DefaultTabMConfig:
         Weight decay (L2 penalty) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-    layer_sizes : list, default=(256, 128, 32)
+    layer_sizes : list, default=(512, 512, 128)
         Sizes of the layers in the model.
-    activation : callable, default=nn.SELU()
+    activation : callable, default=nn.ReLU()
         Activation function for the model layers.
     skip_layers : bool, default=False
         Whether to skip layers in the model.
@@ -30,8 +30,6 @@ class DefaultTabMConfig:
         Normalization method to be used, if any.
     use_glu : bool, default=False
         Whether to use Gated Linear Units (GLU) in the model.
-    skip_connections : bool, default=False
-        Whether to use skip connections in the model.
     batch_norm : bool, default=False
         Whether to use batch normalization in the model layers.
     layer_norm : bool, default=False
@@ -58,17 +56,18 @@ class DefaultTabMConfig:
         Whether to average the outputs of the ensembles.
     """
 
+    # lr params
     lr: float = 1e-04
     lr_patience: int = 10
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
-    layer_sizes: list = (256, 256, 32)
-    activation: callable = nn.SELU()
-    skip_layers: bool = False
-    dropout: float = 0.5
+
+    # arch params
+    layer_sizes: list = (512, 512, 128)
+    activation: callable = nn.ReLU()
+    dropout: float = 0.3
     norm: str = None
     use_glu: bool = False
-    skip_connections: bool = False
     batch_norm: bool = False
     layer_norm: bool = False
     layer_norm_eps: float = 1e-05
@@ -77,8 +76,8 @@ class DefaultTabMConfig:
     use_embeddings: bool = True
     embedding_type: float = "plr"
     plr_lite: bool = False
-    average_embeddings: bool = True
-    embedding_activation: callable = nn.Identity()
+    average_embeddings: bool = False
+    embedding_activation: callable = nn.ReLU()
     layer_norm_after_embedding: bool = False
     d_model: int = 64
 
