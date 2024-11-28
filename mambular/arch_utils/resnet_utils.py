@@ -2,7 +2,7 @@ import torch.nn as nn
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, input_dim, output_dim, activation, norm_layer=None, dropout=0.0):
+    def __init__(self, input_dim, output_dim, activation, norm=False, dropout=0.0):
         """
         Residual Block used in ResNet.
 
@@ -23,8 +23,8 @@ class ResidualBlock(nn.Module):
         self.linear1 = nn.Linear(input_dim, output_dim)
         self.linear2 = nn.Linear(output_dim, output_dim)
         self.activation = activation
-        self.norm1 = norm_layer(output_dim) if norm_layer else None
-        self.norm2 = norm_layer(output_dim) if norm_layer else None
+        self.norm1 = nn.LayerNorm(output_dim) if norm else None
+        self.norm2 = nn.LayerNorm(output_dim) if norm else None
         self.dropout = nn.Dropout(dropout) if dropout > 0.0 else None
 
     def forward(self, x):
