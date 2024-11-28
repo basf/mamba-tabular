@@ -6,60 +6,64 @@ from ..arch_utils.transformer_utils import ReGLU
 @dataclass
 class DefaultFTTransformerConfig:
     """
-    Configuration class for the default FT Transformer model with predefined hyperparameters.
+    Configuration class for the FT Transformer model with predefined hyperparameters.
 
-    Parameters
+    Attributes
     ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
-        Number of epochs with no improvement after which learning rate will be reduced.
+        Number of epochs with no improvement after which the learning rate will be reduced.
     weight_decay : float, default=1e-06
-        Weight decay (L2 penalty) for the optimizer.
+        Weight decay (L2 regularization) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-    d_model : int, default=64
-        Dimensionality of the model.
-    n_layers : int, default=8
-        Number of layers in the transformer.
-    n_heads : int, default=4
+    d_model : int, default=128
+        Dimensionality of the transformer model.
+    n_layers : int, default=4
+        Number of transformer layers.
+    n_heads : int, default=8
         Number of attention heads in the transformer.
-    attn_dropout : float, default=0.3
+    attn_dropout : float, default=0.2
         Dropout rate for the attention mechanism.
-    ff_dropout : float, default=0.3
+    ff_dropout : float, default=0.1
         Dropout rate for the feed-forward layers.
-    norm : str, default="RMSNorm"
-        Normalization method to be used.
+    norm : str, default="LayerNorm"
+        Type of normalization to be used ('LayerNorm', 'RMSNorm', etc.).
     activation : callable, default=nn.SELU()
-        Activation function for the transformer.
+        Activation function for the transformer layers.
     embedding_activation : callable, default=nn.Identity()
-        Activation function for  embeddings.
-    head_layer_sizes : list, default=(128, 64, 32)
-        Sizes of the layers in the head of the model.
+        Activation function for embeddings.
+    embedding_bias : bool, default=False
+        Whether to use bias in embedding layers.
+    head_layer_sizes : list, default=()
+        Sizes of the fully connected layers in the model's head.
     head_dropout : float, default=0.5
         Dropout rate for the head layers.
     head_skip_layers : bool, default=False
-        Whether to skip layers in the head.
+        Whether to use skip connections in the head layers.
     head_activation : callable, default=nn.SELU()
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
     layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding.
-    pooling_method : str, default="cls"
+        Whether to apply layer normalization after embedding layers.
+    pooling_method : str, default="avg"
         Pooling method to be used ('cls', 'avg', etc.).
+    use_cls : bool, default=False
+        Whether to use a CLS token for pooling.
     norm_first : bool, default=False
         Whether to apply normalization before other operations in each transformer block.
     bias : bool, default=True
-        Whether to use bias in the linear layers.
-    transformer_activation : callable, default=nn.SELU()
-        Activation function for the transformer layers.
+        Whether to use bias in linear layers.
+    transformer_activation : callable, default=ReGLU()
+        Activation function for the transformer feed-forward layers.
     layer_norm_eps : float, default=1e-05
-        Epsilon value for layer normalization.
-    transformer_dim_feedforward : int, default=512
+        Epsilon value for layer normalization to improve numerical stability.
+    transformer_dim_feedforward : int, default=256
         Dimensionality of the feed-forward layers in the transformer.
     cat_encoding : str, default="int"
-        whether to use integer encoding or one-hot encoding for cat features.
+        Method for encoding categorical features ('int', 'one-hot', or 'linear').
     """
 
     lr: float = 1e-04
@@ -74,13 +78,15 @@ class DefaultFTTransformerConfig:
     norm: str = "LayerNorm"
     activation: callable = nn.SELU()
     embedding_activation: callable = nn.Identity()
+    embedding_bias: bool = False
     head_layer_sizes: list = ()
     head_dropout: float = 0.5
     head_skip_layers: bool = False
     head_activation: callable = nn.SELU()
     head_use_batch_norm: bool = False
     layer_norm_after_embedding: bool = False
-    pooling_method: str = "cls"
+    pooling_method: str = "avg"
+    use_cls: bool = False
     norm_first: bool = False
     bias: bool = True
     transformer_activation: callable = ReGLU()

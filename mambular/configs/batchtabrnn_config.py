@@ -6,44 +6,75 @@ from typing import Literal
 @dataclass
 class DefaultBatchTabRNNConfig:
     """
-    Configuration class for the default TabulaRNN model with predefined hyperparameters.
+    Configuration class for the TabulaRNN model with predefined hyperparameters.
 
-    Parameters
+    Attributes
     ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
-    model_type : str, default="RNN"
-        type of model, one of "RNN", "LSTM", "GRU", "mLSTM", "sLSTM"
     lr_patience : int, default=10
-        Number of epochs with no improvement after which learning rate will be reduced.
-    weight_decay : float, default=1e-06
-        Weight decay (L2 penalty) for the optimizer.
+        Number of epochs with no improvement after which the learning rate will be reduced.
+    weight_decay : float, default=1e-05
+        Weight decay (L2 regularization) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-    d_model : int, default=64
+    d_model : int, default=128
         Dimensionality of the model.
-    n_layers : int, default=8
-        Number of layers in the transformer.
+    n_layers : int, default=4
+        Number of RNN layers in the model.
+    rnn_dropout : float, default=0.3
+        Dropout rate for RNN layers.
     norm : str, default="RMSNorm"
-        Normalization method to be used.
+        Type of normalization to be used ('RMSNorm', 'LayerNorm', etc.).
     activation : callable, default=nn.SELU()
-        Activation function for the transformer.
+        Activation function for the RNN model.
     embedding_activation : callable, default=nn.Identity()
         Activation function for numerical embeddings.
+    embedding_dropout : float, optional
+        Dropout rate applied to embeddings. If None, no dropout is applied.
     layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding.
-    pooling_method : str, default="cls"
+        Whether to apply layer normalization after the embedding layer.
+    pooling_method : str, default="avg"
         Pooling method to be used ('cls', 'avg', etc.).
     norm_first : bool, default=False
-        Whether to apply normalization before other operations in each transformer block.
+        Whether to apply normalization before other operations in each RNN block.
     bias : bool, default=True
         Whether to use bias in the linear layers.
-    rnn_activation : callable, default=nn.SELU()
-        Activation function for the transformer layers.
-    bidirectional : bool, default=False.
-        Whether to process data bidirectionally
+    rnn_activation : callable, default=nn.ReLU()
+        Activation function for RNN layers.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization to improve numerical stability.
+    dim_feedforward : int, default=256
+        Dimensionality of the feed-forward layers.
+    embedding_type : str, default="linear"
+        Type of embedding to use ('linear', 'plr'.).
+    embedding_bias : bool, default=False
+        Whether to have a bias in the embedding layer
     cat_encoding : str, default="int"
-        Encoding method for categorical features.
+        Encoding method for categorical features ('int', 'one-hot', 'linear').
+    d_conv : int, default=4
+        Dimensionality of convolutional layers, if used.
+    conv_bias : bool, default=True
+        Whether to use bias in convolutional layers.
+    residuals : bool, default=False
+        Whether to include residual connections.
+
+    Batch Ensembling Specific Attributes
+    ------------------------------------
+    ensemble_size : int, default=32
+        Number of ensemble members in batch ensembling.
+    ensemble_scaling_in : bool, default=True
+        Whether to apply scaling to input features for each ensemble member.
+    ensemble_scaling_out : bool, default=True
+        Whether to apply scaling to outputs for each ensemble member.
+    ensemble_bias : bool, default=True
+        Whether to include bias for ensemble-specific scaling.
+    scaling_init : {"ones", "random-signs", "normal"}, default="ones"
+        Initialization method for ensemble scaling factors.
+    average_ensembles : bool, default=False
+        Whether to average predictions across ensemble members.
+    model_type : {"mini", "full"}, default="mini"
+        Model type to use ('mini' for reduced version, 'full' for complete model).
     """
 
     lr: float = 1e-04
@@ -64,7 +95,8 @@ class DefaultBatchTabRNNConfig:
     rnn_activation: callable = nn.ReLU()
     layer_norm_eps: float = 1e-05
     dim_feedforward: int = 256
-    embedding_type: float = "standard"
+    embedding_type: float = "linear"
+    embedding_bias: bool = False
     cat_encoding: str = "int"
     d_conv: int = 4
     conv_bias: bool = True
