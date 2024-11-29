@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
-from typing import Literal
+from typing import Literal, List
 import math
 from typing import Callable
+import torch.nn.functional as F
 
 
 class LinearBatchEnsembleLayer(nn.Module):
@@ -298,3 +299,343 @@ class RNNBatchEnsembleLayer(nn.Module):
         )  # Shape: (batch_size, seq_len, ensemble_size, hidden_size * num_directions)
 
         return outputs, hidden
+
+
+class MultiHeadAttentionBatchEnsemble(nn.Module):
+    """
+    Multi-head attention module with batch ensembling.
+
+    This module implements the multi-head attention mechanism with optional batch ensembling on selected projections.
+    Batch ensembling allows for efficient ensembling by sharing weights across ensemble members while introducing
+    diversity through scaling factors.
+
+    Parameters
+    ----------
+    embed_dim : int
+        The dimension of the embedding (input and output feature dimension).
+    num_heads : int
+        Number of attention heads.
+    ensemble_size : int
+        Number of ensemble members.
+    scaling_init : {'ones', 'random-signs', 'normal'}, optional
+        Initialization method for the scaling factors `r` and `s`. Default is 'ones'.
+        - 'ones': Initialize scaling factors to ones.
+        - 'random-signs': Initialize scaling factors to random signs (+1 or -1).
+        - 'normal': Initialize scaling factors from a normal distribution (mean=0, std=1).
+    batch_ensemble_projections : list of str, optional
+        List of projections to which batch ensembling should be applied.
+        Valid values are any combination of ['query', 'key', 'value', 'out_proj']. Default is ['query'].
+
+    Attributes
+    ----------
+    embed_dim : int
+        The dimension of the embedding.
+    num_heads : int
+        Number of attention heads.
+    head_dim : int
+        Dimension of each attention head (embed_dim // num_heads).
+    ensemble_size : int
+        Number of ensemble members.
+    batch_ensemble_projections : list of str
+        List of projections to which batch ensembling is applied.
+    q_proj : nn.Linear
+        Linear layer for projecting queries.
+    k_proj : nn.Linear
+        Linear layer for projecting keys.
+    v_proj : nn.Linear
+        Linear layer for projecting values.
+    out_proj : nn.Linear
+        Linear layer for projecting outputs.
+    r : nn.ParameterDict
+        Dictionary of input scaling factors for batch ensembling.
+    s : nn.ParameterDict
+        Dictionary of output scaling factors for batch ensembling.
+
+    Methods
+    -------
+    reset_parameters(scaling_init)
+        Initialize the parameters of the module.
+    forward(query, key, value, mask=None)
+        Perform the forward pass of the multi-head attention with batch ensembling.
+    process_projection(x, linear_layer, proj_name)
+        Process a projection with or without batch ensembling.
+    batch_ensemble_linear(x, linear_layer, r, s)
+        Apply a linear transformation with batch ensembling.
+    """
+
+    def __init__(
+        self,
+        embed_dim: int,
+        num_heads: int,
+        ensemble_size: int,
+        scaling_init: Literal["ones", "random-signs", "normal"] = "ones",
+        batch_ensemble_projections: List[str] = ["query"],
+    ):
+        super(MultiHeadAttentionBatchEnsemble, self).__init__()
+        # Ensure embedding dimension is divisible by the number of heads
+        assert (
+            embed_dim % num_heads == 0
+        ), "Embedding dimension must be divisible by number of heads."
+
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.head_dim = embed_dim // num_heads
+        self.ensemble_size = ensemble_size
+        self.batch_ensemble_projections = batch_ensemble_projections
+
+        # Linear layers for projecting queries, keys, and values
+        self.q_proj = nn.Linear(embed_dim, embed_dim)
+        self.k_proj = nn.Linear(embed_dim, embed_dim)
+        self.v_proj = nn.Linear(embed_dim, embed_dim)
+        # Output linear layer
+        self.out_proj = nn.Linear(embed_dim, embed_dim)
+
+        # Batch ensembling parameters
+        self.r = nn.ParameterDict()
+        self.s = nn.ParameterDict()
+
+        # Initialize batch ensembling parameters for specified projections
+        for proj_name in batch_ensemble_projections:
+            if proj_name == "query":
+                self.r["q_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.s["q_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+            elif proj_name == "key":
+                self.r["k_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.s["k_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+            elif proj_name == "value":
+                self.r["v_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.s["v_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+            elif proj_name == "out_proj":
+                self.r["out_proj"] = nn.Parameter(
+                    torch.Tensor(ensemble_size, embed_dim)
+                )
+                self.s["out_proj"] = nn.Parameter(
+                    torch.Tensor(ensemble_size, embed_dim)
+                )
+            else:
+                raise ValueError(
+                    f"Invalid projection name '{proj_name}'. Must be one of 'query', 'key', 'value', 'out_proj'."
+                )
+
+        # Initialize parameters
+        self.reset_parameters(scaling_init)
+
+    def reset_parameters(self, scaling_init: Literal["ones", "random-signs", "normal"]):
+        """
+        Initialize the parameters of the module.
+
+        Parameters
+        ----------
+        scaling_init : {'ones', 'random-signs', 'normal'}
+            Initialization method for the scaling factors `r` and `s`.
+            - 'ones': Initialize scaling factors to ones.
+            - 'random-signs': Initialize scaling factors to random signs (+1 or -1).
+            - 'normal': Initialize scaling factors from a normal distribution (mean=0, std=1).
+
+        Raises
+        ------
+        ValueError
+            If an invalid `scaling_init` method is provided.
+        """
+        # Initialize weight matrices using Kaiming uniform initialization
+        nn.init.kaiming_uniform_(self.q_proj.weight, a=math.sqrt(5))
+        nn.init.kaiming_uniform_(self.k_proj.weight, a=math.sqrt(5))
+        nn.init.kaiming_uniform_(self.v_proj.weight, a=math.sqrt(5))
+        nn.init.kaiming_uniform_(self.out_proj.weight, a=math.sqrt(5))
+
+        # Initialize biases uniformly
+        for layer in [self.q_proj, self.k_proj, self.v_proj, self.out_proj]:
+            if layer.bias is not None:
+                fan_in, _ = nn.init._calculate_fan_in_and_fan_out(layer.weight)
+                bound = 1 / math.sqrt(fan_in)
+                nn.init.uniform_(layer.bias, -bound, bound)
+
+        # Initialize scaling factors r and s based on selected initialization
+        scaling_init_fn = {
+            "ones": nn.init.ones_,
+            "random-signs": lambda x: torch.sign(torch.randn_like(x)),
+            "normal": lambda x: nn.init.normal_(x, mean=0.0, std=1.0),
+        }
+
+        init_fn = scaling_init_fn.get(scaling_init)
+        if init_fn is None:
+            raise ValueError(
+                f"Invalid scaling_init '{scaling_init}'. Must be one of 'ones', 'random-signs', 'normal'."
+            )
+
+        # Initialize r and s for specified projections
+        for key in self.r.keys():
+            init_fn(self.r[key])
+        for key in self.s.keys():
+            init_fn(self.s[key])
+
+    def forward(self, query, key, value, mask=None):
+        """
+        Perform the forward pass of the multi-head attention with batch ensembling.
+
+        Parameters
+        ----------
+        query : torch.Tensor
+            The query tensor of shape (N, S, E, D), where:
+                - N: Batch size
+                - S: Sequence length
+                - E: Ensemble size
+                - D: Embedding dimension
+        key : torch.Tensor
+            The key tensor of shape (N, S, E, D).
+        value : torch.Tensor
+            The value tensor of shape (N, S, E, D).
+        mask : torch.Tensor, optional
+            An optional mask tensor that is broadcastable to shape (N, 1, 1, 1, S). Positions with zero in the mask will be masked out.
+
+        Returns
+        -------
+        torch.Tensor
+            The output tensor of shape (N, S, E, D).
+
+        Raises
+        ------
+        AssertionError
+            If the ensemble size `E` does not match `self.ensemble_size`.
+        """
+        if x.dim() == 3:  # Case: (B, L, D) - no ensembles
+            batch_size, seq_len, input_size = x.shape
+            x = x.unsqueeze(2).expand(
+                -1, -1, self.ensemble_size, -1
+            )  # Shape: (B, L, ensemble_size, D)
+        elif (
+            x.dim() == 4 and x.size(2) == self.ensemble_size
+        ):  # Case: (B, L, ensemble_size, D)
+            batch_size, seq_len, ensemble_size, _ = x.shape
+            if ensemble_size != self.ensemble_size:
+                raise ValueError(
+                    f"Input shape {x.shape} is invalid. Expected shape: (B, S, ensemble_size, N)"
+                )
+        else:
+            raise ValueError(
+                f"Input shape {x.shape} is invalid. Expected shape: (B, L, D) or (B, L, ensemble_size, D)"
+            )
+        N, S, E, D = query.size()
+        assert E == self.ensemble_size, "Ensemble size mismatch."
+
+        # Process projections with or without batch ensembling
+        Q = self.process_projection(query, self.q_proj, "q_proj")  # Shape: (N, S, E, D)
+        K = self.process_projection(key, self.k_proj, "k_proj")  # Shape: (N, S, E, D)
+        V = self.process_projection(value, self.v_proj, "v_proj")  # Shape: (N, S, E, D)
+
+        # Reshape for multi-head attention
+        Q = Q.view(N, S, E, self.num_heads, self.head_dim).permute(
+            0, 2, 3, 1, 4
+        )  # (N, E, num_heads, S, head_dim)
+        K = K.view(N, S, E, self.num_heads, self.head_dim).permute(0, 2, 3, 1, 4)
+        V = V.view(N, S, E, self.num_heads, self.head_dim).permute(0, 2, 3, 1, 4)
+
+        # Compute scaled dot-product attention
+        attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(
+            self.head_dim
+        )  # (N, E, num_heads, S, S)
+
+        if mask is not None:
+            # Expand mask to match attn_scores shape
+            mask = mask.unsqueeze(1).unsqueeze(1)  # (N, 1, 1, 1, S)
+            attn_scores = attn_scores.masked_fill(mask == 0, float("-inf"))
+
+        attn_weights = F.softmax(attn_scores, dim=-1)  # (N, E, num_heads, S, S)
+
+        # Apply attention weights to values
+        context = torch.matmul(attn_weights, V)  # (N, E, num_heads, S, head_dim)
+
+        # Reshape and permute back to (N, S, E, D)
+        context = (
+            context.permute(0, 3, 1, 2, 4).contiguous().view(N, S, E, self.embed_dim)
+        )  # (N, S, E, D)
+
+        # Apply output projection
+        output = self.process_projection(
+            context, self.out_proj, "out_proj"
+        )  # (N, S, E, D)
+
+        return output
+
+    def process_projection(self, x, linear_layer, proj_name):
+        """
+        Process a projection (query, key, value, or output) with or without batch ensembling.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The input tensor of shape (N, S, E, D_in), where:
+                - N: Batch size
+                - S: Sequence length
+                - E: Ensemble size
+                - D_in: Input feature dimension
+        linear_layer : torch.nn.Linear
+            The linear layer to apply.
+        proj_name : str
+            The name of the projection ('q_proj', 'k_proj', 'v_proj', or 'out_proj').
+
+        Returns
+        -------
+        torch.Tensor
+            The output tensor of shape (N, S, E, D_out).
+        """
+        if proj_name in self.batch_ensemble_projections:
+            # Apply batch ensemble linear layer
+            r = self.r[proj_name]
+            s = self.s[proj_name]
+            return self.batch_ensemble_linear(x, linear_layer, r, s)
+        else:
+            # Process normally without batch ensembling
+            N, S, E, D_in = x.size()
+            x = x.view(N * E, S, D_in)  # Combine batch and ensemble dimensions
+            y = linear_layer(x)  # Apply linear layer
+            D_out = y.size(-1)
+            y = y.view(N, E, S, D_out).permute(0, 2, 1, 3)  # (N, S, E, D_out)
+            return y
+
+    def batch_ensemble_linear(self, x, linear_layer, r, s):
+        """
+        Apply a linear transformation with batch ensembling.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The input tensor of shape (N, S, E, D_in), where:
+                - N: Batch size
+                - S: Sequence length
+                - E: Ensemble size
+                - D_in: Input feature dimension
+        linear_layer : torch.nn.Linear
+            The linear layer with weight matrix `W` of shape (D_out, D_in).
+        r : torch.Tensor
+            The input scaling factors of shape (E, D_in).
+        s : torch.Tensor
+            The output scaling factors of shape (E, D_out).
+
+        Returns
+        -------
+        torch.Tensor
+            The output tensor of shape (N, S, E, D_out).
+        """
+        W = linear_layer.weight  # Shape: (D_out, D_in)
+        b = linear_layer.bias  # Shape: (D_out)
+
+        N, S, E, D_in = x.shape
+        D_out = W.shape[0]
+
+        # Multiply input by r
+        x_r = x * r.view(1, 1, E, D_in)  # (N, S, E, D_in)
+
+        # Reshape x_r to (N*S*E, D_in)
+        x_r = x_r.view(-1, D_in)  # (N*S*E, D_in)
+
+        # Compute x_r @ W^T + b
+        y = F.linear(x_r, W, b)  # (N*S*E, D_out)
+
+        # Reshape y back to (N, S, E, D_out)
+        y = y.view(N, S, E, D_out)  # (N, S, E, D_out)
+
+        # Multiply by s
+        y = y * s.view(1, 1, E, D_out)  # (N, S, E, D_out)
+
+        return y
