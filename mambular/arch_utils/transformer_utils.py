@@ -5,6 +5,7 @@ from .layer_utils.batch_ensemble_layer import (
     LinearBatchEnsembleLayer,
     MultiHeadAttentionBatchEnsemble,
 )
+from typing import Optional, List, Literal
 
 
 def reglu(x):
@@ -76,14 +77,6 @@ class CustomTransformerEncoderLayer(nn.TransformerEncoderLayer):
         return src
 
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import math
-from typing import Optional, List, Literal
-import copy
-
-
 class BatchEnsembleTransformerEncoderLayer(nn.Module):
     """
     Transformer Encoder Layer with Batch Ensembling.
@@ -126,6 +119,7 @@ class BatchEnsembleTransformerEncoderLayer(nn.Module):
         scaling_init: Literal["ones", "random-signs", "normal"] = "ones",
         batch_ensemble_projections: List[str] = ["query"],
         batch_ensemble_ffn: bool = False,
+        ensemble_bias=False,
     ):
         super(BatchEnsembleTransformerEncoderLayer, self).__init__()
 
@@ -133,7 +127,7 @@ class BatchEnsembleTransformerEncoderLayer(nn.Module):
         self.num_heads = num_heads
         self.ensemble_size = ensemble_size
         self.dim_feedforward = dim_feedforward
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
         self.activation = activation
         self.batch_ensemble_ffn = batch_ensemble_ffn
 
@@ -149,11 +143,19 @@ class BatchEnsembleTransformerEncoderLayer(nn.Module):
         # Feedforward network
         if batch_ensemble_ffn:
             # Apply batch ensembling to the feedforward network
-            self.linear1 = BatchEnsembleLinear(
-                embed_dim, dim_feedforward, ensemble_size, scaling_init
+            self.linear1 = LinearBatchEnsembleLayer(
+                embed_dim,
+                dim_feedforward,
+                ensemble_size,
+                scaling_init=scaling_init,
+                ensemble_bias=ensemble_bias,
             )
-            self.linear2 = BatchEnsembleLinear(
-                dim_feedforward, embed_dim, ensemble_size, scaling_init
+            self.linear2 = LinearBatchEnsembleLayer(
+                dim_feedforward,
+                embed_dim,
+                ensemble_size,
+                scaling_init=scaling_init,
+                ensemble_bias=ensemble_bias,
             )
         else:
             # Standard feedforward network
@@ -217,23 +219,6 @@ class BatchEnsembleTransformerEncoderLayer(nn.Module):
         src = self.norm2(src)
         return src
 
-    def dropout(self, x):
-        """
-        Apply dropout to the input tensor.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input tensor.
-
-        Returns
-        -------
-        torch.Tensor
-            Output tensor after applying dropout.
-
-        """
-        return F.dropout(x, p=self.dropout, training=self.training)
-
 
 class BatchEnsembleTransformerEncoder(nn.Module):
     """
@@ -271,38 +256,77 @@ class BatchEnsembleTransformerEncoder(nn.Module):
 
     def __init__(
         self,
-        num_layers: int,
-        embed_dim: int,
-        num_heads: int,
-        ensemble_size: int,
-        dim_feedforward: int = 2048,
-        dropout: float = 0.1,
-        activation: Literal["relu", "gelu"] = "relu",
-        scaling_init: Literal["ones", "random-signs", "normal"] = "ones",
-        batch_ensemble_projections: List[str] = ["query"],
-        batch_ensemble_ffn: bool = False,
-        norm: Optional[nn.Module] = None,
+        config,
     ):
         super(BatchEnsembleTransformerEncoder, self).__init__()
-        self.layers = nn.ModuleList(
-            [
-                BatchEnsembleTransformerEncoderLayer(
-                    embed_dim=embed_dim,
-                    num_heads=num_heads,
-                    ensemble_size=ensemble_size,
-                    dim_feedforward=dim_feedforward,
-                    dropout=dropout,
-                    activation=activation,
-                    scaling_init=scaling_init,
-                    batch_ensemble_projections=batch_ensemble_projections,
-                    batch_ensemble_ffn=batch_ensemble_ffn,
-                )
-                for _ in range(num_layers)
-            ]
-        )
-        self.norm = norm
+        d_model = getattr(config, "d_model", 128)
+        nhead = getattr(config, "n_heads", 8)
+        dim_feedforward = getattr(config, "transformer_dim_feedforward", 256)
+        dropout = getattr(config, "attn_dropout", 0.5)
+        activation = getattr(config, "transformer_activation", F.relu)
+        num_layers = getattr(config, "n_layers", 4)
+        ff_dropout = getattr(config, "ff_dropout", 0.5)
+        ensemble_projections = getattr(config, "batch_ensemble_projections", ["query"])
+        scaling_init = getattr(config, "scaling_init", "ones")
+        batch_ensemble_ffn = getattr(config, "batch_ensemble_ffn", False)
+        ensemble_bias = getattr(config, "ensemble_bias", False)
+        model_type = getattr(config, "model_type", "full")
+        scaling_init = getattr(config, "scaling_init", "ones")
 
-    def forward(self, src, mask: Optional[torch.Tensor] = None):
+        self.ensemble_size = getattr(config, "ensemble_size", 32)
+
+        self.layers = nn.ModuleList()
+
+        self.layers.append(
+            BatchEnsembleTransformerEncoderLayer(
+                embed_dim=d_model,
+                num_heads=nhead,
+                ensemble_size=self.ensemble_size,
+                dim_feedforward=dim_feedforward,
+                dropout=dropout,
+                activation=activation,
+                batch_ensemble_projections=ensemble_projections,
+                batch_ensemble_ffn=batch_ensemble_ffn,
+                scaling_init="normal",
+                ensemble_bias=ensemble_bias,
+            )
+        )
+
+        for i in range(1, num_layers):
+            if model_type == "mini":
+                self.layers.append(
+                    BatchEnsembleTransformerEncoderLayer(
+                        embed_dim=d_model,
+                        num_heads=nhead,
+                        ensemble_size=self.ensemble_size,
+                        dim_feedforward=dim_feedforward,
+                        dropout=dropout,
+                        activation=activation,
+                        scaling_init=scaling_init,
+                        batch_ensemble_projections=[],
+                        batch_ensemble_ffn=False,
+                        ensemble_bias=ensemble_bias,
+                    )
+                )
+
+            else:
+                self.layers.append(
+                    BatchEnsembleTransformerEncoderLayer(
+                        embed_dim=d_model,
+                        num_heads=nhead,
+                        ensemble_size=self.ensemble_size,
+                        dim_feedforward=dim_feedforward,
+                        dropout=dropout,
+                        activation=activation,
+                        batch_ensemble_projections=ensemble_projections,
+                        batch_ensemble_ffn=batch_ensemble_ffn,
+                        ensemble_bias=ensemble_bias,
+                    )
+                )
+
+        self.ensemble_projections = ensemble_projections
+
+    def forward(self, x, mask: Optional[torch.Tensor] = None):
         """
         Pass the input through the encoder layers in turn.
 
@@ -318,12 +342,26 @@ class BatchEnsembleTransformerEncoder(nn.Module):
         torch.Tensor
             The output tensor of shape (N, S, E, D).
         """
-        output = src
+        if x.dim() == 3:  # Case: (B, L, D) - no ensembles
+            batch_size, seq_len, input_size = x.shape
+            x = x.unsqueeze(2).expand(
+                -1, -1, self.ensemble_size, -1
+            )  # Shape: (B, L, ensemble_size, D)
+        elif (
+            x.dim() == 4 and x.size(2) == self.ensemble_size
+        ):  # Case: (B, L, ensemble_size, D)
+            batch_size, seq_len, ensemble_size, _ = x.shape
+            if ensemble_size != self.ensemble_size:
+                raise ValueError(
+                    f"Input shape {x.shape} is invalid. Expected shape: (B, S, ensemble_size, N)"
+                )
+        else:
+            raise ValueError(
+                f"Input shape {x.shape} is invalid. Expected shape: (B, L, D) or (B, L, ensemble_size, D)"
+            )
+        output = x
 
         for layer in self.layers:
             output = layer(output, src_mask=mask)
-
-        if self.norm is not None:
-            output = self.norm(output)
 
         return output
