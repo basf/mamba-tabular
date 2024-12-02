@@ -417,7 +417,7 @@ class Preprocessor:
         self.fitted = True
         return self.transform(X)
 
-    def get_feature_info(self):
+    def get_feature_info(self, verbose=True):
         """
         Retrieves information about how features are encoded within the model's preprocessor.
         This method identifies the type of encoding applied to each feature, categorizing them into binned or ordinal
@@ -467,24 +467,27 @@ class Preprocessor:
                         other_encoding_info[
                             feature_name
                         ] = n_bins  # Number of bins before one-hot encoding
-                        print(
-                            f"Numerical Feature (Discretized & One-Hot Encoded): {feature_name}, Number of bins before one-hot encoding: {n_bins}"
-                        )
+                        if verbose:
+                            print(
+                                f"Numerical Feature (Discretized & One-Hot Encoded): {feature_name}, Number of bins before one-hot encoding: {n_bins}"
+                            )
                     else:
                         # Only discretization without subsequent one-hot encoding
                         binned_or_ordinal_info[feature_name] = n_bins
-                        print(
-                            f"Numerical Feature (Binned): {feature_name}, Number of bins: {n_bins}"
-                        )
+                        if verbose:
+                            print(
+                                f"Numerical Feature (Binned): {feature_name}, Number of bins: {n_bins}"
+                            )
 
                 # Handle features processed with continuous ordinal encoding
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
                     n_categories = len(step.mapping_[columns.index(feature_name)])
                     binned_or_ordinal_info[feature_name] = n_categories
-                    print(
-                        f"Categorical Feature (Ordinal Encoded): {feature_name}, Number of unique categories: {n_categories}"
-                    )
+                    if verbose:
+                        print(
+                            f"Categorical Feature (Ordinal Encoded): {feature_name}, Number of unique categories: {n_categories}"
+                        )
 
                 # Handle other numerical feature encodings
                 else:
@@ -496,10 +499,12 @@ class Preprocessor:
                             np.zeros((1, len(columns)))
                         )
                         other_encoding_info[feature_name] = transformed_feature.shape[1]
-                        print(
-                            f"Feature: {feature_name} ({step_descriptions}), Encoded feature dimension: {transformed_feature.shape[1]}"
-                        )
+                        if verbose:
+                            print(
+                                f"Feature: {feature_name} ({step_descriptions}), Encoded feature dimension: {transformed_feature.shape[1]}"
+                            )
 
-                print("-" * 50)
+                if verbose:
+                    print("-" * 50)
 
         return binned_or_ordinal_info, other_encoding_info
