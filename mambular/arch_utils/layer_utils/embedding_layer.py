@@ -161,7 +161,7 @@ class EmbeddingLayer(nn.Module):
         if self.embedding_type == "plr":
             # For PLR, pass all numerical features together
             if num_features is not None:
-                num_features = torch.cat(num_features, dim=1).squeeze(
+                num_features = torch.stack(num_features, dim=1).squeeze(
                     -1
                 )  # Stack features along the feature dimension
                 num_embeddings = self.num_embeddings(
