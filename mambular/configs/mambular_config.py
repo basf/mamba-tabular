@@ -120,7 +120,7 @@ class DefaultMambularConfig:
     dt_max: float = 0.1
     dt_min: float = 1e-04
     dt_init_floor: float = 1e-04
-    norm: str = "LayerNorm"
+    norm: str = "RMSNorm"
     activation: callable = nn.SiLU()
     embedding_activation: callable = nn.Identity()
     embedding_type: str = "linear"
