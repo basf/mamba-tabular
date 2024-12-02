@@ -4,9 +4,9 @@ from typing import Literal
 
 
 @dataclass
-class DefaultBatchTabRNNConfig:
+class DefaultTREMConfig:
     """
-    Configuration class for the TabulaRNN model with predefined hyperparameters.
+    Configuration class for the Tabular Recurrent Ensemble Model (TREM)
 
     Attributes
     ----------

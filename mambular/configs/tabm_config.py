@@ -82,9 +82,9 @@ class DefaultTabMConfig:
     lr_factor: float = 0.1
 
     # arch params
-    layer_sizes: list = (512, 512, 128)
+    layer_sizes: list = (512, 512, 256)
     activation: callable = nn.ReLU()
-    dropout: float = 0.3
+    dropout: float = 0.2
     norm: str = None
     use_glu: bool = False
     batch_norm: bool = False
@@ -97,15 +97,15 @@ class DefaultTabMConfig:
     embedding_bias = False
     plr_lite: bool = False
     average_embeddings: bool = False
-    embedding_activation: callable = nn.ReLU()
+    embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
-    d_model: int = 64
+    d_model: int = 128
 
     # Batch ensembling specific configurations
     ensemble_size: int = 32
     ensemble_scaling_in: bool = True
     ensemble_scaling_out: bool = True
     ensemble_bias: bool = True
-    scaling_init: Literal["ones", "random-signs", "normal"] = "normal"
+    scaling_init: Literal["ones", "random-signs", "normal"] = "ones"
     average_ensembles: bool = False
     model_type: Literal["mini", "full"] = "mini"
