@@ -393,18 +393,17 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
         # Batch ensembling parameters
         self.r = nn.ParameterDict()
         self.s = nn.ParameterDict()
-
         # Initialize batch ensembling parameters for specified projections
         for proj_name in batch_ensemble_projections:
             if proj_name == "query":
-                self.r["q_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
-                self.s["q_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.r["query"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.s["query"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
             elif proj_name == "key":
-                self.r["k_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
-                self.s["k_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.r["key"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.s["key"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
             elif proj_name == "value":
-                self.r["v_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
-                self.s["v_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.r["value"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.s["value"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
             elif proj_name == "out_proj":
                 self.r["out_proj"] = nn.Parameter(
                     torch.Tensor(ensemble_size, embed_dim)
@@ -498,30 +497,14 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
         AssertionError
             If the ensemble size `E` does not match `self.ensemble_size`.
         """
-        if x.dim() == 3:  # Case: (B, L, D) - no ensembles
-            batch_size, seq_len, input_size = x.shape
-            x = x.unsqueeze(2).expand(
-                -1, -1, self.ensemble_size, -1
-            )  # Shape: (B, L, ensemble_size, D)
-        elif (
-            x.dim() == 4 and x.size(2) == self.ensemble_size
-        ):  # Case: (B, L, ensemble_size, D)
-            batch_size, seq_len, ensemble_size, _ = x.shape
-            if ensemble_size != self.ensemble_size:
-                raise ValueError(
-                    f"Input shape {x.shape} is invalid. Expected shape: (B, S, ensemble_size, N)"
-                )
-        else:
-            raise ValueError(
-                f"Input shape {x.shape} is invalid. Expected shape: (B, L, D) or (B, L, ensemble_size, D)"
-            )
+
         N, S, E, D = query.size()
         assert E == self.ensemble_size, "Ensemble size mismatch."
 
         # Process projections with or without batch ensembling
-        Q = self.process_projection(query, self.q_proj, "q_proj")  # Shape: (N, S, E, D)
-        K = self.process_projection(key, self.k_proj, "k_proj")  # Shape: (N, S, E, D)
-        V = self.process_projection(value, self.v_proj, "v_proj")  # Shape: (N, S, E, D)
+        Q = self.process_projection(query, self.q_proj, "query")  # Shape: (N, S, E, D)
+        K = self.process_projection(key, self.k_proj, "key")  # Shape: (N, S, E, D)
+        V = self.process_projection(value, self.v_proj, "value")  # Shape: (N, S, E, D)
 
         # Reshape for multi-head attention
         Q = Q.view(N, S, E, self.num_heads, self.head_dim).permute(
