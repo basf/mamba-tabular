@@ -308,6 +308,7 @@ class SklearnBaseLSS(BaseEstimator):
         checkpoint_path="model_checkpoints",
         distributional_kwargs=None,
         dataloader_kwargs={},
+        rebuild=True,
         **trainer_kwargs,
     ):
         """
@@ -384,51 +385,27 @@ class SklearnBaseLSS(BaseEstimator):
         else:
             raise ValueError("Unsupported family: {}".format(family))
 
-        if not isinstance(X, pd.DataFrame):
-            X = pd.DataFrame(X)
-        if isinstance(y, pd.Series):
-            y = y.values
-        if X_val is not None:
-            if not isinstance(X_val, pd.DataFrame):
-                X_val = pd.DataFrame(X_val)
-            if isinstance(y_val, pd.Series):
-                y_val = y_val.values
+        if rebuild:
+            self.build_model(
+                X=X,
+                y=y,
+                val_size=val_size,
+                X_val=X_val,
+                y_val=y_val,
+                random_state=random_state,
+                batch_size=batch_size,
+                shuffle=shuffle,
+                lr=lr,
+                lr_patience=lr_patience,
+                lr_factor=lr_factor,
+                weight_decay=weight_decay,
+                dataloader_kwargs=dataloader_kwargs,
+            )
 
-        self.data_module = MambularDataModule(
-            preprocessor=self.preprocessor,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            X_val=X_val,
-            y_val=y_val,
-            val_size=val_size,
-            random_state=random_state,
-            regression=True,
-            **dataloader_kwargs,
-        )
-
-        self.data_module.preprocess_data(
-            X, y, X_val, y_val, val_size=val_size, random_state=random_state
-        )
-
-        self.task_model = TaskModel(
-            model_class=self.base_model,
-            num_classes=self.family.param_count,
-            family=self.family,
-            config=self.config,
-            cat_feature_info=self.data_module.cat_feature_info,
-            num_feature_info=self.data_module.num_feature_info,
-            lr=lr if lr is not None else self.config.lr,
-            lr_patience=(
-                lr_patience if lr_patience is not None else self.config.lr_patience
-            ),
-            lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
-            weight_decay=(
-                weight_decay if weight_decay is not None else self.config.weight_decay
-            ),
-            lss=True,
-            optimizer_type=self.optimizer_type,
-            optimizer_args=self.optimizer_kwargs,
-        )
+        else:
+            assert (
+                self.built
+            ), "The model must be built before calling the fit method. Either call .build_model() or set rebuild=True"
 
         early_stop_callback = EarlyStopping(
             monitor=monitor, min_delta=0.00, patience=patience, verbose=False, mode=mode
@@ -689,6 +666,7 @@ class SklearnBaseLSS(BaseEstimator):
             nonlocal best_val_loss, best_epoch_val_loss  # Access across trials
 
             head_layer_sizes = []
+            head_layer_size_length = None
 
             for key, param_value in zip(param_names, hyperparams):
                 if key == "head_layer_size_length":
@@ -716,8 +694,6 @@ class SklearnBaseLSS(BaseEstimator):
                     "head_layer_sizes",
                     head_layer_sizes[:head_layer_size_length],
                 )
-
-                print(head_layer_sizes)
 
             # Build the model with updated hyperparameters
             self.build_model(
@@ -769,14 +745,19 @@ class SklearnBaseLSS(BaseEstimator):
 
         # Update the model with the best-found hyperparameters
         best_hparams = result.x
-        if "head_layer_sizes" in self.config.__dataclass_fields__:
-            head_layer_sizes = []
+        head_layer_sizes = (
+            [] if "head_layer_sizes" in self.config.__dataclass_fields__ else None
+        )
+        layer_sizes = [] if "layer_sizes" in self.config.__dataclass_fields__ else None
 
         # Iterate over the best hyperparameters found by optimization
         for key, param_value in zip(param_names, best_hparams):
-            if key.startswith("head_layer_size_"):
+            if key.startswith("head_layer_size_") and head_layer_sizes is not None:
                 # These are the individual head layer sizes
                 head_layer_sizes.append(round_to_nearest_16(param_value))
+            elif key.startswith("layer_size_") and layer_sizes is not None:
+                # These are the individual layer sizes
+                layer_sizes.append(round_to_nearest_16(param_value))
             else:
                 # For all other config values, update normally
                 field_type = self.config.__dataclass_fields__[key].type
@@ -785,9 +766,11 @@ class SklearnBaseLSS(BaseEstimator):
                 else:
                     setattr(self.config, key, param_value)
 
-        # After the loop, set head_layer_sizes in the config
-        if head_layer_sizes:
+        # After the loop, set head_layer_sizes or layer_sizes in the config
+        if head_layer_sizes is not None and head_layer_sizes:
             setattr(self.config, "head_layer_sizes", head_layer_sizes)
+        if layer_sizes is not None and layer_sizes:
+            setattr(self.config, "layer_sizes", layer_sizes)
 
         print("Best hyperparameters found:", best_hparams)
 
