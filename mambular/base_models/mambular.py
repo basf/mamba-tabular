@@ -76,7 +76,6 @@ class Mambular(BaseModel):
             self.mamba = Mamba(config)
         else:
             self.mamba = MambaOriginal(config)
-        self.norm_f = get_normalization_layer(config)
 
         self.tabular_head = MLPhead(
             input_dim=self.hparams.d_model,
@@ -116,7 +115,6 @@ class Mambular(BaseModel):
 
         x = self.pool_sequence(x)
 
-        x = self.norm_f(x)
         preds = self.tabular_head(x)
 
         return preds

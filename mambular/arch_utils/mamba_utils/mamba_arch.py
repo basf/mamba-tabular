@@ -6,9 +6,6 @@ from ..layer_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
 )
 from ..get_norm_fn import get_normalization_layer
 
@@ -165,9 +162,6 @@ class ResidualBlock(nn.Module):
             "RMSNorm": RMSNorm,
             "LayerNorm": LayerNorm,
             "LearnableLayerScaling": LearnableLayerScaling,
-            "BatchNorm": BatchNorm,
-            "InstanceNorm": InstanceNorm,
-            "GroupNorm": GroupNorm,
         }
 
         # Check if the provided normalization layer is valid
