@@ -1,7 +1,7 @@
 from .sklearn_base_regressor import SklearnBaseRegressor
 from .sklearn_base_lss import SklearnBaseLSS
 from .sklearn_base_classifier import SklearnBaseClassifier
-from ..base_models import CNN
+from ..base_models.cnn import CNN
 from ..configs.cnn_config import DefaultCNNConfig
 
 
