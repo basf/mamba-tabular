@@ -625,6 +625,15 @@ class SklearnBaseClassifier(BaseEstimator):
         max_epochs=200,
         prune_by_epoch=True,
         prune_epoch=5,
+        fixed_params={
+            "pooling_method": "avg",
+            "head_skip_layers": False,
+            "head_layer_size_length": 0,
+            "cat_encoding": "int",
+            "head_skip_layer": False,
+            "use_cls": False,
+        },
+        custom_search_space=None,
         **optimize_kwargs,
     ):
         """
@@ -656,7 +665,11 @@ class SklearnBaseClassifier(BaseEstimator):
         """
 
         # Define the hyperparameter search space from the model config
-        param_names, param_space = get_search_space(self.config)
+        param_names, param_space = get_search_space(
+            self.config,
+            fixed_params=fixed_params,
+            custom_search_space=custom_search_space,
+        )
 
         # Initial model fitting to get the baseline validation loss
         self.fit(X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs)
@@ -727,32 +740,41 @@ class SklearnBaseClassifier(BaseEstimator):
             self.task_model.pruning_epoch = prune_epoch
 
             # Fit the model (limit epochs for faster optimization)
-            self.fit(
-                X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs, rebuild=False
-            )
+            try:
+                # Wrap the risky operation (model fitting) in a try-except block
+                self.fit(
+                    X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs, rebuild=False
+                )
 
-            # Retrieve the current validation loss
-            if X_val is not None and y_val is not None:
-                val_loss = self.evaluate(
-                    X_val, y_val, metrics={"Accuracy": (accuracy_score, False)}
-                )["Accuracy"]
-            else:
-                val_loss = self.trainer.validate(self.task_model, self.data_module)[0][
-                    "val_loss"
-                ]
+                # Evaluate validation loss
+                if X_val is not None and y_val is not None:
+                    val_loss = self.evaluate(
+                        X_val, y_val, metrics={"Mean Squared Error": mean_squared_error}
+                    )["Mean Squared Error"]
+                else:
+                    val_loss = self.trainer.validate(self.task_model, self.data_module)[
+                        0
+                    ]["val_loss"]
 
-            # Retrieve validation loss at the specified epoch (e.g., epoch 5)
-            epoch_val_loss = self.task_model.epoch_val_loss_at(prune_epoch)
+                # Pruning based on validation loss at specific epoch
+                epoch_val_loss = self.task_model.epoch_val_loss_at(prune_epoch)
 
-            # Update the best validation loss at the specified epoch
-            if prune_by_epoch and epoch_val_loss < best_epoch_val_loss:
-                best_epoch_val_loss = epoch_val_loss
+                if prune_by_epoch and epoch_val_loss < best_epoch_val_loss:
+                    best_epoch_val_loss = epoch_val_loss
 
-            # Update the best overall validation loss
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
 
-            return val_loss
+                return val_loss
+
+            except Exception as e:
+                # Penalize the hyperparameter configuration with a large value
+                print(
+                    f"Error encountered during fit with hyperparameters {hyperparams}: {e}"
+                )
+                return (
+                    best_val_loss * 100
+                )  # Large value to discourage this configuration
 
         # Perform Bayesian optimization using scikit-optimize
         result = gp_minimize(_objective, param_space, n_calls=time, random_state=42)
