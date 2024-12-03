@@ -6,6 +6,7 @@ from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.layer_utils.batch_ensemble_layer import LinearBatchEnsembleLayer
 from ..arch_utils.layer_utils.sn_linear import SNLinear
+from ..utils.get_feature_dimensions import get_feature_dimensions
 
 
 class TabM(BaseModel):
@@ -46,9 +47,7 @@ class TabM(BaseModel):
                 ) * config.d_model
 
         else:
-            # Calculate input dimension
-            input_dim = sum(input_shape for input_shape in num_feature_info.values())
-            input_dim += len(cat_feature_info)
+            input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
 
         # Input layer with batch ensembling
         self.layers.append(

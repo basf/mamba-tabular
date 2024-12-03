@@ -84,8 +84,6 @@ class MambaTab(BaseModel):
 
         self.axis = config.axis
 
-        head_activation = self.hparams.head_activation
-
         self.tabular_head = MLPhead(
             input_dim=self.hparams.d_model,
             config=config,

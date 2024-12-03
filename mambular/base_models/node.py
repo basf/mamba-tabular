@@ -4,6 +4,7 @@ import torch
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.node_utils import DenseBlock
 from ..arch_utils.mlp_utils import MLPhead
+from ..utils.get_feature_dimensions import get_feature_dimensions
 
 
 class NODE(BaseModel):
@@ -75,11 +76,7 @@ class NODE(BaseModel):
             self.embedding_layer = EmbeddingLayer(config)
 
         else:
-            input_dim = 0
-            for feature_name, input_shape in num_feature_info.items():
-                input_dim += input_shape
-            for feature_name, input_shape in cat_feature_info.items():
-                input_dim += 1
+            input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
 
         self.d_out = num_classes
         self.block = DenseBlock(

@@ -3,6 +3,7 @@ import torch.nn as nn
 from ..configs.mlp_config import DefaultMLPConfig
 from .basemodel import BaseModel
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
+from ..utils.get_feature_dimensions import get_feature_dimensions
 
 
 class MLP(BaseModel):
@@ -73,11 +74,7 @@ class MLP(BaseModel):
         # Initialize layers
         self.layers = nn.ModuleList()
 
-        input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            input_dim += input_shape
-        for feature_name, input_shape in cat_feature_info.items():
-            input_dim += 1
+        input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
 
         if self.hparams.use_embeddings:
             self.embedding_layer = EmbeddingLayer(

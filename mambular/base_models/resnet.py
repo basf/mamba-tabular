@@ -5,6 +5,7 @@ from ..configs.resnet_config import DefaultResNetConfig
 from .basemodel import BaseModel
 from ..arch_utils.resnet_utils import ResidualBlock
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
+from ..utils.get_feature_dimensions import get_feature_dimensions
 
 
 class ResNet(BaseModel):
@@ -83,11 +84,7 @@ class ResNet(BaseModel):
             )
 
         else:
-            input_dim = 0
-            for feature_name, input_shape in num_feature_info.items():
-                input_dim += input_shape
-            for feature_name, input_shape in cat_feature_info.items():
-                input_dim += 1
+            input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
 
         self.initial_layer = nn.Linear(input_dim, self.hparams.layer_sizes[0])
 

@@ -4,6 +4,7 @@ from ..configs.ndtf_config import DefaultNDTFConfig
 from .basemodel import BaseModel
 from ..arch_utils.neural_decision_tree import NeuralDecisionTree
 import numpy as np
+from ..utils.get_feature_dimensions import get_feature_dimensions
 
 
 class NDTF(BaseModel):
@@ -66,11 +67,7 @@ class NDTF(BaseModel):
         self.num_feature_info = num_feature_info
         self.returns_ensemble = False
 
-        input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            input_dim += input_shape
-        for feature_name, input_shape in cat_feature_info.items():
-            input_dim += 1
+        input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
 
         self.input_dimensions = [input_dim]
 
