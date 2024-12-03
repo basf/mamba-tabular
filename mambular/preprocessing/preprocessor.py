@@ -11,18 +11,25 @@ from sklearn.preprocessing import (
     QuantileTransformer,
     PolynomialFeatures,
     SplineTransformer,
+    PowerTransformer,
+    OneHotEncoder,
 )
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from .ple_encoding import PLE
-from .prepro_utils import ContinuousOrdinalEncoder, CustomBinner, OneHotFromOrdinal
+from .prepro_utils import (
+    ContinuousOrdinalEncoder,
+    CustomBinner,
+    OneHotFromOrdinal,
+    NoTransformer,
+)
 
 
 class Preprocessor:
     """
     A comprehensive preprocessor for structured data, capable of handling both numerical and categorical features.
     It supports various preprocessing strategies for numerical data, including binning, one-hot encoding,
-    standardization, and normalization. Categorical features can be transformed using continuous ordinal encoding.
+    standardization, and minmax. Categorical features can be transformed using continuous ordinal encoding.
     Additionally, it allows for the use of decision tree-derived bin edges for numerical feature binning.
 
     The class is designed to work seamlessly with pandas DataFrames, facilitating easy integration into
@@ -32,14 +39,14 @@ class Preprocessor:
     ----------
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
-        only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
+        only if `numerical_preprocessing` is set to 'binning' or 'one-hot'.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
-        'binning', 'one_hot', 'standardization', and 'normalization'.
+        'binning', 'one-hot', 'standardization', and 'minmax'.
     use_decision_tree_bins : bool, default=False
         If True, uses decision tree regression/classification to determine
         optimal bin edges for numerical feature binning. This parameter is
-        relevant only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
+        relevant only if `numerical_preprocessing` is set to 'binning' or 'one-hot'.
     binning_strategy : str, default="uniform"
         Defines the strategy for binning numerical features. Options include 'uniform',
         'quantile', or other sklearn-compatible strategies.
@@ -71,6 +78,7 @@ class Preprocessor:
         self,
         n_bins=50,
         numerical_preprocessing="ple",
+        categorical_preprocessing="int",
         use_decision_tree_bins=False,
         binning_strategy="uniform",
         task="regression",
@@ -80,19 +88,36 @@ class Preprocessor:
         knots=12,
     ):
         self.n_bins = n_bins
-        self.numerical_preprocessing = numerical_preprocessing.lower()
+        self.numerical_preprocessing = (
+            numerical_preprocessing.lower()
+            if numerical_preprocessing is not None
+            else "none"
+        )
+        self.categorical_preprocessing = (
+            categorical_preprocessing.lower()
+            if categorical_preprocessing is not None
+            else "none"
+        )
         if self.numerical_preprocessing not in [
             "ple",
             "binning",
-            "one_hot",
+            "one-hot",
             "standardization",
-            "normalization",
+            "min-max",
             "quantile",
             "polynomial",
             "splines",
+            "box-cox",
+            "yeo-johnson",
+            "none",
         ]:
             raise ValueError(
-                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'one_hot', 'standardization', 'quantile', 'polynomial', 'splines' and 'normalization'."
+                "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'box-cox', 'one-hot', 'standardization', 'quantile', 'polynomial', 'splines', 'minmax' or 'None'."
+            )
+
+        if self.categorical_preprocessing not in ["int", "one-hot", "none"]:
+            raise ValueError(
+                "invalid categorical_preprocessing value. Supported values are 'int' and 'one-hot'"
             )
 
         self.use_decision_tree_bins = use_decision_tree_bins
@@ -184,7 +209,7 @@ class Preprocessor:
                     ("imputer", SimpleImputer(strategy="mean"))
                 ]
 
-                if self.numerical_preprocessing in ["binning", "one_hot"]:
+                if self.numerical_preprocessing in ["binning", "one-hot"]:
                     bins = (
                         self._get_decision_tree_bins(X[[feature]], y, [feature])
                         if self.use_decision_tree_bins
@@ -216,7 +241,7 @@ class Preprocessor:
                             ]
                         )
 
-                    if self.numerical_preprocessing == "one_hot":
+                    if self.numerical_preprocessing == "one-hot":
                         numeric_transformer_steps.extend(
                             [
                                 ("onehot_from_ordinal", OneHotFromOrdinal()),
@@ -226,9 +251,9 @@ class Preprocessor:
                 elif self.numerical_preprocessing == "standardization":
                     numeric_transformer_steps.append(("scaler", StandardScaler()))
 
-                elif self.numerical_preprocessing == "normalization":
+                elif self.numerical_preprocessing == "minmax":
                     numeric_transformer_steps.append(
-                        ("normalizer", MinMaxScaler(feature_range=(-1, 1)))
+                        ("minmax", MinMaxScaler(feature_range=(-1, 1)))
                     )
 
                 elif self.numerical_preprocessing == "quantile":
@@ -249,8 +274,6 @@ class Preprocessor:
                             PolynomialFeatures(self.degree, include_bias=False),
                         )
                     )
-                    # if self.degree > 10:
-                    #    numeric_transformer_steps.append(("normalizer", MinMaxScaler()))
 
                 elif self.numerical_preprocessing == "splines":
                     numeric_transformer_steps.append(
@@ -266,10 +289,34 @@ class Preprocessor:
 
                 elif self.numerical_preprocessing == "ple":
                     numeric_transformer_steps.append(
-                        ("normalizer", MinMaxScaler(feature_range=(-1, 1)))
+                        ("minmax", MinMaxScaler(feature_range=(-1, 1)))
                     )
                     numeric_transformer_steps.append(
                         ("ple", PLE(n_bins=self.n_bins, task=self.task))
+                    )
+
+                elif self.numerical_preprocessing == "box-cox":
+                    numeric_transformer_steps.append(
+                        (
+                            "box-cox",
+                            PowerTransformer(method="box-cox", standardize=True),
+                        )
+                    )
+
+                elif self.numerical_preprocessing == "yeo-johnson":
+                    numeric_transformer_steps.append(
+                        (
+                            "yeo-johnson",
+                            PowerTransformer(method="yeo-johnson", standardize=True),
+                        )
+                    )
+
+                elif self.numerical_preprocessing == "none":
+                    numeric_transformer_steps.append(
+                        (
+                            "none",
+                            NoTransformer(),
+                        )
                     )
 
                 numeric_transformer = Pipeline(numeric_transformer_steps)
@@ -278,16 +325,36 @@ class Preprocessor:
 
         if categorical_features:
             for feature in categorical_features:
-                # Create a pipeline for each categorical feature
-                categorical_transformer = Pipeline(
-                    [
-                        ("imputer", SimpleImputer(strategy="most_frequent")),
-                        (
-                            "continuous_ordinal",
-                            ContinuousOrdinalEncoder(),
-                        ),
-                    ]
-                )
+                if self.categorical_preprocessing == "int":
+                    # Use ContinuousOrdinalEncoder for "int"
+                    categorical_transformer = Pipeline(
+                        [
+                            ("imputer", SimpleImputer(strategy="most_frequent")),
+                            ("continuous_ordinal", ContinuousOrdinalEncoder()),
+                        ]
+                    )
+                elif self.categorical_preprocessing == "one-hot":
+                    # Use OneHotEncoder for "one-hot"
+                    categorical_transformer = Pipeline(
+                        [
+                            ("imputer", SimpleImputer(strategy="most_frequent")),
+                            ("onehot", OneHotEncoder()),
+                        ]
+                    )
+
+                elif self.categorical_preprocessing == "none":
+                    # Use OneHotEncoder for "one-hot"
+                    categorical_transformer = Pipeline(
+                        [
+                            ("imputer", SimpleImputer(strategy="most_frequent")),
+                            ("none", NoTransformer()),
+                        ]
+                    )
+                else:
+                    raise ValueError(
+                        f"Unknown categorical_preprocessing type: {self.categorical_preprocessing}"
+                    )
+
                 # Append the transformer for the current categorical feature
                 transformers.append(
                     (f"cat_{feature}", categorical_transformer, [feature])
@@ -442,8 +509,8 @@ class Preprocessor:
                   features after encoding transformations (e.g., one-hot encoding dimensions).
 
         """
-        binned_or_ordinal_info = {}
-        other_encoding_info = {}
+        numerical_feature_info = {}
+        categorical_feature_info = {}
 
         if not self.column_transformer:
             raise RuntimeError("The preprocessor has not been fitted yet.")
@@ -456,55 +523,94 @@ class Preprocessor:
             steps = [step[0] for step in transformer_pipeline.steps]
 
             for feature_name in columns:
-                # Handle features processed with discretization
-                if "discretizer" in steps:
-                    step = transformer_pipeline.named_steps["discretizer"]
-                    n_bins = step.n_bins_[0] if hasattr(step, "n_bins_") else None
+                # Initialize common fields
+                preprocessing_type = " -> ".join(steps)
+                dimension = None
+                categories = None
 
-                    # Check if discretization is followed by one-hot encoding
-                    if "onehot_from_ordinal" in steps:
-                        # Classify as other encoding due to the expanded feature dimensions from one-hot encoding
-                        other_encoding_info[
-                            feature_name
-                        ] = n_bins  # Number of bins before one-hot encoding
-                        if verbose:
-                            print(
-                                f"Numerical Feature (Discretized & One-Hot Encoded): {feature_name}, Number of bins before one-hot encoding: {n_bins}"
-                            )
-                    else:
-                        # Only discretization without subsequent one-hot encoding
-                        binned_or_ordinal_info[feature_name] = n_bins
-                        if verbose:
-                            print(
-                                f"Numerical Feature (Binned): {feature_name}, Number of bins: {n_bins}"
-                            )
-
-                # Handle features processed with continuous ordinal encoding
-                elif "continuous_ordinal" in steps:
-                    step = transformer_pipeline.named_steps["continuous_ordinal"]
-                    n_categories = len(step.mapping_[columns.index(feature_name)])
-                    binned_or_ordinal_info[feature_name] = n_categories
+                # Numerical features
+                if "discretizer" in steps or any(
+                    step in steps
+                    for step in [
+                        "standardization",
+                        "minmax",
+                        "quantile",
+                        "polynomial",
+                        "splines",
+                    ]
+                ):
+                    last_step = transformer_pipeline.steps[-1][1]
+                    if hasattr(last_step, "transform"):
+                        dummy_input = np.zeros(
+                            (1, 1)
+                        )  # Single-column input for dimension check
+                        transformed_feature = last_step.transform(dummy_input)
+                        dimension = transformed_feature.shape[1]
+                    numerical_feature_info[feature_name] = {
+                        "preprocessing": preprocessing_type,
+                        "dimension": dimension,
+                        "categories": None,  # Numerical features don't have categories
+                    }
                     if verbose:
                         print(
-                            f"Categorical Feature (Ordinal Encoded): {feature_name}, Number of unique categories: {n_categories}"
+                            f"Numerical Feature: {feature_name}, Info: {numerical_feature_info[feature_name]}"
                         )
 
-                # Handle other numerical feature encodings
+                # Categorical features
+                elif "continuous_ordinal" in steps:
+                    step = transformer_pipeline.named_steps["continuous_ordinal"]
+                    categories = len(step.mapping_[columns.index(feature_name)])
+                    dimension = 1  # Ordinal encoding always outputs one dimension
+                    categorical_feature_info[feature_name] = {
+                        "preprocessing": preprocessing_type,
+                        "dimension": dimension,
+                        "categories": categories,
+                    }
+                    if verbose:
+                        print(
+                            f"Categorical Feature (Ordinal): {feature_name}, Info: {categorical_feature_info[feature_name]}"
+                        )
+
+                elif "onehot" in steps:
+                    step = transformer_pipeline.named_steps["onehot"]
+                    if hasattr(step, "categories_"):
+                        categories = sum(len(cat) for cat in step.categories_)
+                        dimension = categories  # One-hot encoding expands into multiple dimensions
+                    categorical_feature_info[feature_name] = {
+                        "preprocessing": preprocessing_type,
+                        "dimension": dimension,
+                        "categories": categories,
+                    }
+                    if verbose:
+                        print(
+                            f"Categorical Feature (One-Hot): {feature_name}, Info: {categorical_feature_info[feature_name]}"
+                        )
+
+                # Fallback for other transformations
                 else:
                     last_step = transformer_pipeline.steps[-1][1]
-                    step_names = [step[0] for step in transformer_pipeline.steps]
-                    step_descriptions = " -> ".join(step_names)
                     if hasattr(last_step, "transform"):
-                        transformed_feature = last_step.transform(
-                            np.zeros((1, len(columns)))
+                        dummy_input = np.zeros((1, 1))
+                        transformed_feature = last_step.transform(dummy_input)
+                        dimension = transformed_feature.shape[1]
+                    if "cat" in name:
+                        categorical_feature_info[feature_name] = {
+                            "preprocessing": preprocessing_type,
+                            "dimension": dimension,
+                            "categories": None,  # Categories not defined for unknown categorical transformations
+                        }
+                    else:
+                        numerical_feature_info[feature_name] = {
+                            "preprocessing": preprocessing_type,
+                            "dimension": dimension,
+                            "categories": None,  # Numerical features don't have categories
+                        }
+                    if verbose:
+                        print(
+                            f"Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}"
                         )
-                        other_encoding_info[feature_name] = transformed_feature.shape[1]
-                        if verbose:
-                            print(
-                                f"Feature: {feature_name} ({step_descriptions}), Encoded feature dimension: {transformed_feature.shape[1]}"
-                            )
 
                 if verbose:
                     print("-" * 50)
 
-        return binned_or_ordinal_info, other_encoding_info
+        return numerical_feature_info, categorical_feature_info
