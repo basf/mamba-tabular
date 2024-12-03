@@ -22,6 +22,7 @@ from .prepro_utils import (
     CustomBinner,
     OneHotFromOrdinal,
     NoTransformer,
+    ToFloatTransformer,
 )
 
 
@@ -339,6 +340,7 @@ class Preprocessor:
                         [
                             ("imputer", SimpleImputer(strategy="most_frequent")),
                             ("onehot", OneHotEncoder()),
+                            ("to_float", ToFloatTransformer()),
                         ]
                     )
 
@@ -453,17 +455,20 @@ class Preprocessor:
         """
         start = 0
         transformed_dict = {}
-        for (
-            name,
-            transformer,
-            columns,
-        ) in self.column_transformer.transformers_:
+        for name, transformer, columns in self.column_transformer.transformers_:
             if transformer != "drop":
                 end = start + transformer.transform(X[[columns[0]]]).shape[1]
-                dtype = int if "cat" in name else float
+
+                # Determine dtype based on the transformer steps
+                transformer_steps = [step[0] for step in transformer.steps]
+                if "continuous_ordinal" in transformer_steps:
+                    dtype = int  # Use int for ordinal/integer encoding
+                else:
+                    dtype = float  # Default to float for other encodings
+
+                # Assign transformed data with the correct dtype
                 transformed_dict[name] = transformed_X[:, start:end].astype(dtype)
                 start = end
-
         return transformed_dict
 
     def fit_transform(self, X, y=None):

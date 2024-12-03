@@ -220,3 +220,15 @@ class NoTransformer(TransformerMixin, BaseEstimator):
                 "input_features must be provided to generate feature names."
             )
         return np.array(input_features)
+
+
+class ToFloatTransformer(TransformerMixin, BaseEstimator):
+    """
+    A transformer that converts input data to float type.
+    """
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return X.astype(float)
