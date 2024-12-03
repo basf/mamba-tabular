@@ -9,8 +9,6 @@ from .mambattention_config import DefaultMambAttentionConfig
 from .ndtf_config import DefaultNDTFConfig
 from .node_config import DefaultNODEConfig
 from .tabm_config import DefaultTabMConfig
-from .trem_config import DefaultTREMConfig
-from .cnn_config import DefaultCNNConfig
 
 
 __all__ = [
@@ -25,6 +23,4 @@ __all__ = [
     "DefaultNDTFConfig",
     "DefaultNODEConfig",
     "DefaultTabMConfig",
-    "DefaultTREMConfig",
-    "DefaultCNNConfig",
 ]
