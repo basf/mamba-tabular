@@ -29,7 +29,6 @@ class EmbeddingLayer(nn.Module):
         )
         self.use_cls = getattr(config, "use_cls", False)
         self.cls_position = getattr(config, "cls_position", 0)
-        self.cat_encoding = getattr(config, "cat_encoding", "int")
         self.embedding_dropout = (
             nn.Dropout(getattr(config, "embedding_dropout", 0.0))
             if getattr(config, "embedding_dropout", None) is not None
@@ -45,8 +44,8 @@ class EmbeddingLayer(nn.Module):
         if self.embedding_type == "ndt":
             self.num_embeddings = nn.ModuleList(
                 [
-                    NeuralEmbeddingTree(input_shape, self.d_model)
-                    for feature_name, input_shape in num_feature_info.items()
+                    NeuralEmbeddingTree(feature_info["dimension"], self.d_model)
+                    for feature_name, feature_info in num_feature_info.items()
                 ]
             )
         elif self.embedding_type == "plr":
@@ -62,10 +61,14 @@ class EmbeddingLayer(nn.Module):
             self.num_embeddings = nn.ModuleList(
                 [
                     nn.Sequential(
-                        nn.Linear(input_shape, self.d_model, bias=self.embedding_bias),
+                        nn.Linear(
+                            feature_info["dimension"],
+                            self.d_model,
+                            bias=self.embedding_bias,
+                        ),
                         self.embedding_activation,
                     )
-                    for feature_name, input_shape in num_feature_info.items()
+                    for feature_name, feature_info in num_feature_info.items()
                 ]
             )
         else:
@@ -73,39 +76,24 @@ class EmbeddingLayer(nn.Module):
                 "Invalid embedding_type. Choose from 'linear', 'ndt', or 'plr'."
             )
 
-        if self.cat_encoding == "int":
-            self.cat_embeddings = nn.ModuleList(
-                [
-                    nn.Sequential(
-                        nn.Embedding(num_categories + 1, self.d_model),
-                        self.embedding_activation,
-                    )
-                    for feature_name, num_categories in cat_feature_info.items()
-                ]
-            )
-        elif self.cat_encoding == "one-hot":
-            self.cat_embeddings = nn.ModuleList(
-                [
-                    nn.Sequential(
-                        OneHotEncoding(num_categories),
-                        nn.Linear(
-                            num_categories, self.d_model, bias=self.embedding_bias
-                        ),
-                        self.embedding_activation,
-                    )
-                    for feature_name, num_categories in cat_feature_info.items()
-                ]
-            )
-        elif self.cat_encoding == "linear":
-            self.cat_embeddings = nn.ModuleList(
-                [
-                    nn.Sequential(
-                        nn.Linear(input_shape, self.d_model, bias=self.embedding_bias),
-                        self.embedding_activation,
-                    )
-                    for feature_name, input_shape in cat_feature_info.items()
-                ]
-            )
+        self.cat_embeddings = nn.ModuleList(
+            [
+                nn.Sequential(
+                    nn.Embedding(feature_info["categories"] + 1, self.d_model),
+                    self.embedding_activation,
+                )
+                if feature_info["dimension"] == 1
+                else nn.Sequential(
+                    nn.Linear(
+                        feature_info["dimension"],
+                        self.d_model,
+                        bias=self.embedding_bias,
+                    ),
+                    self.embedding_activation,
+                )
+                for feature_name, feature_info in cat_feature_info.items()
+            ]
+        )
 
         # Class token if required
         if self.use_cls:
@@ -136,6 +124,7 @@ class EmbeddingLayer(nn.Module):
         ValueError
             If no features are provided to the model.
         """
+
         # Class token initialization
         if self.use_cls:
             batch_size = (
