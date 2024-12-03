@@ -64,7 +64,7 @@ class DefaultMLPConfig:
     layer_sizes: list = (256, 128, 32)
     activation: callable = nn.SELU()
     skip_layers: bool = False
-    dropout: float = 0.5
+    dropout: float = 0.2
     use_glu: bool = False
     skip_connections: bool = False
     batch_norm: bool = False

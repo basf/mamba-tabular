@@ -78,13 +78,13 @@ class DefaultTabMConfig:
     # lr params
     lr: float = 1e-04
     lr_patience: int = 10
-    weight_decay: float = 1e-06
+    weight_decay: float = 1e-05
     lr_factor: float = 0.1
 
     # arch params
-    layer_sizes: list = (512, 512, 256)
+    layer_sizes: list = (256, 256, 128)
     activation: callable = nn.ReLU()
-    dropout: float = 0.2
+    dropout: float = 0.5
     norm: str = None
     use_glu: bool = False
     batch_norm: bool = False
@@ -99,7 +99,7 @@ class DefaultTabMConfig:
     average_embeddings: bool = False
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
-    d_model: int = 128
+    d_model: int = 32
 
     # Batch ensembling specific configurations
     ensemble_size: int = 32
