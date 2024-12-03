@@ -2,16 +2,16 @@ from .sklearn_base_regressor import SklearnBaseRegressor
 from .sklearn_base_classifier import SklearnBaseClassifier
 from .sklearn_base_lss import SklearnBaseLSS
 
-from ..base_models.batch_tabrnn import BatchTabRNN
-from ..configs.batchtabrnn_config import DefaultBatchTabRNNConfig
+from ..base_models.trem import TREM
+from ..configs.trem_config import DefaultTREMConfig
 
 
-class BatchTabRNNRegressor(SklearnBaseRegressor):
+class TREMRegressor(SklearnBaseRegressor):
     """
-    RNN regressor. This class extends the SklearnBaseRegressor class and uses the BatchTabRNN model
-    with the default BatchTabRNN configuration.
+    RNN regressor. This class extends the SklearnBaseRegressor class and uses the TREM model
+    with the default TREM configuration.
 
-    The accepted arguments to the BatchTabRNNRegressor class include both the attributes in the DefaultBatchTabRNNConfig dataclass
+    The accepted arguments to the TREMRegressor class include both the attributes in the DefaultTREMConfig dataclass
     and the parameters for the Preprocessor class.
 
     Parameters
@@ -87,15 +87,15 @@ class BatchTabRNNRegressor(SklearnBaseRegressor):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(model=BatchTabRNN, config=DefaultBatchTabRNNConfig, **kwargs)
+        super().__init__(model=TREM, config=DefaultTREMConfig, **kwargs)
 
 
-class BatchTabRNNClassifier(SklearnBaseClassifier):
+class TREMClassifier(SklearnBaseClassifier):
     """
-    RNN classifier. This class extends the SklearnBaseClassifier class and uses the BatchTabRNN model
-    with the default BatchTabRNN configuration.
+    RNN classifier. This class extends the SklearnBaseClassifier class and uses the TREM model
+    with the default TREM configuration.
 
-    The accepted arguments to the BatchTabRNNClassifier class include both the attributes in the DefaultBatchTabRNNConfig dataclass
+    The accepted arguments to the TREMClassifier class include both the attributes in the DefaultTREMConfig dataclass
     and the parameters for the Preprocessor class.
 
     Parameters
@@ -171,15 +171,15 @@ class BatchTabRNNClassifier(SklearnBaseClassifier):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(model=BatchTabRNN, config=DefaultBatchTabRNNConfig, **kwargs)
+        super().__init__(model=TREM, config=DefaultTREMConfig, **kwargs)
 
 
-class BatchTabRNNLSS(SklearnBaseLSS):
+class TREMLSS(SklearnBaseLSS):
     """
-    RNN LSS. This class extends the SklearnBaseLSS class and uses the BatchTabRNN model
-    with the default BatchTabRNN configuration.
+    RNN LSS. This class extends the SklearnBaseLSS class and uses the TREM model
+    with the default TREM configuration.
 
-    The accepted arguments to the BatchTabRNNLSS class include both the attributes in the DefaultBatchTabRNNConfig dataclass
+    The accepted arguments to the TREMLSS class include both the attributes in the DefaultTREMConfig dataclass
     and the parameters for the Preprocessor class.
 
     Parameters
@@ -257,4 +257,4 @@ class BatchTabRNNLSS(SklearnBaseLSS):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(model=BatchTabRNN, config=DefaultBatchTabRNNConfig, **kwargs)
+        super().__init__(model=TREM, config=DefaultTREMConfig, **kwargs)

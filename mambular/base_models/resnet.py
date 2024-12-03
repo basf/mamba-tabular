@@ -3,9 +3,9 @@ import torch.nn as nn
 from typing import Any
 from ..configs.resnet_config import DefaultResNetConfig
 from .basemodel import BaseModel
-from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.resnet_utils import ResidualBlock
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
+from ..utils.get_feature_dimensions import get_feature_dimensions
 
 
 class ResNet(BaseModel):
@@ -47,8 +47,6 @@ class ResNet(BaseModel):
         List of residual blocks to process the hidden representations.
     output_layer : nn.Linear
         Output layer that produces the final prediction.
-    norm_f : nn.Module, optional
-        Normalization layer applied in each residual block, if specified in the configuration.
 
     Methods
     -------
@@ -66,27 +64,17 @@ class ResNet(BaseModel):
         config: DefaultResNetConfig = DefaultResNetConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.layer_sizes = self.hparams.get("layer_sizes", config.layer_sizes)
+        self.returns_ensemble = False
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-        self.activation = config.activation
-        self.use_embeddings = self.hparams.get("use_embeddings", config.use_embeddings)
 
-        input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            input_dim += input_shape
-        for feature_name, input_shape in cat_feature_info.items():
-            input_dim += 1
-
-        self.norm_f = get_normalization_layer(config)
-
-        if self.use_embeddings:
+        if self.hparams.use_embeddings:
             input_dim = (
-                len(num_feature_info) * config.d_model
-                + len(cat_feature_info) * config.d_model
+                len(num_feature_info) * self.hparams.d_model
+                + len(cat_feature_info) * self.hparams.d_model
             )
             # embedding layer
             self.embedding_layer = EmbeddingLayer(
@@ -95,29 +83,32 @@ class ResNet(BaseModel):
                 config=config,
             )
 
-        self.initial_layer = nn.Linear(input_dim, self.layer_sizes[0])
+        else:
+            input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
+
+        self.initial_layer = nn.Linear(input_dim, self.hparams.layer_sizes[0])
 
         self.blocks = nn.ModuleList()
-        for i in range(config.num_blocks):
-            input_dim = self.layer_sizes[i]
+        for i in range(self.hparams.num_blocks):
+            input_dim = self.hparams.layer_sizes[i]
             output_dim = (
-                self.layer_sizes[i + 1]
-                if i + 1 < len(self.layer_sizes)
-                else self.layer_sizes[-1]
+                self.hparams.layer_sizes[i + 1]
+                if i + 1 < len(self.hparams.layer_sizes)
+                else self.hparams.layer_sizes[-1]
             )
             block = ResidualBlock(
                 input_dim,
                 output_dim,
-                self.activation,
-                self.norm_f,
-                config.dropout,
+                self.hparams.activation,
+                self.hparams.norm,
+                self.hparams.dropout,
             )
             self.blocks.append(block)
 
-        self.output_layer = nn.Linear(self.layer_sizes[-1], num_classes)
+        self.output_layer = nn.Linear(self.hparams.layer_sizes[-1], num_classes)
 
     def forward(self, num_features, cat_features):
-        if self.use_embeddings:
+        if self.hparams.use_embeddings:
             x = self.embedding_layer(num_features, cat_features)
             B, S, D = x.shape
             x = x.reshape(B, S * D)

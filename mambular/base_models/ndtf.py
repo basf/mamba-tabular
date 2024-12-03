@@ -4,6 +4,7 @@ from ..configs.ndtf_config import DefaultNDTFConfig
 from .basemodel import BaseModel
 from ..arch_utils.neural_decision_tree import NeuralDecisionTree
 import numpy as np
+from ..utils.get_feature_dimensions import get_feature_dimensions
 
 
 class NDTF(BaseModel):
@@ -32,7 +33,7 @@ class NDTF(BaseModel):
     num_feature_info : dict
         Stores numerical feature information.
     penalty_factor : float
-        Scaling factor for the penalty applied during training, specified in the config.
+        Scaling factor for the penalty applied during training, specified in the self.hparams.
     input_dimensions : list of int
         List of input dimensions for each tree in the ensemble, with random sampling.
     trees : nn.ModuleList
@@ -59,35 +60,34 @@ class NDTF(BaseModel):
         config: DefaultNDTFConfig = DefaultNDTFConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
-        self.penalty_factor = config.penalty_factor
+        self.returns_ensemble = False
 
-        input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            input_dim += input_shape
-        for feature_name, input_shape in cat_feature_info.items():
-            input_dim += 1
+        input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
 
         self.input_dimensions = [input_dim]
 
-        for _ in range(config.n_ensembles - 1):
+        for _ in range(self.hparams.n_ensembles - 1):
             self.input_dimensions.append(np.random.randint(1, input_dim))
 
         self.trees = nn.ModuleList(
             [
                 NeuralDecisionTree(
                     input_dim=self.input_dimensions[idx],
-                    depth=np.random.randint(config.min_depth, config.max_depth),
+                    depth=np.random.randint(
+                        self.hparams.min_depth, self.hparams.max_depth
+                    ),
                     output_dim=num_classes,
-                    lamda=config.lamda,
-                    temperature=config.temperature + np.abs(np.random.normal(0, 0.1)),
-                    node_sampling=config.node_sampling,
+                    lamda=self.hparams.lamda,
+                    temperature=self.hparams.temperature
+                    + np.abs(np.random.normal(0, 0.1)),
+                    node_sampling=self.hparams.node_sampling,
                 )
-                for idx in range(config.n_ensembles)
+                for idx in range(self.hparams.n_ensembles)
             ]
         )
 
@@ -101,7 +101,7 @@ class NDTF(BaseModel):
         )
 
         self.tree_weights = nn.Parameter(
-            torch.full((config.n_ensembles, 1), 1.0 / config.n_ensembles),
+            torch.full((self.hparams.n_ensembles, 1), 1.0 / self.hparams.n_ensembles),
             requires_grad=True,
         )
 
@@ -168,4 +168,4 @@ class NDTF(BaseModel):
 
         # Stack predictions and calculate mean across trees
         preds = torch.stack(preds, dim=1).squeeze(-1)
-        return preds @ self.tree_weights, self.penalty_factor * penalty
+        return preds @ self.tree_weights, self.hparams.penalty_factor * penalty

@@ -3,12 +3,13 @@ import torch.nn as nn
 from ..arch_utils.mlp_utils import MLPhead
 from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
-from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
-from ..configs.fttransformer_config import DefaultFTTransformerConfig
+from ..arch_utils.transformer_utils import BatchEnsembleTransformerEncoder
+from ..configs.ftet_config import DefaultFTETConfig
 from .basemodel import BaseModel
+from ..arch_utils.layer_utils.sn_linear import SNLinear
 
 
-class FTTransformer(BaseModel):
+class FTET(BaseModel):
     """
     A Feature Transformer model for tabular data with categorical and numerical features, using embedding, transformer
     encoding, and pooling to produce final predictions.
@@ -56,12 +57,17 @@ class FTTransformer(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes=1,
-        config: DefaultFTTransformerConfig = DefaultFTTransformerConfig(),
+        config: DefaultFTETConfig = DefaultFTETConfig(),
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
-        self.returns_ensemble = False
+
+        if not self.hparams.average_ensembles:
+            self.returns_ensemble = True  # Directly set ensemble flag
+        else:
+            self.returns_ensemble = False
+
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -74,18 +80,16 @@ class FTTransformer(BaseModel):
 
         # transformer encoder
         self.norm_f = get_normalization_layer(config)
-        encoder_layer = CustomTransformerEncoderLayer(config=config)
-        self.encoder = nn.TransformerEncoder(
-            encoder_layer,
-            num_layers=self.hparams.n_layers,
-            norm=self.norm_f,
-        )
+        self.encoder = BatchEnsembleTransformerEncoder(config)
 
-        self.tabular_head = MLPhead(
-            input_dim=self.hparams.d_model,
-            config=config,
-            output_dim=num_classes,
-        )
+        if self.hparams.average_ensembles:
+            self.final_layer = nn.Linear(self.hparams.d_model, num_classes)
+        else:
+            self.final_layer = SNLinear(
+                self.hparams.ensemble_size,
+                self.hparams.d_model,
+                num_classes,
+            )
 
         # pooling
         n_inputs = len(num_feature_info) + len(cat_feature_info)
@@ -111,10 +115,16 @@ class FTTransformer(BaseModel):
 
         x = self.encoder(x)
 
-        x = self.pool_sequence(x)
+        x = self.pool_sequence(x)  # Shape: (batch_size, ensemble_size, hidden_size)
 
-        if self.norm_f is not None:
-            x = self.norm_f(x)
-        preds = self.tabular_head(x)
+        if self.hparams.average_ensembles:
+            x = x.mean(axis=1)  # Shape (batch_size, num_classes)
 
-        return preds
+        x = self.final_layer(
+            x
+        )  # Shape (batch_size, (ensemble_size), num_classes) if not averaged
+
+        if not self.hparams.average_ensembles:
+            x = x.squeeze(-1)
+
+        return x

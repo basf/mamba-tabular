@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 import torch.nn as nn
 from ..arch_utils.transformer_utils import ReGLU
+from typing import Optional, List, Literal
 
 
 @dataclass
-class DefaultFTTransformerConfig:
+class DefaultFTETConfig:
     """
-    Configuration class for the FT Transformer model with predefined hyperparameters.
+    Configuration class for the FTET model with predefined hyperparameters.
 
     Attributes
     ----------
@@ -75,24 +76,30 @@ class DefaultFTTransformerConfig:
     d_model: int = 128
     n_layers: int = 4
     n_heads: int = 8
-    attn_dropout: float = 0.2
-    ff_dropout: float = 0.1
+    attn_dropout: float = 0.3
+    ff_dropout: float = 0.5
     norm: str = "LayerNorm"
     activation: callable = nn.SELU()
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: callable = nn.ReLU()
     embedding_type: str = "linear"
     embedding_bias: bool = False
-    head_layer_sizes: list = ()
-    head_dropout: float = 0.5
-    head_skip_layers: bool = False
-    head_activation: callable = nn.SELU()
-    head_use_batch_norm: bool = False
     layer_norm_after_embedding: bool = False
     pooling_method: str = "avg"
     use_cls: bool = False
     norm_first: bool = False
     bias: bool = True
-    transformer_activation: callable = ReGLU()
+    transformer_activation: str = "relu"
     layer_norm_eps: float = 1e-05
     transformer_dim_feedforward: int = 256
     cat_encoding: str = "int"
+
+    # Batch ensembling specific configurations
+    ensemble_size: int = 32
+    ensemble_scaling_in: bool = True
+    ensemble_scaling_out: bool = True
+    ensemble_bias: bool = True
+    scaling_init: Literal["ones", "random-signs", "normal"] = "normal"
+    average_ensembles: bool = False
+    model_type: Literal["mini", "full"] = "full"
+    batch_ensemble_projections: list = ("query", "key", "value", "out_proj")
+    abtch_ensemble_ffn: bool = False

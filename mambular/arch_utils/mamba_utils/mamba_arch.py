@@ -6,9 +6,6 @@ from ..layer_utils.normalization_layers import (
     RMSNorm,
     LayerNorm,
     LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
 )
 from ..get_norm_fn import get_normalization_layer
 
@@ -33,29 +30,31 @@ class Mamba(nn.Module):
         self.layers = nn.ModuleList(
             [
                 ResidualBlock(
-                    d_model=config.d_model,
-                    expand_factor=config.expand_factor,
-                    bias=config.bias,
-                    d_conv=config.d_conv,
-                    conv_bias=config.conv_bias,
-                    dropout=config.dropout,
-                    dt_rank=config.dt_rank,
-                    d_state=config.d_state,
-                    dt_scale=config.dt_scale,
-                    dt_init=config.dt_init,
-                    dt_max=config.dt_max,
-                    dt_min=config.dt_min,
-                    dt_init_floor=config.dt_init_floor,
+                    d_model=getattr(config, "d_model", 128),
+                    expand_factor=getattr(config, "expand_factor", 4),
+                    bias=getattr(config, "bias", True),
+                    d_conv=getattr(config, "d_conv", 4),
+                    conv_bias=getattr(config, "conv_bias", False),
+                    dropout=getattr(config, "dropout", 0.0),
+                    dt_rank=getattr(config, "dt_rank", "auto"),
+                    d_state=getattr(config, "d_state", 256),
+                    dt_scale=getattr(config, "dt_scale", 1.0),
+                    dt_init=getattr(config, "dt_init", "random"),
+                    dt_max=getattr(config, "dt_max", 0.1),
+                    dt_min=getattr(config, "dt_min", 1e-04),
+                    dt_init_floor=getattr(config, "dt_init_floor", 1e-04),
                     norm=get_normalization_layer(config),
-                    activation=config.activation,
-                    bidirectional=config.bidirectional,
-                    use_learnable_interaction=config.use_learnable_interaction,
-                    layer_norm_eps=config.layer_norm_eps,
-                    AD_weight_decay=config.AD_weight_decay,
-                    BC_layer_norm=config.BC_layer_norm,
-                    use_pscan=config.use_pscan,
+                    activation=getattr(config, "activation", nn.SiLU()),
+                    bidirectional=getattr(config, "bidirectional", False),
+                    use_learnable_interaction=getattr(
+                        config, "use_learnable_interaction", False
+                    ),
+                    layer_norm_eps=getattr(config, "layer_norm_eps", 1e-5),
+                    AD_weight_decay=getattr(config, "AD_weight_decay", True),
+                    BC_layer_norm=getattr(config, "BC_layer_norm", False),
+                    use_pscan=getattr(config, "use_pscan", False),
                 )
-                for _ in range(config.n_layers)
+                for _ in range(getattr(config, "n_layers", 6))
             ]
         )
 
@@ -163,9 +162,6 @@ class ResidualBlock(nn.Module):
             "RMSNorm": RMSNorm,
             "LayerNorm": LayerNorm,
             "LearnableLayerScaling": LearnableLayerScaling,
-            "BatchNorm": BatchNorm,
-            "InstanceNorm": InstanceNorm,
-            "GroupNorm": GroupNorm,
         }
 
         # Check if the provided normalization layer is valid
