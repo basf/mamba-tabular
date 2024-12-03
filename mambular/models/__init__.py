@@ -22,13 +22,9 @@ from .mambattention import (
     MambAttentionRegressor,
     MambAttentionLSS,
 )
-
 from .ndtf import NDTFClassifier, NDTFRegressor, NDTFLSS
 from .node import NODEClassifier, NODERegressor, NODELSS
 from .tabm import TabMClassifier, TabMRegressor, TabMLSS
-from .trem import TREMRegressor, TREMClassifier, TREMLSS
-from .cnn import CNNRegressor, CNNClassifier, CNNLSS
-from .ftet import FTETRegressor, FTETClassifier, FTETLSS
 
 
 __all__ = [
@@ -68,13 +64,4 @@ __all__ = [
     "TabMClassifier",
     "TabMRegressor",
     "TabMLSS",
-    "TREMRegressor",
-    "TREMClassifier",
-    "TREMLSS",
-    "CNNRegressor",
-    "CNNClassifier",
-    "CNNLSS",
-    "FTETRegressor",
-    "FTETClassifier",
-    "FTETLSS",
 ]
