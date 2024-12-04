@@ -6,9 +6,11 @@ from .mlp import MLP
 from .resnet import ResNet
 from .tabtransformer import TabTransformer
 from .mambatab import MambaTab
-from .mambattn import MambAttn
+from .mambattn import MambAttention
 from .node import NODE
 from .tabm import TabM
+from .tabularnn import TabulaRNN
+from .ndtf import NDTF
 
 __all__ = [
     "TaskModel",
@@ -19,7 +21,9 @@ __all__ = [
     "MLP",
     "BaseModel",
     "MambaTab",
-    "MambAttn",
+    "MambAttention",
     "TabM",
     "NODE",
+    "NDTF",
+    "TabulaRNN",
 ]
