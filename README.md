@@ -16,7 +16,7 @@
 </div>
 
 <div style="text-align: center;">
-    <h1>Mambular: Tabular Deep  Made Simple</h1>
+    <h1>Mambular: Tabular Deep Learning Made Simple</h1>
 </div>
 
 Mambular is a Python library for tabular deep learning. It includes models that leverage the Mamba (State Space Model) architecture, as well as other popular models like TabTransformer, FTTransformer, TabM and tabular ResNets. Check out our paper `Mambular: A Sequential Model for Tabular Deep Learning`, available [here](https://arxiv.org/abs/2408.06291). Also check out our paper introducing [TabulaRNN](https://arxiv.org/pdf/2411.17207) and analyzing the efficiency of NLP inspired tabular models. 
@@ -65,6 +65,7 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 | `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.    |
 | `TabulaRNN`      | A Recurrent Neural Network for Tabular data, introduced [here](https://arxiv.org/pdf/2411.17207).                                                   |
 | `MambAttention`  | A combination between Mamba and Transformers, also introduced [here](https://arxiv.org/pdf/2411.17207).                                             |
+| `NDTF`           | A neural decision forest using soft decision trees. See [Kontschieder et al.](https://openaccess.thecvf.com/content_iccv_2015/html/Kontschieder_Deep_Neural_Decision_ICCV_2015_paper.html) for inspiration. |
 
 
 
