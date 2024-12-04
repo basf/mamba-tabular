@@ -131,7 +131,48 @@ class Preprocessor:
         self.degree = degree
         self.n_knots = knots
 
+    def get_params(self, deep=True):
+        """
+        Get parameters for the preprocessor.
+
+        Parameters
+        ----------
+        deep : bool, default=True
+            If True, will return parameters of subobjects that are estimators.
+
+        Returns
+        -------
+        params : dict
+            Parameter names mapped to their values.
+        """
+        params = {
+            "n_bins": self.n_bins,
+            "numerical_preprocessing": self.numerical_preprocessing,
+            "categorical_preprocessing": self.categorical_preprocessing,
+            "use_decision_tree_bins": self.use_decision_tree_bins,
+            "binning_strategy": self.binning_strategy,
+            "task": self.task,
+            "cat_cutoff": self.cat_cutoff,
+            "treat_all_integers_as_numerical": self.treat_all_integers_as_numerical,
+            "degree": self.degree,
+            "knots": self.n_knots,
+        }
+        return params
+
     def set_params(self, **params):
+        """
+        Set parameters for the preprocessor.
+
+        Parameters
+        ----------
+        **params : dict
+            Parameter names mapped to their new values.
+
+        Returns
+        -------
+        self : object
+            Preprocessor instance.
+        """
         for key, value in params.items():
             setattr(self, key, value)
         return self
@@ -222,9 +263,11 @@ class Preprocessor:
                                 (
                                     "discretizer",
                                     KBinsDiscretizer(
-                                        n_bins=bins
-                                        if isinstance(bins, int)
-                                        else len(bins) - 1,
+                                        n_bins=(
+                                            bins
+                                            if isinstance(bins, int)
+                                            else len(bins) - 1
+                                        ),
                                         encode="ordinal",
                                         strategy=self.binning_strategy,
                                         subsample=200_000 if len(X) > 200_000 else None,
