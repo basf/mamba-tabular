@@ -37,13 +37,27 @@ class TaskModel(pl.LightningModule):
         lss=False,
         family=None,
         loss_fct: callable = None,
+        early_pruning_threshold=None,
+        pruning_epoch=5,
+        optimizer_type: str = "Adam",
+        optimizer_args: dict = None,
         **kwargs,
     ):
         super().__init__()
+        self.optimizer_type = optimizer_type
         self.num_classes = num_classes
         self.lss = lss
         self.family = family
         self.loss_fct = loss_fct
+        self.early_pruning_threshold = early_pruning_threshold
+        self.pruning_epoch = pruning_epoch
+        self.val_losses = []
+
+        self.optimizer_params = {
+            k.replace("optimizer_", ""): v
+            for k, v in optimizer_args.items()
+            if k.startswith("optimizer_")
+        }
 
         if lss:
             pass
@@ -116,9 +130,9 @@ class TaskModel(pl.LightningModule):
         Parameters
         ----------
         predictions : Tensor
-            Model predictions.
+            Model predictions. Shape: (batch_size, k, output_dim) for ensembles, or (batch_size, output_dim) otherwise.
         y_true : Tensor
-            True labels.
+            True labels. Shape: (batch_size, output_dim).
 
         Returns
         -------
@@ -126,14 +140,39 @@ class TaskModel(pl.LightningModule):
             Computed loss.
         """
         if self.lss:
-            return self.family.compute_loss(predictions, y_true.squeeze(-1))
+            if getattr(self.base_model, "returns_ensemble", False):
+                loss = 0.0
+                for ensemble_member in range(predictions.shape[1]):
+                    loss += self.family.compute_loss(
+                        predictions[:, ensemble_member], y_true.squeeze(-1)
+                    )
+                return loss
+            else:
+                return self.family.compute_loss(predictions, y_true.squeeze(-1))
+
+        if getattr(self.base_model, "returns_ensemble", False):  # Ensemble case
+            if (
+                self.loss_fct.__class__.__name__ == "CrossEntropyLoss"
+                and predictions.dim() == 3
+            ):
+                # Classification case with ensemble: predictions (N, E, k), y_true (N,)
+                N, E, k = predictions.shape
+                loss = 0.0
+                for ensemble_member in range(E):
+                    loss += self.loss_fct(predictions[:, ensemble_member, :], y_true)
+                return loss
+
+            else:
+                # Regression case with ensemble (e.g., MSE) or other compatible losses
+                y_true_expanded = y_true.expand_as(predictions)
+                return self.loss_fct(predictions, y_true_expanded)
         else:
-            loss = self.loss_fct(predictions, y_true)
-            return loss
+            # Non-ensemble case
+            return self.loss_fct(predictions, y_true)
 
     def training_step(self, batch, batch_idx):
         """
-        Training step for a single batch.
+        Training step for a single batch, incorporating penalty if the model has a penalty_forward method.
 
         Parameters
         ----------
@@ -147,17 +186,25 @@ class TaskModel(pl.LightningModule):
         Tensor
             Training loss.
         """
-
         cat_features, num_features, labels = batch
-        preds = self(num_features=num_features, cat_features=cat_features)
-        loss = self.compute_loss(preds, labels)
 
+        # Check if the model has a `penalty_forward` method
+        if hasattr(self.base_model, "penalty_forward"):
+            preds, penalty = self.base_model.penalty_forward(
+                num_features=num_features, cat_features=cat_features
+            )
+            loss = self.compute_loss(preds, labels) + penalty
+        else:
+            preds = self(num_features=num_features, cat_features=cat_features)
+            loss = self.compute_loss(preds, labels)
+
+        # Log the training loss
         self.log(
             "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )
 
         # Log additional metrics
-        if not self.lss:
+        if not self.lss and not self.base_model.returns_ensemble:
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(
@@ -202,7 +249,7 @@ class TaskModel(pl.LightningModule):
         )
 
         # Log additional metrics
-        if not self.lss:
+        if not self.lss and not self.base_model.returns_ensemble:
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(
@@ -246,7 +293,7 @@ class TaskModel(pl.LightningModule):
         )
 
         # Log additional metrics
-        if not self.lss:
+        if not self.lss and not self.base_model.returns_ensemble:
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(
@@ -260,20 +307,100 @@ class TaskModel(pl.LightningModule):
 
         return test_loss
 
-    def configure_optimizers(self):
+    def on_validation_epoch_end(self):
         """
-        Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
+        Callback executed at the end of each validation epoch.
+
+        This method retrieves the current validation loss from the trainer's callback metrics
+        and stores it in a list for tracking validation losses across epochs. It also applies
+        pruning logic to stop training early if the validation loss exceeds a specified threshold.
+
+        Parameters
+        ----------
+        None
+
+        Attributes
+        ----------
+        val_loss : torch.Tensor or None
+            The validation loss for the current epoch, retrieved from `self.trainer.callback_metrics`.
+        val_loss_value : float
+            The validation loss for the current epoch, converted to a float.
+        val_losses : list of float
+            A list storing the validation losses for each epoch.
+        pruning_epoch : int
+            The epoch after which pruning logic will be applied.
+        early_pruning_threshold : float, optional
+            The threshold for early pruning based on validation loss. If the current validation
+            loss exceeds this value, training will be stopped early.
+
+        Notes
+        -----
+        If the current epoch is greater than or equal to `pruning_epoch`, and the validation
+        loss exceeds the `early_pruning_threshold`, the training is stopped early by setting
+        `self.trainer.should_stop` to True.
+        """
+        val_loss = self.trainer.callback_metrics.get("val_loss")
+        if val_loss is not None:
+            val_loss_value = val_loss.item()
+            self.val_losses.append(val_loss_value)  # Store val_loss for each epoch
+
+            # Apply pruning logic if needed
+            if self.current_epoch >= self.pruning_epoch:
+                if (
+                    self.early_pruning_threshold is not None
+                    and val_loss_value > self.early_pruning_threshold
+                ):
+                    print(
+                        f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}"
+                    )
+                    self.trainer.should_stop = True  # Stop training early
+
+    def epoch_val_loss_at(self, epoch):
+        """
+        Retrieve the validation loss at a specific epoch.
+
+        This method allows the user to query the validation loss for any given epoch,
+        provided the epoch exists within the range of completed epochs. If the epoch
+        exceeds the length of the `val_losses` list, a default value of infinity is returned.
+
+        Parameters
+        ----------
+        epoch : int
+            The epoch number for which the validation loss is requested.
 
         Returns
         -------
-        dict
-            A dictionary containing the optimizer and lr_scheduler configurations.
+        float
+            The validation loss for the requested epoch. If the epoch does not exist,
+            the method returns `float("inf")`.
+
+        Notes
+        -----
+        This method relies on `self.val_losses` which stores the validation loss values
+        at the end of each epoch during training.
         """
-        optimizer = torch.optim.Adam(
+        if epoch < len(self.val_losses):
+            return self.val_losses[epoch]
+        else:
+            return float("inf")
+
+    def configure_optimizers(self):
+        """
+        Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
+        The optimizer type can be chosen by the user (Adam, SGD, etc.).
+        """
+        # Dynamically choose the optimizer based on the passed optimizer_type
+        optimizer_class = getattr(torch.optim, self.optimizer_type)
+
+        # Initialize the optimizer with the chosen class and parameters
+        optimizer = optimizer_class(
             self.base_model.parameters(),
             lr=self.lr,
             weight_decay=self.weight_decay,
+            **self.optimizer_params,  # Pass any additional optimizer-specific parameters
         )
+
+        # Define learning rate scheduler
         scheduler = {
             "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer,

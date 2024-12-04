@@ -61,6 +61,7 @@ class BatchNorm(nn.Module):
 
     def __init__(self, d_model: int, eps: float = 1e-5, momentum: float = 0.1):
         super().__init__()
+        self.d_model = d_model
         self.eps = eps
         self.momentum = momentum
         self.register_buffer("running_mean", torch.zeros(d_model))
@@ -71,13 +72,12 @@ class BatchNorm(nn.Module):
     def forward(self, x):
         if self.training:
             mean = x.mean(dim=0)
-            var = x.var(dim=0)
-            self.running_mean = (
-                1 - self.momentum
-            ) * self.running_mean + self.momentum * mean
-            self.running_var = (
-                1 - self.momentum
-            ) * self.running_var + self.momentum * var
+            var = x.var(
+                dim=0, unbiased=False
+            )  # Use unbiased=False for consistency with BatchNorm
+            # Update running stats in-place
+            self.running_mean.mul_(1 - self.momentum).add_(self.momentum * mean)
+            self.running_var.mul_(1 - self.momentum).add_(self.momentum * var)
         else:
             mean = self.running_mean
             var = self.running_var

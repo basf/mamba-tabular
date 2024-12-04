@@ -9,7 +9,16 @@ from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
 from lightning.pytorch.callbacks import ModelSummary
-from dataclasses import asdict, is_dataclass
+from skopt import gp_minimize
+from skopt.space import Real, Integer, Categorical
+import torch.nn as nn
+from sklearn.metrics import mean_squared_error
+import warnings
+from ..utils.config_mapper import (
+    get_search_space,
+    activation_mapper,
+    round_to_nearest_16,
+)
 
 
 class SklearnBaseRegressor(BaseEstimator):
@@ -17,6 +26,7 @@ class SklearnBaseRegressor(BaseEstimator):
         self.preprocessor_arg_names = [
             "n_bins",
             "numerical_preprocessing",
+            "categorical_preprocessing",
             "use_decision_tree_bins",
             "binning_strategy",
             "task",
@@ -27,7 +37,9 @@ class SklearnBaseRegressor(BaseEstimator):
         ]
 
         self.config_kwargs = {
-            k: v for k, v in kwargs.items() if k not in self.preprocessor_arg_names
+            k: v
+            for k, v in kwargs.items()
+            if k not in self.preprocessor_arg_names and not k.startswith("optimizer")
         }
         self.config = config(**self.config_kwargs)
 
@@ -46,6 +58,16 @@ class SklearnBaseRegressor(BaseEstimator):
                 "The task is set to 'classification'. The Regressor is designed for regression tasks.",
                 UserWarning,
             )
+
+        self.optimizer_type = kwargs.get("optimizer_type", "Adam")
+
+        self.optimizer_kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if k
+            not in ["lr", "weight_decay", "patience", "lr_patience", "optimizer_type"]
+            and k.startswith("optimizer_")
+        }
 
     def get_params(self, deep=True):
         """
@@ -66,7 +88,7 @@ class SklearnBaseRegressor(BaseEstimator):
 
         if deep:
             preprocessor_params = {
-                "preprocessor__" + key: value
+                "prepro__" + key: value
                 for key, value in self.preprocessor.get_params().items()
             }
             params.update(preprocessor_params)
@@ -88,12 +110,12 @@ class SklearnBaseRegressor(BaseEstimator):
             Estimator instance.
         """
         config_params = {
-            k: v for k, v in parameters.items() if not k.startswith("preprocessor__")
+            k: v for k, v in parameters.items() if not k.startswith("prepro__")
         }
         preprocessor_params = {
             k.split("__")[1]: v
             for k, v in parameters.items()
-            if k.startswith("preprocessor__")
+            if k.startswith("prepro__")
         }
 
         if config_params:
@@ -119,10 +141,10 @@ class SklearnBaseRegressor(BaseEstimator):
         random_state: int = 101,
         batch_size: int = 128,
         shuffle: bool = True,
-        lr: float = 1e-4,
-        lr_patience: int = 10,
-        factor: float = 0.1,
-        weight_decay: float = 1e-06,
+        lr: float = None,
+        lr_patience: int = None,
+        lr_factor: float = None,
+        weight_decay: float = None,
         dataloader_kwargs={},
     ):
         """
@@ -169,6 +191,7 @@ class SklearnBaseRegressor(BaseEstimator):
         if isinstance(y, pd.Series):
             y = y.values
         if X_val is not None:
+        if X_val is not None:
             if not isinstance(X_val, pd.DataFrame):
                 X_val = pd.DataFrame(X_val)
             if isinstance(y_val, pd.Series):
@@ -183,7 +206,7 @@ class SklearnBaseRegressor(BaseEstimator):
             val_size=val_size,
             random_state=random_state,
             regression=True,
-            **dataloader_kwargs
+            **dataloader_kwargs,
         )
 
         self.data_module.preprocess_data(
@@ -195,10 +218,16 @@ class SklearnBaseRegressor(BaseEstimator):
             config=self.config,
             cat_feature_info=self.data_module.cat_feature_info,
             num_feature_info=self.data_module.num_feature_info,
-            lr=lr,
-            lr_patience=lr_patience,
-            lr_factor=factor,
-            weight_decay=weight_decay,
+            lr=lr if lr is not None else self.config.lr,
+            lr_patience=(
+                lr_patience if lr_patience is not None else self.config.lr_patience
+            ),
+            lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
+            weight_decay=(
+                weight_decay if weight_decay is not None else self.config.weight_decay
+            ),
+            optimizer_type=self.optimizer_type,
+            optimizer_args=self.optimizer_kwargs,
         )
 
         self.built = True
@@ -251,14 +280,14 @@ class SklearnBaseRegressor(BaseEstimator):
         patience: int = 15,
         monitor: str = "val_loss",
         mode: str = "min",
-        lr: float = 1e-4,
-        lr_patience: int = 10,
-        factor: float = 0.1,
-        weight_decay: float = 1e-06,
+        lr: float = None,
+        lr_patience: int = None,
+        lr_factor: float = None,
+        weight_decay: float = None,
         checkpoint_path="model_checkpoints",
         dataloader_kwargs={},
         rebuild=True,
-        **trainer_kwargs
+        **trainer_kwargs,
     ):
         """
         Trains the regression model using the provided training data. Optionally, a separate validation set can be used.
@@ -310,45 +339,26 @@ class SklearnBaseRegressor(BaseEstimator):
             The fitted regressor.
         """
         if rebuild:
-            if not isinstance(X, pd.DataFrame):
-                X = pd.DataFrame(X)
-            if isinstance(y, pd.Series):
-                y = y.values
-            if X_val is not None:
-                if not isinstance(X_val, pd.DataFrame):
-                    X_val = pd.DataFrame(X_val)
-                if isinstance(y_val, pd.Series):
-                    y_val = y_val.values
-
-            self.data_module = MambularDataModule(
-                preprocessor=self.preprocessor,
-                batch_size=batch_size,
-                shuffle=shuffle,
+            self.build_model(
+                X=X,
+                y=y,
+                val_size=val_size,
                 X_val=X_val,
                 y_val=y_val,
-                val_size=val_size,
                 random_state=random_state,
-                regression=True,
-                **dataloader_kwargs
-            )
-
-            self.data_module.preprocess_data(
-                X, y, X_val, y_val, val_size=val_size, random_state=random_state
-            )
-
-            self.task_model = TaskModel(
-                model_class=self.base_model,
-                config=self.config,
-                cat_feature_info=self.data_module.cat_feature_info,
-                num_feature_info=self.data_module.num_feature_info,
+                batch_size=batch_size,
+                shuffle=shuffle,
                 lr=lr,
                 lr_patience=lr_patience,
-                lr_factor=factor,
+                lr_factor=lr_factor,
                 weight_decay=weight_decay,
+                dataloader_kwargs=dataloader_kwargs,
             )
 
         else:
-            assert self.built, "The model must be built before calling the fit method."
+            assert (
+                self.built
+            ), "The model must be built before calling the fit method. Either call .build_model() or set rebuild=True"
 
         early_stop_callback = EarlyStopping(
             monitor=monitor, min_delta=0.00, patience=patience, verbose=False, mode=mode
@@ -370,7 +380,7 @@ class SklearnBaseRegressor(BaseEstimator):
                 checkpoint_callback,
                 ModelSummary(max_depth=2),
             ],
-            **trainer_kwargs
+            **trainer_kwargs,
         )
         self.trainer.fit(self.task_model, self.data_module)
 
@@ -381,7 +391,7 @@ class SklearnBaseRegressor(BaseEstimator):
 
         return self
 
-    def predict(self, X):
+    def predict(self, X, device=None):
         """
         Predicts target values for the given input samples.
 
@@ -404,7 +414,8 @@ class SklearnBaseRegressor(BaseEstimator):
         cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
 
         # Move tensors to appropriate device
-        device = next(self.task_model.parameters()).device
+        if device is None:
+            device = next(self.task_model.parameters()).device
         if isinstance(cat_tensors, list):
             cat_tensors = [tensor.to(device) for tensor in cat_tensors]
         else:
@@ -423,6 +434,11 @@ class SklearnBaseRegressor(BaseEstimator):
             predictions = self.task_model(
                 num_features=num_tensors, cat_features=cat_tensors
             )
+
+        # Check if ensemble is used
+        if self.task_model.base_model.returns_ensemble:  # If using ensemble
+            # Average over the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
+            predictions = predictions.mean(dim=1)
 
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()
@@ -500,3 +516,199 @@ class SklearnBaseRegressor(BaseEstimator):
         """
         predictions = self.predict(X)
         return metric(y, predictions)
+
+    def optimize_hparams(
+        self,
+        X,
+        y,
+        X_val=None,
+        y_val=None,
+        time=100,
+        max_epochs=200,
+        prune_by_epoch=True,
+        prune_epoch=5,
+        fixed_params={
+            "pooling_method": "avg",
+            "head_skip_layers": False,
+            "head_layer_size_length": 0,
+            "cat_encoding": "int",
+            "head_skip_layer": False,
+            "use_cls": False,
+        },
+        custom_search_space=None,
+        **optimize_kwargs,
+    ):
+        """
+        Optimizes hyperparameters using Bayesian optimization with optional pruning.
+
+        Parameters
+        ----------
+        X : array-like
+            Training data.
+        y : array-like
+            Training labels.
+        X_val, y_val : array-like, optional
+            Validation data and labels.
+        time : int
+            The number of optimization trials to run.
+        max_epochs : int
+            Maximum number of epochs for training.
+        prune_by_epoch : bool
+            Whether to prune based on a specific epoch (True) or the best validation loss (False).
+        prune_epoch : int
+            The specific epoch to prune by when prune_by_epoch is True.
+        **optimize_kwargs : dict
+            Additional keyword arguments passed to the fit method.
+
+        Returns
+        -------
+        best_hparams : list
+            Best hyperparameters found during optimization.
+        """
+
+        # Define the hyperparameter search space from the model config
+        param_names, param_space = get_search_space(
+            self.config,
+            fixed_params=fixed_params,
+            custom_search_space=custom_search_space,
+        )
+
+        # Initial model fitting to get the baseline validation loss
+        self.fit(X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs)
+        best_val_loss = float("inf")
+
+        if X_val is not None and y_val is not None:
+            val_loss = self.evaluate(
+                X_val, y_val, metrics={"Mean Squared Error": mean_squared_error}
+            )["Mean Squared Error"]
+        else:
+            val_loss = self.trainer.validate(self.task_model, self.data_module)[0][
+                "val_loss"
+            ]
+
+        best_val_loss = val_loss
+        best_epoch_val_loss = self.task_model.epoch_val_loss_at(prune_epoch)
+
+        def _objective(hyperparams):
+            nonlocal best_val_loss, best_epoch_val_loss  # Access across trials
+
+            head_layer_sizes = []
+            head_layer_size_length = None
+
+            for key, param_value in zip(param_names, hyperparams):
+                if key == "head_layer_size_length":
+                    head_layer_size_length = param_value
+                elif key.startswith("head_layer_size_"):
+                    head_layer_sizes.append(round_to_nearest_16(param_value))
+                else:
+                    field_type = self.config.__dataclass_fields__[key].type
+
+                    # Check if the field is a callable (e.g., activation function)
+                    if field_type == callable and isinstance(param_value, str):
+                        if param_value in activation_mapper:
+                            setattr(self.config, key, activation_mapper[param_value])
+                        else:
+                            raise ValueError(
+                                f"Unknown activation function: {param_value}"
+                            )
+                    else:
+                        setattr(self.config, key, param_value)
+
+            # Truncate or use part of head_layer_sizes based on the optimized length
+            if head_layer_size_length is not None:
+                setattr(
+                    self.config,
+                    "head_layer_sizes",
+                    head_layer_sizes[:head_layer_size_length],
+                )
+
+            # Build the model with updated hyperparameters
+            self.build_model(
+                X, y, X_val=X_val, y_val=y_val, lr=self.config.lr, **optimize_kwargs
+            )
+
+            # Dynamically set the early pruning threshold
+            if prune_by_epoch:
+                early_pruning_threshold = (
+                    best_epoch_val_loss * 1.5
+                )  # Prune based on specific epoch loss
+            else:
+                early_pruning_threshold = (
+                    best_val_loss * 1.5
+                )  # Prune based on the best overall validation loss
+
+            # Initialize the model with pruning
+            self.task_model.early_pruning_threshold = early_pruning_threshold
+            self.task_model.pruning_epoch = prune_epoch
+
+            try:
+                # Wrap the risky operation (model fitting) in a try-except block
+                self.fit(
+                    X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs, rebuild=False
+                )
+
+                # Evaluate validation loss
+                if X_val is not None and y_val is not None:
+                    val_loss = self.evaluate(
+                        X_val, y_val, metrics={"Mean Squared Error": mean_squared_error}
+                    )["Mean Squared Error"]
+                else:
+                    val_loss = self.trainer.validate(self.task_model, self.data_module)[
+                        0
+                    ]["val_loss"]
+
+                # Pruning based on validation loss at specific epoch
+                epoch_val_loss = self.task_model.epoch_val_loss_at(prune_epoch)
+
+                if prune_by_epoch and epoch_val_loss < best_epoch_val_loss:
+                    best_epoch_val_loss = epoch_val_loss
+
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
+
+                return val_loss
+
+            except Exception as e:
+                # Penalize the hyperparameter configuration with a large value
+                print(
+                    f"Error encountered during fit with hyperparameters {hyperparams}: {e}"
+                )
+                return (
+                    best_val_loss * 100
+                )  # Large value to discourage this configuration
+
+        # Perform Bayesian optimization using scikit-optimize
+        result = gp_minimize(_objective, param_space, n_calls=time, random_state=42)
+
+        # Update the model with the best-found hyperparameters
+        best_hparams = result.x
+        head_layer_sizes = (
+            [] if "head_layer_sizes" in self.config.__dataclass_fields__ else None
+        )
+        layer_sizes = [] if "layer_sizes" in self.config.__dataclass_fields__ else None
+
+        # Iterate over the best hyperparameters found by optimization
+        for key, param_value in zip(param_names, best_hparams):
+            if key.startswith("head_layer_size_") and head_layer_sizes is not None:
+                # These are the individual head layer sizes
+                head_layer_sizes.append(round_to_nearest_16(param_value))
+            elif key.startswith("layer_size_") and layer_sizes is not None:
+                # These are the individual layer sizes
+                layer_sizes.append(round_to_nearest_16(param_value))
+            else:
+                # For all other config values, update normally
+                field_type = self.config.__dataclass_fields__[key].type
+                if field_type == callable and isinstance(param_value, str):
+                    setattr(self.config, key, activation_mapper[param_value])
+                else:
+                    setattr(self.config, key, param_value)
+
+        # After the loop, set head_layer_sizes or layer_sizes in the config
+        if head_layer_sizes is not None and head_layer_sizes:
+            setattr(self.config, "head_layer_sizes", head_layer_sizes)
+        if layer_sizes is not None and layer_sizes:
+            setattr(self.config, "layer_sizes", layer_sizes)
+
+        print("Best hyperparameters found:", best_hparams)
+
+        return best_hparams
