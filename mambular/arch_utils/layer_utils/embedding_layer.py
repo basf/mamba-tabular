@@ -54,7 +54,7 @@ class EmbeddingLayer(nn.Module):
                 d_embedding=self.d_model,
                 n_frequencies=getattr(config, "n_frequencies", 48),
                 frequency_init_scale=getattr(config, "frequency_init_scale", 0.01),
-                activation=self.embedding_activation,
+                activation=True,
                 lite=getattr(config, "plr_lite", False),
             )
         elif self.embedding_type == "linear":

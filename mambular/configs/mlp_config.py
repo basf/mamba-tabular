@@ -62,7 +62,7 @@ class DefaultMLPConfig:
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
     layer_sizes: list = (256, 128, 32)
-    activation: callable = nn.SELU()
+    activation: callable = nn.ReLU()
     skip_layers: bool = False
     dropout: float = 0.2
     use_glu: bool = False
@@ -76,5 +76,4 @@ class DefaultMLPConfig:
     embedding_bias: bool = False
     layer_norm_after_embedding: bool = False
     d_model: int = 32
-    embedding_type: float = "plr"
     plr_lite: bool = False
