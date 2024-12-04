@@ -7,19 +7,19 @@ class DefaultMambaTabConfig:
     """
     Configuration class for the Default Mambular model with predefined hyperparameters.
 
-    Parameters
+    Attributes
     ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
-        Number of epochs with no improvement after which learning rate will be reduced.
+        Number of epochs with no improvement after which the learning rate will be reduced.
     weight_decay : float, default=1e-06
-        Weight decay (L2 penalty) for the optimizer.
+        Weight decay (L2 regularization) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
     d_model : int, default=64
         Dimensionality of the model.
-    n_layers : int, default=8
+    n_layers : int, default=1
         Number of layers in the model.
     expand_factor : int, default=2
         Expansion factor for the feed-forward layers.
@@ -32,37 +32,47 @@ class DefaultMambaTabConfig:
     dropout : float, default=0.05
         Dropout rate for regularization.
     dt_rank : str, default="auto"
-        Rank of the decision tree.
-    d_state : int, default=32
+        Rank of the decision tree used in the model.
+    d_state : int, default=128
         Dimensionality of the state in recurrent layers.
     dt_scale : float, default=1.0
-        Scaling factor for decision tree.
+        Scaling factor for the decision tree.
     dt_init : str, default="random"
-        Initialization method for decision tree.
+        Initialization method for the decision tree.
     dt_max : float, default=0.1
         Maximum value for decision tree initialization.
     dt_min : float, default=1e-04
         Minimum value for decision tree initialization.
     dt_init_floor : float, default=1e-04
         Floor value for decision tree initialization.
-    norm : str, default="RMSNorm"
-        Normalization method to be used.
-    activation : callable, default=nn.SELU()
+    activation : callable, default=nn.ReLU()
         Activation function for the model.
-    num_embedding_activation : callable, default=nn.Identity()
+    num_embedding_activation : callable, default=nn.ReLU()
         Activation function for numerical embeddings.
-    head_layer_sizes : list, default=(128, 64, 32)
-        Sizes of the layers in the head of the model.
-    head_dropout : float, default=0.5
+    embedding_type : str, default="linear"
+        Type of embedding to use ('linear', etc.).
+    embedding_bias : bool, default=False
+        Whether to use bias in the embedding layers.
+    head_layer_sizes : list, default=()
+        Sizes of the fully connected layers in the model's head.
+    head_dropout : float, default=0.0
         Dropout rate for the head layers.
     head_skip_layers : bool, default=False
         Whether to skip layers in the head.
-    head_activation : callable, default=nn.SELU()
+    head_activation : callable, default=nn.ReLU()
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-    layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding.
+    norm : str, default="LayerNorm"
+        Type of normalization to be used ('LayerNorm', 'RMSNorm', etc.).
+    axis : int, default=1
+        Axis along which operations are applied, if applicable.
+    use_pscan : bool, default=False
+        Whether to use PSCAN for the state-space model.
+    mamba_version : str, default="mamba-torch"
+        Version of the Mamba model to use ('mamba-torch', 'mamba1', 'mamba2').
+    bidirectional : bool, default=False
+        Whether to process data bidirectionally.
     """
 
     lr: float = 1e-04
@@ -85,6 +95,8 @@ class DefaultMambaTabConfig:
     dt_init_floor: float = 1e-04
     activation: callable = nn.ReLU()
     num_embedding_activation: callable = nn.ReLU()
+    embedding_type: str = "linear"
+    embedding_bias: bool = False
     head_layer_sizes: list = ()
     head_dropout: float = 0.0
     head_skip_layers: bool = False
@@ -92,3 +104,6 @@ class DefaultMambaTabConfig:
     head_use_batch_norm: bool = False
     norm: str = "LayerNorm"
     axis: int = 1
+    use_pscan: bool = False
+    mamba_version: str = "mamba-torch"
+    bidirectional = False

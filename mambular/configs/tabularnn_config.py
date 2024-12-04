@@ -12,7 +12,7 @@ class DefaultTabulaRNNConfig:
     lr : float, default=1e-04
         Learning rate for the optimizer.
     model_type : str, default="RNN"
-        type of model, one of "RNN", "LSTM", "GRU"
+        type of model, one of "RNN", "LSTM", "GRU", "mLSTM", "sLSTM"
     lr_patience : int, default=10
         Number of epochs with no improvement after which learning rate will be reduced.
     weight_decay : float, default=1e-06
@@ -65,7 +65,9 @@ class DefaultTabulaRNNConfig:
     rnn_dropout: float = 0.2
     norm: str = "RMSNorm"
     activation: callable = nn.SELU()
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: callable = nn.ReLU()
+    embedding_type: str = "linear"
+    embedding_bias: bool = False
     head_layer_sizes: list = ()
     head_dropout: float = 0.5
     head_skip_layers: bool = False
@@ -79,5 +81,7 @@ class DefaultTabulaRNNConfig:
     layer_norm_eps: float = 1e-05
     dim_feedforward: int = 256
     numerical_embedding: str = "ple"
-    bidirectional: bool = False
     cat_encoding: str = "int"
+    d_conv: int = 4
+    conv_bias: bool = True
+    residuals: bool = False

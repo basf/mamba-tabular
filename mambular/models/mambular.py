@@ -13,52 +13,73 @@ class MambularRegressor(SklearnBaseRegressor):
     The accepted arguments to the MambularRegressor class include both the attributes in the DefaultMambularConfig dataclass
     and the parameters for the Preprocessor class.
 
-    Parameters
-    ----------
+     Optimizer Parameters
+    --------------------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
-        Number of epochs with no improvement after which learning rate will be reduced.
+        Number of epochs with no improvement after which the learning rate will be reduced.
     weight_decay : float, default=1e-06
         Weight decay (L2 penalty) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
+
+    Mambular Model Parameters
+    -----------------------
     d_model : int, default=64
         Dimensionality of the model.
-    n_layers : int, default=8
+    n_layers : int, default=4
         Number of layers in the model.
     expand_factor : int, default=2
         Expansion factor for the feed-forward layers.
     bias : bool, default=False
         Whether to use bias in the linear layers.
-    d_conv : int, default=16
-        Dimensionality of the convolutional layers.
-    conv_bias : bool, default=True
-        Whether to use bias in the convolutional layers.
-    dropout : float, default=0.05
+    dropout : float, default=0.0
         Dropout rate for regularization.
     dt_rank : str, default="auto"
-        Rank of the decision tree.
-    d_state : int, default=32
+        Rank of the decision tree used in the model.
+    d_state : int, default=128
         Dimensionality of the state in recurrent layers.
     dt_scale : float, default=1.0
-        Scaling factor for decision tree.
+        Scaling factor for decision tree parameters.
     dt_init : str, default="random"
-        Initialization method for decision tree.
+        Initialization method for decision tree parameters.
     dt_max : float, default=0.1
         Maximum value for decision tree initialization.
     dt_min : float, default=1e-04
         Minimum value for decision tree initialization.
     dt_init_floor : float, default=1e-04
         Floor value for decision tree initialization.
-    norm : str, default="RMSNorm"
-        Normalization method to be used.
-    activation : callable, default=nn.SELU()
+    norm : str, default="LayerNorm"
+        Type of normalization used ('LayerNorm', 'RMSNorm', etc.).
+    activation : callable, default=nn.SiLU()
         Activation function for the model.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=True
+        Whether weight decay is applied to A-D matrices.
+    BC_layer_norm : bool, default=False
+        Whether to apply layer normalization to B-C matrices.
+
+    Embedding Parameters
+    ---------------------
     embedding_activation : callable, default=nn.Identity()
         Activation function for embeddings.
-    head_layer_sizes : list, default=(128, 64, 32)
-        Sizes of the layers in the head of the model.
+    embedding_type : str, default="linear"
+        Type of embedding to use ('linear', etc.).
+    embedding_bias : bool, default=False
+        Whether to use bias in the embedding layers.
+    layer_norm_after_embedding : bool, default=False
+        Whether to apply layer normalization after embedding.
+    shuffle_embeddings : bool, default=False
+        Whether to shuffle embeddings before being passed to Mamba layers.
+    cat_encoding : str, default="int"
+        Encoding method for categorical features ('int', 'one-hot', etc.).
+
+    Head Parameters
+    ---------------
+    head_layer_sizes : list, default=()
+        Sizes of the layers in the model's head.
     head_dropout : float, default=0.5
         Dropout rate for the head layers.
     head_skip_layers : bool, default=False
@@ -67,26 +88,27 @@ class MambularRegressor(SklearnBaseRegressor):
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-    layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding.
+
+    Additional Features
+    --------------------
     pooling_method : str, default="avg"
-        Pooling method to be used ('avg', 'max', etc.).
+        Pooling method to use ('avg', 'max', etc.).
     bidirectional : bool, default=False
-        Whether to use bidirectional processing of the input sequences.
+        Whether to process data bidirectionally.
     use_learnable_interaction : bool, default=False
-        Whether to use learnable feature interactions before passing through mamba blocks.
-    use_cls : bool, default=True
-        Whether to append a cls to the end of each 'sequence'.
-    shuffle_embeddings : bool, default=False.
-        Whether to shuffle the embeddings before being passed to the Mamba layers.
-    layer_norm_eps : float, default=1e-05
-        Epsilon value for layer normalization.
-    AD_weight_decay : bool, default=True
-        whether weight decay is also applied to A-D matrices.
-    BC_layer_norm: bool, default=False
-        whether to apply layer normalization to B-C matrices.
-    cat_encoding : str, default="int"
-        whether to use integer encoding or one-hot encoding for cat features.
+        Whether to use learnable feature interactions before passing through Mamba blocks.
+    use_cls : bool, default=False
+        Whether to append a CLS token to the input sequences.
+    use_pscan : bool, default=False
+        Whether to use PSCAN for the state-space model.
+
+    Mamba Version
+    -------------
+    mamba_version : str, default="mamba-torch"
+        Version of the Mamba model to use ('mamba-torch', 'mamba1', 'mamba2').
+
+    Preprocessing Params
+    ---------------------
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -142,52 +164,62 @@ class MambularClassifier(SklearnBaseClassifier):
     The accepted arguments to the MambularClassifier class include both the attributes in the DefaultMambularConfig dataclass
     and the parameters for the Preprocessor class.
 
-    Parameters
-    ----------
-    lr : float, default=1e-04
-        Learning rate for the optimizer.
-    lr_patience : int, default=10
-        Number of epochs with no improvement after which learning rate will be reduced.
-    weight_decay : float, default=1e-06
-        Weight decay (L2 penalty) for the optimizer.
-    lr_factor : float, default=0.1
-        Factor by which the learning rate will be reduced.
+    Mambular Model Parameters
+    -----------------------
     d_model : int, default=64
         Dimensionality of the model.
-    n_layers : int, default=8
+    n_layers : int, default=4
         Number of layers in the model.
     expand_factor : int, default=2
         Expansion factor for the feed-forward layers.
     bias : bool, default=False
         Whether to use bias in the linear layers.
-    d_conv : int, default=16
-        Dimensionality of the convolutional layers.
-    conv_bias : bool, default=True
-        Whether to use bias in the convolutional layers.
-    dropout : float, default=0.05
+    dropout : float, default=0.0
         Dropout rate for regularization.
     dt_rank : str, default="auto"
-        Rank of the decision tree.
-    d_state : int, default=32
+        Rank of the decision tree used in the model.
+    d_state : int, default=128
         Dimensionality of the state in recurrent layers.
     dt_scale : float, default=1.0
-        Scaling factor for decision tree.
+        Scaling factor for decision tree parameters.
     dt_init : str, default="random"
-        Initialization method for decision tree.
+        Initialization method for decision tree parameters.
     dt_max : float, default=0.1
         Maximum value for decision tree initialization.
     dt_min : float, default=1e-04
         Minimum value for decision tree initialization.
     dt_init_floor : float, default=1e-04
         Floor value for decision tree initialization.
-    norm : str, default="RMSNorm"
-        Normalization method to be used.
-    activation : callable, default=nn.SELU()
+    norm : str, default="LayerNorm"
+        Type of normalization used ('LayerNorm', 'RMSNorm', etc.).
+    activation : callable, default=nn.SiLU()
         Activation function for the model.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=True
+        Whether weight decay is applied to A-D matrices.
+    BC_layer_norm : bool, default=False
+        Whether to apply layer normalization to B-C matrices.
+
+    Embedding Parameters
+    ---------------------
     embedding_activation : callable, default=nn.Identity()
         Activation function for embeddings.
-    head_layer_sizes : list, default=(128, 64, 32)
-        Sizes of the layers in the head of the model.
+    embedding_type : str, default="linear"
+        Type of embedding to use ('linear', etc.).
+    embedding_bias : bool, default=False
+        Whether to use bias in the embedding layers.
+    layer_norm_after_embedding : bool, default=False
+        Whether to apply layer normalization after embedding.
+    shuffle_embeddings : bool, default=False
+        Whether to shuffle embeddings before being passed to Mamba layers.
+    cat_encoding : str, default="int"
+        Encoding method for categorical features ('int', 'one-hot', etc.).
+
+    Head Parameters
+    ---------------
+    head_layer_sizes : list, default=()
+        Sizes of the layers in the model's head.
     head_dropout : float, default=0.5
         Dropout rate for the head layers.
     head_skip_layers : bool, default=False
@@ -196,24 +228,27 @@ class MambularClassifier(SklearnBaseClassifier):
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-    layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding.
+
+    Additional Features
+    --------------------
     pooling_method : str, default="avg"
-        Pooling method to be used ('avg', 'max', etc.).
+        Pooling method to use ('avg', 'max', etc.).
     bidirectional : bool, default=False
-        Whether to use bidirectional processing of the input sequences.
+        Whether to process data bidirectionally.
     use_learnable_interaction : bool, default=False
-        Whether to use learnable feature interactions before passing through mamba blocks.
-    shuffle_embeddings : bool, default=False.
-        Whether to shuffle the embeddings before being passed to the Mamba layers.
-    layer_norm_eps : float, default=1e-05
-        Epsilon value for layer normalization.
-    AD_weight_decay : bool, default=True
-        whether weight decay is also applied to A-D matrices.
-    BC_layer_norm: bool, default=False
-        whether to apply layer normalization to B-C matrices.
-    cat_encoding : str, default="int"
-        whether to use integer encoding or one-hot encoding for cat features.
+        Whether to use learnable feature interactions before passing through Mamba blocks.
+    use_cls : bool, default=False
+        Whether to append a CLS token to the input sequences.
+    use_pscan : bool, default=False
+        Whether to use PSCAN for the state-space model.
+
+    Mamba Version
+    -------------
+    mamba_version : str, default="mamba-torch"
+        Version of the Mamba model to use ('mamba-torch', 'mamba1', 'mamba2').
+
+    Preprocessing Params
+    ---------------------
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
@@ -269,54 +304,62 @@ class MambularLSS(SklearnBaseLSS):
     The accepted arguments to the MambularLSS class include both the attributes in the DefaultMambularConfig dataclass
     and the parameters for the Preprocessor class.
 
-    Parameters
-    ----------
-    lr : float, default=1e-04
-        Learning rate for the optimizer.
-    lr_patience : int, default=10
-        Number of epochs with no improvement after which learning rate will be reduced.
-    family : str, default=None
-        Distributional family to be used for the model.
-    weight_decay : float, default=1e-06
-        Weight decay (L2 penalty) for the optimizer.
-    lr_factor : float, default=0.1
-        Factor by which the learning rate will be reduced.
+    Mambular Model Parameters
+    -----------------------
     d_model : int, default=64
         Dimensionality of the model.
-    n_layers : int, default=8
+    n_layers : int, default=4
         Number of layers in the model.
     expand_factor : int, default=2
         Expansion factor for the feed-forward layers.
     bias : bool, default=False
         Whether to use bias in the linear layers.
-    d_conv : int, default=16
-        Dimensionality of the convolutional layers.
-    conv_bias : bool, default=True
-        Whether to use bias in the convolutional layers.
-    dropout : float, default=0.05
+    dropout : float, default=0.0
         Dropout rate for regularization.
     dt_rank : str, default="auto"
-        Rank of the decision tree.
-    d_state : int, default=32
+        Rank of the decision tree used in the model.
+    d_state : int, default=128
         Dimensionality of the state in recurrent layers.
     dt_scale : float, default=1.0
-        Scaling factor for decision tree.
+        Scaling factor for decision tree parameters.
     dt_init : str, default="random"
-        Initialization method for decision tree.
+        Initialization method for decision tree parameters.
     dt_max : float, default=0.1
         Maximum value for decision tree initialization.
     dt_min : float, default=1e-04
         Minimum value for decision tree initialization.
     dt_init_floor : float, default=1e-04
         Floor value for decision tree initialization.
-    norm : str, default="RMSNorm"
-        Normalization method to be used.
-    activation : callable, default=nn.SELU()
+    norm : str, default="LayerNorm"
+        Type of normalization used ('LayerNorm', 'RMSNorm', etc.).
+    activation : callable, default=nn.SiLU()
         Activation function for the model.
+    layer_norm_eps : float, default=1e-05
+        Epsilon value for layer normalization.
+    AD_weight_decay : bool, default=True
+        Whether weight decay is applied to A-D matrices.
+    BC_layer_norm : bool, default=False
+        Whether to apply layer normalization to B-C matrices.
+
+    Embedding Parameters
+    ---------------------
     embedding_activation : callable, default=nn.Identity()
         Activation function for embeddings.
-    head_layer_sizes : list, default=(128, 64, 32)
-        Sizes of the layers in the head of the model.
+    embedding_type : str, default="linear"
+        Type of embedding to use ('linear', etc.).
+    embedding_bias : bool, default=False
+        Whether to use bias in the embedding layers.
+    layer_norm_after_embedding : bool, default=False
+        Whether to apply layer normalization after embedding.
+    shuffle_embeddings : bool, default=False
+        Whether to shuffle embeddings before being passed to Mamba layers.
+    cat_encoding : str, default="int"
+        Encoding method for categorical features ('int', 'one-hot', etc.).
+
+    Head Parameters
+    ---------------
+    head_layer_sizes : list, default=()
+        Sizes of the layers in the model's head.
     head_dropout : float, default=0.5
         Dropout rate for the head layers.
     head_skip_layers : bool, default=False
@@ -325,27 +368,30 @@ class MambularLSS(SklearnBaseLSS):
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-    layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding.
+
+    Additional Features
+    --------------------
     pooling_method : str, default="avg"
-        Pooling method to be used ('avg', 'max', etc.).
+        Pooling method to use ('avg', 'max', etc.).
     bidirectional : bool, default=False
-        Whether to use bidirectional processing of the input sequences.
+        Whether to process data bidirectionally.
     use_learnable_interaction : bool, default=False
-        Whether to use learnable feature interactions before passing through mamba blocks.
+        Whether to use learnable feature interactions before passing through Mamba blocks.
+    use_cls : bool, default=False
+        Whether to append a CLS token to the input sequences.
+    use_pscan : bool, default=False
+        Whether to use PSCAN for the state-space model.
+
+    Mamba Version
+    -------------
+    mamba_version : str, default="mamba-torch"
+        Version of the Mamba model to use ('mamba-torch', 'mamba1', 'mamba2').
+
+    Preprocessing Params
+    ---------------------
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning' or 'one_hot'.
-    shuffle_embeddings : bool, default=False.
-        Whether to shuffle the embeddings before being passed to the Mamba layers.
-    layer_norm_eps : float, default=1e-05
-        Epsilon value for layer normalization.
-    AD_weight_decay : bool, default=True
-        whether weight decay is also applied to A-D matrices.
-    BC_layer_norm: bool, default=False
-        whether to apply layer normalization to B-C matrices.
-    cat_encoding : str, default="int"
-        whether to use integer encoding or one-hot encoding for cat features.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
         'binning', 'one_hot', 'standardization', and 'normalization'.
@@ -356,9 +402,6 @@ class MambularLSS(SklearnBaseLSS):
     binning_strategy : str, default="uniform"
         Defines the strategy for binning numerical features. Options include 'uniform',
         'quantile', or other sklearn-compatible strategies.
-    task : str, default="regression"
-        Indicates the type of machine learning task ('regression' or 'classification'). This can
-        influence certain preprocessing behaviors, especially when using decision tree-based binning as ple.
     cat_cutoff : float or int, default=0.03
         Indicates the cutoff after which integer values are treated as categorical.
         If float, it's treated as a percentage. If int, it's the maximum number of

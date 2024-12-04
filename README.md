@@ -16,21 +16,21 @@
 </div>
 
 <div style="text-align: center;">
-    <h1>Mambular: Tabular Deep Learning (with Mamba)</h1>
+    <h1>Mambular: Tabular Deep Learning Made Simple</h1>
 </div>
 
-Mambular is a Python library for tabular deep learning. It includes models that leverage the Mamba (State Space Model) architecture, as well as other popular models like TabTransformer, FTTransformer, and tabular ResNets. Check out our paper `Mambular: A Sequential Model for Tabular Deep Learning`, available [here](https://arxiv.org/abs/2408.06291).
+Mambular is a Python library for tabular deep learning. It includes models that leverage the Mamba (State Space Model) architecture, as well as other popular models like TabTransformer, FTTransformer, TabM and tabular ResNets. Check out our paper `Mambular: A Sequential Model for Tabular Deep Learning`, available [here](https://arxiv.org/abs/2408.06291). Also check out our paper introducing [TabulaRNN](https://arxiv.org/pdf/2411.17207) and analyzing the efficiency of NLP inspired tabular models. 
 
 <h3> Table of Contents </h3>
 
 - [🏃 Quickstart](#-quickstart)
 - [📖 Introduction](#-introduction)
 - [🤖 Models](#-models)
-- [🏆 Results](#-results)
 - [📚 Documentation](#-documentation)
 - [🛠️ Installation](#️-installation)
 - [🚀 Usage](#-usage)
 - [💻 Implement Your Own Model](#-implement-your-own-model)
+- [Custom Training](#custom-training)
 - [🏷️ Citation](#️-citation)
 - [License](#license)
 
@@ -55,73 +55,22 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 
 | Model            | Description                                                                                                                                         |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Mambular`       | A sequential model using Mamba blocks [Gu and Dao](https://arxiv.org/pdf/2312.00752)  specifically designed for various tabular data tasks.         |
+| `Mambular`       | A sequential model using Mamba blocks specifically designed for various tabular data tasks introduced [here](https://arxiv.org/abs/2408.06291).     |
+| `TabM`           | Batch Ensembling for a MLP as introduced by [Gorishniy et al.](https://arxiv.org/abs/2410.24210)                                                    |
+| `NODE`           | Neural Oblivious Decision Ensembles as introduced by [Popov et al.](https://arxiv.org/abs/1909.06312)                                               |
 | `FTTransformer`  | A model leveraging transformer encoders, as introduced by [Gorishniy et al.](https://arxiv.org/abs/2106.11959), for tabular data.                   |
 | `MLP`            | A classical Multi-Layer Perceptron (MLP) model for handling tabular data tasks.                                                                     |
 | `ResNet`         | An adaptation of the ResNet architecture for tabular data applications.                                                                             |
 | `TabTransformer` | A transformer-based model for tabular data introduced by [Huang et al.](https://arxiv.org/abs/2012.06678), enhancing feature learning capabilities. |
 | `MambaTab`       | A tabular model using a Mamba-Block on a joint input representation described [here](https://arxiv.org/abs/2401.08867) . Not a sequential model.    |
-| `TabulaRNN`      | A Recurrent Neural Network for Tabular data. Not yet included in the benchmarks                                                                     |
+| `TabulaRNN`      | A Recurrent Neural Network for Tabular data, introduced [here](https://arxiv.org/pdf/2411.17207).                                                   |
+| `MambAttention`  | A combination between Mamba and Transformers, also introduced [here](https://arxiv.org/pdf/2411.17207).                                             |
+| `NDTF`           | A neural decision forest using soft decision trees. See [Kontschieder et al.](https://openaccess.thecvf.com/content_iccv_2015/html/Kontschieder_Deep_Neural_Decision_ICCV_2015_paper.html) for inspiration. |
+
 
 
 All models are available for `regression`, `classification` and distributional regression, denoted by `LSS`.
 Hence, they are available as e.g. `MambularRegressor`, `MambularClassifier` or `MambularLSS`
-
-
-# 🏆 Results
-Detailed results for the available methods can be found [here](https://arxiv.org/abs/2408.06291).
-Note, that these are achieved results with default hyperparameter and for our splits. Performing hyperparameter optimization could improve the performance of all models.
-
-The average rank table over all models and all datasets is given here:
-
-<div align="center">
-
-<table>
-  <tr>
-    <th style="text-align:center;">Model</th>
-    <th style="text-align:center;">Avg. Rank</th>
-  </tr>
-  <tr>
-    <td style="text-align:center;"><strong>Mambular</strong></td>
-    <td style="text-align:center;"><strong>2.083</strong> <sub>±1.037</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">FT-Transformer</td>
-    <td style="text-align:center;">2.417 <sub>±1.256</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">XGBoost</td>
-    <td style="text-align:center;">3.167 <sub>±2.577</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab*</td>
-    <td style="text-align:center;">4.333 <sub>±1.374</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">ResNet</td>
-    <td style="text-align:center;">4.750 <sub>±1.639</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">TabTransformer</td>
-    <td style="text-align:center;">6.222 <sub>±1.618</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MLP</td>
-    <td style="text-align:center;">6.500 <sub>±1.500</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab</td>
-    <td style="text-align:center;">6.583 <sub>±1.801</sub></td>
-  </tr>
-  <tr>
-    <td style="text-align:center;">MambaTab<sup>T</sup></td>
-    <td style="text-align:center;">7.917 <sub>±1.187</sub></td>
-  </tr>
-</table>
-
-</div>
-
-
 
 
 # 📚 Documentation
@@ -135,6 +84,19 @@ Install Mambular using pip:
 pip install mambular
 ```
 
+If you want to use the original mamba and mamba2 implementations, additionally install mamba-ssm via:
+
+```sh
+pip install mamba-ssm
+```
+
+Be careful to use the correct torch and cuda versions: 
+
+```sh
+pip install torch==2.0.0+cu118 torchvision==0.15.0+cu118 torchaudio==2.0.0+cu118 -f https://download.pytorch.org/whl/cu118/torch_stable.html
+pip install mamba-ssm
+```
+
 # 🚀 Usage
 
 <h2> Preprocessing </h2>
@@ -143,12 +105,18 @@ Mambular simplifies data preprocessing with a range of tools designed for easy t
 
 <h3> Data Type Detection and Transformation </h3>
 
-- **Ordinal & One-Hot Encoding**: Automatically transforms categorical data into numerical formats.
-- **Binning**: Discretizes numerical features; can use decision trees for optimal binning.
-- **Normalization & Standardization**: Scales numerical data appropriately.
-- **Periodic Linear Encoding (PLE)**: Encodes periodicity in numerical data.
-- **Quantile & Spline Transformations**: Applies advanced transformations to handle nonlinearity and distributional shifts.
-- **Polynomial Features**: Generates polynomial and interaction terms to capture complex relationships.
+- **Ordinal & One-Hot Encoding**: Automatically transforms categorical data into numerical formats using continuous ordinal encoding or one-hot encoding. Includes options for transforming outputs to `float` for compatibility with downstream models.  
+- **Binning**: Discretizes numerical features into bins, with support for both fixed binning strategies and optimal binning derived from decision tree models.  
+- **MinMax**: Scales numerical data to a specific range, such as [-1, 1], using Min-Max scaling or similar techniques.  
+- **Standardization**: Centers and scales numerical features to have a mean of zero and unit variance for better compatibility with certain models.  
+- **Quantile Transformations**: Normalizes numerical data to follow a uniform or normal distribution, handling distributional shifts effectively.  
+- **Spline Transformations**: Captures nonlinearity in numerical features using spline-based transformations, ideal for complex relationships.  
+- **Piecewise Linear Encodings (PLE)**: Captures complex numerical patterns by applying piecewise linear encoding, suitable for data with periodic or nonlinear structures.  
+- **Polynomial Features**: Automatically generates polynomial and interaction terms for numerical features, enhancing the ability to capture higher-order relationships.  
+- **Box-Cox & Yeo-Johnson Transformations**: Performs power transformations to stabilize variance and normalize distributions.  
+- **Custom Binning**: Enables user-defined bin edges for precise discretization of numerical data.  
+ 
+
 
 
 <h2> Fit a Model </h2>
@@ -159,9 +127,10 @@ from mambular.models import MambularClassifier
 # Initialize and fit your model
 model = MambularClassifier(
     d_model=64,
-    n_layers=8,
+    n_layers=4,
     numerical_preprocessing="ple",
-    n_bins=50
+    n_bins=50,
+    d_conv=8
 )
 
 # X can be a dataframe or something that can be easily transformed into a pd.DataFrame as a np.array
@@ -176,6 +145,59 @@ preds = model.predict(X)
 # Predict probabilities
 preds = model.predict_proba(X)
 ```
+
+<h3> Hyperparameter Optimization</h3>
+Since all of the models are sklearn base estimators, you can use the built-in hyperparameter optimizatino from sklearn. 
+
+```python
+from sklearn.model_selection import RandomizedSearchCV
+
+param_dist = {
+    'd_model': randint(32, 128),   
+    'n_layers': randint(2, 10),   
+    'lr': uniform(1e-5, 1e-3) 
+}
+
+random_search = RandomizedSearchCV(
+    estimator=model,
+    param_distributions=param_dist,
+    n_iter=50,  # Number of parameter settings sampled
+    cv=5,       # 5-fold cross-validation
+    scoring='accuracy',  # Metric to optimize
+    random_state=42
+)
+
+fit_params = {"max_epochs":5, "rebuild":False}
+
+# Fit the model
+random_search.fit(X, y, **fit_params)
+
+# Best parameters and score
+print("Best Parameters:", random_search.best_params_)
+print("Best Score:", random_search.best_score_)
+```
+Note, that using this, you can also optimize the preprocessing. Just use the prefix ``prepro__`` when specifying the preprocessor arguments you want to optimize:
+```python
+param_dist = {
+    'd_model': randint(32, 128),   
+    'n_layers': randint(2, 10),   
+    'lr': uniform(1e-5, 1e-3),
+    "prepro__numerical_preprocessing": ["ple", "standardization", "box-cox"] 
+}
+
+```
+
+
+Since we have early stopping integrated and return the best model with respect to the validation loss, setting max_epochs to a large number is sensible.
+
+
+Or use the built-in bayesian hpo simply by running:
+
+```python
+best_params = model.optimize_hparams(X, y)
+```
+
+This automatically sets the search space based on the default config from ``mambular.configs``. See the documentation for all params with regard to ``optimize_hparams()``. However, the preprocessor arguments are fixed and cannot be optimized here.
 
 
 <h2> ⚖️ Distributional Regression with MambularLSS </h2>
@@ -260,6 +282,7 @@ Here's how you can implement a custom model with Mambular:
 
    ```python
    from mambular.base_models import BaseModel
+   from mambular.utils.get_feature_dimensions import get_feature_dimensions
    import torch
    import torch.nn
 
@@ -275,11 +298,7 @@ Here's how you can implement a custom model with Mambular:
            super().__init__(**kwargs)
            self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-           input_dim = 0
-           for feature_name, input_shape in num_feature_info.items():
-               input_dim += input_shape
-           for feature_name, input_shape in cat_feature_info.items():
-               input_dim += 1 
+           input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
 
            self.linear = nn.Linear(input_dim, num_classes)
 
@@ -311,6 +330,59 @@ Here's how you can implement a custom model with Mambular:
    regressor.fit(X_train, y_train, max_epochs=50)
    ```
 
+# Custom Training
+If you prefer to setup custom training, preprocessing and evaluation, you can simply use the `mambular.base_models`.
+Just be careful that all basemodels expect lists of features as inputs. More precisely as list for numerical features and a list for categorical features. A custom training loop, with random data could look like this.
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from mambular.base_models import Mambular
+from mambular.configs import DefaultMambularConfig
+
+# Dummy data and configuration
+cat_feature_info = {
+    "cat1": {
+        "preprocessing": "imputer -> continuous_ordinal",
+        "dimension": 1,
+        "categories": 4,
+    }
+}  # Example categorical feature information
+num_feature_info = {
+    "num1": {"preprocessing": "imputer -> scaler", "dimension": 1, "categories": None}
+} # Example numerical feature information
+num_classes = 1
+config = DefaultMambularConfig()  # Use the desired configuration
+
+# Initialize model, loss function, and optimizer
+model = Mambular(cat_feature_info, num_feature_info, num_classes, config)
+criterion = nn.MSELoss()  # Use MSE for regression; change as appropriate for your task
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Example training loop
+for epoch in range(10):  # Number of epochs
+    model.train()
+    optimizer.zero_grad()
+
+    # Dummy Data
+    num_features = [torch.randn(32, 1) for _ in num_feature_info]
+    cat_features = [torch.randint(0, 5, (32,)) for _ in cat_feature_info]
+    labels = torch.randn(32, num_classes)  
+
+    # Forward pass
+    outputs = model(num_features, cat_features)
+    loss = criterion(outputs, labels)
+
+    # Backward pass and optimization
+    loss.backward()
+    optimizer.step()
+
+    # Print loss for monitoring
+    print(f"Epoch [{epoch+1}/10], Loss: {loss.item():.4f}")
+
+```
+
 # 🏷️ Citation
 
 If you find this project useful in your research, please consider cite:
@@ -319,6 +391,16 @@ If you find this project useful in your research, please consider cite:
   title={Mambular: A Sequential Model for Tabular Deep Learning},
   author={Thielmann, Anton Frederik and Kumar, Manish and Weisser, Christoph and Reuter, Arik and S{\"a}fken, Benjamin and Samiee, Soheila},
   journal={arXiv preprint arXiv:2408.06291},
+  year={2024}
+}
+```
+
+If you use TabulaRNN please consider to cite:
+```BibTeX
+@article{thielmann2024efficiency,
+  title={On the Efficiency of NLP-Inspired Methods for Tabular Deep Learning},
+  author={Thielmann, Anton Frederik and Samiee, Soheila},
+  journal={arXiv preprint arXiv:2411.17207},
   year={2024}
 }
 ```
