@@ -109,7 +109,7 @@ class SklearnBaseLSS(BaseEstimator):
 
         if deep:
             preprocessor_params = {
-                "preprocessor__" + key: value
+                "prepro__" + key: value
                 for key, value in self.preprocessor.get_params().items()
             }
             params.update(preprocessor_params)
@@ -131,12 +131,12 @@ class SklearnBaseLSS(BaseEstimator):
             Estimator instance.
         """
         config_params = {
-            k: v for k, v in parameters.items() if not k.startswith("preprocessor__")
+            k: v for k, v in parameters.items() if not k.startswith("prepro__")
         }
         preprocessor_params = {
             k.split("__")[1]: v
             for k, v in parameters.items()
-            if k.startswith("preprocessor__")
+            if k.startswith("prepro__")
         }
 
         if config_params:
