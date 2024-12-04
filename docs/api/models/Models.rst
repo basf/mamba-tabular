@@ -73,6 +73,18 @@ mambular.models
     :members:
     :undoc-members:
 
+.. autoclass:: mambular.models.MambAttentionClassifier
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.MambAttentionRegressor
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.MambAttentionLSS
+    :members:
+    :undoc-members:
+
 .. autoclass:: mambular.models.TabulaRNNClassifier
     :members:
     :undoc-members:
@@ -82,6 +94,42 @@ mambular.models
     :undoc-members:
 
 .. autoclass:: mambular.models.TabulaRNNLSS
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.TabMClassifier
+    :members:
+    :inherited-members:
+
+.. autoclass:: mambular.models.TabMRegressor 
+    :members:
+    :inherited-members:
+
+.. autoclass:: mambular.models.TabMLSS
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.NODEClassifier
+    :members:
+    :inherited-members:
+
+.. autoclass:: mambular.models.NODERegressor 
+    :members:
+    :inherited-members:
+
+.. autoclass:: mambular.models.NODELSS
+    :members:
+    :undoc-members:
+
+.. autoclass:: mambular.models.NDTFClassifier
+    :members:
+    :inherited-members:
+
+.. autoclass:: mambular.models.NDTFRegressor 
+    :members:
+    :inherited-members:
+
+.. autoclass:: mambular.models.NDTFLSS
     :members:
     :undoc-members:
 

@@ -28,3 +28,23 @@ mambular.base_models
 .. autoclass:: mambular.base_models.TabTransformer
     :members:
     :no-inherited-members:
+
+.. autoclass:: mambular.base_models.TabulaRNN
+    :members:
+    :no-inherited-members:
+
+.. autoclass:: mambular.base_models.MambAttention
+    :members:
+    :no-inherited-members:
+
+.. autoclass:: mambular.base_models.TabM
+    :members:
+    :no-inherited-members:
+
+.. autoclass:: mambular.base_models.NODE
+    :members:
+    :no-inherited-members:
+
+.. autoclass:: mambular.base_models.NDTF
+    :members:
+    :no-inherited-members:
