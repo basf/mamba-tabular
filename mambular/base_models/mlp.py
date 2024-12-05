@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 from ..configs.mlp_config import DefaultMLPConfig
 from .basemodel import BaseModel
-from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
+from ..utils.get_feature_dimensions import get_feature_dimensions
 
 
 class MLP(BaseModel):
@@ -64,72 +64,59 @@ class MLP(BaseModel):
         config: DefaultMLPConfig = DefaultMLPConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.layer_sizes = self.hparams.get("layer_sizes", config.layer_sizes)
+        self.returns_ensemble = False
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
         # Initialize layers
         self.layers = nn.ModuleList()
-        self.skip_connections = self.hparams.get(
-            "skip_connections", config.skip_connections
-        )
-        self.use_glu = self.hparams.get("use_glu", config.use_glu)
-        self.activation = self.hparams.get("activation", config.activation)
-        self.use_embeddings = self.hparams.get("use_embeddings", config.use_embeddings)
 
-        input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            input_dim += input_shape
-        for feature_name, input_shape in cat_feature_info.items():
-            input_dim += 1
+        input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
 
-        if self.use_embeddings:
+        if self.hparams.use_embeddings:
             self.embedding_layer = EmbeddingLayer(
                 num_feature_info=num_feature_info,
                 cat_feature_info=cat_feature_info,
                 config=config,
             )
             input_dim = (
-                len(num_feature_info) * config.d_model
-                + len(cat_feature_info) * config.d_model
+                len(num_feature_info) * self.hparams.d_model
+                + len(cat_feature_info) * self.hparams.d_model
             )
 
         # Input layer
-        self.layers.append(nn.Linear(input_dim, self.layer_sizes[0]))
-        if config.batch_norm:
-            self.layers.append(nn.BatchNorm1d(self.layer_sizes[0]))
+        self.layers.append(nn.Linear(input_dim, self.hparams.layer_sizes[0]))
+        if self.hparams.batch_norm:
+            self.layers.append(nn.BatchNorm1d(self.hparams.layer_sizes[0]))
 
-        self.norm_f = get_normalization_layer(config)
-
-        if self.norm_f is not None:
-            self.layers.append(self.norm_f(self.layer_sizes[0]))
-
-        if config.use_glu:
+        if self.hparams.use_glu:
             self.layers.append(nn.GLU())
         else:
-            self.layers.append(self.activation)
-        if config.dropout > 0.0:
-            self.layers.append(nn.Dropout(config.dropout))
+            self.layers.append(self.hparams.activation)
+        if self.hparams.dropout > 0.0:
+            self.layers.append(nn.Dropout(self.hparams.dropout))
 
         # Hidden layers
-        for i in range(1, len(self.layer_sizes)):
-            self.layers.append(nn.Linear(self.layer_sizes[i - 1], self.layer_sizes[i]))
-            if config.batch_norm:
-                self.layers.append(nn.BatchNorm1d(self.layer_sizes[i]))
-            if config.layer_norm:
-                self.layers.append(nn.LayerNorm(self.layer_sizes[i]))
-            if config.use_glu:
+        for i in range(1, len(self.hparams.layer_sizes)):
+            self.layers.append(
+                nn.Linear(self.hparams.layer_sizes[i - 1], self.hparams.layer_sizes[i])
+            )
+            if self.hparams.batch_norm:
+                self.layers.append(nn.BatchNorm1d(self.hparams.layer_sizes[i]))
+            if self.hparams.layer_norm:
+                self.layers.append(nn.LayerNorm(self.hparams.layer_sizes[i]))
+            if self.hparams.use_glu:
                 self.layers.append(nn.GLU())
             else:
-                self.layers.append(self.activation)
-            if config.dropout > 0.0:
-                self.layers.append(nn.Dropout(config.dropout))
+                self.layers.append(self.hparams.activation)
+            if self.hparams.dropout > 0.0:
+                self.layers.append(nn.Dropout(self.hparams.dropout))
 
         # Output layer
-        self.layers.append(nn.Linear(self.layer_sizes[-1], num_classes))
+        self.layers.append(nn.Linear(self.hparams.layer_sizes[-1], num_classes))
 
     def forward(self, num_features, cat_features) -> torch.Tensor:
         """
@@ -145,7 +132,7 @@ class MLP(BaseModel):
         torch.Tensor
             Output tensor.
         """
-        if self.use_embeddings:
+        if self.hparams.use_embeddings:
             x = self.embedding_layer(num_features, cat_features)
             B, S, D = x.shape
             x = x.reshape(B, S * D)
@@ -156,7 +143,7 @@ class MLP(BaseModel):
         for i in range(len(self.layers) - 1):
             if isinstance(self.layers[i], nn.Linear):
                 out = self.layers[i](x)
-                if self.skip_connections and x.shape == out.shape:
+                if self.hparams.skip_connections and x.shape == out.shape:
                     x = x + out
                 else:
                     x = out

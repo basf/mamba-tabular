@@ -65,7 +65,9 @@ class DefaultTabulaRNNConfig:
     rnn_dropout: float = 0.2
     norm: str = "RMSNorm"
     activation: callable = nn.SELU()
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: callable = nn.ReLU()
+    embedding_type: str = "linear"
+    embedding_bias: bool = False
     head_layer_sizes: list = ()
     head_dropout: float = 0.5
     head_skip_layers: bool = False

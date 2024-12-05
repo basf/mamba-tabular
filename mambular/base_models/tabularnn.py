@@ -18,14 +18,10 @@ class TabulaRNN(BaseModel):
         config: DefaultTabulaRNNConfig = DefaultTabulaRNNConfig(),
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.lr = self.hparams.get("lr", config.lr)
-        self.lr_patience = self.hparams.get("lr_patience", config.lr_patience)
-        self.weight_decay = self.hparams.get("weight_decay", config.weight_decay)
-        self.lr_factor = self.hparams.get("lr_factor", config.lr_factor)
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
+        self.returns_ensemble = False
         self.cat_feature_info = cat_feature_info
         self.num_feature_info = num_feature_info
 
@@ -37,17 +33,15 @@ class TabulaRNN(BaseModel):
             config=config,
         )
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
-
         self.tabular_head = MLPhead(
-            input_dim=self.hparams.get("dim_feedforward", config.dim_feedforward),
+            input_dim=self.hparams.dim_feedforward,
             config=config,
             output_dim=num_classes,
         )
 
         self.linear = nn.Linear(
-            self.hparams.get("d_model", config.d_model),
-            self.hparams.get("dim_feedforward", config.dim_feedforward),
+            self.hparams.d_model,
+            self.hparams.dim_feedforward,
         )
 
         temp_config = replace(config, d_model=config.dim_feedforward)

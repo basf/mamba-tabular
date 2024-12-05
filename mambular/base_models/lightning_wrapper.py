@@ -130,9 +130,9 @@ class TaskModel(pl.LightningModule):
         Parameters
         ----------
         predictions : Tensor
-            Model predictions.
+            Model predictions. Shape: (batch_size, k, output_dim) for ensembles, or (batch_size, output_dim) otherwise.
         y_true : Tensor
-            True labels.
+            True labels. Shape: (batch_size, output_dim).
 
         Returns
         -------
@@ -140,10 +140,35 @@ class TaskModel(pl.LightningModule):
             Computed loss.
         """
         if self.lss:
-            return self.family.compute_loss(predictions, y_true.squeeze(-1))
+            if getattr(self.base_model, "returns_ensemble", False):
+                loss = 0.0
+                for ensemble_member in range(predictions.shape[1]):
+                    loss += self.family.compute_loss(
+                        predictions[:, ensemble_member], y_true.squeeze(-1)
+                    )
+                return loss
+            else:
+                return self.family.compute_loss(predictions, y_true.squeeze(-1))
+
+        if getattr(self.base_model, "returns_ensemble", False):  # Ensemble case
+            if (
+                self.loss_fct.__class__.__name__ == "CrossEntropyLoss"
+                and predictions.dim() == 3
+            ):
+                # Classification case with ensemble: predictions (N, E, k), y_true (N,)
+                N, E, k = predictions.shape
+                loss = 0.0
+                for ensemble_member in range(E):
+                    loss += self.loss_fct(predictions[:, ensemble_member, :], y_true)
+                return loss
+
+            else:
+                # Regression case with ensemble (e.g., MSE) or other compatible losses
+                y_true_expanded = y_true.expand_as(predictions)
+                return self.loss_fct(predictions, y_true_expanded)
         else:
-            loss = self.loss_fct(predictions, y_true)
-            return loss
+            # Non-ensemble case
+            return self.loss_fct(predictions, y_true)
 
     def training_step(self, batch, batch_idx):
         """
@@ -179,7 +204,7 @@ class TaskModel(pl.LightningModule):
         )
 
         # Log additional metrics
-        if not self.lss:
+        if not self.lss and not self.base_model.returns_ensemble:
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(
@@ -224,7 +249,7 @@ class TaskModel(pl.LightningModule):
         )
 
         # Log additional metrics
-        if not self.lss:
+        if not self.lss and not self.base_model.returns_ensemble:
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(
@@ -268,7 +293,7 @@ class TaskModel(pl.LightningModule):
         )
 
         # Log additional metrics
-        if not self.lss:
+        if not self.lss and not self.base_model.returns_ensemble:
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(

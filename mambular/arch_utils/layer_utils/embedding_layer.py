@@ -29,13 +29,13 @@ class EmbeddingLayer(nn.Module):
         )
         self.use_cls = getattr(config, "use_cls", False)
         self.cls_position = getattr(config, "cls_position", 0)
-        self.cat_encoding = getattr(config, "cat_encoding", "int")
         self.embedding_dropout = (
             nn.Dropout(getattr(config, "embedding_dropout", 0.0))
             if getattr(config, "embedding_dropout", None) is not None
             else None
         )
-        self.embedding_type = getattr(config, "embedding_type", "standard")
+        self.embedding_type = getattr(config, "embedding_type", "linear")
+        self.embedding_bias = getattr(config, "embedding_bias", False)
 
         # Sequence length
         self.seq_len = len(num_feature_info) + len(cat_feature_info)
@@ -44,52 +44,56 @@ class EmbeddingLayer(nn.Module):
         if self.embedding_type == "ndt":
             self.num_embeddings = nn.ModuleList(
                 [
-                    NeuralEmbeddingTree(input_shape, self.d_model)
-                    for feature_name, input_shape in num_feature_info.items()
+                    NeuralEmbeddingTree(feature_info["dimension"], self.d_model)
+                    for feature_name, feature_info in num_feature_info.items()
                 ]
             )
         elif self.embedding_type == "plr":
             self.num_embeddings = PeriodicEmbeddings(
-                n_features=self.seq_len,
+                n_features=len(num_feature_info),
                 d_embedding=self.d_model,
                 n_frequencies=getattr(config, "n_frequencies", 48),
                 frequency_init_scale=getattr(config, "frequency_init_scale", 0.01),
-                activation=self.embedding_activation,
+                activation=True,
                 lite=getattr(config, "plr_lite", False),
             )
-        elif self.embedding_type == "standard":
+        elif self.embedding_type == "linear":
             self.num_embeddings = nn.ModuleList(
                 [
                     nn.Sequential(
-                        nn.Linear(input_shape, self.d_model, bias=False),
+                        nn.Linear(
+                            feature_info["dimension"],
+                            self.d_model,
+                            bias=self.embedding_bias,
+                        ),
                         self.embedding_activation,
                     )
-                    for feature_name, input_shape in num_feature_info.items()
+                    for feature_name, feature_info in num_feature_info.items()
                 ]
             )
         else:
             raise ValueError(
-                "Invalid embedding_type. Choose from 'standard', 'ndt', or 'plr'."
+                "Invalid embedding_type. Choose from 'linear', 'ndt', or 'plr'."
             )
 
-        # Initialize categorical embeddings
-        self.cat_embeddings = nn.ModuleList()
-        for feature_name, num_categories in cat_feature_info.items():
-            if self.cat_encoding == "int":
-                self.cat_embeddings.append(
-                    nn.Sequential(
-                        nn.Embedding(num_categories + 1, self.d_model),
-                        self.embedding_activation,
-                    )
+        self.cat_embeddings = nn.ModuleList(
+            [
+                nn.Sequential(
+                    nn.Embedding(feature_info["categories"] + 1, self.d_model),
+                    self.embedding_activation,
                 )
-            elif self.cat_encoding == "one-hot":
-                self.cat_embeddings.append(
-                    nn.Sequential(
-                        OneHotEncoding(num_categories),
-                        nn.Linear(num_categories, self.d_model, bias=False),
-                        self.embedding_activation,
-                    )
+                if feature_info["dimension"] == 1
+                else nn.Sequential(
+                    nn.Linear(
+                        feature_info["dimension"],
+                        self.d_model,
+                        bias=self.embedding_bias,
+                    ),
+                    self.embedding_activation,
                 )
+                for feature_name, feature_info in cat_feature_info.items()
+            ]
+        )
 
         # Class token if required
         if self.use_cls:
@@ -120,6 +124,7 @@ class EmbeddingLayer(nn.Module):
         ValueError
             If no features are provided to the model.
         """
+
         # Class token initialization
         if self.use_cls:
             batch_size = (
@@ -156,7 +161,7 @@ class EmbeddingLayer(nn.Module):
             else:
                 num_embeddings = None
         else:
-            # For standard and ndt embeddings, handle each feature individually
+            # For linear and ndt embeddings, handle each feature individually
             if self.num_embeddings and num_features is not None:
                 num_embeddings = [
                     emb(num_features[i]) for i, emb in enumerate(self.num_embeddings)

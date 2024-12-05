@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from torch import Tensor
 from torch.nn.parameter import Parameter
 import math
+from .sn_linear import SNLinear
 
 
 class Periodic(nn.Module):
@@ -24,32 +24,6 @@ class Periodic(nn.Module):
     def forward(self, x):
         x = 2 * math.pi * self.weight * x[..., None]
         return torch.cat([torch.cos(x), torch.sin(x)], dim=-1)
-
-
-class SNLinear(nn.Module):
-    """Separate linear layers for each feature embedding."""
-
-    def __init__(self, n: int, in_features: int, out_features: int) -> None:
-        super().__init__()
-        self.weight = Parameter(torch.empty(n, in_features, out_features))
-        self.bias = Parameter(torch.empty(n, out_features))
-        self.reset_parameters()
-
-    def reset_parameters(self) -> None:
-        d_in_rsqrt = self.weight.shape[-2] ** -0.5
-        nn.init.uniform_(self.weight, -d_in_rsqrt, d_in_rsqrt)
-        nn.init.uniform_(self.bias, -d_in_rsqrt, d_in_rsqrt)
-
-    def forward(self, x):
-        if x.ndim != 3:
-            raise ValueError(
-                "_NLinear requires a 3D input (batch, features, embedding)."
-            )
-        if x.shape[-(self.weight.ndim - 1) :] != self.weight.shape[:-1]:
-            raise ValueError("Input shape mismatch with weight dimensions.")
-
-        x = x.transpose(0, 1) @ self.weight
-        return x.transpose(0, 1) + self.bias
 
 
 class PeriodicEmbeddings(nn.Module):

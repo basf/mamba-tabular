@@ -22,11 +22,9 @@ from .mambattention import (
     MambAttentionRegressor,
     MambAttentionLSS,
 )
-
 from .ndtf import NDTFClassifier, NDTFRegressor, NDTFLSS
 from .node import NODEClassifier, NODERegressor, NODELSS
 from .tabm import TabMClassifier, TabMRegressor, TabMLSS
-from .batchtabrnn import BatchTabRNNRegressor, BatchTabRNNClassifier, BatchTabRNNLSS
 
 
 __all__ = [
@@ -66,7 +64,4 @@ __all__ = [
     "TabMClassifier",
     "TabMRegressor",
     "TabMLSS",
-    "BatchTabRNNRegressor",
-    "BatchTabRNNClassifier",
-    "BatchTabRNNLSS",
 ]
