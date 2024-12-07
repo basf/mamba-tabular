@@ -7,8 +7,8 @@ class DefaultResNetConfig:
     """
     Configuration class for the default ResNet model with predefined hyperparameters.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -17,9 +17,6 @@ class DefaultResNetConfig:
         Weight decay (L2 regularization penalty) applied by the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate is reduced when there is no improvement.
-
-    ResNet Architecture Parameters
-    ------------------------------
     layer_sizes : list, default=(256, 128, 32)
         Sizes of the layers in the ResNet.
     activation : callable, default=nn.SELU()
@@ -42,9 +39,6 @@ class DefaultResNetConfig:
         Epsilon value for layer normalization.
     num_blocks : int, default=3
         Number of residual blocks in the ResNet.
-
-    Embedding Parameters
-    ---------------------
     use_embeddings : bool, default=True
         Whether to use embedding layers for all features.
     embedding_type : str, default="linear"

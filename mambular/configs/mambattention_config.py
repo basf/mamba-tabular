@@ -7,8 +7,8 @@ class DefaultMambAttentionConfig:
     """
     Configuration class for the Default Mambular Attention model with predefined hyperparameters.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -17,9 +17,6 @@ class DefaultMambAttentionConfig:
         Weight decay (L2 penalty) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-
-    Architecture Parameters
-    ------------------------
     d_model : int, default=64
         Dimensionality of the model.
     n_layers : int, default=4
@@ -62,9 +59,6 @@ class DefaultMambAttentionConfig:
         Activation function for the model.
     layer_norm_eps : float, default=1e-05
         Epsilon value for layer normalization.
-
-    Embedding Parameters
-    ---------------------
     num_embedding_activation : callable, default=nn.ReLU()
         Activation function for numerical embeddings.
     embedding_type : str, default="linear"
@@ -79,9 +73,6 @@ class DefaultMambAttentionConfig:
         Initial scale for frequency parameters in embeddings.
     layer_norm_after_embedding : bool, default=False
         Whether to apply layer normalization after embedding layers.
-
-    Head Parameters
-    ---------------
     head_layer_sizes : list, default=()
         Sizes of the fully connected layers in the model's head.
     head_dropout : float, default=0.5
@@ -92,9 +83,6 @@ class DefaultMambAttentionConfig:
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-
-    Pooling and Categorical Encoding
-    ---------------------------------
     pooling_method : str, default="avg"
         Pooling method to be used ('avg', 'max', etc.).
     bidirectional : bool, default=False
@@ -107,9 +95,6 @@ class DefaultMambAttentionConfig:
         Whether to shuffle embeddings before passing to Mamba layers.
     cat_encoding : str, default="int"
         Encoding method for categorical features ('int', 'one-hot', etc.).
-
-    Additional Features
-    --------------------
     AD_weight_decay : bool, default=True
         Whether weight decay is applied to A-D matrices.
     BC_layer_norm : bool, default=False

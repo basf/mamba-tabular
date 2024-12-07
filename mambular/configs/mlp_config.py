@@ -7,8 +7,8 @@ class DefaultMLPConfig:
     """
     Configuration class for the default Multi-Layer Perceptron (MLP) model with predefined hyperparameters.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -17,9 +17,6 @@ class DefaultMLPConfig:
         Weight decay (L2 regularization) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-
-    Architecture Parameters
-    ------------------------
     layer_sizes : list, default=(256, 128, 32)
         Sizes of the layers in the MLP.
     activation : callable, default=nn.ReLU()
@@ -38,9 +35,6 @@ class DefaultMLPConfig:
         Whether to use layer normalization in the MLP layers.
     layer_norm_eps : float, default=1e-05
         Epsilon value for layer normalization.
-
-    Embedding Parameters
-    ---------------------
     use_embeddings : bool, default=False
         Whether to use embedding layers for all features.
     embedding_activation : callable, default=nn.Identity()

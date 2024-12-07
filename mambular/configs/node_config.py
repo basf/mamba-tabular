@@ -7,8 +7,8 @@ class DefaultNODEConfig:
     """
     Configuration class for the Neural Oblivious Decision Ensemble (NODE) model.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-03
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -17,9 +17,6 @@ class DefaultNODEConfig:
         Weight decay (L2 regularization penalty) applied by the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate is reduced when there is no improvement.
-
-    Architecture Parameters
-    ------------------------
     num_layers : int, default=4
         Number of dense layers in the model.
     layer_dim : int, default=128
@@ -30,9 +27,6 @@ class DefaultNODEConfig:
         Depth of each decision tree in the ensemble.
     norm : str, default=None
         Type of normalization to use in the model.
-
-    Embedding Parameters
-    ---------------------
     use_embeddings : bool, default=False
         Whether to use embedding layers for categorical features.
     embedding_activation : callable, default=nn.Identity()
@@ -51,9 +45,6 @@ class DefaultNODEConfig:
         Number of frequencies for PLR embeddings.
     frequencies_init_scale : float, default=0.01
         Initial scale for frequency parameters in embeddings.
-
-    Head Parameters
-    ---------------
     head_layer_sizes : list, default=()
         Sizes of the layers in the model's head.
     head_dropout : float, default=0.5

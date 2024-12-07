@@ -8,8 +8,8 @@ class DefaultFTTransformerConfig:
     """
     Configuration class for the FT Transformer model with predefined hyperparameters.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -18,9 +18,6 @@ class DefaultFTTransformerConfig:
         Weight decay (L2 regularization) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-
-    Architecture Parameters
-    ------------------------
     d_model : int, default=128
         Dimensionality of the transformer model.
     n_layers : int, default=4
@@ -45,9 +42,6 @@ class DefaultFTTransformerConfig:
         Whether to apply normalization before other operations in each transformer block.
     bias : bool, default=True
         Whether to use bias in linear layers.
-
-    Embedding Parameters
-    ---------------------
     embedding_activation : callable, default=nn.Identity()
         Activation function for embeddings.
     embedding_type : str, default="linear"
@@ -62,9 +56,6 @@ class DefaultFTTransformerConfig:
         Whether to use bias in embedding layers.
     layer_norm_after_embedding : bool, default=False
         Whether to apply layer normalization after embedding layers.
-
-    Head Parameters
-    ---------------
     head_layer_sizes : list, default=()
         Sizes of the fully connected layers in the model's head.
     head_dropout : float, default=0.5
@@ -75,9 +66,6 @@ class DefaultFTTransformerConfig:
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-
-    Pooling and Categorical Encoding
-    ---------------------------------
     pooling_method : str, default="avg"
         Pooling method to be used ('cls', 'avg', etc.).
     use_cls : bool, default=False

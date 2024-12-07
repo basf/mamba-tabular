@@ -8,8 +8,8 @@ class DefaultMambularConfig:
     """
     Configuration class for the Default Mambular model with predefined hyperparameters.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -18,9 +18,6 @@ class DefaultMambularConfig:
         Weight decay (L2 penalty) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-
-    Architecture Parameters
-    ------------------------
     d_model : int, default=64
         Dimensionality of the model.
     n_layers : int, default=4
@@ -51,9 +48,6 @@ class DefaultMambularConfig:
         Activation function for the model.
     layer_norm_eps : float, default=1e-05
         Epsilon value for layer normalization.
-
-    Embedding Parameters
-    ---------------------
     embedding_activation : callable, default=nn.Identity()
         Activation function for embeddings.
     embedding_type : str, default="linear"
@@ -70,9 +64,6 @@ class DefaultMambularConfig:
         Whether to apply layer normalization after embedding layers.
     shuffle_embeddings : bool, default=False
         Whether to shuffle embeddings before being passed to Mamba layers.
-
-    Head Parameters
-    ---------------
     head_layer_sizes : list, default=()
         Sizes of the layers in the model's head.
     head_dropout : float, default=0.5
@@ -83,9 +74,6 @@ class DefaultMambularConfig:
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-
-    Additional Features
-    --------------------
     pooling_method : str, default="avg"
         Pooling method to use ('avg', 'max', etc.).
     bidirectional : bool, default=False
@@ -96,9 +84,6 @@ class DefaultMambularConfig:
         Whether to append a CLS token to the input sequences.
     use_pscan : bool, default=False
         Whether to use PSCAN for the state-space model.
-
-    Mamba Version
-    -------------
     mamba_version : str, default="mamba-torch"
         Version of the Mamba model to use ('mamba-torch', 'mamba1', 'mamba2').
     """

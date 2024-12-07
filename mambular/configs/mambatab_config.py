@@ -7,8 +7,8 @@ class DefaultMambaTabConfig:
     """
     Configuration class for the Default MambaTab model with predefined hyperparameters.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -17,9 +17,6 @@ class DefaultMambaTabConfig:
         Weight decay (L2 regularization) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-
-    Architecture Parameters
-    ------------------------
     d_model : int, default=64
         Dimensionality of the model.
     n_layers : int, default=1
@@ -52,9 +49,6 @@ class DefaultMambaTabConfig:
         Activation function for the model.
     axis : int, default=1
         Axis along which operations are applied, if applicable.
-
-    Embedding Parameters
-    ---------------------
     num_embedding_activation : callable, default=nn.ReLU()
         Activation function for numerical embeddings.
     embedding_type : str, default="linear"
@@ -67,9 +61,6 @@ class DefaultMambaTabConfig:
         Number of frequencies for PLR embeddings.
     frequencies_init_scale : float, default=0.01
         Initial scale for frequency parameters in embeddings.
-
-    Head Parameters
-    ---------------
     head_layer_sizes : list, default=()
         Sizes of the fully connected layers in the model's head.
     head_dropout : float, default=0.0
@@ -80,9 +71,6 @@ class DefaultMambaTabConfig:
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-
-    Additional Features
-    --------------------
     norm : str, default="LayerNorm"
         Type of normalization to be used ('LayerNorm', 'RMSNorm', etc.).
     use_pscan : bool, default=False

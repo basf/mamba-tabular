@@ -8,8 +8,8 @@ class DefaultTabulaRNNConfig:
     """
     Configuration class for the TabulaRNN model with predefined hyperparameters.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -18,9 +18,6 @@ class DefaultTabulaRNNConfig:
         Weight decay (L2 penalty) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate will be reduced.
-
-    Architecture Parameters
-    ------------------------
     model_type : str, default="RNN"
         Type of model, one of "RNN", "LSTM", "GRU", "mLSTM", "sLSTM".
     d_model : int, default=128
@@ -35,9 +32,6 @@ class DefaultTabulaRNNConfig:
         Activation function for the RNN layers.
     residuals : bool, default=False
         Whether to include residual connections in the RNN.
-
-    Embedding Parameters
-    ---------------------
     embedding_type : str, default="linear"
         Type of embedding for features ('linear', 'plr', etc.).
     embedding_bias : bool, default=False
@@ -52,9 +46,6 @@ class DefaultTabulaRNNConfig:
         Activation function for embeddings.
     layer_norm_after_embedding : bool, default=False
         Whether to apply layer normalization after embedding layers.
-
-    Head Parameters
-    ----------------
     head_layer_sizes : list, default=()
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -65,18 +56,12 @@ class DefaultTabulaRNNConfig:
         Activation function for the head layers.
     head_use_batch_norm : bool, default=False
         Whether to use batch normalization in the head layers.
-
-    Pooling and Normalization
-    --------------------------
     pooling_method : str, default="avg"
         Pooling method to be used ('avg', 'cls', etc.).
     norm_first : bool, default=False
         Whether to apply normalization before other operations in each block.
     layer_norm_eps : float, default=1e-05
         Epsilon value for layer normalization.
-
-    Additional Parameters
-    ----------------------
     bias : bool, default=True
         Whether to use bias in the linear layers.
     rnn_activation : str, default="relu"
