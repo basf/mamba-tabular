@@ -33,6 +33,7 @@
    api/base_models/index
    api/preprocessing/index
    api/data_utils/index
+   api/configs/index
 
 
 .. toctree::
