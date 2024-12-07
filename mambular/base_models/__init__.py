@@ -11,6 +11,7 @@ from .node import NODE
 from .tabm import TabM
 from .tabularnn import TabulaRNN
 from .ndtf import NDTF
+from .saint import SAINT
 
 __all__ = [
     "TaskModel",
@@ -26,4 +27,5 @@ __all__ = [
     "NODE",
     "NDTF",
     "TabulaRNN",
+    "SAINT",
 ]

@@ -9,6 +9,7 @@ from .mambattention_config import DefaultMambAttentionConfig
 from .ndtf_config import DefaultNDTFConfig
 from .node_config import DefaultNODEConfig
 from .tabm_config import DefaultTabMConfig
+from .saint_config import DefaultSAINTConfig
 
 
 __all__ = [
