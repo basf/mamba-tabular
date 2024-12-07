@@ -1,0 +1,1049 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mambular.preprocessing.preprocessor &#8212; mambular</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mambular/preprocessing/preprocessor';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="2024-12-07"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/mamba_tabular.jpg" class="logo__image only-light" alt="mambular - Home"/>
+    <script>document.write(`<img src="../../../_static/mamba_tabular.jpg" class="logo__image only-dark" alt="mambular - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/classification.html">Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/regression.html">Regression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/distributional.html">Distributional</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/models/index.html">Models</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/models/Models.html">mambular.models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/base_models/index.html">BaseModels</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/base_models/BaseModels.html">mambular.base_models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/preprocessing/index.html">Preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/preprocessing/Preprocessor.html">mambular.preprocessing</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/data_utils/index.html">Data Utils</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/data_utils/Datautils.html">mambular.data_utils</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/configs/index.html">Configurations</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/configs/Configurations.html">Configurations</a></li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../codeofconduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../release.html">Build and release</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for mambular.preprocessing.preprocessor</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">NotFittedError</span>
+<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">KBinsDiscretizer</span><span class="p">,</span>
+    <span class="n">MinMaxScaler</span><span class="p">,</span>
+    <span class="n">StandardScaler</span><span class="p">,</span>
+    <span class="n">QuantileTransformer</span><span class="p">,</span>
+    <span class="n">PolynomialFeatures</span><span class="p">,</span>
+    <span class="n">SplineTransformer</span><span class="p">,</span>
+    <span class="n">PowerTransformer</span><span class="p">,</span>
+    <span class="n">OneHotEncoder</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeClassifier</span><span class="p">,</span> <span class="n">DecisionTreeRegressor</span>
+
+<span class="kn">from</span> <span class="nn">.ple_encoding</span> <span class="kn">import</span> <span class="n">PLE</span>
+<span class="kn">from</span> <span class="nn">.prepro_utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ContinuousOrdinalEncoder</span><span class="p">,</span>
+    <span class="n">CustomBinner</span><span class="p">,</span>
+    <span class="n">OneHotFromOrdinal</span><span class="p">,</span>
+    <span class="n">NoTransformer</span><span class="p">,</span>
+    <span class="n">ToFloatTransformer</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="Preprocessor"><a class="viewcode-back" href="../../../api/utils/Preprocessor.html#mambular.preprocessing.Preprocessor">[docs]</a><span class="k">class</span> <span class="nc">Preprocessor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A comprehensive preprocessor for structured data, capable of handling both numerical and categorical features.</span>
+<span class="sd">    It supports various preprocessing strategies for numerical data, including binning, one-hot encoding,</span>
+<span class="sd">    standardization, and minmax. Categorical features can be transformed using continuous ordinal encoding.</span>
+<span class="sd">    Additionally, it allows for the use of decision tree-derived bin edges for numerical feature binning.</span>
+
+<span class="sd">    The class is designed to work seamlessly with pandas DataFrames, facilitating easy integration into</span>
+<span class="sd">    machine learning pipelines.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_bins : int, default=50</span>
+<span class="sd">        The number of bins to use for numerical feature binning. This parameter is relevant</span>
+<span class="sd">        only if `numerical_preprocessing` is set to &#39;binning&#39;, &#39;ple&#39; or &#39;one-hot&#39;.</span>
+<span class="sd">    numerical_preprocessing : str, default=&quot;ple&quot;</span>
+<span class="sd">        The preprocessing strategy for numerical features. Valid options are</span>
+<span class="sd">        &#39;ple&#39;, &#39;binning&#39;, &#39;one-hot&#39;, &#39;standardization&#39;, &#39;min-max&#39;, &#39;quantile&#39;, &#39;polynomial&#39;,</span>
+<span class="sd">        &#39;splines&#39;, &#39;box-cox&#39;, &#39;yeo-johnson&#39; and None</span>
+<span class="sd">    categorical_preprocessing : str, default=&quot;int&quot;</span>
+<span class="sd">        The preprocessing strategy for categorical features. Valid options are</span>
+<span class="sd">        &#39;int&#39;, &#39;one-hot&#39;, None</span>
+<span class="sd">    use_decision_tree_bins : bool, default=False</span>
+<span class="sd">        If True, uses decision tree regression/classification to determine</span>
+<span class="sd">        optimal bin edges for numerical feature binning. This parameter is</span>
+<span class="sd">        relevant only if `numerical_preprocessing` is set to &#39;binning&#39; or &#39;one-hot&#39;.</span>
+<span class="sd">    binning_strategy : str, default=&quot;uniform&quot;</span>
+<span class="sd">        Defines the strategy for binning numerical features. Options include &#39;uniform&#39;,</span>
+<span class="sd">        &#39;quantile&#39;, or other sklearn-compatible strategies.</span>
+<span class="sd">    task : str, default=&quot;regression&quot;</span>
+<span class="sd">        Indicates the type of machine learning task (&#39;regression&#39; or &#39;classification&#39;). This can</span>
+<span class="sd">        influence certain preprocessing behaviors, especially when using decision tree-based binning.</span>
+<span class="sd">    cat_cutoff : float or int, default=0.03</span>
+<span class="sd">        Indicates the cutoff after which integer values are treated as categorical.</span>
+<span class="sd">        If float, it&#39;s treated as a percentage. If int, it&#39;s the maximum number of</span>
+<span class="sd">        unique values for a column to be considered categorical.</span>
+<span class="sd">    treat_all_integers_as_numerical : bool, default=False</span>
+<span class="sd">        If True, all integer columns will be treated as numerical, regardless</span>
+<span class="sd">        of their unique value count or proportion.</span>
+<span class="sd">    degree : int, default=3</span>
+<span class="sd">        The degree of the polynomial features to be used in preprocessing.</span>
+<span class="sd">    knots : int, default=12</span>
+<span class="sd">        The number of knots to be used in spline transformations.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    column_transformer : ColumnTransformer</span>
+<span class="sd">        An instance of sklearn&#39;s ColumnTransformer that holds the</span>
+<span class="sd">        configured preprocessing pipelines for different feature types.</span>
+<span class="sd">    fitted : bool</span>
+<span class="sd">        Indicates whether the preprocessor has been fitted to the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">numerical_preprocessing</span><span class="o">=</span><span class="s2">&quot;ple&quot;</span><span class="p">,</span>
+        <span class="n">categorical_preprocessing</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span>
+        <span class="n">use_decision_tree_bins</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">binning_strategy</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;regression&quot;</span><span class="p">,</span>
+        <span class="n">cat_cutoff</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span>
+        <span class="n">treat_all_integers_as_numerical</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">degree</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">knots</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span> <span class="o">=</span> <span class="n">n_bins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">numerical_preprocessing</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">numerical_preprocessing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="s2">&quot;none&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorical_preprocessing</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">categorical_preprocessing</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">categorical_preprocessing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="s2">&quot;none&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;ple&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;binning&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;one-hot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;standardization&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;min-max&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;quantile&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;polynomial&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;splines&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;box-cox&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;yeo-johnson&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid numerical_preprocessing value. Supported values are &#39;ple&#39;, &#39;binning&#39;, &#39;box-cox&#39;, &#39;one-hot&#39;, &#39;standardization&#39;, &#39;quantile&#39;, &#39;polynomial&#39;, &#39;splines&#39;, &#39;minmax&#39; or &#39;None&#39;.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_preprocessing</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="s2">&quot;one-hot&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;invalid categorical_preprocessing value. Supported values are &#39;int&#39; and &#39;one-hot&#39;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_decision_tree_bins</span> <span class="o">=</span> <span class="n">use_decision_tree_bins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_transformer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binning_strategy</span> <span class="o">=</span> <span class="n">binning_strategy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cat_cutoff</span> <span class="o">=</span> <span class="n">cat_cutoff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treat_all_integers_as_numerical</span> <span class="o">=</span> <span class="n">treat_all_integers_as_numerical</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">degree</span> <span class="o">=</span> <span class="n">degree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_knots</span> <span class="o">=</span> <span class="n">knots</span>
+
+<div class="viewcode-block" id="Preprocessor.get_params"><a class="viewcode-back" href="../../../api/utils/Preprocessor.html#mambular.preprocessing.Preprocessor.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get parameters for the preprocessor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        deep : bool, default=True</span>
+<span class="sd">            If True, will return parameters of subobjects that are estimators.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            Parameter names mapped to their values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;n_bins&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span><span class="p">,</span>
+            <span class="s2">&quot;numerical_preprocessing&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span><span class="p">,</span>
+            <span class="s2">&quot;categorical_preprocessing&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_preprocessing</span><span class="p">,</span>
+            <span class="s2">&quot;use_decision_tree_bins&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_decision_tree_bins</span><span class="p">,</span>
+            <span class="s2">&quot;binning_strategy&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">binning_strategy</span><span class="p">,</span>
+            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">,</span>
+            <span class="s2">&quot;cat_cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat_cutoff</span><span class="p">,</span>
+            <span class="s2">&quot;treat_all_integers_as_numerical&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">treat_all_integers_as_numerical</span><span class="p">,</span>
+            <span class="s2">&quot;degree&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span>
+            <span class="s2">&quot;knots&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_knots</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="Preprocessor.set_params"><a class="viewcode-back" href="../../../api/utils/Preprocessor.html#mambular.preprocessing.Preprocessor.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set parameters for the preprocessor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **params : dict</span>
+<span class="sd">            Parameter names mapped to their new values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Preprocessor instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="k">def</span> <span class="nf">_detect_column_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Identifies and separates the features in the dataset into numerical and categorical types based on the data type</span>
+<span class="sd">        and the proportion of unique values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            X (DataFrame or dict): The input dataset, where the features are columns in a DataFrame or keys in a dict.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            tuple: A tuple containing two lists, the first with the names of numerical features and the second with the names of categorical features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">numerical_features</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">num_unique_values</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+            <span class="n">total_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">treat_all_integers_as_numerical</span> <span class="ow">and</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;i&quot;</span><span class="p">:</span>
+                <span class="n">numerical_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cat_cutoff</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                    <span class="n">cutoff_condition</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">num_unique_values</span> <span class="o">/</span> <span class="n">total_samples</span>
+                    <span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat_cutoff</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cat_cutoff</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="n">cutoff_condition</span> <span class="o">=</span> <span class="n">num_unique_values</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat_cutoff</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;cat_cutoff should be either a float or an integer.&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">&quot;iufc&quot;</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;i&quot;</span> <span class="ow">and</span> <span class="n">cutoff_condition</span>
+                <span class="p">):</span>
+                    <span class="n">categorical_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">numerical_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">numerical_features</span><span class="p">,</span> <span class="n">categorical_features</span>
+
+<div class="viewcode-block" id="Preprocessor.fit"><a class="viewcode-back" href="../../../api/utils/Preprocessor.html#mambular.preprocessing.Preprocessor.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits the preprocessor to the data by identifying feature types and configuring the appropriate transformations for each feature.</span>
+<span class="sd">        It sets up a column transformer with a pipeline of transformations for numerical and categorical features based on the specified preprocessing strategy.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            X (DataFrame or dict): The input dataset to fit the preprocessor on.</span>
+<span class="sd">            y (array-like, optional): The target variable. Required if `use_decision_tree_bins` is True for determining optimal bin edges using decision trees.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            self: The fitted Preprocessor instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">numerical_features</span><span class="p">,</span> <span class="n">categorical_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_column_types</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">transformers</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">numerical_features</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">numerical_features</span><span class="p">:</span>
+                <span class="n">numeric_transformer_steps</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">(</span><span class="s2">&quot;imputer&quot;</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">))</span>
+                <span class="p">]</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;binning&quot;</span><span class="p">,</span> <span class="s2">&quot;one-hot&quot;</span><span class="p">]:</span>
+                    <span class="n">bins</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_get_decision_tree_bins</span><span class="p">(</span><span class="n">X</span><span class="p">[[</span><span class="n">feature</span><span class="p">]],</span> <span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">feature</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_decision_tree_bins</span>
+                        <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                        <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="p">(</span>
+                                    <span class="s2">&quot;discretizer&quot;</span><span class="p">,</span>
+                                    <span class="n">KBinsDiscretizer</span><span class="p">(</span>
+                                        <span class="n">n_bins</span><span class="o">=</span><span class="p">(</span>
+                                            <span class="n">bins</span>
+                                            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+                                            <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                                        <span class="p">),</span>
+                                        <span class="n">encode</span><span class="o">=</span><span class="s2">&quot;ordinal&quot;</span><span class="p">,</span>
+                                        <span class="n">strategy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">binning_strategy</span><span class="p">,</span>
+                                        <span class="n">subsample</span><span class="o">=</span><span class="mi">200_000</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">200_000</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                                    <span class="p">),</span>
+                                <span class="p">),</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="p">(</span>
+                                    <span class="s2">&quot;discretizer&quot;</span><span class="p">,</span>
+                                    <span class="n">CustomBinner</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">),</span>
+                                <span class="p">),</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;one-hot&quot;</span><span class="p">:</span>
+                        <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="p">(</span><span class="s2">&quot;onehot_from_ordinal&quot;</span><span class="p">,</span> <span class="n">OneHotFromOrdinal</span><span class="p">()),</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;standardization&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;scaler&quot;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()))</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;minmax&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="s2">&quot;minmax&quot;</span><span class="p">,</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;quantile&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s2">&quot;quantile&quot;</span><span class="p">,</span>
+                            <span class="n">QuantileTransformer</span><span class="p">(</span>
+                                <span class="n">n_quantiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">101</span>
+                            <span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;polynomial&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;scaler&quot;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()))</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s2">&quot;polynomial&quot;</span><span class="p">,</span>
+                            <span class="n">PolynomialFeatures</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;splines&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s2">&quot;splines&quot;</span><span class="p">,</span>
+                            <span class="n">SplineTransformer</span><span class="p">(</span>
+                                <span class="n">degree</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span>
+                                <span class="n">n_knots</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_knots</span><span class="p">,</span>
+                                <span class="n">include_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="p">),</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;ple&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="s2">&quot;minmax&quot;</span><span class="p">,</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+                    <span class="p">)</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="s2">&quot;ple&quot;</span><span class="p">,</span> <span class="n">PLE</span><span class="p">(</span><span class="n">n_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">))</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;box-cox&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s2">&quot;box-cox&quot;</span><span class="p">,</span>
+                            <span class="n">PowerTransformer</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;box-cox&quot;</span><span class="p">,</span> <span class="n">standardize</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;yeo-johnson&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s2">&quot;yeo-johnson&quot;</span><span class="p">,</span>
+                            <span class="n">PowerTransformer</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;yeo-johnson&quot;</span><span class="p">,</span> <span class="n">standardize</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+                    <span class="n">numeric_transformer_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+                            <span class="n">NoTransformer</span><span class="p">(),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="n">numeric_transformer</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">numeric_transformer_steps</span><span class="p">)</span>
+
+                <span class="n">transformers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="sa">f</span><span class="s2">&quot;num_</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">numeric_transformer</span><span class="p">,</span> <span class="p">[</span><span class="n">feature</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="n">categorical_features</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
+                    <span class="c1"># Use ContinuousOrdinalEncoder for &quot;int&quot;</span>
+                    <span class="n">categorical_transformer</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="p">(</span><span class="s2">&quot;imputer&quot;</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;most_frequent&quot;</span><span class="p">)),</span>
+                            <span class="p">(</span><span class="s2">&quot;continuous_ordinal&quot;</span><span class="p">,</span> <span class="n">ContinuousOrdinalEncoder</span><span class="p">()),</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;one-hot&quot;</span><span class="p">:</span>
+                    <span class="c1"># Use OneHotEncoder for &quot;one-hot&quot;</span>
+                    <span class="n">categorical_transformer</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="p">(</span><span class="s2">&quot;imputer&quot;</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;most_frequent&quot;</span><span class="p">)),</span>
+                            <span class="p">(</span><span class="s2">&quot;onehot&quot;</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">()),</span>
+                            <span class="p">(</span><span class="s2">&quot;to_float&quot;</span><span class="p">,</span> <span class="n">ToFloatTransformer</span><span class="p">()),</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_preprocessing</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+                    <span class="c1"># Use OneHotEncoder for &quot;one-hot&quot;</span>
+                    <span class="n">categorical_transformer</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="p">(</span><span class="s2">&quot;imputer&quot;</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;most_frequent&quot;</span><span class="p">)),</span>
+                            <span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">NoTransformer</span><span class="p">()),</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Unknown categorical_preprocessing type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">categorical_preprocessing</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Append the transformer for the current categorical feature</span>
+                <span class="n">transformers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cat_</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">categorical_transformer</span><span class="p">,</span> <span class="p">[</span><span class="n">feature</span><span class="p">])</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_transformer</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">(</span>
+            <span class="n">transformers</span><span class="o">=</span><span class="n">transformers</span><span class="p">,</span> <span class="n">remainder</span><span class="o">=</span><span class="s2">&quot;passthrough&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_transformer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_decision_tree_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">numerical_features</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses decision tree models to determine optimal bin edges for numerical feature binning. This method is used when `use_decision_tree_bins` is True.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            X (DataFrame): The input dataset containing only the numerical features for which the bin edges are to be determined.</span>
+<span class="sd">            y (array-like): The target variable for training the decision tree models.</span>
+<span class="sd">            numerical_features (list of str): The names of the numerical features for which the bin edges are to be determined.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            list: A list of arrays, where each array contains the bin edges determined by the decision tree for a numerical feature.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">numerical_features</span><span class="p">:</span>
+            <span class="n">tree_model</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="s2">&quot;bi&quot;</span>
+                <span class="k">else</span> <span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">tree_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[[</span><span class="n">feature</span><span class="p">]],</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">thresholds</span> <span class="o">=</span> <span class="n">tree_model</span><span class="o">.</span><span class="n">tree_</span><span class="o">.</span><span class="n">threshold</span><span class="p">[</span><span class="n">tree_model</span><span class="o">.</span><span class="n">tree_</span><span class="o">.</span><span class="n">feature</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">thresholds</span><span class="p">))</span>
+
+            <span class="n">bins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">X</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()],</span> <span class="n">bin_edges</span><span class="p">,</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()]))</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">bins</span>
+
+<div class="viewcode-block" id="Preprocessor.transform"><a class="viewcode-back" href="../../../api/utils/Preprocessor.html#mambular.preprocessing.Preprocessor.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transforms the input data using the preconfigured column transformer and converts the output into a dictionary</span>
+<span class="sd">        format with keys corresponding to transformed feature names and values as arrays of transformed data.</span>
+
+<span class="sd">        This method converts the sparse or dense matrix returned by the column transformer into a more accessible</span>
+<span class="sd">        dictionary format, where each key-value pair represents a feature and its transformed data.</span>
+<span class="sd">        Transforms the input data using the preconfigured column transformer and converts the output into a dictionary</span>
+<span class="sd">        format with keys corresponding to transformed feature names and values as arrays of transformed data.</span>
+
+<span class="sd">        This method converts the sparse or dense matrix returned by the column transformer into a more accessible</span>
+<span class="sd">        dictionary format, where each key-value pair represents a feature and its transformed data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            X (DataFrame): The input data to be transformed.</span>
+<span class="sd">            X (DataFrame): The input data to be transformed.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            dict: A dictionary where keys are the names of the features (as per the transformations defined in the</span>
+<span class="sd">            column transformer) and the values are numpy arrays of the transformed data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFittedError</span><span class="p">(</span>
+                <span class="s2">&quot;The preprocessor must be fitted before transforming new data. Use .fit or .fit_transform&quot;</span>
+            <span class="p">)</span>
+        <span class="n">transformed_X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># Now let&#39;s convert this into a dictionary of arrays, one per column</span>
+        <span class="n">transformed_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_transformed_output</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">transformed_X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transformed_dict</span></div>
+
+    <span class="k">def</span> <span class="nf">_split_transformed_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">transformed_X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Splits the transformed data array into a dictionary where keys correspond to the original column names or</span>
+<span class="sd">        feature groups and values are the transformed data for those columns.</span>
+
+<span class="sd">        This helper method is utilized within `transform` to segregate the transformed data based on the</span>
+<span class="sd">        specification in the column transformer, assigning each transformed section to its corresponding feature name.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            X (DataFrame): The original input data, used for determining shapes and transformations.</span>
+<span class="sd">            transformed_X (numpy array): The transformed data as a numpy array, outputted by the column transformer.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            dict: A dictionary mapping each transformation&#39;s name to its respective numpy array of transformed data.</span>
+<span class="sd">            The type of each array (int or float) is determined based on the type of transformation applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">transformed_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">columns</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_transformer</span><span class="o">.</span><span class="n">transformers_</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transformer</span> <span class="o">!=</span> <span class="s2">&quot;drop&quot;</span><span class="p">:</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">[[</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]]])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># Determine dtype based on the transformer steps</span>
+                <span class="n">transformer_steps</span> <span class="o">=</span> <span class="p">[</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">transformer</span><span class="o">.</span><span class="n">steps</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;continuous_ordinal&quot;</span> <span class="ow">in</span> <span class="n">transformer_steps</span><span class="p">:</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="nb">int</span>  <span class="c1"># Use int for ordinal/integer encoding</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="nb">float</span>  <span class="c1"># Default to float for other encodings</span>
+
+                <span class="c1"># Assign transformed data with the correct dtype</span>
+                <span class="n">transformed_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">transformed_X</span><span class="p">[:,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">end</span>
+        <span class="k">return</span> <span class="n">transformed_dict</span>
+
+<div class="viewcode-block" id="Preprocessor.fit_transform"><a class="viewcode-back" href="../../../api/utils/Preprocessor.html#mambular.preprocessing.Preprocessor.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits the preprocessor to the data and then transforms the data using the fitted preprocessing pipelines. This is a convenience method that combines `fit` and `transform`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            X (DataFrame or dict): The input dataset to fit the preprocessor on and then transform.</span>
+<span class="sd">            y (array-like, optional): The target variable. Required if `use_decision_tree_bins` is True.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            dict: A dictionary with the transformed data, where keys are the base feature names and values are the transformed features as arrays.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Preprocessor.get_feature_info"><a class="viewcode-back" href="../../../api/utils/Preprocessor.html#mambular.preprocessing.Preprocessor.get_feature_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_feature_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves information about how features are encoded within the model&#39;s preprocessor.</span>
+<span class="sd">        This method identifies the type of encoding applied to each feature, categorizing them into binned or ordinal</span>
+<span class="sd">        encodings and other types of encodings (e.g., one-hot encoding after discretization).</span>
+
+<span class="sd">        This method should only be called after the preprocessor has been fitted, as it relies on the structure and</span>
+<span class="sd">        configuration of the `column_transformer` attribute.</span>
+
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">            RuntimeError: If the `column_transformer` is not yet fitted, indicating that the preprocessor must be</span>
+<span class="sd">            fitted before invoking this method.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            tuple of (dict, dict):</span>
+<span class="sd">                - The first dictionary maps feature names to their respective number of bins or categories if they are</span>
+<span class="sd">                  processed using discretization or ordinal encoding.</span>
+<span class="sd">                - The second dictionary includes feature names with other encoding details, such as the dimension of</span>
+<span class="sd">                  features after encoding transformations (e.g., one-hot encoding dimensions).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">numerical_feature_info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">categorical_feature_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_transformer</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The preprocessor has not been fitted yet.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">transformer_pipeline</span><span class="p">,</span>
+            <span class="n">columns</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_transformer</span><span class="o">.</span><span class="n">transformers_</span><span class="p">:</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">transformer_pipeline</span><span class="o">.</span><span class="n">steps</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+                <span class="c1"># Initialize common fields</span>
+                <span class="n">preprocessing_type</span> <span class="o">=</span> <span class="s2">&quot; -&gt; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+                <span class="n">dimension</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">categories</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="c1"># Numerical features</span>
+                <span class="k">if</span> <span class="s2">&quot;discretizer&quot;</span> <span class="ow">in</span> <span class="n">steps</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span>
+                    <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span>
+                    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="p">[</span>
+                        <span class="s2">&quot;standardization&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;minmax&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;quantile&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;polynomial&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;splines&quot;</span><span class="p">,</span>
+                    <span class="p">]</span>
+                <span class="p">):</span>
+                    <span class="n">last_step</span> <span class="o">=</span> <span class="n">transformer_pipeline</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">last_step</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">):</span>
+                        <span class="n">dummy_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="p">)</span>  <span class="c1"># Single-column input for dimension check</span>
+                        <span class="n">transformed_feature</span> <span class="o">=</span> <span class="n">last_step</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">dummy_input</span><span class="p">)</span>
+                        <span class="n">dimension</span> <span class="o">=</span> <span class="n">transformed_feature</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">numerical_feature_info</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;preprocessing&quot;</span><span class="p">:</span> <span class="n">preprocessing_type</span><span class="p">,</span>
+                        <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="n">dimension</span><span class="p">,</span>
+                        <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Numerical features don&#39;t have categories</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Numerical Feature: </span><span class="si">{</span><span class="n">feature_name</span><span class="si">}</span><span class="s2">, Info: </span><span class="si">{</span><span class="n">numerical_feature_info</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+
+                <span class="c1"># Categorical features</span>
+                <span class="k">elif</span> <span class="s2">&quot;continuous_ordinal&quot;</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+                    <span class="n">step</span> <span class="o">=</span> <span class="n">transformer_pipeline</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s2">&quot;continuous_ordinal&quot;</span><span class="p">]</span>
+                    <span class="n">categories</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">mapping_</span><span class="p">[</span><span class="n">columns</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)])</span>
+                    <span class="n">dimension</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Ordinal encoding always outputs one dimension</span>
+                    <span class="n">categorical_feature_info</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;preprocessing&quot;</span><span class="p">:</span> <span class="n">preprocessing_type</span><span class="p">,</span>
+                        <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="n">dimension</span><span class="p">,</span>
+                        <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="n">categories</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Categorical Feature (Ordinal): </span><span class="si">{</span><span class="n">feature_name</span><span class="si">}</span><span class="s2">, Info: </span><span class="si">{</span><span class="n">categorical_feature_info</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="s2">&quot;onehot&quot;</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+                    <span class="n">step</span> <span class="o">=</span> <span class="n">transformer_pipeline</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s2">&quot;onehot&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="s2">&quot;categories_&quot;</span><span class="p">):</span>
+                        <span class="n">categories</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span> <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">step</span><span class="o">.</span><span class="n">categories_</span><span class="p">)</span>
+                        <span class="n">dimension</span> <span class="o">=</span> <span class="n">categories</span>  <span class="c1"># One-hot encoding expands into multiple dimensions</span>
+                    <span class="n">categorical_feature_info</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;preprocessing&quot;</span><span class="p">:</span> <span class="n">preprocessing_type</span><span class="p">,</span>
+                        <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="n">dimension</span><span class="p">,</span>
+                        <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="n">categories</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Categorical Feature (One-Hot): </span><span class="si">{</span><span class="n">feature_name</span><span class="si">}</span><span class="s2">, Info: </span><span class="si">{</span><span class="n">categorical_feature_info</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+
+                <span class="c1"># Fallback for other transformations</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">last_step</span> <span class="o">=</span> <span class="n">transformer_pipeline</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">last_step</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">):</span>
+                        <span class="n">dummy_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                        <span class="n">transformed_feature</span> <span class="o">=</span> <span class="n">last_step</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">dummy_input</span><span class="p">)</span>
+                        <span class="n">dimension</span> <span class="o">=</span> <span class="n">transformed_feature</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="s2">&quot;cat&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                        <span class="n">categorical_feature_info</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;preprocessing&quot;</span><span class="p">:</span> <span class="n">preprocessing_type</span><span class="p">,</span>
+                            <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="n">dimension</span><span class="p">,</span>
+                            <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Categories not defined for unknown categorical transformations</span>
+                        <span class="p">}</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">numerical_feature_info</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;preprocessing&quot;</span><span class="p">:</span> <span class="n">preprocessing_type</span><span class="p">,</span>
+                            <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="n">dimension</span><span class="p">,</span>
+                            <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Numerical features don&#39;t have categories</span>
+                        <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Feature: </span><span class="si">{</span><span class="n">feature_name</span><span class="si">}</span><span class="s2">, Info: </span><span class="si">{</span><span class="n">preprocessing_type</span><span class="si">}</span><span class="s2">, Dimension: </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">numerical_feature_info</span><span class="p">,</span> <span class="n">categorical_feature_info</span></div></div>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken, Soheila Samiee
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, BASF SE.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on 2024-12-07.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

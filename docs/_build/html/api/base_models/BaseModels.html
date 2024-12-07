@@ -1,0 +1,2124 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>mambular.base_models &#8212; mambular</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/base_models/BaseModels';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Preprocessing" href="../preprocessing/index.html" />
+    <link rel="prev" title="BaseModels" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="2024-12-07"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/mamba_tabular.jpg" class="logo__image only-light" alt="mambular - Home"/>
+    <script>document.write(`<img src="../../_static/mamba_tabular.jpg" class="logo__image only-dark" alt="mambular - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../examples/classification.html">Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/regression.html">Regression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/distributional.html">Distributional</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../models/index.html">Models</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../models/Models.html">mambular.models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">BaseModels</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">mambular.base_models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../preprocessing/index.html">Preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../preprocessing/Preprocessor.html">mambular.preprocessing</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../data_utils/index.html">Data Utils</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../data_utils/Datautils.html">mambular.data_utils</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../configs/index.html">Configurations</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../configs/Configurations.html">Configurations</a></li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../codeofconduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Build and release</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/api/base_models/BaseModels.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>mambular.base_models</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel"><code class="docutils literal notranslate"><span class="pre">TaskModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.compute_loss"><code class="docutils literal notranslate"><span class="pre">TaskModel.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">TaskModel.configure_optimizers()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.epoch_val_loss_at"><code class="docutils literal notranslate"><span class="pre">TaskModel.epoch_val_loss_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.forward"><code class="docutils literal notranslate"><span class="pre">TaskModel.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.on_validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">TaskModel.on_validation_epoch_end()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.val_loss"><code class="docutils literal notranslate"><span class="pre">TaskModel.val_loss</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.val_loss_value"><code class="docutils literal notranslate"><span class="pre">TaskModel.val_loss_value</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.val_losses"><code class="docutils literal notranslate"><span class="pre">TaskModel.val_losses</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.pruning_epoch"><code class="docutils literal notranslate"><span class="pre">TaskModel.pruning_epoch</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.early_pruning_threshold"><code class="docutils literal notranslate"><span class="pre">TaskModel.early_pruning_threshold</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.test_step"><code class="docutils literal notranslate"><span class="pre">TaskModel.test_step()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.training_step"><code class="docutils literal notranslate"><span class="pre">TaskModel.training_step()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.validation_step"><code class="docutils literal notranslate"><span class="pre">TaskModel.validation_step()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular"><code class="docutils literal notranslate"><span class="pre">Mambular</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.pooling_method"><code class="docutils literal notranslate"><span class="pre">Mambular.pooling_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.shuffle_embeddings"><code class="docutils literal notranslate"><span class="pre">Mambular.shuffle_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.embedding_layer"><code class="docutils literal notranslate"><span class="pre">Mambular.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.mamba"><code class="docutils literal notranslate"><span class="pre">Mambular.mamba</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.norm_f"><code class="docutils literal notranslate"><span class="pre">Mambular.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.tabular_head"><code class="docutils literal notranslate"><span class="pre">Mambular.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.perm"><code class="docutils literal notranslate"><span class="pre">Mambular.perm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.forward"><code class="docutils literal notranslate"><span class="pre">Mambular.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">Mambular.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP"><code class="docutils literal notranslate"><span class="pre">MLP</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.layer_sizes"><code class="docutils literal notranslate"><span class="pre">MLP.layer_sizes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">MLP.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.num_feature_info"><code class="docutils literal notranslate"><span class="pre">MLP.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.layers"><code class="docutils literal notranslate"><span class="pre">MLP.layers</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.skip_connections"><code class="docutils literal notranslate"><span class="pre">MLP.skip_connections</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.use_glu"><code class="docutils literal notranslate"><span class="pre">MLP.use_glu</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.activation"><code class="docutils literal notranslate"><span class="pre">MLP.activation</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.use_embeddings"><code class="docutils literal notranslate"><span class="pre">MLP.use_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.embedding_layer"><code class="docutils literal notranslate"><span class="pre">MLP.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.norm_f"><code class="docutils literal notranslate"><span class="pre">MLP.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.forward"><code class="docutils literal notranslate"><span class="pre">MLP.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">MLP.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet"><code class="docutils literal notranslate"><span class="pre">ResNet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.layer_sizes"><code class="docutils literal notranslate"><span class="pre">ResNet.layer_sizes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">ResNet.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.num_feature_info"><code class="docutils literal notranslate"><span class="pre">ResNet.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.activation"><code class="docutils literal notranslate"><span class="pre">ResNet.activation</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.use_embeddings"><code class="docutils literal notranslate"><span class="pre">ResNet.use_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.embedding_layer"><code class="docutils literal notranslate"><span class="pre">ResNet.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.initial_layer"><code class="docutils literal notranslate"><span class="pre">ResNet.initial_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.blocks"><code class="docutils literal notranslate"><span class="pre">ResNet.blocks</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.output_layer"><code class="docutils literal notranslate"><span class="pre">ResNet.output_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.forward"><code class="docutils literal notranslate"><span class="pre">ResNet.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer"><code class="docutils literal notranslate"><span class="pre">FTTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.pooling_method"><code class="docutils literal notranslate"><span class="pre">FTTransformer.pooling_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">FTTransformer.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.num_feature_info"><code class="docutils literal notranslate"><span class="pre">FTTransformer.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.embedding_layer"><code class="docutils literal notranslate"><span class="pre">FTTransformer.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.norm_f"><code class="docutils literal notranslate"><span class="pre">FTTransformer.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.encoder"><code class="docutils literal notranslate"><span class="pre">FTTransformer.encoder</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.tabular_head"><code class="docutils literal notranslate"><span class="pre">FTTransformer.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.forward"><code class="docutils literal notranslate"><span class="pre">FTTransformer.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">FTTransformer.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer"><code class="docutils literal notranslate"><span class="pre">TabTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.lr"><code class="docutils literal notranslate"><span class="pre">TabTransformer.lr</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.lr_patience"><code class="docutils literal notranslate"><span class="pre">TabTransformer.lr_patience</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.weight_decay"><code class="docutils literal notranslate"><span class="pre">TabTransformer.weight_decay</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.lr_factor"><code class="docutils literal notranslate"><span class="pre">TabTransformer.lr_factor</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.pooling_method"><code class="docutils literal notranslate"><span class="pre">TabTransformer.pooling_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">TabTransformer.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.num_feature_info"><code class="docutils literal notranslate"><span class="pre">TabTransformer.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.embedding_activation"><code class="docutils literal notranslate"><span class="pre">TabTransformer.embedding_activation</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.encoder"><code class="docutils literal notranslate"><span class="pre">TabTransformer.encoder</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.norm_f"><code class="docutils literal notranslate"><span class="pre">TabTransformer.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.num_embeddings"><code class="docutils literal notranslate"><span class="pre">TabTransformer.num_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.cat_embeddings"><code class="docutils literal notranslate"><span class="pre">TabTransformer.cat_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.tabular_head"><code class="docutils literal notranslate"><span class="pre">TabTransformer.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.cls_token"><code class="docutils literal notranslate"><span class="pre">TabTransformer.cls_token</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.embedding_norm"><code class="docutils literal notranslate"><span class="pre">TabTransformer.embedding_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.forward"><code class="docutils literal notranslate"><span class="pre">TabTransformer.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabulaRNN"><code class="docutils literal notranslate"><span class="pre">TabulaRNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabulaRNN.forward"><code class="docutils literal notranslate"><span class="pre">TabulaRNN.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention"><code class="docutils literal notranslate"><span class="pre">MambAttention</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.pooling_method"><code class="docutils literal notranslate"><span class="pre">MambAttention.pooling_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.shuffle_embeddings"><code class="docutils literal notranslate"><span class="pre">MambAttention.shuffle_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.mamba"><code class="docutils literal notranslate"><span class="pre">MambAttention.mamba</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.norm_f"><code class="docutils literal notranslate"><span class="pre">MambAttention.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.embedding_layer"><code class="docutils literal notranslate"><span class="pre">MambAttention.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.tabular_head"><code class="docutils literal notranslate"><span class="pre">MambAttention.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.perm"><code class="docutils literal notranslate"><span class="pre">MambAttention.perm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.forward"><code class="docutils literal notranslate"><span class="pre">MambAttention.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">MambAttention.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabM"><code class="docutils literal notranslate"><span class="pre">TabM</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabM.forward"><code class="docutils literal notranslate"><span class="pre">TabM.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE"><code class="docutils literal notranslate"><span class="pre">NODE</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">NODE.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.num_feature_info"><code class="docutils literal notranslate"><span class="pre">NODE.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.use_embeddings"><code class="docutils literal notranslate"><span class="pre">NODE.use_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.embedding_layer"><code class="docutils literal notranslate"><span class="pre">NODE.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.d_out"><code class="docutils literal notranslate"><span class="pre">NODE.d_out</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.block"><code class="docutils literal notranslate"><span class="pre">NODE.block</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.tabular_head"><code class="docutils literal notranslate"><span class="pre">NODE.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.forward"><code class="docutils literal notranslate"><span class="pre">NODE.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">NODE.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF"><code class="docutils literal notranslate"><span class="pre">NDTF</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">NDTF.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.num_feature_info"><code class="docutils literal notranslate"><span class="pre">NDTF.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.penalty_factor"><code class="docutils literal notranslate"><span class="pre">NDTF.penalty_factor</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.input_dimensions"><code class="docutils literal notranslate"><span class="pre">NDTF.input_dimensions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.trees"><code class="docutils literal notranslate"><span class="pre">NDTF.trees</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.conv_layer"><code class="docutils literal notranslate"><span class="pre">NDTF.conv_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.tree_weights"><code class="docutils literal notranslate"><span class="pre">NDTF.tree_weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.forward"><code class="docutils literal notranslate"><span class="pre">NDTF.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.penalty_forward"><code class="docutils literal notranslate"><span class="pre">NDTF.penalty_forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">NDTF.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">NDTF.penalty_forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="mambular-base-models">
+<h1>mambular.base_models<a class="headerlink" href="#mambular-base-models" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">TaskModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">family</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_fct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_pruning_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pruning_epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Adam'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel" title="Permalink to this definition">#</a></dt>
+<dd><p>PyTorch Lightning Module for training and evaluating a model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_class</strong> (<em>Type</em><em>[</em><em>nn.Module</em><em>]</em>) – The model class to be instantiated and trained.</p></li>
+<li><p><strong>config</strong> (<em>dataclass</em>) – Configuration dataclass containing model hyperparameters.</p></li>
+<li><p><strong>loss_fn</strong> (<em>callable</em>) – Loss function to be used during training and evaluation.</p></li>
+<li><p><strong>lr</strong> (<em>float</em><em>, </em><em>optional</em>) – Learning rate for the optimizer (default is 1e-3).</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of classes for classification tasks (default is 1).</p></li>
+<li><p><strong>lss</strong> (<em>bool</em><em>, </em><em>optional</em>) – Custom flag for additional loss configuration (default is False).</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.compute_loss">
+<span class="sig-name descname"><span class="pre">compute_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel.compute_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel.compute_loss" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute the loss for the given predictions and true labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predictions</strong> (<em>Tensor</em>) – Model predictions. Shape: (batch_size, k, output_dim) for ensembles, or (batch_size, output_dim) otherwise.</p></li>
+<li><p><strong>y_true</strong> (<em>Tensor</em>) – True labels. Shape: (batch_size, output_dim).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Computed loss.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.configure_optimizers">
+<span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel.configure_optimizers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel.configure_optimizers" title="Permalink to this definition">#</a></dt>
+<dd><p>Sets up the model’s optimizer and learning rate scheduler based on the configurations provided.
+The optimizer type can be chosen by the user (Adam, SGD, etc.).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.epoch_val_loss_at">
+<span class="sig-name descname"><span class="pre">epoch_val_loss_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel.epoch_val_loss_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel.epoch_val_loss_at" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieve the validation loss at a specific epoch.</p>
+<p>This method allows the user to query the validation loss for any given epoch,
+provided the epoch exists within the range of completed epochs. If the epoch
+exceeds the length of the <code class="docutils literal notranslate"><span class="pre">val_losses</span></code> list, a default value of infinity is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>int</em>) – The epoch number for which the validation loss is requested.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The validation loss for the requested epoch. If the epoch does not exist,
+the method returns <code class="docutils literal notranslate"><span class="pre">float(&quot;inf&quot;)</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method relies on <code class="docutils literal notranslate"><span class="pre">self.val_losses</span></code> which stores the validation loss values
+at the end of each epoch during training.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Forward pass through the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>tuple</em>) – Positional arguments passed to the model’s forward method.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Keyword arguments passed to the model’s forward method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model output.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.on_validation_epoch_end">
+<span class="sig-name descname"><span class="pre">on_validation_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel.on_validation_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel.on_validation_epoch_end" title="Permalink to this definition">#</a></dt>
+<dd><p>Callback executed at the end of each validation epoch.</p>
+<p>This method retrieves the current validation loss from the trainer’s callback metrics
+and stores it in a list for tracking validation losses across epochs. It also applies
+pruning logic to stop training early if the validation loss exceeds a specified threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong> – </p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.val_loss">
+<span class="sig-name descname"><span class="pre">val_loss</span></span><a class="headerlink" href="#mambular.base_models.TaskModel.val_loss" title="Permalink to this definition">#</a></dt>
+<dd><p>The validation loss for the current epoch, retrieved from <code class="docutils literal notranslate"><span class="pre">self.trainer.callback_metrics</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.val_loss_value">
+<span class="sig-name descname"><span class="pre">val_loss_value</span></span><a class="headerlink" href="#mambular.base_models.TaskModel.val_loss_value" title="Permalink to this definition">#</a></dt>
+<dd><p>The validation loss for the current epoch, converted to a float.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.val_losses">
+<span class="sig-name descname"><span class="pre">val_losses</span></span><a class="headerlink" href="#mambular.base_models.TaskModel.val_losses" title="Permalink to this definition">#</a></dt>
+<dd><p>A list storing the validation losses for each epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.pruning_epoch">
+<span class="sig-name descname"><span class="pre">pruning_epoch</span></span><a class="headerlink" href="#mambular.base_models.TaskModel.pruning_epoch" title="Permalink to this definition">#</a></dt>
+<dd><p>The epoch after which pruning logic will be applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.early_pruning_threshold">
+<span class="sig-name descname"><span class="pre">early_pruning_threshold</span></span><a class="headerlink" href="#mambular.base_models.TaskModel.early_pruning_threshold" title="Permalink to this definition">#</a></dt>
+<dd><p>The threshold for early pruning based on validation loss. If the current validation
+loss exceeds this value, training will be stopped early.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<p>If the current epoch is greater than or equal to <code class="docutils literal notranslate"><span class="pre">pruning_epoch</span></code>, and the validation
+loss exceeds the <code class="docutils literal notranslate"><span class="pre">early_pruning_threshold</span></code>, the training is stopped early by setting
+<code class="docutils literal notranslate"><span class="pre">self.trainer.should_stop</span></code> to True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.test_step">
+<span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel.test_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel.test_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Test step for a single batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> (<em>tuple</em>) – Batch of data containing numerical features, categorical features, and labels.</p></li>
+<li><p><strong>batch_idx</strong> (<em>int</em>) – Index of the batch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Test loss.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.training_step">
+<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel.training_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel.training_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Training step for a single batch, incorporating penalty if the model has a penalty_forward method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> (<em>tuple</em>) – Batch of data containing numerical features, categorical features, and labels.</p></li>
+<li><p><strong>batch_idx</strong> (<em>int</em>) – Index of the batch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Training loss.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TaskModel.validation_step">
+<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/lightning_wrapper.html#TaskModel.validation_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TaskModel.validation_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Validation step for a single batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> (<em>tuple</em>) – Batch of data containing numerical features, categorical features, and labels.</p></li>
+<li><p><strong>batch_idx</strong> (<em>int</em>) – Index of the batch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Validation loss.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">Mambular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultMambularConfig(lr=0.0001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-06,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">d_model=64,</span> <span class="pre">n_layers=4,</span> <span class="pre">expand_factor=2,</span> <span class="pre">bias=False,</span> <span class="pre">dropout=0.0,</span> <span class="pre">dt_rank='auto',</span> <span class="pre">d_state=128,</span> <span class="pre">dt_scale=1.0,</span> <span class="pre">dt_init='random',</span> <span class="pre">dt_max=0.1,</span> <span class="pre">dt_min=0.0001,</span> <span class="pre">dt_init_floor=0.0001,</span> <span class="pre">norm='RMSNorm',</span> <span class="pre">activation=torch.nn.SiLU,</span> <span class="pre">layer_norm_eps=1e-05,</span> <span class="pre">embedding_activation=torch.nn.Identity,</span> <span class="pre">embedding_type='linear',</span> <span class="pre">embedding_bias=False,</span> <span class="pre">plr_lite=False,</span> <span class="pre">n_frequencies=48,</span> <span class="pre">frequencies_init_scale=0.01,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">shuffle_embeddings=False,</span> <span class="pre">head_layer_sizes=(),</span> <span class="pre">head_dropout=0.5,</span> <span class="pre">head_skip_layers=False,</span> <span class="pre">head_activation=torch.nn.SELU,</span> <span class="pre">head_use_batch_norm=False,</span> <span class="pre">pooling_method='avg',</span> <span class="pre">bidirectional=False,</span> <span class="pre">use_learnable_interaction=False,</span> <span class="pre">use_cls=False,</span> <span class="pre">use_pscan=False,</span> <span class="pre">mamba_version='mamba-torch')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mambular.html#Mambular"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.Mambular" title="Permalink to this definition">#</a></dt>
+<dd><p>A Mambular model for tabular data, integrating feature embeddings, Mamba transformations, and a configurable architecture
+for processing categorical and numerical features with pooling and normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_feature_info</strong> (<em>dict</em>) – Dictionary containing information about categorical features, including their names and dimensions.</p></li>
+<li><p><strong>num_feature_info</strong> (<em>dict</em>) – Dictionary containing information about numerical features, including their names and dimensions.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of output classes or target dimensions for regression, by default 1.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../configs/Configurations.html#mambular.configs.DefaultMambularConfig" title="mambular.configs.DefaultMambularConfig"><em>DefaultMambularConfig</em></a><em>, </em><em>optional</em>) – Configuration object with model hyperparameters such as dropout rates, head layer sizes, Mamba version, and
+other architectural configurations, by default DefaultMambularConfig().</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments for the BaseModel class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular.pooling_method">
+<span class="sig-name descname"><span class="pre">pooling_method</span></span><a class="headerlink" href="#mambular.base_models.Mambular.pooling_method" title="Permalink to this definition">#</a></dt>
+<dd><p>Pooling method to aggregate features after the Mamba layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular.shuffle_embeddings">
+<span class="sig-name descname"><span class="pre">shuffle_embeddings</span></span><a class="headerlink" href="#mambular.base_models.Mambular.shuffle_embeddings" title="Permalink to this definition">#</a></dt>
+<dd><p>Flag indicating if embeddings should be shuffled, as specified in the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular.embedding_layer">
+<span class="sig-name descname"><span class="pre">embedding_layer</span></span><a class="headerlink" href="#mambular.base_models.Mambular.embedding_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Layer for embedding categorical and numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmbeddingLayer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular.mamba">
+<span class="sig-name descname"><span class="pre">mamba</span></span><a class="headerlink" href="#mambular.base_models.Mambular.mamba" title="Permalink to this definition">#</a></dt>
+<dd><p>Mamba-based transformation layer based on the version specified in config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mamba or MambaOriginal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular.norm_f">
+<span class="sig-name descname"><span class="pre">norm_f</span></span><a class="headerlink" href="#mambular.base_models.Mambular.norm_f" title="Permalink to this definition">#</a></dt>
+<dd><p>Normalization layer for the processed features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular.tabular_head">
+<span class="sig-name descname"><span class="pre">tabular_head</span></span><a class="headerlink" href="#mambular.base_models.Mambular.tabular_head" title="Permalink to this definition">#</a></dt>
+<dd><p>MLP layer to produce the final prediction based on the output of the Mamba layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mambular.base_models.MLP" title="mambular.base_models.MLP">MLP</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular.perm">
+<span class="sig-name descname"><span class="pre">perm</span></span><a class="headerlink" href="#mambular.base_models.Mambular.perm" title="Permalink to this definition">#</a></dt>
+<dd><p>Permutation tensor used for shuffling embeddings, if enabled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.Mambular.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mambular.html#Mambular.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.Mambular.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform a forward pass through the model, including embedding, Mamba transformation, pooling,
+and prediction steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mambular.html#Mambular.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
+<dd><p>Defines the forward pass of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_features</strong> (<em>Tensor</em>) – Tensor containing the numerical features.</p></li>
+<li><p><strong>cat_features</strong> (<em>Tensor</em>) – Tensor containing the categorical features.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The output predictions of the model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.MLP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">MLP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultMLPConfig(lr=0.0001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-06,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">layer_sizes=(256,</span> <span class="pre">128,</span> <span class="pre">32),</span> <span class="pre">activation=torch.nn.ReLU,</span> <span class="pre">skip_layers=False,</span> <span class="pre">dropout=0.2,</span> <span class="pre">use_glu=False,</span> <span class="pre">skip_connections=False,</span> <span class="pre">batch_norm=False,</span> <span class="pre">layer_norm=False,</span> <span class="pre">layer_norm_eps=1e-05,</span> <span class="pre">use_embeddings=False,</span> <span class="pre">embedding_activation=torch.nn.Identity,</span> <span class="pre">embedding_type='linear',</span> <span class="pre">embedding_bias=False,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">d_model=32,</span> <span class="pre">plr_lite=False,</span> <span class="pre">n_frequencies=48,</span> <span class="pre">frequencies_init_scale=0.01)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mlp.html#MLP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.MLP" title="Permalink to this definition">#</a></dt>
+<dd><p>A multi-layer perceptron (MLP) model for tabular data processing, with options for embedding, normalization,
+skip connections, and customizable activation functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_feature_info</strong> (<em>dict</em>) – Dictionary containing information about categorical features, including their names and dimensions.</p></li>
+<li><p><strong>num_feature_info</strong> (<em>dict</em>) – Dictionary containing information about numerical features, including their names and dimensions.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of output classes or target dimensions for regression, by default 1.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../configs/Configurations.html#mambular.configs.DefaultMLPConfig" title="mambular.configs.DefaultMLPConfig"><em>DefaultMLPConfig</em></a><em>, </em><em>optional</em>) – Configuration object with model hyperparameters such as layer sizes, dropout rates, activation functions,
+embedding settings, and normalization options, by default DefaultMLPConfig().</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments for the BaseModel class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.layer_sizes">
+<span class="sig-name descname"><span class="pre">layer_sizes</span></span><a class="headerlink" href="#mambular.base_models.MLP.layer_sizes" title="Permalink to this definition">#</a></dt>
+<dd><p>List specifying the number of units in each layer of the MLP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.cat_feature_info">
+<span class="sig-name descname"><span class="pre">cat_feature_info</span></span><a class="headerlink" href="#mambular.base_models.MLP.cat_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores categorical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.num_feature_info">
+<span class="sig-name descname"><span class="pre">num_feature_info</span></span><a class="headerlink" href="#mambular.base_models.MLP.num_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores numerical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.layers">
+<span class="sig-name descname"><span class="pre">layers</span></span><a class="headerlink" href="#mambular.base_models.MLP.layers" title="Permalink to this definition">#</a></dt>
+<dd><p>List containing the layers of the MLP, including linear layers, normalization layers, and activations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.skip_connections">
+<span class="sig-name descname"><span class="pre">skip_connections</span></span><a class="headerlink" href="#mambular.base_models.MLP.skip_connections" title="Permalink to this definition">#</a></dt>
+<dd><p>Flag indicating whether skip connections are enabled between layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.use_glu">
+<span class="sig-name descname"><span class="pre">use_glu</span></span><a class="headerlink" href="#mambular.base_models.MLP.use_glu" title="Permalink to this definition">#</a></dt>
+<dd><p>Flag indicating if gated linear units (GLU) should be used as the activation function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.activation">
+<span class="sig-name descname"><span class="pre">activation</span></span><a class="headerlink" href="#mambular.base_models.MLP.activation" title="Permalink to this definition">#</a></dt>
+<dd><p>Activation function applied between layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.use_embeddings">
+<span class="sig-name descname"><span class="pre">use_embeddings</span></span><a class="headerlink" href="#mambular.base_models.MLP.use_embeddings" title="Permalink to this definition">#</a></dt>
+<dd><p>Flag indicating if embeddings should be used for categorical and numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.embedding_layer">
+<span class="sig-name descname"><span class="pre">embedding_layer</span></span><a class="headerlink" href="#mambular.base_models.MLP.embedding_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Embedding layer for features, used if <code class="docutils literal notranslate"><span class="pre">use_embeddings</span></code> is enabled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmbeddingLayer, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.norm_f">
+<span class="sig-name descname"><span class="pre">norm_f</span></span><a class="headerlink" href="#mambular.base_models.MLP.norm_f" title="Permalink to this definition">#</a></dt>
+<dd><p>Normalization layer applied to the output of the first layer, if specified in the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Module, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.MLP.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mlp.html#MLP.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.MLP.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform a forward pass through the model, including embedding (if enabled), linear transformations,
+activation, normalization, and prediction steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mlp.html#MLP.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Permalink to this definition">#</a></dt>
+<dd><p>Forward pass of the MLP model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">ResNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultResNetConfig(lr=0.0001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-06,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">layer_sizes=(256,</span> <span class="pre">128,</span> <span class="pre">32),</span> <span class="pre">activation=torch.nn.SELU,</span> <span class="pre">skip_layers=False,</span> <span class="pre">dropout=0.5,</span> <span class="pre">norm=False,</span> <span class="pre">use_glu=False,</span> <span class="pre">skip_connections=True,</span> <span class="pre">batch_norm=True,</span> <span class="pre">layer_norm=False,</span> <span class="pre">layer_norm_eps=1e-05,</span> <span class="pre">num_blocks=3,</span> <span class="pre">use_embeddings=True,</span> <span class="pre">embedding_type='linear',</span> <span class="pre">plr_lite=False,</span> <span class="pre">average_embeddings=True,</span> <span class="pre">embedding_activation=torch.nn.Identity,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">d_model=64,</span> <span class="pre">n_frequencies=48,</span> <span class="pre">frequencies_init_scale=0.01)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/resnet.html#ResNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.ResNet" title="Permalink to this definition">#</a></dt>
+<dd><p>A ResNet model for tabular data, combining feature embeddings, residual blocks, and customizable architecture
+for processing categorical and numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_feature_info</strong> (<em>dict</em>) – Dictionary containing information about categorical features, including their names and dimensions.</p></li>
+<li><p><strong>num_feature_info</strong> (<em>dict</em>) – Dictionary containing information about numerical features, including their names and dimensions.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of output classes or target dimensions for regression, by default 1.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../configs/Configurations.html#mambular.configs.DefaultResNetConfig" title="mambular.configs.DefaultResNetConfig"><em>DefaultResNetConfig</em></a><em>, </em><em>optional</em>) – Configuration object containing model hyperparameters such as layer sizes, number of residual blocks,
+dropout rates, activation functions, and normalization settings, by default DefaultResNetConfig().</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments for the BaseModel class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.layer_sizes">
+<span class="sig-name descname"><span class="pre">layer_sizes</span></span><a class="headerlink" href="#mambular.base_models.ResNet.layer_sizes" title="Permalink to this definition">#</a></dt>
+<dd><p>List specifying the number of units in each layer of the ResNet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.cat_feature_info">
+<span class="sig-name descname"><span class="pre">cat_feature_info</span></span><a class="headerlink" href="#mambular.base_models.ResNet.cat_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores categorical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.num_feature_info">
+<span class="sig-name descname"><span class="pre">num_feature_info</span></span><a class="headerlink" href="#mambular.base_models.ResNet.num_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores numerical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.activation">
+<span class="sig-name descname"><span class="pre">activation</span></span><a class="headerlink" href="#mambular.base_models.ResNet.activation" title="Permalink to this definition">#</a></dt>
+<dd><p>Activation function used in the residual blocks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.use_embeddings">
+<span class="sig-name descname"><span class="pre">use_embeddings</span></span><a class="headerlink" href="#mambular.base_models.ResNet.use_embeddings" title="Permalink to this definition">#</a></dt>
+<dd><p>Flag indicating if embeddings should be used for categorical and numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.embedding_layer">
+<span class="sig-name descname"><span class="pre">embedding_layer</span></span><a class="headerlink" href="#mambular.base_models.ResNet.embedding_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Embedding layer for features, used if <code class="docutils literal notranslate"><span class="pre">use_embeddings</span></code> is enabled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmbeddingLayer, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.initial_layer">
+<span class="sig-name descname"><span class="pre">initial_layer</span></span><a class="headerlink" href="#mambular.base_models.ResNet.initial_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Initial linear layer to project input features into the model’s hidden dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Linear</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.blocks">
+<span class="sig-name descname"><span class="pre">blocks</span></span><a class="headerlink" href="#mambular.base_models.ResNet.blocks" title="Permalink to this definition">#</a></dt>
+<dd><p>List of residual blocks to process the hidden representations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.output_layer">
+<span class="sig-name descname"><span class="pre">output_layer</span></span><a class="headerlink" href="#mambular.base_models.ResNet.output_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Output layer that produces the final prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Linear</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.ResNet.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/resnet.html#ResNet.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.ResNet.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform a forward pass through the model, including embedding (if enabled), residual blocks,
+and prediction steps.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">FTTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultFTTransformerConfig(lr=0.0001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-06,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">d_model=128,</span> <span class="pre">n_layers=4,</span> <span class="pre">n_heads=8,</span> <span class="pre">attn_dropout=0.2,</span> <span class="pre">ff_dropout=0.1,</span> <span class="pre">norm='LayerNorm',</span> <span class="pre">activation=torch.nn.SELU,</span> <span class="pre">transformer_activation=torch.nn.Module,</span> <span class="pre">transformer_dim_feedforward=256,</span> <span class="pre">layer_norm_eps=1e-05,</span> <span class="pre">norm_first=False,</span> <span class="pre">bias=True,</span> <span class="pre">embedding_activation=torch.nn.Identity,</span> <span class="pre">embedding_type='linear',</span> <span class="pre">plr_lite=False,</span> <span class="pre">n_frequencies=48,</span> <span class="pre">frequencies_init_scale=0.01,</span> <span class="pre">embedding_bias=False,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">head_layer_sizes=(),</span> <span class="pre">head_dropout=0.5,</span> <span class="pre">head_skip_layers=False,</span> <span class="pre">head_activation=torch.nn.SELU,</span> <span class="pre">head_use_batch_norm=False,</span> <span class="pre">pooling_method='avg',</span> <span class="pre">use_cls=False,</span> <span class="pre">cat_encoding='int')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/ft_transformer.html#FTTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.FTTransformer" title="Permalink to this definition">#</a></dt>
+<dd><p>A Feature Transformer model for tabular data with categorical and numerical features, using embedding, transformer
+encoding, and pooling to produce final predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_feature_info</strong> (<em>dict</em>) – Dictionary containing information about categorical features, including their names and dimensions.</p></li>
+<li><p><strong>num_feature_info</strong> (<em>dict</em>) – Dictionary containing information about numerical features, including their names and dimensions.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of output classes or target dimensions for regression, by default 1.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../configs/Configurations.html#mambular.configs.DefaultFTTransformerConfig" title="mambular.configs.DefaultFTTransformerConfig"><em>DefaultFTTransformerConfig</em></a><em>, </em><em>optional</em>) – Configuration object containing model hyperparameters such as dropout rates, hidden layer sizes,
+transformer settings, and other architectural configurations, by default DefaultFTTransformerConfig().</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments for the BaseModel class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer.pooling_method">
+<span class="sig-name descname"><span class="pre">pooling_method</span></span><a class="headerlink" href="#mambular.base_models.FTTransformer.pooling_method" title="Permalink to this definition">#</a></dt>
+<dd><p>The pooling method to aggregate features after transformer encoding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer.cat_feature_info">
+<span class="sig-name descname"><span class="pre">cat_feature_info</span></span><a class="headerlink" href="#mambular.base_models.FTTransformer.cat_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores categorical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer.num_feature_info">
+<span class="sig-name descname"><span class="pre">num_feature_info</span></span><a class="headerlink" href="#mambular.base_models.FTTransformer.num_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores numerical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer.embedding_layer">
+<span class="sig-name descname"><span class="pre">embedding_layer</span></span><a class="headerlink" href="#mambular.base_models.FTTransformer.embedding_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Layer for embedding categorical and numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmbeddingLayer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer.norm_f">
+<span class="sig-name descname"><span class="pre">norm_f</span></span><a class="headerlink" href="#mambular.base_models.FTTransformer.norm_f" title="Permalink to this definition">#</a></dt>
+<dd><p>Normalization layer for the transformer output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer.encoder">
+<span class="sig-name descname"><span class="pre">encoder</span></span><a class="headerlink" href="#mambular.base_models.FTTransformer.encoder" title="Permalink to this definition">#</a></dt>
+<dd><p>Transformer encoder for sequential processing of embedded features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.TransformerEncoder</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer.tabular_head">
+<span class="sig-name descname"><span class="pre">tabular_head</span></span><a class="headerlink" href="#mambular.base_models.FTTransformer.tabular_head" title="Permalink to this definition">#</a></dt>
+<dd><p>MLPhead layer to produce the final prediction based on the output of the transformer encoder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MLPhead</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.FTTransformer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/ft_transformer.html#FTTransformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.FTTransformer.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform a forward pass through the model, including embedding, transformer encoding, pooling, and prediction steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/ft_transformer.html#FTTransformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Permalink to this definition">#</a></dt>
+<dd><p>Defines the forward pass of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_features</strong> (<em>Tensor</em>) – Tensor containing the numerical features.</p></li>
+<li><p><strong>cat_features</strong> (<em>Tensor</em>) – Tensor containing the categorical features.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The output predictions of the model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">TabTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultTabTransformerConfig(lr=0.0001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-06,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">d_model=128,</span> <span class="pre">n_layers=4,</span> <span class="pre">n_heads=8,</span> <span class="pre">attn_dropout=0.2,</span> <span class="pre">ff_dropout=0.1,</span> <span class="pre">norm='LayerNorm',</span> <span class="pre">activation=torch.nn.SELU,</span> <span class="pre">transformer_activation=torch.nn.Module,</span> <span class="pre">transformer_dim_feedforward=512,</span> <span class="pre">layer_norm_eps=1e-05,</span> <span class="pre">norm_first=True,</span> <span class="pre">bias=True,</span> <span class="pre">embedding_activation=torch.nn.Identity,</span> <span class="pre">embedding_type='linear',</span> <span class="pre">embedding_bias=False,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">head_layer_sizes=(),</span> <span class="pre">head_dropout=0.5,</span> <span class="pre">head_skip_layers=False,</span> <span class="pre">head_activation=torch.nn.SELU,</span> <span class="pre">head_use_batch_norm=False,</span> <span class="pre">pooling_method='avg',</span> <span class="pre">cat_encoding='int')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/tabtransformer.html#TabTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TabTransformer" title="Permalink to this definition">#</a></dt>
+<dd><p>A PyTorch model for tasks utilizing the Transformer architecture and various normalization techniques.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_feature_info</strong> (<em>dict</em>) – Dictionary containing information about categorical features.</p></li>
+<li><p><strong>num_feature_info</strong> (<em>dict</em>) – Dictionary containing information about numerical features.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of output classes (default is 1).</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../configs/Configurations.html#mambular.configs.DefaultFTTransformerConfig" title="mambular.configs.DefaultFTTransformerConfig"><em>DefaultFTTransformerConfig</em></a><em>, </em><em>optional</em>) – Configuration object containing default hyperparameters for the model (default is DefaultMambularConfig()).</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.lr">
+<span class="sig-name descname"><span class="pre">lr</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.lr" title="Permalink to this definition">#</a></dt>
+<dd><p>Learning rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.lr_patience">
+<span class="sig-name descname"><span class="pre">lr_patience</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.lr_patience" title="Permalink to this definition">#</a></dt>
+<dd><p>Patience for learning rate scheduler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.weight_decay">
+<span class="sig-name descname"><span class="pre">weight_decay</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.weight_decay" title="Permalink to this definition">#</a></dt>
+<dd><p>Weight decay for optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.lr_factor">
+<span class="sig-name descname"><span class="pre">lr_factor</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.lr_factor" title="Permalink to this definition">#</a></dt>
+<dd><p>Factor by which the learning rate will be reduced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.pooling_method">
+<span class="sig-name descname"><span class="pre">pooling_method</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.pooling_method" title="Permalink to this definition">#</a></dt>
+<dd><p>Method to pool the features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.cat_feature_info">
+<span class="sig-name descname"><span class="pre">cat_feature_info</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.cat_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Dictionary containing information about categorical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.num_feature_info">
+<span class="sig-name descname"><span class="pre">num_feature_info</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.num_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Dictionary containing information about numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.embedding_activation">
+<span class="sig-name descname"><span class="pre">embedding_activation</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.embedding_activation" title="Permalink to this definition">#</a></dt>
+<dd><p>Activation function for embeddings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.encoder">
+<span class="sig-name descname"><span class="pre">encoder</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.encoder" title="Permalink to this definition">#</a></dt>
+<dd><p>stack of N encoder layers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.norm_f">
+<span class="sig-name descname"><span class="pre">norm_f</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.norm_f" title="Permalink to this definition">#</a></dt>
+<dd><p>Normalization layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.num_embeddings">
+<span class="sig-name descname"><span class="pre">num_embeddings</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.num_embeddings" title="Permalink to this definition">#</a></dt>
+<dd><p>Module list for numerical feature embeddings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.cat_embeddings">
+<span class="sig-name descname"><span class="pre">cat_embeddings</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.cat_embeddings" title="Permalink to this definition">#</a></dt>
+<dd><p>Module list for categorical feature embeddings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.tabular_head">
+<span class="sig-name descname"><span class="pre">tabular_head</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.tabular_head" title="Permalink to this definition">#</a></dt>
+<dd><p>Multi-layer perceptron head for tabular data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MLPhead</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.cls_token">
+<span class="sig-name descname"><span class="pre">cls_token</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.cls_token" title="Permalink to this definition">#</a></dt>
+<dd><p>Class token parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Parameter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.embedding_norm">
+<span class="sig-name descname"><span class="pre">embedding_norm</span></span><a class="headerlink" href="#mambular.base_models.TabTransformer.embedding_norm" title="Permalink to this definition">#</a></dt>
+<dd><p>Layer normalization applied after embedding if specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Module, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TabTransformer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/tabtransformer.html#TabTransformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TabTransformer.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Defines the forward pass of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_features</strong> (<em>Tensor</em>) – Tensor containing the numerical features.</p></li>
+<li><p><strong>cat_features</strong> (<em>Tensor</em>) – Tensor containing the categorical features.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The output predictions of the model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.TabulaRNN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">TabulaRNN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultTabulaRNNConfig(lr=0.0001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-06,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">model_type='RNN',</span> <span class="pre">d_model=128,</span> <span class="pre">n_layers=4,</span> <span class="pre">rnn_dropout=0.2,</span> <span class="pre">norm='RMSNorm',</span> <span class="pre">activation=torch.nn.SELU,</span> <span class="pre">residuals=False,</span> <span class="pre">embedding_type='linear',</span> <span class="pre">embedding_bias=False,</span> <span class="pre">plr_lite=False,</span> <span class="pre">n_frequencies=48,</span> <span class="pre">frequencies_init_scale=0.01,</span> <span class="pre">embedding_activation=torch.nn.ReLU,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">head_layer_sizes=(),</span> <span class="pre">head_dropout=0.5,</span> <span class="pre">head_skip_layers=False,</span> <span class="pre">head_activation=torch.nn.SELU,</span> <span class="pre">head_use_batch_norm=False,</span> <span class="pre">pooling_method='avg',</span> <span class="pre">norm_first=False,</span> <span class="pre">layer_norm_eps=1e-05,</span> <span class="pre">bias=True,</span> <span class="pre">rnn_activation='relu',</span> <span class="pre">dim_feedforward=256,</span> <span class="pre">d_conv=4,</span> <span class="pre">conv_bias=True)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/tabularnn.html#TabulaRNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TabulaRNN" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TabulaRNN.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/tabularnn.html#TabulaRNN.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TabulaRNN.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Defines the forward pass of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_features</strong> (<em>Tensor</em>) – Tensor containing the numerical features.</p></li>
+<li><p><strong>cat_features</strong> (<em>Tensor</em>) – Tensor containing the categorical features.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The output predictions of the model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">MambAttention</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultMambAttentionConfig(lr=0.0001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-06,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">d_model=64,</span> <span class="pre">n_layers=4,</span> <span class="pre">expand_factor=2,</span> <span class="pre">n_heads=8,</span> <span class="pre">last_layer='attn',</span> <span class="pre">n_mamba_per_attention=1,</span> <span class="pre">bias=False,</span> <span class="pre">d_conv=4,</span> <span class="pre">conv_bias=True,</span> <span class="pre">dropout=0.0,</span> <span class="pre">attn_dropout=0.2,</span> <span class="pre">dt_rank='auto',</span> <span class="pre">d_state=128,</span> <span class="pre">dt_scale=1.0,</span> <span class="pre">dt_init='random',</span> <span class="pre">dt_max=0.1,</span> <span class="pre">dt_min=0.0001,</span> <span class="pre">dt_init_floor=0.0001,</span> <span class="pre">norm='LayerNorm',</span> <span class="pre">activation=torch.nn.SiLU,</span> <span class="pre">layer_norm_eps=1e-05,</span> <span class="pre">num_embedding_activation=torch.nn.ReLU,</span> <span class="pre">embedding_type='linear',</span> <span class="pre">embedding_bias=False,</span> <span class="pre">plr_lite=False,</span> <span class="pre">n_frequencies=48,</span> <span class="pre">frequencies_init_scale=0.01,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">head_layer_sizes=(),</span> <span class="pre">head_dropout=0.5,</span> <span class="pre">head_skip_layers=False,</span> <span class="pre">head_activation=torch.nn.SELU,</span> <span class="pre">head_use_batch_norm=False,</span> <span class="pre">pooling_method='avg',</span> <span class="pre">bidirectional=False,</span> <span class="pre">use_learnable_interaction=False,</span> <span class="pre">use_cls=False,</span> <span class="pre">shuffle_embeddings=False,</span> <span class="pre">cat_encoding='int',</span> <span class="pre">AD_weight_decay=True,</span> <span class="pre">BC_layer_norm=False,</span> <span class="pre">use_pscan=False,</span> <span class="pre">n_attention_layers=1)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mambattn.html#MambAttention"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.MambAttention" title="Permalink to this definition">#</a></dt>
+<dd><p>A MambAttention model for tabular data, integrating feature embeddings, attention-based Mamba transformations, and
+a customizable architecture for handling categorical and numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_feature_info</strong> (<em>dict</em>) – Dictionary containing information about categorical features, including their names and dimensions.</p></li>
+<li><p><strong>num_feature_info</strong> (<em>dict</em>) – Dictionary containing information about numerical features, including their names and dimensions.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of output classes or target dimensions for regression, by default 1.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../configs/Configurations.html#mambular.configs.DefaultMambAttentionConfig" title="mambular.configs.DefaultMambAttentionConfig"><em>DefaultMambAttentionConfig</em></a><em>, </em><em>optional</em>) – Configuration object with model hyperparameters such as dropout rates, head layer sizes, attention settings,
+and other architectural configurations, by default DefaultMambAttentionConfig().</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments for the BaseModel class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention.pooling_method">
+<span class="sig-name descname"><span class="pre">pooling_method</span></span><a class="headerlink" href="#mambular.base_models.MambAttention.pooling_method" title="Permalink to this definition">#</a></dt>
+<dd><p>Pooling method to aggregate features after the Mamba attention layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention.shuffle_embeddings">
+<span class="sig-name descname"><span class="pre">shuffle_embeddings</span></span><a class="headerlink" href="#mambular.base_models.MambAttention.shuffle_embeddings" title="Permalink to this definition">#</a></dt>
+<dd><p>Flag indicating if embeddings should be shuffled, as specified in the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention.mamba">
+<span class="sig-name descname"><span class="pre">mamba</span></span><a class="headerlink" href="#mambular.base_models.MambAttention.mamba" title="Permalink to this definition">#</a></dt>
+<dd><p>Mamba attention layer to process embedded features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MambAttn</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention.norm_f">
+<span class="sig-name descname"><span class="pre">norm_f</span></span><a class="headerlink" href="#mambular.base_models.MambAttention.norm_f" title="Permalink to this definition">#</a></dt>
+<dd><p>Normalization layer for the processed features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention.embedding_layer">
+<span class="sig-name descname"><span class="pre">embedding_layer</span></span><a class="headerlink" href="#mambular.base_models.MambAttention.embedding_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Layer for embedding categorical and numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmbeddingLayer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention.tabular_head">
+<span class="sig-name descname"><span class="pre">tabular_head</span></span><a class="headerlink" href="#mambular.base_models.MambAttention.tabular_head" title="Permalink to this definition">#</a></dt>
+<dd><p>MLPhead layer to produce the final prediction based on the output of the Mamba attention layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MLPhead</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention.perm">
+<span class="sig-name descname"><span class="pre">perm</span></span><a class="headerlink" href="#mambular.base_models.MambAttention.perm" title="Permalink to this definition">#</a></dt>
+<dd><p>Permutation tensor used for shuffling embeddings, if enabled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.MambAttention.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mambattn.html#MambAttention.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.MambAttention.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform a forward pass through the model, including embedding, Mamba attention transformation, pooling,
+and prediction steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/mambattn.html#MambAttention.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Permalink to this definition">#</a></dt>
+<dd><p>Defines the forward pass of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_features</strong> (<em>Tensor</em>) – Tensor containing the numerical features.</p></li>
+<li><p><strong>cat_features</strong> (<em>Tensor</em>) – Tensor containing the categorical features.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The output predictions of the model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.TabM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">TabM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultTabMConfig(lr=0.0001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-05,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">layer_sizes=(256,</span> <span class="pre">256,</span> <span class="pre">128),</span> <span class="pre">activation=torch.nn.ReLU,</span> <span class="pre">dropout=0.5,</span> <span class="pre">norm=None,</span> <span class="pre">use_glu=False,</span> <span class="pre">batch_norm=False,</span> <span class="pre">layer_norm=False,</span> <span class="pre">layer_norm_eps=1e-05,</span> <span class="pre">use_embeddings=True,</span> <span class="pre">embedding_type='plr',</span> <span class="pre">plr_lite=False,</span> <span class="pre">average_embeddings=False,</span> <span class="pre">embedding_activation=torch.nn.Identity,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">d_model=32,</span> <span class="pre">n_frequencies=48,</span> <span class="pre">frequencies_init_scale=0.01,</span> <span class="pre">ensemble_size=32,</span> <span class="pre">ensemble_scaling_in=True,</span> <span class="pre">ensemble_scaling_out=True,</span> <span class="pre">ensemble_bias=True,</span> <span class="pre">scaling_init='ones',</span> <span class="pre">average_ensembles=False,</span> <span class="pre">model_type='mini')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/tabm.html#TabM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TabM" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.TabM.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/tabm.html#TabM.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.TabM.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Forward pass of the TabM model with batch ensembling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_features</strong> (<em>torch.Tensor</em>) – Numerical features tensor.</p></li>
+<li><p><strong>cat_features</strong> (<em>torch.Tensor</em>) – Categorical features tensor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.NODE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">NODE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultNODEConfig(lr=0.001,</span> <span class="pre">lr_patience=10,</span> <span class="pre">weight_decay=1e-06,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">num_layers=4,</span> <span class="pre">layer_dim=128,</span> <span class="pre">tree_dim=1,</span> <span class="pre">depth=6,</span> <span class="pre">norm=None,</span> <span class="pre">use_embeddings=False,</span> <span class="pre">embedding_activation=torch.nn.Identity,</span> <span class="pre">embedding_type='linear',</span> <span class="pre">embedding_bias=False,</span> <span class="pre">layer_norm_after_embedding=False,</span> <span class="pre">d_model=32,</span> <span class="pre">plr_lite=False,</span> <span class="pre">n_frequencies=48,</span> <span class="pre">frequencies_init_scale=0.01,</span> <span class="pre">head_layer_sizes=(),</span> <span class="pre">head_dropout=0.5,</span> <span class="pre">head_skip_layers=False,</span> <span class="pre">head_activation=torch.nn.SELU,</span> <span class="pre">head_use_batch_norm=False)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/node.html#NODE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.NODE" title="Permalink to this definition">#</a></dt>
+<dd><p>A Neural Oblivious Decision Ensemble (NODE) model for tabular data, integrating feature embeddings, dense blocks,
+and customizable heads for predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_feature_info</strong> (<em>dict</em>) – Dictionary containing information about categorical features, including their names and dimensions.</p></li>
+<li><p><strong>num_feature_info</strong> (<em>dict</em>) – Dictionary containing information about numerical features, including their names and dimensions.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of output classes or target dimensions for regression, by default 1.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../configs/Configurations.html#mambular.configs.DefaultNODEConfig" title="mambular.configs.DefaultNODEConfig"><em>DefaultNODEConfig</em></a><em>, </em><em>optional</em>) – Configuration object containing model hyperparameters such as the number of dense layers, layer dimensions,
+tree depth, embedding settings, and head layer configurations, by default DefaultNODEConfig().</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments for the BaseModel class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NODE.cat_feature_info">
+<span class="sig-name descname"><span class="pre">cat_feature_info</span></span><a class="headerlink" href="#mambular.base_models.NODE.cat_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores categorical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NODE.num_feature_info">
+<span class="sig-name descname"><span class="pre">num_feature_info</span></span><a class="headerlink" href="#mambular.base_models.NODE.num_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores numerical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NODE.use_embeddings">
+<span class="sig-name descname"><span class="pre">use_embeddings</span></span><a class="headerlink" href="#mambular.base_models.NODE.use_embeddings" title="Permalink to this definition">#</a></dt>
+<dd><p>Flag indicating if embeddings should be used for categorical and numerical features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NODE.embedding_layer">
+<span class="sig-name descname"><span class="pre">embedding_layer</span></span><a class="headerlink" href="#mambular.base_models.NODE.embedding_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Embedding layer for features, used if <code class="docutils literal notranslate"><span class="pre">use_embeddings</span></code> is enabled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmbeddingLayer, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NODE.d_out">
+<span class="sig-name descname"><span class="pre">d_out</span></span><a class="headerlink" href="#mambular.base_models.NODE.d_out" title="Permalink to this definition">#</a></dt>
+<dd><p>The output dimension, usually set to <code class="docutils literal notranslate"><span class="pre">num_classes</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NODE.block">
+<span class="sig-name descname"><span class="pre">block</span></span><a class="headerlink" href="#mambular.base_models.NODE.block" title="Permalink to this definition">#</a></dt>
+<dd><p>Dense block layer for feature transformations based on the NODE approach.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DenseBlock</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NODE.tabular_head">
+<span class="sig-name descname"><span class="pre">tabular_head</span></span><a class="headerlink" href="#mambular.base_models.NODE.tabular_head" title="Permalink to this definition">#</a></dt>
+<dd><p>MLPhead layer to produce the final prediction based on the output of the dense block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MLPhead</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.NODE.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/node.html#NODE.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.NODE.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform a forward pass through the model, including embedding (if enabled), dense transformations,
+and prediction steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/node.html#NODE.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Permalink to this definition">#</a></dt>
+<dd><p>Forward pass through the NODE model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_features</strong> (<em>torch.Tensor</em>) – Numerical features tensor of shape [batch_size, num_numerical_features].</p></li>
+<li><p><strong>cat_features</strong> (<em>torch.Tensor</em>) – Categorical features tensor of shape [batch_size, num_categorical_features].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model output of shape [batch_size, num_classes].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mambular.base_models.</span></span><span class="sig-name descname"><span class="pre">NDTF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_feature_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DefaultNDTFConfig(lr=0.0001,</span> <span class="pre">lr_patience=5,</span> <span class="pre">weight_decay=1e-07,</span> <span class="pre">lr_factor=0.1,</span> <span class="pre">min_depth=4,</span> <span class="pre">max_depth=16,</span> <span class="pre">temperature=0.1,</span> <span class="pre">node_sampling=0.3,</span> <span class="pre">lamda=0.3,</span> <span class="pre">n_ensembles=12,</span> <span class="pre">penalty_factor=1e-08)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/ndtf.html#NDTF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.NDTF" title="Permalink to this definition">#</a></dt>
+<dd><p>A Neural Decision Tree Forest (NDTF) model for tabular data, composed of an ensemble of neural decision trees
+with convolutional feature interactions, capable of producing predictions and penalty-based regularization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cat_feature_info</strong> (<em>dict</em>) – Dictionary containing information about categorical features, including their names and dimensions.</p></li>
+<li><p><strong>num_feature_info</strong> (<em>dict</em>) – Dictionary containing information about numerical features, including their names and dimensions.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of output classes or target dimensions for regression, by default 1.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../configs/Configurations.html#mambular.configs.DefaultNDTFConfig" title="mambular.configs.DefaultNDTFConfig"><em>DefaultNDTFConfig</em></a><em>, </em><em>optional</em>) – Configuration object containing model hyperparameters such as the number of ensembles, tree depth, penalty factor,
+sampling settings, and temperature, by default DefaultNDTFConfig().</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments for the BaseModel class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.cat_feature_info">
+<span class="sig-name descname"><span class="pre">cat_feature_info</span></span><a class="headerlink" href="#mambular.base_models.NDTF.cat_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores categorical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.num_feature_info">
+<span class="sig-name descname"><span class="pre">num_feature_info</span></span><a class="headerlink" href="#mambular.base_models.NDTF.num_feature_info" title="Permalink to this definition">#</a></dt>
+<dd><p>Stores numerical feature information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.penalty_factor">
+<span class="sig-name descname"><span class="pre">penalty_factor</span></span><a class="headerlink" href="#mambular.base_models.NDTF.penalty_factor" title="Permalink to this definition">#</a></dt>
+<dd><p>Scaling factor for the penalty applied during training, specified in the self.hparams.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.input_dimensions">
+<span class="sig-name descname"><span class="pre">input_dimensions</span></span><a class="headerlink" href="#mambular.base_models.NDTF.input_dimensions" title="Permalink to this definition">#</a></dt>
+<dd><p>List of input dimensions for each tree in the ensemble, with random sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.trees">
+<span class="sig-name descname"><span class="pre">trees</span></span><a class="headerlink" href="#mambular.base_models.NDTF.trees" title="Permalink to this definition">#</a></dt>
+<dd><p>List of neural decision trees used in the ensemble.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.conv_layer">
+<span class="sig-name descname"><span class="pre">conv_layer</span></span><a class="headerlink" href="#mambular.base_models.NDTF.conv_layer" title="Permalink to this definition">#</a></dt>
+<dd><p>Convolutional layer for feature interactions before passing inputs to trees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Conv1d</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.tree_weights">
+<span class="sig-name descname"><span class="pre">tree_weights</span></span><a class="headerlink" href="#mambular.base_models.NDTF.tree_weights" title="Permalink to this definition">#</a></dt>
+<dd><p>Learnable parameter to weight each tree’s output in the ensemble.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Parameter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../../_modules/mambular/base_models/ndtf.html#NDTF.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.NDTF.forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform a forward pass through the model, producing predictions based on an ensemble of neural decision trees.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mambular.base_models.NDTF.penalty_forward">
+<span class="sig-name descname"><span class="pre">penalty_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span> <span class="pre">of</span> <span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../../_modules/mambular/base_models/ndtf.html#NDTF.penalty_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mambular.base_models.NDTF.penalty_forward" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform a forward pass with penalty regularization, returning predictions and the calculated penalty term.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/ndtf.html#NDTF.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition">#</a></dt>
+<dd><p>Forward pass of the NDTF model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">penalty_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mambular/base_models/ndtf.html#NDTF.penalty_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Permalink to this definition">#</a></dt>
+<dd><p>Forward pass of the NDTF model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">BaseModels</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../preprocessing/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Preprocessing</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel"><code class="docutils literal notranslate"><span class="pre">TaskModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.compute_loss"><code class="docutils literal notranslate"><span class="pre">TaskModel.compute_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">TaskModel.configure_optimizers()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.epoch_val_loss_at"><code class="docutils literal notranslate"><span class="pre">TaskModel.epoch_val_loss_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.forward"><code class="docutils literal notranslate"><span class="pre">TaskModel.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.on_validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">TaskModel.on_validation_epoch_end()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.val_loss"><code class="docutils literal notranslate"><span class="pre">TaskModel.val_loss</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.val_loss_value"><code class="docutils literal notranslate"><span class="pre">TaskModel.val_loss_value</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.val_losses"><code class="docutils literal notranslate"><span class="pre">TaskModel.val_losses</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.pruning_epoch"><code class="docutils literal notranslate"><span class="pre">TaskModel.pruning_epoch</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.early_pruning_threshold"><code class="docutils literal notranslate"><span class="pre">TaskModel.early_pruning_threshold</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.test_step"><code class="docutils literal notranslate"><span class="pre">TaskModel.test_step()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.training_step"><code class="docutils literal notranslate"><span class="pre">TaskModel.training_step()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TaskModel.validation_step"><code class="docutils literal notranslate"><span class="pre">TaskModel.validation_step()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular"><code class="docutils literal notranslate"><span class="pre">Mambular</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.pooling_method"><code class="docutils literal notranslate"><span class="pre">Mambular.pooling_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.shuffle_embeddings"><code class="docutils literal notranslate"><span class="pre">Mambular.shuffle_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.embedding_layer"><code class="docutils literal notranslate"><span class="pre">Mambular.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.mamba"><code class="docutils literal notranslate"><span class="pre">Mambular.mamba</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.norm_f"><code class="docutils literal notranslate"><span class="pre">Mambular.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.tabular_head"><code class="docutils literal notranslate"><span class="pre">Mambular.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.perm"><code class="docutils literal notranslate"><span class="pre">Mambular.perm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.Mambular.forward"><code class="docutils literal notranslate"><span class="pre">Mambular.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">Mambular.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP"><code class="docutils literal notranslate"><span class="pre">MLP</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.layer_sizes"><code class="docutils literal notranslate"><span class="pre">MLP.layer_sizes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">MLP.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.num_feature_info"><code class="docutils literal notranslate"><span class="pre">MLP.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.layers"><code class="docutils literal notranslate"><span class="pre">MLP.layers</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.skip_connections"><code class="docutils literal notranslate"><span class="pre">MLP.skip_connections</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.use_glu"><code class="docutils literal notranslate"><span class="pre">MLP.use_glu</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.activation"><code class="docutils literal notranslate"><span class="pre">MLP.activation</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.use_embeddings"><code class="docutils literal notranslate"><span class="pre">MLP.use_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.embedding_layer"><code class="docutils literal notranslate"><span class="pre">MLP.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.norm_f"><code class="docutils literal notranslate"><span class="pre">MLP.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MLP.forward"><code class="docutils literal notranslate"><span class="pre">MLP.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">MLP.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet"><code class="docutils literal notranslate"><span class="pre">ResNet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.layer_sizes"><code class="docutils literal notranslate"><span class="pre">ResNet.layer_sizes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">ResNet.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.num_feature_info"><code class="docutils literal notranslate"><span class="pre">ResNet.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.activation"><code class="docutils literal notranslate"><span class="pre">ResNet.activation</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.use_embeddings"><code class="docutils literal notranslate"><span class="pre">ResNet.use_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.embedding_layer"><code class="docutils literal notranslate"><span class="pre">ResNet.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.initial_layer"><code class="docutils literal notranslate"><span class="pre">ResNet.initial_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.blocks"><code class="docutils literal notranslate"><span class="pre">ResNet.blocks</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.output_layer"><code class="docutils literal notranslate"><span class="pre">ResNet.output_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.ResNet.forward"><code class="docutils literal notranslate"><span class="pre">ResNet.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer"><code class="docutils literal notranslate"><span class="pre">FTTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.pooling_method"><code class="docutils literal notranslate"><span class="pre">FTTransformer.pooling_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">FTTransformer.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.num_feature_info"><code class="docutils literal notranslate"><span class="pre">FTTransformer.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.embedding_layer"><code class="docutils literal notranslate"><span class="pre">FTTransformer.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.norm_f"><code class="docutils literal notranslate"><span class="pre">FTTransformer.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.encoder"><code class="docutils literal notranslate"><span class="pre">FTTransformer.encoder</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.tabular_head"><code class="docutils literal notranslate"><span class="pre">FTTransformer.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.FTTransformer.forward"><code class="docutils literal notranslate"><span class="pre">FTTransformer.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">FTTransformer.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer"><code class="docutils literal notranslate"><span class="pre">TabTransformer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.lr"><code class="docutils literal notranslate"><span class="pre">TabTransformer.lr</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.lr_patience"><code class="docutils literal notranslate"><span class="pre">TabTransformer.lr_patience</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.weight_decay"><code class="docutils literal notranslate"><span class="pre">TabTransformer.weight_decay</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.lr_factor"><code class="docutils literal notranslate"><span class="pre">TabTransformer.lr_factor</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.pooling_method"><code class="docutils literal notranslate"><span class="pre">TabTransformer.pooling_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">TabTransformer.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.num_feature_info"><code class="docutils literal notranslate"><span class="pre">TabTransformer.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.embedding_activation"><code class="docutils literal notranslate"><span class="pre">TabTransformer.embedding_activation</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.encoder"><code class="docutils literal notranslate"><span class="pre">TabTransformer.encoder</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.norm_f"><code class="docutils literal notranslate"><span class="pre">TabTransformer.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.num_embeddings"><code class="docutils literal notranslate"><span class="pre">TabTransformer.num_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.cat_embeddings"><code class="docutils literal notranslate"><span class="pre">TabTransformer.cat_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.tabular_head"><code class="docutils literal notranslate"><span class="pre">TabTransformer.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.cls_token"><code class="docutils literal notranslate"><span class="pre">TabTransformer.cls_token</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.embedding_norm"><code class="docutils literal notranslate"><span class="pre">TabTransformer.embedding_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabTransformer.forward"><code class="docutils literal notranslate"><span class="pre">TabTransformer.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabulaRNN"><code class="docutils literal notranslate"><span class="pre">TabulaRNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabulaRNN.forward"><code class="docutils literal notranslate"><span class="pre">TabulaRNN.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention"><code class="docutils literal notranslate"><span class="pre">MambAttention</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.pooling_method"><code class="docutils literal notranslate"><span class="pre">MambAttention.pooling_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.shuffle_embeddings"><code class="docutils literal notranslate"><span class="pre">MambAttention.shuffle_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.mamba"><code class="docutils literal notranslate"><span class="pre">MambAttention.mamba</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.norm_f"><code class="docutils literal notranslate"><span class="pre">MambAttention.norm_f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.embedding_layer"><code class="docutils literal notranslate"><span class="pre">MambAttention.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.tabular_head"><code class="docutils literal notranslate"><span class="pre">MambAttention.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.perm"><code class="docutils literal notranslate"><span class="pre">MambAttention.perm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.MambAttention.forward"><code class="docutils literal notranslate"><span class="pre">MambAttention.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">MambAttention.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabM"><code class="docutils literal notranslate"><span class="pre">TabM</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.TabM.forward"><code class="docutils literal notranslate"><span class="pre">TabM.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE"><code class="docutils literal notranslate"><span class="pre">NODE</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">NODE.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.num_feature_info"><code class="docutils literal notranslate"><span class="pre">NODE.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.use_embeddings"><code class="docutils literal notranslate"><span class="pre">NODE.use_embeddings</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.embedding_layer"><code class="docutils literal notranslate"><span class="pre">NODE.embedding_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.d_out"><code class="docutils literal notranslate"><span class="pre">NODE.d_out</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.block"><code class="docutils literal notranslate"><span class="pre">NODE.block</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.tabular_head"><code class="docutils literal notranslate"><span class="pre">NODE.tabular_head</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NODE.forward"><code class="docutils literal notranslate"><span class="pre">NODE.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">NODE.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF"><code class="docutils literal notranslate"><span class="pre">NDTF</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.cat_feature_info"><code class="docutils literal notranslate"><span class="pre">NDTF.cat_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.num_feature_info"><code class="docutils literal notranslate"><span class="pre">NDTF.num_feature_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.penalty_factor"><code class="docutils literal notranslate"><span class="pre">NDTF.penalty_factor</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.input_dimensions"><code class="docutils literal notranslate"><span class="pre">NDTF.input_dimensions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.trees"><code class="docutils literal notranslate"><span class="pre">NDTF.trees</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.conv_layer"><code class="docutils literal notranslate"><span class="pre">NDTF.conv_layer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.tree_weights"><code class="docutils literal notranslate"><span class="pre">NDTF.tree_weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.forward"><code class="docutils literal notranslate"><span class="pre">NDTF.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mambular.base_models.NDTF.penalty_forward"><code class="docutils literal notranslate"><span class="pre">NDTF.penalty_forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">NDTF.forward()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">NDTF.penalty_forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken, Soheila Samiee
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, BASF SE.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on 2024-12-07.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

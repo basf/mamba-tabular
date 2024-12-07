@@ -133,6 +133,18 @@ mambular.models
     :members:
     :undoc-members:
 
+.. autoclass:: mambular.models.SAINTClassifier
+    :members:
+    :inherited-members:
+
+.. autoclass:: mambular.models.SAINTRegressor 
+    :members:
+    :inherited-members:
+
+.. autoclass:: mambular.models.SAINTLSS
+    :members:
+    :undoc-members:
+
 .. autoclass:: mambular.models.SklearnBaseClassifier
     :members:
     :undoc-members:
