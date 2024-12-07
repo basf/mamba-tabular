@@ -18,8 +18,8 @@ class DefaultNODEConfig:
     lr_factor : float, default=0.1
         Factor by which the learning rate is reduced when there is no improvement.
 
-    Model Architecture Parameters
-    -----------------------------
+    Architecture Parameters
+    ------------------------
     num_layers : int, default=4
         Number of dense layers in the model.
     layer_dim : int, default=128
@@ -45,6 +45,12 @@ class DefaultNODEConfig:
         Whether to apply layer normalization after embedding layers.
     d_model : int, default=32
         Dimensionality of the embedding space.
+    plr_lite : bool, default=False
+        Whether to use a lightweight version of Piecewise Linear Regression (PLR).
+    n_frequencies : int, default=48
+        Number of frequencies for PLR embeddings.
+    frequencies_init_scale : float, default=0.01
+        Initial scale for frequency parameters in embeddings.
 
     Head Parameters
     ---------------
@@ -60,21 +66,31 @@ class DefaultNODEConfig:
         Whether to use batch normalization in the head layers.
     """
 
+    # Optimizer Parameters
     lr: float = 1e-03
     lr_patience: int = 10
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
-    norm: str = None
-    use_embeddings: bool = False
-    embedding_activation: callable = nn.Identity()
-    embedding_tpye: str = "linear"
-    embedding_bias: bool = False
-    layer_norm_after_embedding: bool = False
-    d_model: int = 32
+
+    # Architecture Parameters
     num_layers: int = 4
     layer_dim: int = 128
     tree_dim: int = 1
     depth: int = 6
+    norm: str = None
+
+    # Embedding Parameters
+    use_embeddings: bool = False
+    embedding_activation: callable = nn.Identity()
+    embedding_type: str = "linear"
+    embedding_bias: bool = False
+    layer_norm_after_embedding: bool = False
+    d_model: int = 32
+    plr_lite: bool = False
+    n_frequencies: int = 48
+    frequencies_init_scale: float = 0.01
+
+    # Head Parameters
     head_layer_sizes: list = ()
     head_dropout: float = 0.5
     head_skip_layers: bool = False

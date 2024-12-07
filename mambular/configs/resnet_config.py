@@ -88,3 +88,6 @@ class DefaultResNetConfig:
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
     d_model: int = 64
+    plr_lite: bool = False
+    n_frequencies: int = 48
+    frequencies_init_scale: float = 0.01

@@ -48,6 +48,10 @@ class DefaultTabMConfig:
         Whether to use bias in the embedding layers.
     plr_lite : bool, default=False
         Whether to use a lightweight version of Piecewise Linear Regression (PLR).
+    n_frequencies : int, default=48
+        Number of frequencies for PLR embeddings.
+    frequencies_init_scale : float, default=0.01
+        Initial scale for frequency parameters in embeddings.
     average_embeddings : bool, default=False
         Whether to average embeddings during the forward pass.
     embedding_activation : callable, default=nn.ReLU()
@@ -100,6 +104,9 @@ class DefaultTabMConfig:
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
     d_model: int = 32
+    plr_lite: bool = False
+    n_frequencies: int = 48
+    frequencies_init_scale: float = 0.01
 
     # Batch ensembling specific configurations
     ensemble_size: int = 32
