@@ -7,3 +7,4 @@ torchmetrics
 setuptools
 properscoring
 scikit-optimize
+einops

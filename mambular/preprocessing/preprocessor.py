@@ -40,10 +40,14 @@ class Preprocessor:
     ----------
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
-        only if `numerical_preprocessing` is set to 'binning' or 'one-hot'.
+        only if `numerical_preprocessing` is set to 'binning', 'ple' or 'one-hot'.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
-        'binning', 'one-hot', 'standardization', and 'minmax'.
+        'ple', 'binning', 'one-hot', 'standardization', 'min-max', 'quantile', 'polynomial',
+        'splines', 'box-cox', 'yeo-johnson' and None
+    categorical_preprocessing : str, default="int"
+        The preprocessing strategy for categorical features. Valid options are
+        'int', 'one-hot', None
     use_decision_tree_bins : bool, default=False
         If True, uses decision tree regression/classification to determine
         optimal bin edges for numerical feature binning. This parameter is

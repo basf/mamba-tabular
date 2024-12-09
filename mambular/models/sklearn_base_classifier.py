@@ -475,22 +475,6 @@ class SklearnBaseClassifier(BaseEstimator):
         Softmax is applied to the logits to obtain probabilities, which are then converted from a PyTorch tensor
         to a NumPy array before being returned.
 
-
-        Examples
-        --------
-        >>> from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_score
-        >>> # Define the metrics you want to evaluate
-        >>> metrics = {
-        ...     'Accuracy': (accuracy_score, False),
-        ...     'Precision': (precision_score, False),
-        ...     'F1 Score': (f1_score, False),
-        ...     'AUC Score': (roc_auc_score, True)
-        ... }
-        >>> # Assuming 'X_test' and 'y_test' are your test dataset and labels
-        >>> # Evaluate using the specified metrics
-        >>> results = classifier.evaluate(X_test, y_test, metrics=metrics)
-
-
         Returns
         -------
         probabilities : ndarray of shape (n_samples, n_classes)
