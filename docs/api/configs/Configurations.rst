@@ -44,3 +44,7 @@ Configurations
 .. autoclass:: mambular.configs.DefaultTabMConfig
    :members:
    :undoc-members:
+
+.. autoclass:: mambular.configs.DefaultSAINTConfig
+   :members:
+   :undoc-members:

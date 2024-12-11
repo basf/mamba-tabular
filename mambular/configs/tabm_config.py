@@ -8,8 +8,8 @@ class DefaultTabMConfig:
     """
     Configuration class for the TabM model with batch ensembling and predefined hyperparameters.
 
-    Optimizer Parameters
-    --------------------
+    Parameters
+    ----------
     lr : float, default=1e-04
         Learning rate for the optimizer.
     lr_patience : int, default=10
@@ -18,9 +18,6 @@ class DefaultTabMConfig:
         Weight decay (L2 penalty) for the optimizer.
     lr_factor : float, default=0.1
         Factor by which the learning rate is reduced when there is no improvement.
-
-    Architecture Parameters
-    ------------------------
     layer_sizes : list, default=(512, 512, 128)
         Sizes of the layers in the model.
     activation : callable, default=nn.ReLU()
@@ -37,9 +34,6 @@ class DefaultTabMConfig:
         Whether to use layer normalization in the model layers.
     layer_norm_eps : float, default=1e-05
         Epsilon value for layer normalization.
-
-    Embedding Parameters
-    ---------------------
     use_embeddings : bool, default=True
         Whether to use embedding layers for all features.
     embedding_type : str, default="plr"
@@ -48,6 +42,10 @@ class DefaultTabMConfig:
         Whether to use bias in the embedding layers.
     plr_lite : bool, default=False
         Whether to use a lightweight version of Piecewise Linear Regression (PLR).
+    n_frequencies : int, default=48
+        Number of frequencies for PLR embeddings.
+    frequencies_init_scale : float, default=0.01
+        Initial scale for frequency parameters in embeddings.
     average_embeddings : bool, default=False
         Whether to average embeddings during the forward pass.
     embedding_activation : callable, default=nn.ReLU()
@@ -56,9 +54,6 @@ class DefaultTabMConfig:
         Whether to apply layer normalization after embedding layers.
     d_model : int, default=64
         Dimensionality of the embeddings.
-
-    Batch Ensembling Parameters
-    ----------------------------
     ensemble_size : int, default=32
         Number of ensemble members for batch ensembling.
     ensemble_scaling_in : bool, default=True
@@ -100,6 +95,9 @@ class DefaultTabMConfig:
     embedding_activation: callable = nn.Identity()
     layer_norm_after_embedding: bool = False
     d_model: int = 32
+    plr_lite: bool = False
+    n_frequencies: int = 48
+    frequencies_init_scale: float = 0.01
 
     # Batch ensembling specific configurations
     ensemble_size: int = 32

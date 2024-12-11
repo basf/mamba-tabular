@@ -25,6 +25,7 @@ from .mambattention import (
 from .ndtf import NDTFClassifier, NDTFRegressor, NDTFLSS
 from .node import NODEClassifier, NODERegressor, NODELSS
 from .tabm import TabMClassifier, TabMRegressor, TabMLSS
+from .saint import SAINTClassifier, SAINTRegressor, SAINTLSS
 
 
 __all__ = [
@@ -64,4 +65,7 @@ __all__ = [
     "TabMClassifier",
     "TabMRegressor",
     "TabMLSS",
+    "SAINTClassifier",
+    "SAINTRegressor",
+    "SAINTLSS",
 ]

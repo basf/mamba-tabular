@@ -460,21 +460,6 @@ class SklearnBaseRegressor(BaseEstimator):
         -----
         This method uses the `predict` method to generate predictions and computes each metric.
 
-
-        Examples
-        --------
-        >>> from sklearn.metrics import mean_squared_error, r2_score
-        >>> from sklearn.model_selection import train_test_split
-        >>> from mambular.models import MambularRegressor
-        >>> metrics = {
-        ...     'Mean Squared Error': mean_squared_error,
-        ...     'R2 Score': r2_score
-        ... }
-        >>> # Assuming 'X_test' and 'y_test' are your test dataset and labels
-        >>> # Evaluate using the specified metrics
-        >>> results = regressor.evaluate(X_test, y_test, metrics=metrics)
-
-
         Returns
         -------
         scores : dict
