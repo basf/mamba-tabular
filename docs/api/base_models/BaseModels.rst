@@ -48,3 +48,7 @@ mambular.base_models
 .. autoclass:: mambular.base_models.NDTF
     :members:
     :no-inherited-members:
+
+.. autoclass:: mambular.base_models.SAINT
+    :members:
+    :no-inherited-members:
