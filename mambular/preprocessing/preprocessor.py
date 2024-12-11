@@ -7,12 +7,13 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import (
     KBinsDiscretizer,
     MinMaxScaler,
-    StandardScaler,
-    QuantileTransformer,
-    PolynomialFeatures,
-    SplineTransformer,
-    PowerTransformer,
     OneHotEncoder,
+    PolynomialFeatures,
+    PowerTransformer,
+    QuantileTransformer,
+    RobustScaler,
+    SplineTransformer,
+    StandardScaler,
 )
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
@@ -20,8 +21,8 @@ from .ple_encoding import PLE
 from .prepro_utils import (
     ContinuousOrdinalEncoder,
     CustomBinner,
-    OneHotFromOrdinal,
     NoTransformer,
+    OneHotFromOrdinal,
     ToFloatTransformer,
 )
 
@@ -43,7 +44,7 @@ class Preprocessor:
         only if `numerical_preprocessing` is set to 'binning', 'ple' or 'one-hot'.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
-        'ple', 'binning', 'one-hot', 'standardization', 'min-max', 'quantile', 'polynomial',
+        'ple', 'binning', 'one-hot', 'standardization', 'min-max', 'quantile', 'polynomial', 'robust',
         'splines', 'box-cox', 'yeo-johnson' and None
     categorical_preprocessing : str, default="int"
         The preprocessing strategy for categorical features. Valid options are
@@ -111,6 +112,7 @@ class Preprocessor:
             "min-max",
             "quantile",
             "polynomial",
+            "robust",
             "splines",
             "box-cox",
             "yeo-johnson",
@@ -257,7 +259,8 @@ class Preprocessor:
 
                 if self.numerical_preprocessing in ["binning", "one-hot"]:
                     bins = (
-                        self._get_decision_tree_bins(X[[feature]], y, [feature])
+                        self._get_decision_tree_bins(
+                            X[[feature]], y, [feature])
                         if self.use_decision_tree_bins
                         else self.n_bins
                     )
@@ -274,7 +277,8 @@ class Preprocessor:
                                         ),
                                         encode="ordinal",
                                         strategy=self.binning_strategy,
-                                        subsample=200_000 if len(X) > 200_000 else None,
+                                        subsample=200_000 if len(
+                                            X) > 200_000 else None,
                                     ),
                                 ),
                             ]
@@ -297,7 +301,8 @@ class Preprocessor:
                         )
 
                 elif self.numerical_preprocessing == "standardization":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(
+                        ("scaler", StandardScaler()))
 
                 elif self.numerical_preprocessing == "minmax":
                     numeric_transformer_steps.append(
@@ -315,15 +320,24 @@ class Preprocessor:
                     )
 
                 elif self.numerical_preprocessing == "polynomial":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(
+                        ("scaler", StandardScaler()))
                     numeric_transformer_steps.append(
                         (
                             "polynomial",
-                            PolynomialFeatures(self.degree, include_bias=False),
+                            PolynomialFeatures(
+                                self.degree, include_bias=False),
                         )
                     )
 
+                elif self.numerical_preprocessing == "robust":
+                    numeric_transformer_steps.append(
+                        ("robust", RobustScaler())
+                    )
+
                 elif self.numerical_preprocessing == "splines":
+                    numeric_transformer_steps.append(
+                        ("scaler", StandardScaler()))
                     numeric_transformer_steps.append(
                         (
                             "splines",
@@ -347,7 +361,8 @@ class Preprocessor:
                     numeric_transformer_steps.append(
                         (
                             "box-cox",
-                            PowerTransformer(method="box-cox", standardize=True),
+                            PowerTransformer(method="box-cox",
+                                             standardize=True),
                         )
                     )
 
@@ -355,7 +370,8 @@ class Preprocessor:
                     numeric_transformer_steps.append(
                         (
                             "yeo-johnson",
-                            PowerTransformer(method="yeo-johnson", standardize=True),
+                            PowerTransformer(
+                                method="yeo-johnson", standardize=True),
                         )
                     )
 
@@ -369,7 +385,8 @@ class Preprocessor:
 
                 numeric_transformer = Pipeline(numeric_transformer_steps)
 
-                transformers.append((f"num_{feature}", numeric_transformer, [feature]))
+                transformers.append(
+                    (f"num_{feature}", numeric_transformer, [feature]))
 
         if categorical_features:
             for feature in categorical_features:
@@ -443,7 +460,8 @@ class Preprocessor:
             bin_edges = np.sort(np.unique(thresholds))
 
             bins.append(
-                np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()]))
+                np.concatenate(
+                    ([X[feature].min()], bin_edges, [X[feature].max()]))
             )
         return bins
 
@@ -514,7 +532,8 @@ class Preprocessor:
                     dtype = float  # Default to float for other encodings
 
                 # Assign transformed data with the correct dtype
-                transformed_dict[name] = transformed_X[:, start:end].astype(dtype)
+                transformed_dict[name] = transformed_X[:,
+                                                       start:end].astype(dtype)
                 start = end
         return transformed_dict
 
@@ -611,7 +630,8 @@ class Preprocessor:
                 # Categorical features
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
-                    categories = len(step.mapping_[columns.index(feature_name)])
+                    categories = len(
+                        step.mapping_[columns.index(feature_name)])
                     dimension = 1  # Ordinal encoding always outputs one dimension
                     categorical_feature_info[feature_name] = {
                         "preprocessing": preprocessing_type,
