@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures, SplineTransformer
+from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
 
 
 class ScaledPolynomialLayer(nn.Module):
