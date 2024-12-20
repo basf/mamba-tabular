@@ -21,7 +21,6 @@ repos:
         types_or: [python, pyi, jupyter]
         args: [ --fix, --exit-non-zero-on-fix ]
 
-
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8
     hooks:
@@ -30,3 +29,14 @@ repos:
           - yaml
           - markdown
           - json
+
+  - repo: https://github.com/PyCQA/docformatter
+    rev: v1.7.1  # Use the latest version
+    hooks:
+      - id: docformatter
+        args: ["--wrap-summaries=80", "--wrap-descriptions=80"]
+
+  - repo: https://github.com/psf/black
+    rev: 23.3.0  # Use the latest version
+    hooks:
+      - id: black
