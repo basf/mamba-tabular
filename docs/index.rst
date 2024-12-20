@@ -28,7 +28,7 @@
    :caption: API Reference
    :maxdepth: 2
    :hidden:
- 
+
    api/models/index
    api/base_models/index
    api/preprocessing/index

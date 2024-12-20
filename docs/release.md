@@ -16,7 +16,7 @@ Fix any docstring related issue, then proceed with next steps.
 The package version is mantained in `mambular/__version__.py` file. Increment the version according to the changes such as patch, minor, major or all.
 
 ## 3. Release
-We use git flow for the package release. 
+We use git flow for the package release.
 
 - If you don't have git flow installed, you can follow the instructions [here](https://skoch.github.io/Git-Workflow/) to install it.
 - Initialize git flow in the repository using the below command, if not already done.
@@ -67,10 +67,3 @@ The package is published to PyPi using GitHub Actions. The workflow is triggered
 ## 5. GitHub Release
 
 Create a new release on GitHub with the version number and release notes. The release notes should include the changes made in the release.
-
-
-
-
-
-
-

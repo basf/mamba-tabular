@@ -5,7 +5,7 @@ mambular.models
     :members:
     :inherited-members:
 
-.. autoclass:: mambular.models.MambularRegressor 
+.. autoclass:: mambular.models.MambularRegressor
     :members:
     :inherited-members:
 
@@ -29,7 +29,7 @@ mambular.models
     :members:
     :undoc-members:
 
-.. autoclass:: mambular.models.MLPRegressor 
+.. autoclass:: mambular.models.MLPRegressor
     :members:
     :undoc-members:
 
@@ -49,7 +49,7 @@ mambular.models
     :members:
     :undoc-members:
 
-.. autoclass:: mambular.models.ResNetClassifier 
+.. autoclass:: mambular.models.ResNetClassifier
     :members:
     :undoc-members:
 
@@ -101,7 +101,7 @@ mambular.models
     :members:
     :inherited-members:
 
-.. autoclass:: mambular.models.TabMRegressor 
+.. autoclass:: mambular.models.TabMRegressor
     :members:
     :inherited-members:
 
@@ -113,7 +113,7 @@ mambular.models
     :members:
     :inherited-members:
 
-.. autoclass:: mambular.models.NODERegressor 
+.. autoclass:: mambular.models.NODERegressor
     :members:
     :inherited-members:
 
@@ -125,7 +125,7 @@ mambular.models
     :members:
     :inherited-members:
 
-.. autoclass:: mambular.models.NDTFRegressor 
+.. autoclass:: mambular.models.NDTFRegressor
     :members:
     :inherited-members:
 
@@ -137,7 +137,7 @@ mambular.models
     :members:
     :inherited-members:
 
-.. autoclass:: mambular.models.SAINTRegressor 
+.. autoclass:: mambular.models.SAINTRegressor
     :members:
     :inherited-members:
 
