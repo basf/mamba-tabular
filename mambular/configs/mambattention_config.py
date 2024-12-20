@@ -1,11 +1,12 @@
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
 import torch.nn as nn
 
 
 @dataclass
 class DefaultMambAttentionConfig:
-    """
-    Configuration class for the Default Mambular Attention model with predefined hyperparameters.
+    """Configuration class for the Default Mambular Attention model with predefined hyperparameters.
 
     Parameters
     ----------
@@ -131,11 +132,11 @@ class DefaultMambAttentionConfig:
     dt_min: float = 1e-04
     dt_init_floor: float = 1e-04
     norm: str = "LayerNorm"
-    activation: callable = nn.SiLU()
+    activation: Callable = nn.SiLU
     layer_norm_eps: float = 1e-05
 
     # Embedding Parameters
-    num_embedding_activation: callable = nn.ReLU()
+    num_embedding_activation: Callable = nn.ReLU
     embedding_type: str = "linear"
     embedding_bias: bool = False
     plr_lite: bool = False
@@ -144,10 +145,10 @@ class DefaultMambAttentionConfig:
     layer_norm_after_embedding: bool = False
 
     # Head Parameters
-    head_layer_sizes: list = ()
+    head_layer_sizes: list = field(default_factory=list)
     head_dropout: float = 0.5
     head_skip_layers: bool = False
-    head_activation: callable = nn.SELU()
+    head_activation: Callable = nn.SELU
     head_use_batch_norm: bool = False
 
     # Pooling and Categorical Encoding

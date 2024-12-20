@@ -3,10 +3,11 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
-import torch
 from properscoring import (
     crps_gaussian,
-)  # Assuming this is the source of the CRPS function
+)
+
+# Assuming this is the source of the CRPS function
 from sklearn.metrics import mean_poisson_deviance, mean_squared_error
 
 from mambular.models import MambularLSS  # Update the import path

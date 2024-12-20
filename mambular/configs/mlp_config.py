@@ -1,11 +1,12 @@
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
 import torch.nn as nn
 
 
 @dataclass
 class DefaultMLPConfig:
-    """
-    Configuration class for the default Multi-Layer Perceptron (MLP) model with predefined hyperparameters.
+    """Configuration class for the default Multi-Layer Perceptron (MLP) model with predefined hyperparameters.
 
     Parameters
     ----------
@@ -62,8 +63,8 @@ class DefaultMLPConfig:
     lr_factor: float = 0.1
 
     # Architecture Parameters
-    layer_sizes: list = (256, 128, 32)
-    activation: callable = nn.ReLU()
+    layer_sizes: list = field(default_factory=lambda: [256, 128, 32])
+    activation: Callable = nn.ReLU
     skip_layers: bool = False
     dropout: float = 0.2
     use_glu: bool = False
@@ -74,7 +75,7 @@ class DefaultMLPConfig:
 
     # Embedding Parameters
     use_embeddings: bool = False
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: Callable = nn.Identity
     embedding_type: str = "linear"
     embedding_bias: bool = False
     layer_norm_after_embedding: bool = False

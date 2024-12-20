@@ -1,14 +1,16 @@
 import unittest
+
 import torch
+
 from mambular.utils.distributions import (
-    NormalDistribution,
-    PoissonDistribution,
     BetaDistribution,
-    InverseGammaDistribution,
+    CategoricalDistribution,
     DirichletDistribution,
     GammaDistribution,
+    InverseGammaDistribution,
     NegativeBinomialDistribution,
-    CategoricalDistribution,
+    NormalDistribution,
+    PoissonDistribution,
     StudentTDistribution,
 )
 

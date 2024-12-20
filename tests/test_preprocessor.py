@@ -1,9 +1,10 @@
 import unittest
-import pandas as pd
+
 import numpy as np
-import sys
-from mambular.utils.preprocessor import Preprocessor
+import pandas as pd
 from sklearn.exceptions import NotFittedError
+
+from mambular.utils.preprocessor import Preprocessor
 
 
 class TestPreprocessor(unittest.TestCase):

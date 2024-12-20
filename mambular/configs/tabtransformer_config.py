@@ -1,12 +1,14 @@
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
 import torch.nn as nn
+
 from ..arch_utils.transformer_utils import ReGLU
 
 
 @dataclass
 class DefaultTabTransformerConfig:
-    """
-    Configuration class for the default Tab Transformer model with predefined hyperparameters.
+    """Configuration class for the default Tab Transformer model with predefined hyperparameters.
 
     Parameters
     ----------
@@ -79,24 +81,24 @@ class DefaultTabTransformerConfig:
     attn_dropout: float = 0.2
     ff_dropout: float = 0.1
     norm: str = "LayerNorm"
-    activation: callable = nn.SELU()
-    transformer_activation: callable = ReGLU()
+    activation: Callable = nn.SELU
+    transformer_activation: Callable = ReGLU
     transformer_dim_feedforward: int = 512
     layer_norm_eps: float = 1e-05
     norm_first: bool = True
     bias: bool = True
 
     # Embedding Parameters
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: Callable = nn.Identity
     embedding_type: str = "linear"
     embedding_bias: bool = False
     layer_norm_after_embedding: bool = False
 
     # Head Parameters
-    head_layer_sizes: list = ()
+    head_layer_sizes: list = field(default_factory=list)
     head_dropout: float = 0.5
     head_skip_layers: bool = False
-    head_activation: callable = nn.SELU()
+    head_activation: Callable = nn.SELU
     head_use_batch_norm: bool = False
 
     # Pooling and Categorical Encoding

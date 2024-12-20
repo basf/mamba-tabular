@@ -1,11 +1,12 @@
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
 import torch.nn as nn
 
 
 @dataclass
 class DefaultNODEConfig:
-    """
-    Configuration class for the Neural Oblivious Decision Ensemble (NODE) model.
+    """Configuration class for the Neural Oblivious Decision Ensemble (NODE) model.
 
     Parameters
     ----------
@@ -68,11 +69,12 @@ class DefaultNODEConfig:
     layer_dim: int = 128
     tree_dim: int = 1
     depth: int = 6
-    norm: str = None
+
+    norm: str | None = None
 
     # Embedding Parameters
     use_embeddings: bool = False
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: Callable = nn.Identity
     embedding_type: str = "linear"
     embedding_bias: bool = False
     layer_norm_after_embedding: bool = False
@@ -82,8 +84,8 @@ class DefaultNODEConfig:
     frequencies_init_scale: float = 0.01
 
     # Head Parameters
-    head_layer_sizes: list = ()
+    head_layer_sizes: list = field(default_factory=list)
     head_dropout: float = 0.5
     head_skip_layers: bool = False
-    head_activation: callable = nn.SELU()
+    head_activation: Callable = nn.SELU
     head_use_batch_norm: bool = False
