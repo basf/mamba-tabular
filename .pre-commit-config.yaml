@@ -32,7 +32,7 @@ repos:
     rev: v1.7.1  # Use the latest version
     hooks:
       - id: docformatter
-        args: ["--wrap-summaries=80", "--wrap-descriptions=80"]
+        args: ["--wrap-summaries=120", "--wrap-descriptions=120"]
 
   - repo: https://github.com/psf/black
     rev: 23.3.0  # Use the latest version
