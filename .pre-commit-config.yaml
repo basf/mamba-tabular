@@ -15,6 +15,8 @@ repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.1.14
     hooks:
+      - id: ruff-format
+        types_or: [python, pyi, jupyter]
       - id: ruff
         types_or: [python, pyi, jupyter]
         args: [ --fix, --exit-non-zero-on-fix ]
@@ -33,8 +35,3 @@ repos:
     hooks:
       - id: docformatter
         args: ["--wrap-summaries=120", "--wrap-descriptions=120"]
-
-  - repo: https://github.com/psf/black
-    rev: 23.3.0  # Use the latest version
-    hooks:
-      - id: black
