@@ -31,4 +31,4 @@ lint:
 # run ruff formatter to format all files
 format:
     poetry run docformatter --in-place --recursive --wrap-summaries 120 --wrap-descriptions 120 .
-    poetry run black .
+    poetry run ruff format .
