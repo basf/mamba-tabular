@@ -64,7 +64,8 @@ ignore = ["B006",
   "D100",  # Missing module-level docstring
   "D101",  # Missing class-level docstring
   "D102",  # Missing method-level docstring
-  "D103",  # Missing function-level docstring  # Ignore mamba original
+  "D103",  # Missing function-level docstring
+  "B007",
 ]
 
 [tool.ruff.lint]
