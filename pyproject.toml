@@ -32,7 +32,6 @@ pytest-cov = "^4.1"
 ruff = ">=0.3"
 pre-commit = "^3.6"
 docformatter = "^1.4"
-black = "^22.1b1"
 
 
 [tool.poetry.urls]
@@ -55,8 +54,18 @@ venv = ".venv"
 [tool.ruff]
 line-length = 120
 target-version = 'py310'
-exclude = ["*.ipynb"]
-ignore = ["B006"]
+exclude = ["*.ipynb",
+  "mambular/arch_utils/mamba_utils.mamba_orginal.py",]
+
+ignore = ["B006",
+  "F401",  # Ignore unused imports
+  "F841",  # Ignore unused local variables
+  "E501",  # Ignore line length
+  "D100",  # Missing module-level docstring
+  "D101",  # Missing class-level docstring
+  "D102",  # Missing method-level docstring
+  "D103",  # Missing function-level docstring  # Ignore mamba original
+]
 
 [tool.ruff.lint]
 select = [
