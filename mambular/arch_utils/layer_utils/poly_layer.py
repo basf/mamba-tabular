@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
@@ -6,7 +5,7 @@ from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
 
 class ScaledPolynomialLayer(nn.Module):
     def __init__(self, degree=2):
-        super(ScaledPolynomialLayer, self).__init__()
+        super().__init__()
         self.degree = degree
 
         # Initialize polynomial feature generator
@@ -24,8 +23,7 @@ class ScaledPolynomialLayer(nn.Module):
         poly_features = self.poly.fit_transform(x_scaled)
 
         # Convert polynomial features back to tensor
-        poly_features = torch.tensor(
-            poly_features, dtype=torch.float32).to(x.device)
+        poly_features = torch.tensor(poly_features, dtype=torch.float32).to(x.device)
 
         # Apply the learnable scaling parameter
         output = poly_features * self.weights
