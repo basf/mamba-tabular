@@ -2,9 +2,7 @@ from ..preprocessing.preprocessor import Preprocessor
 
 
 def generate_docstring(config, model_description, examples):
-    """
-    Generates the complete docstring for any model class by combining
-    config and Preprocessor docstrings.
+    """Generates the complete docstring for any model class by combining config and Preprocessor docstrings.
 
     The `Parameters` tag is stripped from the Preprocessor docstring to avoid duplication.
     """
@@ -12,9 +10,7 @@ def generate_docstring(config, model_description, examples):
     preprocessor_doc = Preprocessor.__doc__ or "No documentation for Preprocessor."
 
     # Remove "Parameters" section header from the Preprocessor docstring
-    preprocessor_doc_cleaned = preprocessor_doc.split(
-        "Parameters\n    ----------\n", 1
-    )[-1].strip()
+    preprocessor_doc_cleaned = preprocessor_doc.split("Parameters\n    ----------\n", 1)[-1].strip()
 
     preprocessor_doc_cleaned = preprocessor_doc_cleaned.split("Attributes")[0].strip()
 
