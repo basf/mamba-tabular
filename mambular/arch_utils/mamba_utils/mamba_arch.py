@@ -1,16 +1,13 @@
 import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..layer_utils.normalization_layers import (
-    RMSNorm,
-    LayerNorm,
-    LearnableLayerScaling,
-)
+
 from ..get_norm_fn import get_normalization_layer
+from ..layer_utils.normalization_layers import LayerNorm, LearnableLayerScaling, RMSNorm
 
-
-### Heavily inspired and mostly taken from https://github.com/alxndrTL/mamba.py
+# Heavily inspired and mostly taken from https://github.com/alxndrTL/mamba.py
 
 
 class Mamba(nn.Module):
@@ -43,12 +40,10 @@ class Mamba(nn.Module):
                     dt_max=getattr(config, "dt_max", 0.1),
                     dt_min=getattr(config, "dt_min", 1e-04),
                     dt_init_floor=getattr(config, "dt_init_floor", 1e-04),
-                    norm=get_normalization_layer(config),
+                    norm=get_normalization_layer(config),  # type: ignore
                     activation=getattr(config, "activation", nn.SiLU()),
                     bidirectional=getattr(config, "bidirectional", False),
-                    use_learnable_interaction=getattr(
-                        config, "use_learnable_interaction", False
-                    ),
+                    use_learnable_interaction=getattr(config, "use_learnable_interaction", False),
                     layer_norm_eps=getattr(config, "layer_norm_eps", 1e-5),
                     AD_weight_decay=getattr(config, "AD_weight_decay", True),
                     BC_layer_norm=getattr(config, "BC_layer_norm", False),
@@ -66,8 +61,7 @@ class Mamba(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-    """
-    Residual block composed of a MambaBlock and a normalization layer.
+    """Residual block composed of a MambaBlock and a normalization layer.
 
     Parameters
     ----------
@@ -186,7 +180,7 @@ class ResidualBlock(nn.Module):
             d_conv=d_conv,
             conv_bias=conv_bias,
             dropout=dropout,
-            dt_rank=dt_rank,
+            dt_rank=dt_rank,  # type: ignore
             d_state=d_state,
             dt_scale=dt_scale,
             dt_init=dt_init,
@@ -204,8 +198,7 @@ class ResidualBlock(nn.Module):
         self.norm = norm
 
     def forward(self, x):
-        """
-        Forward pass through the residual block.
+        """Forward pass through the residual block.
 
         Parameters
         ----------
@@ -222,8 +215,7 @@ class ResidualBlock(nn.Module):
 
 
 class MambaBlock(nn.Module):
-    """
-    MambaBlock module containing the main computational components for processing input.
+    """MambaBlock module containing the main computational components for processing input.
 
     Parameters
     ----------
@@ -291,7 +283,6 @@ class MambaBlock(nn.Module):
     -------
     forward(x)
         Performs a forward pass through the MambaBlock.
-
     """
 
     def __init__(
@@ -323,15 +314,12 @@ class MambaBlock(nn.Module):
 
         if self.use_pscan:
             try:
-                from mambapy.pscan import pscan
+                from mambapy.pscan import pscan  # type: ignore
 
                 self.pscan = pscan  # Store the imported pscan function
             except ImportError:
                 self.pscan = None  # Set to None if pscan is not available
-                print(
-                    "The 'mambapy' package is not installed. Please install it by running:\n"
-                    "pip install mambapy"
-                )
+                print("The 'mambapy' package is not installed. Please install it by running:\n" "pip install mambapy")
         else:
             self.pscan = None
 
@@ -367,15 +355,15 @@ class MambaBlock(nn.Module):
         if self.use_learnable_interaction:
             self.learnable_interaction = LearnableFeatureInteraction(self.d_inner)
 
-        self.x_proj_fwd = nn.Linear(self.d_inner, dt_rank + 2 * d_state, bias=False)
+        self.x_proj_fwd = nn.Linear(self.d_inner, dt_rank + 2 * d_state, bias=False)  # type: ignore
         if self.bidirectional:
-            self.x_proj_bwd = nn.Linear(self.d_inner, dt_rank + 2 * d_state, bias=False)
+            self.x_proj_bwd = nn.Linear(self.d_inner, dt_rank + 2 * d_state, bias=False)  # type: ignore
 
-        self.dt_proj_fwd = nn.Linear(dt_rank, self.d_inner, bias=True)
+        self.dt_proj_fwd = nn.Linear(dt_rank, self.d_inner, bias=True)  # type: ignore
         if self.bidirectional:
-            self.dt_proj_bwd = nn.Linear(dt_rank, self.d_inner, bias=True)
+            self.dt_proj_bwd = nn.Linear(dt_rank, self.d_inner, bias=True)  # type: ignore
 
-        dt_init_std = dt_rank**-0.5 * dt_scale
+        dt_init_std = dt_rank**-0.5 * dt_scale  # type: ignore
         if dt_init == "constant":
             nn.init.constant_(self.dt_proj_fwd.weight, dt_init_std)
             if self.bidirectional:
@@ -387,18 +375,16 @@ class MambaBlock(nn.Module):
         else:
             raise NotImplementedError
 
-        dt_fwd = torch.exp(
-            torch.rand(self.d_inner) * (math.log(dt_max) - math.log(dt_min))
-            + math.log(dt_min)
-        ).clamp(min=dt_init_floor)
+        dt_fwd = torch.exp(torch.rand(self.d_inner) * (math.log(dt_max) - math.log(dt_min)) + math.log(dt_min)).clamp(
+            min=dt_init_floor
+        )
         inv_dt_fwd = dt_fwd + torch.log(-torch.expm1(-dt_fwd))
         with torch.no_grad():
             self.dt_proj_fwd.bias.copy_(inv_dt_fwd)
 
         if self.bidirectional:
             dt_bwd = torch.exp(
-                torch.rand(self.d_inner) * (math.log(dt_max) - math.log(dt_min))
-                + math.log(dt_min)
+                torch.rand(self.d_inner) * (math.log(dt_max) - math.log(dt_min)) + math.log(dt_min)
             ).clamp(min=dt_init_floor)
             inv_dt_bwd = dt_bwd + torch.log(-torch.expm1(-dt_bwd))
             with torch.no_grad():
@@ -413,20 +399,20 @@ class MambaBlock(nn.Module):
             self.D_bwd = nn.Parameter(torch.ones(self.d_inner))
 
         if not AD_weight_decay:
-            self.A_log_fwd._no_weight_decay = True
-            self.D_fwd._no_weight_decay = True
+            self.A_log_fwd._no_weight_decay = True  # type: ignore
+            self.D_fwd._no_weight_decay = True  # type: ignore
 
         if self.bidirectional:
             if not AD_weight_decay:
-                self.A_log_bwd._no_weight_decay = True
-                self.D_bwd._no_weight_decay = True
+                self.A_log_bwd._no_weight_decay = True  # type: ignore
+                self.D_bwd._no_weight_decay = True  # type: ignore
 
         self.out_proj = nn.Linear(self.d_inner, d_model, bias=bias)
         self.dt_rank = dt_rank
         self.d_state = d_state
 
         if BC_layer_norm:
-            self.dt_layernorm = RMSNorm(self.dt_rank, eps=layer_norm_eps)
+            self.dt_layernorm = RMSNorm(self.dt_rank, eps=layer_norm_eps)  # type: ignore
             self.B_layernorm = RMSNorm(self.d_state, eps=layer_norm_eps)
             self.C_layernorm = RMSNorm(self.d_state, eps=layer_norm_eps)
         else:
@@ -455,14 +441,14 @@ class MambaBlock(nn.Module):
         if self.use_learnable_interaction:
             x_fwd = self.learnable_interaction(x_fwd)
             if self.bidirectional:
-                x_bwd = self.learnable_interaction(x_bwd)
+                x_bwd = self.learnable_interaction(x_bwd)  # type: ignore
 
         x_fwd = self.activation(x_fwd)
         x_fwd = self.dropout(x_fwd)
         y_fwd = self.ssm(x_fwd, forward=True)
 
         if self.bidirectional:
-            x_bwd = self.activation(x_bwd)
+            x_bwd = self.activation(x_bwd)  # type: ignore
             x_bwd = self.dropout(x_bwd)
             y_bwd = self.ssm(torch.flip(x_bwd, [1]), forward=False)
             y = y_fwd + torch.flip(y_bwd, [1])
@@ -493,7 +479,9 @@ class MambaBlock(nn.Module):
             D = self.D_fwd.float()
             deltaBC = self.x_proj_fwd(x)
             delta, B, C = torch.split(
-                deltaBC, [self.dt_rank, self.d_state, self.d_state], dim=-1
+                deltaBC,
+                [self.dt_rank, self.d_state, self.d_state],  # type: ignore
+                dim=-1,
             )
             delta, B, C = self._apply_layernorms(delta, B, C)
             delta = F.softplus(self.dt_proj_fwd(delta))
@@ -502,7 +490,9 @@ class MambaBlock(nn.Module):
             D = self.D_bwd.float()
             deltaBC = self.x_proj_bwd(x)
             delta, B, C = torch.split(
-                deltaBC, [self.dt_rank, self.d_state, self.d_state], dim=-1
+                deltaBC,
+                [self.dt_rank, self.d_state, self.d_state],  # type: ignore
+                dim=-1,
             )
             delta, B, C = self._apply_layernorms(delta, B, C)
             delta = F.softplus(self.dt_proj_bwd(delta))
@@ -519,7 +509,7 @@ class MambaBlock(nn.Module):
         BX = deltaB * (x.unsqueeze(-1))
 
         if self.use_pscan:
-            hs = self.pscan(deltaA, BX)
+            hs = self.pscan(deltaA, BX)  # type: ignore
         else:
             h = torch.zeros(x.size(0), self.d_inner, self.d_state, device=deltaA.device)
             hs = []
