@@ -1,7 +1,5 @@
-import math
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class RMSNorm(nn.Module):
@@ -19,9 +17,7 @@ class RMSNorm(nn.Module):
         self.weight = nn.Parameter(torch.ones(d_model))
 
     def forward(self, x):
-        output = (
-            x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps) * self.weight
-        )
+        output = x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps) * self.weight
 
         return output
 
@@ -72,9 +68,8 @@ class BatchNorm(nn.Module):
     def forward(self, x):
         if self.training:
             mean = x.mean(dim=0)
-            var = x.var(
-                dim=0, unbiased=False
-            )  # Use unbiased=False for consistency with BatchNorm
+            # Use unbiased=False for consistency with BatchNorm
+            var = x.var(dim=0, unbiased=False)
             # Update running stats in-place
             self.running_mean.mul_(1 - self.momentum).add_(self.momentum * mean)
             self.running_var.mul_(1 - self.momentum).add_(self.momentum * var)
@@ -104,9 +99,7 @@ class InstanceNorm(nn.Module):
         mean = x.mean(dim=(2, 3), keepdim=True)
         var = x.var(dim=(2, 3), keepdim=True)
         output = (x - mean) / torch.sqrt(var + self.eps)
-        output = output * self.weight.unsqueeze(0).unsqueeze(2) + self.bias.unsqueeze(
-            0
-        ).unsqueeze(2)
+        output = output * self.weight.unsqueeze(0).unsqueeze(2) + self.bias.unsqueeze(0).unsqueeze(2)
         return output
 
 
@@ -133,9 +126,9 @@ class GroupNorm(nn.Module):
         var = x.var(dim=-1, keepdim=True)
         output = (x - mean) / torch.sqrt(var + self.eps)
         output = output.view(b, c, h, w)
-        output = output * self.weight.unsqueeze(0).unsqueeze(2).unsqueeze(
-            3
-        ) + self.bias.unsqueeze(0).unsqueeze(2).unsqueeze(3)
+        output = output * self.weight.unsqueeze(0).unsqueeze(2).unsqueeze(3) + self.bias.unsqueeze(0).unsqueeze(
+            2
+        ).unsqueeze(3)
         return output
 
 
