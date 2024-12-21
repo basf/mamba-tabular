@@ -66,17 +66,13 @@ class TestPreprocessor(unittest.TestCase):
 
     def test_decision_tree_bins(self):
         """Test the usage of decision tree for binning."""
-        pp = Preprocessor(
-            use_decision_tree_bins=True, numerical_preprocessing="binning", n_bins=5
-        )
+        pp = Preprocessor(use_decision_tree_bins=True, numerical_preprocessing="binning", n_bins=5)
         pp.fit(self.data, self.target)
         # Checking if the preprocessor setup decision tree bins properly
         self.assertTrue(
             all(
                 isinstance(x, np.ndarray)
-                for x in pp._get_decision_tree_bins(
-                    self.data[["numerical"]], self.target, ["numerical"]
-                )
+                for x in pp._get_decision_tree_bins(self.data[["numerical"]], self.target, ["numerical"])
             )
         )
 

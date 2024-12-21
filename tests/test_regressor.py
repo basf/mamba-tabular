@@ -14,9 +14,7 @@ class TestMambularRegressor(unittest.TestCase):
         self.patcher_pl_trainer = patch("lightning.Trainer")
         self.mock_pl_trainer = self.patcher_pl_trainer.start()
 
-        self.patcher_base_model = patch(
-            "mambular.base_models.regressor.BaseMambularRegressor"
-        )
+        self.patcher_base_model = patch("mambular.base_models.regressor.BaseMambularRegressor")
         self.mock_base_model = self.patcher_base_model.start()
 
         self.regressor = MambularRegressor(d_model=128, dropout=0.1)
@@ -42,9 +40,7 @@ class TestMambularRegressor(unittest.TestCase):
 
     def test_split_data(self):
         """Test the data splitting functionality."""
-        X_train, X_val, y_train, y_val = self.regressor.split_data(
-            self.X, self.y, val_size=0.2, random_state=42
-        )
+        X_train, X_val, y_train, y_val = self.regressor.split_data(self.X, self.y, val_size=0.2, random_state=42)
         self.assertEqual(len(X_train), 80)
         self.assertEqual(len(X_val), 20)
         self.assertEqual(len(y_train), 80)
