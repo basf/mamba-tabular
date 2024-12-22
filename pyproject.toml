@@ -52,7 +52,7 @@ venv = ".venv"
 # Configure code linting
 [tool.ruff]
 line-length = 120
-target-version = 'py310'
+target-version = "py310"
 exclude = ["*.ipynb",
   "mambular/arch_utils/mamba_utils.mamba_orginal.py",
   "mambular/preprocessing/preprocessor.py",]
@@ -66,6 +66,7 @@ ignore = ["B006",
   "D102",  # Missing method-level docstring
   "D103",  # Missing function-level docstring
   "B007",
+  "S307"
 ]
 
 [tool.ruff.lint]
