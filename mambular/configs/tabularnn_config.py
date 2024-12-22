@@ -95,7 +95,7 @@ class DefaultTabulaRNNConfig:
     plr_lite: bool = False
     n_frequencies: int = 48
     frequencies_init_scale: float = 0.01
-    embedding_activation: Callable = nn.ReLU
+    embedding_activation: Callable = nn.ReLU()  # noqa: RUF009
     layer_norm_after_embedding: bool = False
 
     # Head params
