@@ -1,9 +1,9 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_classifier import SklearnBaseClassifier
-from .sklearn_base_lss import SklearnBaseLSS
-from ..utils.docstring_generator import generate_docstring
 from ..base_models.saint import SAINT
 from ..configs.saint_config import DefaultSAINTConfig
+from ..utils.docstring_generator import generate_docstring
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class SAINTRegressor(SklearnBaseRegressor):
@@ -30,7 +30,7 @@ class SAINTRegressor(SklearnBaseRegressor):
 class SAINTClassifier(SklearnBaseClassifier):
     __doc__ = generate_docstring(
         DefaultSAINTConfig,
-        """SAINT Classifier. This class extends the SklearnBaseClassifier class 
+        """SAINT Classifier. This class extends the SklearnBaseClassifier class
         and uses the SAINT model with the default SAINT configuration.""",
         examples="""
         >>> from mambular.models import SAINTClassifier
@@ -48,7 +48,7 @@ class SAINTClassifier(SklearnBaseClassifier):
 class SAINTLSS(SklearnBaseLSS):
     __doc__ = generate_docstring(
         DefaultSAINTConfig,
-        """SAINT for distributional regression. 
+        """SAINT for distributional regression.
         This class extends the SklearnBaseLSS class and uses the
         SAINT model with the default SAINT configuration.""",
         examples="""
