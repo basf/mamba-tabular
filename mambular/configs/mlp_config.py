@@ -64,7 +64,7 @@ class DefaultMLPConfig:
 
     # Architecture Parameters
     layer_sizes: list = field(default_factory=lambda: [256, 128, 32])
-    activation: Callable = nn.ReLU
+    activation: Callable = nn.ReLU()  # noqa: RUF009
     skip_layers: bool = False
     dropout: float = 0.2
     use_glu: bool = False
@@ -75,7 +75,7 @@ class DefaultMLPConfig:
 
     # Embedding Parameters
     use_embeddings: bool = False
-    embedding_activation: Callable = nn.Identity
+    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
     embedding_type: str = "linear"
     embedding_bias: bool = False
     layer_norm_after_embedding: bool = False

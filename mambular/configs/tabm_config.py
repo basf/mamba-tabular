@@ -79,7 +79,7 @@ class DefaultTabMConfig:
 
     # arch params
     layer_sizes: list = field(default_factory=lambda: [256, 256, 128])
-    activation: Callable = nn.ReLU
+    activation: Callable = nn.ReLU()  # noqa: RUF009
     dropout: float = 0.5
     norm: str | None = None
     use_glu: bool = False
@@ -93,7 +93,7 @@ class DefaultTabMConfig:
     embedding_bias = False
     plr_lite: bool = False
     average_embeddings: bool = False
-    embedding_activation: Callable = nn.Identity
+    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
     layer_norm_after_embedding: bool = False
     d_model: int = 32
     plr_lite: bool = False

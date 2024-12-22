@@ -63,7 +63,7 @@ class DefaultResNetConfig:
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
     layer_sizes: list = field(default_factory=lambda: [256, 128, 32])
-    activation: Callable = nn.SELU
+    activation: Callable = nn.SELU()  # noqa: RUF009
     skip_layers: bool = False
     dropout: float = 0.5
     norm: bool = False
@@ -80,7 +80,7 @@ class DefaultResNetConfig:
     embedding_bias = False
     plr_lite: bool = False
     average_embeddings: bool = True
-    embedding_activation: Callable = nn.Identity
+    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
     layer_norm_after_embedding: bool = False
     d_model: int = 64
     plr_lite: bool = False

@@ -103,11 +103,11 @@ class DefaultMambaTabConfig:
     dt_max: float = 0.1
     dt_min: float = 1e-04
     dt_init_floor: float = 1e-04
-    activation: Callable = nn.ReLU
+    activation: Callable = nn.ReLU()  # noqa: RUF009
     axis: int = 1
 
     # Embedding Parameters
-    num_embedding_activation: Callable = nn.ReLU
+    num_embedding_activation: Callable = nn.ReLU()  # noqa: RUF009
     embedding_type: str = "linear"
     embedding_bias: bool = False
     plr_lite: bool = False
@@ -118,7 +118,7 @@ class DefaultMambaTabConfig:
     head_layer_sizes: list = field(default_factory=list)
     head_dropout: float = 0.0
     head_skip_layers: bool = False
-    head_activation: Callable = nn.ReLU
+    head_activation: Callable = nn.ReLU()  # noqa: RUF009
     head_use_batch_norm: bool = False
 
     # Additional Features

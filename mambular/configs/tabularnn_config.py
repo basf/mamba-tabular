@@ -86,7 +86,7 @@ class DefaultTabulaRNNConfig:
     n_layers: int = 4
     rnn_dropout: float = 0.2
     norm: str = "RMSNorm"
-    activation: Callable = nn.SELU
+    activation: Callable = nn.SELU()  # noqa: RUF009
     residuals: bool = False
 
     # Embedding params
@@ -102,7 +102,7 @@ class DefaultTabulaRNNConfig:
     head_layer_sizes: list = field(default_factory=list)
     head_dropout: float = 0.5
     head_skip_layers: bool = False
-    head_activation: Callable = nn.SELU
+    head_activation: Callable = nn.SELU()  # noqa: RUF009
     head_use_batch_norm: bool = False
 
     # Pooling and normalization

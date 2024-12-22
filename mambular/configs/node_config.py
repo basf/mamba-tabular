@@ -74,7 +74,7 @@ class DefaultNODEConfig:
 
     # Embedding Parameters
     use_embeddings: bool = False
-    embedding_activation: Callable = nn.Identity
+    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
     embedding_type: str = "linear"
     embedding_bias: bool = False
     layer_norm_after_embedding: bool = False
@@ -87,5 +87,5 @@ class DefaultNODEConfig:
     head_layer_sizes: list = field(default_factory=list)
     head_dropout: float = 0.5
     head_skip_layers: bool = False
-    head_activation: Callable = nn.SELU
+    head_activation: Callable = nn.SELU()  # noqa: RUF009
     head_use_batch_norm: bool = False
