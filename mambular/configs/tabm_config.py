@@ -89,7 +89,7 @@ class DefaultTabMConfig:
 
     # embedding params
     use_embeddings: bool = True
-    embedding_type: str = "plr"
+    embedding_type: str = "linear"
     embedding_bias = False
     plr_lite: bool = False
     average_embeddings: bool = False
