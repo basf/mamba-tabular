@@ -2,7 +2,7 @@
 name = "mambular"
 version = "1.0.3.dev5"
 description = "A python package for tabular deep learning with mamba blocks."
-authors = ["Anton Thielmann"]
+authors = ["Anton Thielmann", "Manish Kumar", "Christoph Weisser"]
 readme = "README.md"
 packages = [{include = "mambular"}]
 
@@ -12,7 +12,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <=3.12"
-
 numpy = "<=1.26.4"
 pandas = "^2.0.3"
 lightning = "^2.3.3"
@@ -23,9 +22,9 @@ setuptools = "^75.3.0"
 properscoring = "^0.1"
 scikit-optimize = "^0.10.2"
 einops = "^0.8.0"
-
-
 accelerate = "^1.2.1"
+
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1"
 pytest-cov = "^4.1"
