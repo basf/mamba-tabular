@@ -29,9 +29,3 @@ repos:
           - yaml
           - markdown
           - json
-
-  - repo: https://github.com/PyCQA/docformatter
-    rev: v1.7.1  # Use the latest version
-    hooks:
-      - id: docformatter
-        args: ["--wrap-summaries=120", "--wrap-descriptions=120"]
