@@ -1,17 +1,16 @@
 import torch
+
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mamba_utils.mamba_arch import Mamba
+from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 from ..arch_utils.mlp_utils import MLPhead
 from ..configs.mambular_config import DefaultMambularConfig
 from .basemodel import BaseModel
-from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
-from ..arch_utils.get_norm_fn import get_normalization_layer
-from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 
 
 class Mambular(BaseModel):
-    """
-    A Mambular model for tabular data, integrating feature embeddings, Mamba transformations, and a configurable architecture
-    for processing categorical and numerical features with pooling and normalization.
+    """A Mambular model for tabular data, integrating feature embeddings, Mamba transformations, and a configurable
+    architecture for processing categorical and numerical features with pooling and normalization.
 
     Parameters
     ----------
@@ -49,7 +48,6 @@ class Mambular(BaseModel):
     forward(num_features, cat_features)
         Perform a forward pass through the model, including embedding, Mamba transformation, pooling,
         and prediction steps.
-
     """
 
     def __init__(
@@ -57,7 +55,7 @@ class Mambular(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes=1,
-        config: DefaultMambularConfig = DefaultMambularConfig(),
+        config: DefaultMambularConfig = DefaultMambularConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
@@ -91,8 +89,7 @@ class Mambular(BaseModel):
         self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
 
     def forward(self, num_features, cat_features):
-        """
-        Defines the forward pass of the model.
+        """Defines the forward pass of the model.
 
         Parameters
         ----------

@@ -1,17 +1,16 @@
 import torch
-import torch.nn as nn
+
+from ..arch_utils.get_norm_fn import get_normalization_layer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mamba_utils.mambattn_arch import MambAttn
 from ..arch_utils.mlp_utils import MLPhead
-from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..configs.mambattention_config import DefaultMambAttentionConfig
 from .basemodel import BaseModel
-from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 
 
 class MambAttention(BaseModel):
-    """
-    A MambAttention model for tabular data, integrating feature embeddings, attention-based Mamba transformations, and
-    a customizable architecture for handling categorical and numerical features.
+    """A MambAttention model for tabular data, integrating feature embeddings, attention-based Mamba transformations,
+    and a customizable architecture for handling categorical and numerical features.
 
     Parameters
     ----------
@@ -49,7 +48,6 @@ class MambAttention(BaseModel):
     forward(num_features, cat_features)
         Perform a forward pass through the model, including embedding, Mamba attention transformation, pooling,
         and prediction steps.
-
     """
 
     def __init__(
@@ -57,16 +55,14 @@ class MambAttention(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes=1,
-        config: DefaultMambAttentionConfig = DefaultMambAttentionConfig(),
+        config: DefaultMambAttentionConfig = DefaultMambAttentionConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
         self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
-        self.shuffle_embeddings = self.hparams.get(
-            "shuffle_embeddings", config.shuffle_embeddings
-        )
+        self.shuffle_embeddings = self.hparams.get("shuffle_embeddings", config.shuffle_embeddings)
 
         self.mamba = MambAttn(config)
         self.norm_f = get_normalization_layer(config)
@@ -94,8 +90,7 @@ class MambAttention(BaseModel):
         self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
 
     def forward(self, num_features, cat_features):
-        """
-        Defines the forward pass of the model.
+        """Defines the forward pass of the model.
 
         Parameters
         ----------
@@ -118,7 +113,7 @@ class MambAttention(BaseModel):
 
         x = self.pool_sequence(x)
 
-        x = self.norm_f(x)
+        x = self.norm_f(x)  # type: ignore
         preds = self.tabular_head(x)
 
         return preds

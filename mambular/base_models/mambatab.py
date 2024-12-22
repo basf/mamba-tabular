@@ -1,19 +1,18 @@
 import torch
 import torch.nn as nn
+
+from ..arch_utils.layer_utils.normalization_layers import LayerNorm
 from ..arch_utils.mamba_utils.mamba_arch import Mamba
+from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 from ..arch_utils.mlp_utils import MLPhead
-from ..arch_utils.layer_utils.normalization_layers import (
-    LayerNorm,
-)
 from ..configs.mambatab_config import DefaultMambaTabConfig
 from .basemodel import BaseModel
-from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 
 
 class MambaTab(BaseModel):
-    """
-    A MambaTab model for tabular data processing, integrating feature embeddings, normalization, and a configurable
-    architecture for flexible deployment of Mamba-based feature transformation layers.
+    """A MambaTab model for tabular data processing, integrating feature embeddings,
+    normalization, and a configurable architecture for flexible deployment of Mamba-based
+    feature transformation layers.
 
     Parameters
     ----------
@@ -53,7 +52,6 @@ class MambaTab(BaseModel):
     forward(num_features, cat_features)
         Perform a forward pass through the model, including feature concatenation, initial transformation,
         Mamba processing, and prediction steps.
-
     """
 
     def __init__(
@@ -61,7 +59,7 @@ class MambaTab(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes=1,
-        config: DefaultMambaTabConfig = DefaultMambaTabConfig(),
+        config: DefaultMambaTabConfig = DefaultMambaTabConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)

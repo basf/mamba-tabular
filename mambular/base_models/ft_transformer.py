@@ -1,17 +1,16 @@
-import torch
 import torch.nn as nn
-from ..arch_utils.mlp_utils import MLPhead
+
 from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.mlp_utils import MLPhead
 from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 from ..configs.fttransformer_config import DefaultFTTransformerConfig
 from .basemodel import BaseModel
 
 
 class FTTransformer(BaseModel):
-    """
-    A Feature Transformer model for tabular data with categorical and numerical features, using embedding, transformer
-    encoding, and pooling to produce final predictions.
+    """A Feature Transformer model for tabular data with categorical and numerical features, using embedding,
+    transformer encoding, and pooling to produce final predictions.
 
     Parameters
     ----------
@@ -47,8 +46,8 @@ class FTTransformer(BaseModel):
     Methods
     -------
     forward(num_features, cat_features)
-        Perform a forward pass through the model, including embedding, transformer encoding, pooling, and prediction steps.
-
+        Perform a forward pass through the model, including embedding, transformer encoding,
+        pooling, and prediction steps.
     """
 
     def __init__(
@@ -56,7 +55,7 @@ class FTTransformer(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes=1,
-        config: DefaultFTTransformerConfig = DefaultFTTransformerConfig(),
+        config: DefaultFTTransformerConfig = DefaultFTTransformerConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
@@ -92,8 +91,7 @@ class FTTransformer(BaseModel):
         self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
 
     def forward(self, num_features, cat_features):
-        """
-        Defines the forward pass of the model.
+        """Defines the forward pass of the model.
 
         Parameters
         ----------

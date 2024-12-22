@@ -1,13 +1,13 @@
+from collections.abc import Callable
+
 import lightning as pl
 import torch
 import torch.nn as nn
 import torchmetrics
-from typing import Type
 
 
 class TaskModel(pl.LightningModule):
-    """
-    PyTorch Lightning Module for training and evaluating a model.
+    """PyTorch Lightning Module for training and evaluating a model.
 
     Parameters
     ----------
@@ -29,18 +29,18 @@ class TaskModel(pl.LightningModule):
 
     def __init__(
         self,
-        model_class: Type[nn.Module],
+        model_class: type[nn.Module],
         config,
         cat_feature_info,
         num_feature_info,
         num_classes=1,
         lss=False,
         family=None,
-        loss_fct: callable = None,
+        loss_fct: Callable | None = None,
         early_pruning_threshold=None,
         pruning_epoch=5,
         optimizer_type: str = "Adam",
-        optimizer_args: dict = None,
+        optimizer_args: dict | None = None,
         **kwargs,
     ):
         super().__init__()
@@ -55,7 +55,7 @@ class TaskModel(pl.LightningModule):
 
         self.optimizer_params = {
             k.replace("optimizer_", ""): v
-            for k, v in optimizer_args.items()
+            for k, v in optimizer_args.items()  # type: ignore
             if k.startswith("optimizer_")
         }
 
@@ -72,15 +72,9 @@ class TaskModel(pl.LightningModule):
             elif num_classes > 2:
                 if not self.loss_fct:
                     self.loss_fct = nn.CrossEntropyLoss()
-                self.acc = torchmetrics.Accuracy(
-                    task="multiclass", num_classes=num_classes
-                )
-                self.auroc = torchmetrics.AUROC(
-                    task="multiclass", num_classes=num_classes
-                )
-                self.precision = torchmetrics.Precision(
-                    task="multiclass", num_classes=num_classes
-                )
+                self.acc = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes)
+                self.auroc = torchmetrics.AUROC(task="multiclass", num_classes=num_classes)
+                self.precision = torchmetrics.Precision(task="multiclass", num_classes=num_classes)
             else:
                 self.loss_fct = nn.MSELoss()
 
@@ -105,8 +99,7 @@ class TaskModel(pl.LightningModule):
         )
 
     def forward(self, num_features, cat_features):
-        """
-        Forward pass through the model.
+        """Forward pass through the model.
 
         Parameters
         ----------
@@ -124,8 +117,7 @@ class TaskModel(pl.LightningModule):
         return self.base_model.forward(num_features, cat_features)
 
     def compute_loss(self, predictions, y_true):
-        """
-        Compute the loss for the given predictions and true labels.
+        """Compute the loss for the given predictions and true labels.
 
         Parameters
         ----------
@@ -143,36 +135,45 @@ class TaskModel(pl.LightningModule):
             if getattr(self.base_model, "returns_ensemble", False):
                 loss = 0.0
                 for ensemble_member in range(predictions.shape[1]):
-                    loss += self.family.compute_loss(
+                    loss += self.family.compute_loss(  # type: ignore
                         predictions[:, ensemble_member], y_true.squeeze(-1)
                     )
                 return loss
             else:
-                return self.family.compute_loss(predictions, y_true.squeeze(-1))
+                return self.family.compute_loss(
+                    predictions,  # type: ignore
+                    y_true.squeeze(-1),
+                )
 
         if getattr(self.base_model, "returns_ensemble", False):  # Ensemble case
-            if (
-                self.loss_fct.__class__.__name__ == "CrossEntropyLoss"
-                and predictions.dim() == 3
-            ):
+            if self.loss_fct.__class__.__name__ == "CrossEntropyLoss" and predictions.dim() == 3:
                 # Classification case with ensemble: predictions (N, E, k), y_true (N,)
                 N, E, k = predictions.shape
                 loss = 0.0
                 for ensemble_member in range(E):
-                    loss += self.loss_fct(predictions[:, ensemble_member, :], y_true)
+                    loss += self.loss_fct(
+                        predictions[
+                            :,  # type: ignore
+                            ensemble_member,
+                            :,
+                        ],
+                        y_true,
+                    )
                 return loss
 
             else:
                 # Regression case with ensemble (e.g., MSE) or other compatible losses
                 y_true_expanded = y_true.expand_as(predictions)
-                return self.loss_fct(predictions, y_true_expanded)
+                return self.loss_fct(
+                    predictions,  # type: ignore
+                    y_true_expanded,
+                )
         else:
             # Non-ensemble case
-            return self.loss_fct(predictions, y_true)
+            return self.loss_fct(predictions, y_true)  # type: ignore
 
-    def training_step(self, batch, batch_idx):
-        """
-        Training step for a single batch, incorporating penalty if the model has a penalty_forward method.
+    def training_step(self, batch, batch_idx):  # type: ignore
+        """Training step for a single batch, incorporating penalty if the model has a penalty_forward method.
 
         Parameters
         ----------
@@ -190,18 +191,14 @@ class TaskModel(pl.LightningModule):
 
         # Check if the model has a `penalty_forward` method
         if hasattr(self.base_model, "penalty_forward"):
-            preds, penalty = self.base_model.penalty_forward(
-                num_features=num_features, cat_features=cat_features
-            )
+            preds, penalty = self.base_model.penalty_forward(num_features=num_features, cat_features=cat_features)
             loss = self.compute_loss(preds, labels) + penalty
         else:
             preds = self(num_features=num_features, cat_features=cat_features)
             loss = self.compute_loss(preds, labels)
 
         # Log the training loss
-        self.log(
-            "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
-        )
+        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         # Log additional metrics
         if not self.lss and not self.base_model.returns_ensemble:
@@ -218,9 +215,8 @@ class TaskModel(pl.LightningModule):
 
         return loss
 
-    def validation_step(self, batch, batch_idx):
-        """
-        Validation step for a single batch.
+    def validation_step(self, batch, batch_idx):  # type: ignore
+        """Validation step for a single batch.
 
         Parameters
         ----------
@@ -263,9 +259,8 @@ class TaskModel(pl.LightningModule):
 
         return val_loss
 
-    def test_step(self, batch, batch_idx):
-        """
-        Test step for a single batch.
+    def test_step(self, batch, batch_idx):  # type: ignore
+        """Test step for a single batch.
 
         Parameters
         ----------
@@ -308,8 +303,7 @@ class TaskModel(pl.LightningModule):
         return test_loss
 
     def on_validation_epoch_end(self):
-        """
-        Callback executed at the end of each validation epoch.
+        """Callback executed at the end of each validation epoch.
 
         This method retrieves the current validation loss from the trainer's callback metrics
         and stores it in a list for tracking validation losses across epochs. It also applies
@@ -342,22 +336,17 @@ class TaskModel(pl.LightningModule):
         val_loss = self.trainer.callback_metrics.get("val_loss")
         if val_loss is not None:
             val_loss_value = val_loss.item()
-            self.val_losses.append(val_loss_value)  # Store val_loss for each epoch
+            # Store val_loss for each epoch
+            self.val_losses.append(val_loss_value)
 
             # Apply pruning logic if needed
             if self.current_epoch >= self.pruning_epoch:
-                if (
-                    self.early_pruning_threshold is not None
-                    and val_loss_value > self.early_pruning_threshold
-                ):
-                    print(
-                        f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}"
-                    )
+                if self.early_pruning_threshold is not None and val_loss_value > self.early_pruning_threshold:
+                    print(f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}")
                     self.trainer.should_stop = True  # Stop training early
 
     def epoch_val_loss_at(self, epoch):
-        """
-        Retrieve the validation loss at a specific epoch.
+        """Retrieve the validation loss at a specific epoch.
 
         This method allows the user to query the validation loss for any given epoch,
         provided the epoch exists within the range of completed epochs. If the epoch
@@ -384,9 +373,9 @@ class TaskModel(pl.LightningModule):
         else:
             return float("inf")
 
-    def configure_optimizers(self):
-        """
-        Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
+    def configure_optimizers(self):  # type: ignore
+        """Sets up the model's optimizer and learning rate scheduler based on the configurations provided.
+
         The optimizer type can be chosen by the user (Adam, SGD, etc.).
         """
         # Dynamically choose the optimizer based on the passed optimizer_type
