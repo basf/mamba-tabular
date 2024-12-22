@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from .layer_utils.block_diagonal import BlockDiagonal
 
 
 class mLSTMblock(nn.Module):
-    """
-    mLSTM block with convolutions, gated mechanisms, and projection layers.
+    """MLSTM block with convolutions, gated mechanisms, and projection layers.
 
     Parameters
     ----------
@@ -99,8 +99,7 @@ class mLSTMblock(nn.Module):
         self.nt_1 = None
 
     def init_states(self, batch_size, seq_length, device):
-        """
-        Initialize the state tensors with the correct batch and sequence dimensions.
+        """Initialize the state tensors with the correct batch and sequence dimensions.
 
         Parameters
         ----------
@@ -115,8 +114,7 @@ class mLSTMblock(nn.Module):
         self.nt_1 = torch.zeros(batch_size, seq_length, self.hidden_size, device=device)
 
     def forward(self, x):
-        """
-        Forward pass through mLSTM block.
+        """Forward pass through mLSTM block.
 
         Parameters
         ----------
@@ -128,7 +126,8 @@ class mLSTMblock(nn.Module):
         torch.Tensor
             Output tensor of shape (batch, sequence_length, input_size).
         """
-        assert x.ndim == 3
+        if x.ndim != 3:
+            raise ValueError("Input tensor must have 3 dimensions (batch, sequence_length, input_size)")
         B, N, D = x.shape
         device = x.device
 
@@ -139,9 +138,8 @@ class mLSTMblock(nn.Module):
         x = self.ln(x)  # layer norm on x
 
         left = self.left(x)  # part left
-        right = self.activation(
-            self.right(x)
-        )  # part right with just swish (silu) function
+        # part right with just swish (silu) function
+        right = self.activation(self.right(x))
 
         left_left = left.transpose(1, 2)
         left_left = self.activation(self.drop(self.conv(left_left).transpose(1, 2)))
@@ -180,8 +178,7 @@ class mLSTMblock(nn.Module):
 
 
 class sLSTMblock(nn.Module):
-    """
-    sLSTM block with convolutions, gated mechanisms, and projection layers.
+    """SLSTM block with convolutions, gated mechanisms, and projection layers.
 
     Parameters
     ----------
@@ -238,18 +235,10 @@ class sLSTMblock(nn.Module):
             bias=bias,
         )
 
-        self.ri_gate = BlockDiagonal(
-            self.input_size, self.input_size, num_layers, bias=False
-        )
-        self.rf_gate = BlockDiagonal(
-            self.input_size, self.input_size, num_layers, bias=False
-        )
-        self.ro_gate = BlockDiagonal(
-            self.input_size, self.input_size, num_layers, bias=False
-        )
-        self.rz_gate = BlockDiagonal(
-            self.input_size, self.input_size, num_layers, bias=False
-        )
+        self.ri_gate = BlockDiagonal(self.input_size, self.input_size, num_layers, bias=False)
+        self.rf_gate = BlockDiagonal(self.input_size, self.input_size, num_layers, bias=False)
+        self.ro_gate = BlockDiagonal(self.input_size, self.input_size, num_layers, bias=False)
+        self.rz_gate = BlockDiagonal(self.input_size, self.input_size, num_layers, bias=False)
 
         self.ln_i = nn.LayerNorm(self.input_size)
         self.ln_f = nn.LayerNorm(self.input_size)
@@ -275,8 +264,7 @@ class sLSTMblock(nn.Module):
         self.mt_1 = None
 
     def init_states(self, batch_size, seq_length, device):
-        """
-        Initialize the state tensors with the correct batch and sequence dimensions.
+        """Initialize the state tensors with the correct batch and sequence dimensions.
 
         Parameters
         ----------
@@ -293,8 +281,7 @@ class sLSTMblock(nn.Module):
         self.mt_1 = torch.zeros(batch_size, seq_length, self.input_size, device=device)
 
     def forward(self, x):
-        """
-        Forward pass through sLSTM block.
+        """Forward pass through sLSTM block.
 
         Parameters
         ----------
@@ -310,7 +297,7 @@ class sLSTMblock(nn.Module):
         device = x.device
 
         # Initialize states dynamically based on input shape
-        if self.ct_1 is None or self.nt_1.shape[0] != B or self.nt_1.shape[1] != N:
+        if self.ct_1 is None or self.nt_1 is None or self.nt_1.shape[0] != B or self.nt_1.shape[1] != N:
             self.init_states(B, N, device)
 
         x = self.activation(x)
@@ -322,9 +309,12 @@ class sLSTMblock(nn.Module):
         f = torch.exp(self.ln_f(self.f_gate(x) + self.rf_gate(ht_1)))
 
         # Use expand_as to match the shapes of f and i for element-wise operations
-        m = torch.max(torch.log(f) + self.mt_1.expand_as(f), torch.log(i))
+        m = torch.max(
+            torch.log(f) + self.mt_1.expand_as(f),  # type: ignore
+            torch.log(i),  # type: ignore
+        )
         i = torch.exp(torch.log(i) - m)
-        f = torch.exp(torch.log(f) + self.mt_1.expand_as(f) - m)
+        f = torch.exp(torch.log(f) + self.mt_1.expand_as(f) - m)  # type: ignore
         self.mt_1 = m.detach()
 
         o = torch.sigmoid(self.ln_o(self.o_gate(x) + self.ro_gate(ht_1)))
