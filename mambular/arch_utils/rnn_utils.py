@@ -1,18 +1,17 @@
 import torch
 import torch.nn as nn
-from .lstm_utils import mLSTMblock, sLSTMblock
+
 from .layer_utils.batch_ensemble_layer import RNNBatchEnsembleLayer
-from typing import Callable, Literal
+from .lstm_utils import mLSTMblock, sLSTMblock
 
 
 class ConvRNN(nn.Module):
     def __init__(self, config):
-        super(ConvRNN, self).__init__()
+        super().__init__()
 
         # Configuration parameters with defaults where needed
-        self.model_type = getattr(
-            config, "model_type", "RNN"
-        )  # 'RNN', 'LSTM', or 'GRU'
+        # 'RNN', 'LSTM', or 'GRU'
+        self.model_type = getattr(config, "model_type", "RNN")
         self.input_size = getattr(config, "d_model", 128)
         self.hidden_size = getattr(config, "dim_feedforward", 128)
         self.num_layers = getattr(config, "n_layers", 4)
@@ -38,10 +37,7 @@ class ConvRNN(nn.Module):
 
         if self.residuals:
             self.residual_matrix = nn.ParameterList(
-                [
-                    nn.Parameter(torch.randn(self.hidden_size, self.hidden_size))
-                    for _ in range(self.num_layers)
-                ]
+                [nn.Parameter(torch.randn(self.hidden_size, self.hidden_size)) for _ in range(self.num_layers)]
             )
 
         # First Conv1d layer uses input_size
@@ -90,8 +86,7 @@ class ConvRNN(nn.Module):
             self.layernorms_rnn.append(nn.LayerNorm(self.hidden_size))
 
     def forward(self, x):
-        """
-        Forward pass through Conv-RNN layers.
+        """Forward pass through Conv-RNN layers.
 
         Parameters
         -----------
@@ -126,7 +121,7 @@ class ConvRNN(nn.Module):
             # Residual connection with learnable matrix
             if self.residuals:
                 if i < self.num_layers and i > 0:
-                    residual_proj = torch.matmul(residual, self.residual_matrix[i])
+                    residual_proj = torch.matmul(residual, self.residual_matrix[i])  # type: ignore
                     x = x + residual_proj
 
                 # Update residual for next layer
@@ -140,7 +135,7 @@ class EnsembleConvRNN(nn.Module):
         self,
         config,
     ):
-        super(EnsembleConvRNN, self).__init__()
+        super().__init__()
 
         self.input_size = getattr(config, "d_model", 128)
         self.hidden_size = getattr(config, "dim_feedforward", 128)
@@ -164,10 +159,7 @@ class EnsembleConvRNN(nn.Module):
 
         if self.residuals:
             self.residual_matrix = nn.ParameterList(
-                [
-                    nn.Parameter(torch.randn(self.hidden_size, self.hidden_size))
-                    for _ in range(self.num_layers)
-                ]
+                [nn.Parameter(torch.randn(self.hidden_size, self.hidden_size)) for _ in range(self.num_layers)]
             )
 
         # First Conv1d layer uses input_size
@@ -211,7 +203,7 @@ class EnsembleConvRNN(nn.Module):
                     ensemble_bias=self.ensemble_bias,
                     dropout=self.rnn_dropout if i < self.num_layers - 1 else 0,
                     nonlinearity=self.rnn_activation,
-                    scaling_init=self.scaling_init,
+                    scaling_init=self.scaling_init,  # type: ignore
                 )
             else:
                 rnn = RNNBatchEnsembleLayer(
@@ -223,14 +215,13 @@ class EnsembleConvRNN(nn.Module):
                     ensemble_bias=self.ensemble_bias,
                     dropout=self.rnn_dropout if i < self.num_layers - 1 else 0,
                     nonlinearity=self.rnn_activation,
-                    scaling_init=self.scaling_init,
+                    scaling_init=self.scaling_init,  # type: ignore
                 )
 
             self.rnns.append(rnn)
 
     def forward(self, x):
-        """
-        Forward pass through Conv-RNN layers.
+        """Forward pass through Conv-RNN layers.
 
         Parameters
         -----------
@@ -265,7 +256,7 @@ class EnsembleConvRNN(nn.Module):
             # Residual connection with learnable matrix
             if self.residuals:
                 if i < self.num_layers and i > 0:
-                    residual_proj = torch.matmul(residual, self.residual_matrix[i])
+                    residual_proj = torch.matmul(residual, self.residual_matrix[i])  # type: ignore
                     x = x + residual_proj
 
                 # Update residual for next layer
