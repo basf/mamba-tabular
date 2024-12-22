@@ -93,9 +93,7 @@ class PLE(BaseEstimator, TransformerMixin):
             feature = feature
         result_list = []
         for idx, cond in enumerate(self.conditions):  # type: ignore
-            import ast
-
-            result_list.append(ast.literal_eval(cond) * (idx + 1))
+            result_list.append(eval(cond) * (idx + 1))  # type: ignore
 
         encoded_feature = np.expand_dims(np.sum(np.stack(result_list).T, axis=1), 1)
 
