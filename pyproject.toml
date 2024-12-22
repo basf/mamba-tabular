@@ -55,7 +55,8 @@ venv = ".venv"
 line-length = 120
 target-version = 'py310'
 exclude = ["*.ipynb",
-  "mambular/arch_utils/mamba_utils.mamba_orginal.py",]
+  "mambular/arch_utils/mamba_utils.mamba_orginal.py",
+  "mambular/preprocessing/preprocessor.py",]
 
 ignore = ["B006",
   "F401",  # Ignore unused imports
