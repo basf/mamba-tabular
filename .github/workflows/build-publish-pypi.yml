@@ -6,7 +6,7 @@ on:
       - release
 
 jobs:
-  publish:
+  build-publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,15 +18,19 @@ jobs:
         with:
           python-version: "3.8"
 
-      - name: Install dependencies
+      - name: Install Poetry
         run: |
-          python -m pip install --upgrade pip
-          pip install setuptools wheel twine
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
 
-      - name: Build and publish package
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish to PyPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          python setup.py sdist bdist_wheel
-          twine upload dist/*
+        run: poetry publish --username $TWINE_USERNAME --password $TWINE_PASSWORD
