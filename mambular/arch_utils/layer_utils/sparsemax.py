@@ -2,13 +2,13 @@ import torch
 from torch.autograd import Function
 
 
-def _make_ix_like(input, dim=0):
+def _make_ix_like(x, dim=0):
     """
     Creates a tensor of indices like the input tensor along the specified dimension.
 
     Parameters
     ----------
-    input : torch.Tensor
+    x : torch.Tensor
         Input tensor whose shape will be used to determine the shape of the output tensor.
     dim : int, optional
         Dimension along which to create the index tensor. Default is 0.
@@ -18,9 +18,9 @@ def _make_ix_like(input, dim=0):
     torch.Tensor
         A tensor containing indices along the specified dimension.
     """
-    d = input.size(dim)
-    rho = torch.arange(1, d + 1, device=input.device, dtype=input.dtype)
-    view = [1] * input.dim()
+    d = x.size(dim)
+    rho = torch.arange(1, d + 1, device=x.device, dtype=x.dtype)
+    view = [1] * x.dim()
     view[0] = -1
     return rho.view(view).transpose(0, dim)
 
@@ -31,17 +31,18 @@ class SparsemaxFunction(Function):
 
     References
     ----------
-    Martins, A. F., & Astudillo, R. F. (2016). "From Softmax to Sparsemax: A Sparse Model of Attention and Multi-Label Classification."
+    Martins, A. F., & Astudillo, R. F. (2016). "From Softmax to Sparsemax: A Sparse Model of
+    Attention and Multi-Label Classification."
     """
 
     @staticmethod
-    def forward(ctx, input, dim=-1):
+    def forward(ctx, x, dim=-1):
         """
         Forward pass of sparsemax: a normalizing, sparse transformation.
 
         Parameters
         ----------
-        input : torch.Tensor
+        x : torch.Tensor
             The input tensor on which sparsemax will be applied.
         dim : int, optional
             Dimension along which to apply sparsemax. Default is -1.
@@ -52,15 +53,15 @@ class SparsemaxFunction(Function):
             A tensor with the same shape as the input, with sparsemax applied.
         """
         ctx.dim = dim
-        max_val, _ = input.max(dim=dim, keepdim=True)
-        input -= max_val  # Numerical stability trick, as with softmax.
+        max_val, _ = x.max(dim=dim, keepdim=True)
+        x -= max_val  # Numerical stability trick, as with softmax.
         tau, supp_size = SparsemaxFunction._threshold_and_support(input, dim=dim)
         output = torch.clamp(input - tau, min=0)
         ctx.save_for_backward(supp_size, output)
         return output
 
     @staticmethod
-    def backward(ctx, grad_output):
+    def backward(ctx, grad_output):  # type: ignore
         """
         Backward pass of sparsemax, calculating gradients.
 
@@ -85,7 +86,7 @@ class SparsemaxFunction(Function):
         return grad_input, None
 
     @staticmethod
-    def _threshold_and_support(input, dim=-1):
+    def _threshold_and_support(x, dim=-1):
         """
         Computes the threshold and support for sparsemax.
 
@@ -102,16 +103,20 @@ class SparsemaxFunction(Function):
             - torch.Tensor : The threshold value for sparsemax.
             - torch.Tensor : The support size tensor.
         """
-        input_srt, _ = torch.sort(input, descending=True, dim=dim)
+        input_srt, _ = torch.sort(x, descending=True, dim=dim)
         input_cumsum = input_srt.cumsum(dim) - 1
         rhos = _make_ix_like(input, dim)
         support = rhos * input_srt > input_cumsum
 
         support_size = support.sum(dim=dim).unsqueeze(dim)
         tau = input_cumsum.gather(dim, support_size - 1)
-        tau /= support_size.to(input.dtype)
+        tau /= support_size.to(x.dtype)
         return tau, support_size
 
 
-sparsemax = lambda input, dim=-1: SparsemaxFunction.apply(input, dim)
-sparsemoid = lambda input: (0.5 * input + 0.5).clamp_(0, 1)
+def sparsemax(tensor, dim=-1):
+    return SparsemaxFunction.apply(tensor, dim)
+
+
+def sparsemoid(tensor):
+    return (0.5 * tensor + 0.5).clamp_(0, 1)
