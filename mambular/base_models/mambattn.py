@@ -58,11 +58,18 @@ class MambAttention(BaseModel):
         config: DefaultMambAttentionConfig = DefaultMambAttentionConfig(),  # noqa: B008
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
 
-        self.pooling_method = self.hparams.get("pooling_method", config.pooling_method)
-        self.shuffle_embeddings = self.hparams.get("shuffle_embeddings", config.shuffle_embeddings)
+        try:
+            self.pooling_method = self.hparams.pooling_method
+        except AttributeError:
+            self.pooling_method = config.pooling_method
+
+        try:
+            self.shuffle_embeddings = self.hparams.shuffle_embeddings
+        except AttributeError:
+            self.shuffle_embeddings = config.shuffle_embeddings
 
         self.mamba = MambAttn(config)
         self.norm_f = get_normalization_layer(config)
@@ -74,10 +81,18 @@ class MambAttention(BaseModel):
             config=config,
         )
 
-        head_activation = self.hparams.get("head_activation", config.head_activation)
+        try:
+            head_activation = self.hparams.head_activation
+        except AttributeError:
+            head_activation = config.head_activation
+
+        try:
+            input_dim = self.hparams.d_model
+        except AttributeError:
+            input_dim = config.d_model
 
         self.tabular_head = MLPhead(
-            input_dim=self.hparams.get("d_model", config.d_model),
+            input_dim=input_dim,
             config=config,
             output_dim=num_classes,
         )
