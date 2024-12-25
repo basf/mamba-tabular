@@ -235,10 +235,8 @@ class SklearnBaseClassifier(BaseEstimator):
             raise ValueError("The model must be built before the number of parameters can be estimated")
         else:
             if requires_grad:
-                # type: ignore
                 return sum(p.numel() for p in self.task_model.parameters() if p.requires_grad)  # type: ignore
             else:
-                # type: ignore
                 return sum(p.numel() for p in self.task_model.parameters())  # type: ignore
 
     def fit(
@@ -415,7 +413,7 @@ class SklearnBaseClassifier(BaseEstimator):
             logits = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
 
             # Check if ensemble is used
-            if self.task_model.base_model.returns_ensemble:  # If using ensemble
+            if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
                 # Average logits across the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
                 logits = logits.mean(dim=1)
                 if logits.dim() == 1:  # Check if logits has only one dimension (shape (N,))
@@ -480,7 +478,7 @@ class SklearnBaseClassifier(BaseEstimator):
             )
             # Check if ensemble is used
             # If using ensemble
-            if self.task_model.base_model.returns_ensemble:  # type: ignore
+            if hasattr(self.task_model.base_model, "returns_ensemble"):  # type: ignore
                 # Average logits across the ensemble dimension
                 # (assuming shape: (batch_size, ensemble_size, output_dim))
                 logits = logits.mean(dim=1)

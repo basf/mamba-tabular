@@ -140,8 +140,8 @@ class TaskModel(pl.LightningModule):
                     )
                 return loss
             else:
-                return self.family.compute_loss(
-                    predictions,  # type: ignore
+                return self.family.compute_loss(  # type: ignore
+                    predictions,
                     y_true.squeeze(-1),
                 )
 
@@ -201,7 +201,7 @@ class TaskModel(pl.LightningModule):
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         # Log additional metrics
-        if not self.lss and not self.base_model.returns_ensemble:
+        if not self.lss and not hasattr(self.base_model, "returns_ensemble"):
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(
@@ -245,7 +245,7 @@ class TaskModel(pl.LightningModule):
         )
 
         # Log additional metrics
-        if not self.lss and not self.base_model.returns_ensemble:
+        if not self.lss and not hasattr(self.base_model, "returns_ensemble"):
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(
@@ -288,7 +288,7 @@ class TaskModel(pl.LightningModule):
         )
 
         # Log additional metrics
-        if not self.lss and not self.base_model.returns_ensemble:
+        if not self.lss and not hasattr(self.base_model, "returns_ensemble"):
             if self.num_classes > 1:
                 acc = self.acc(preds, labels)
                 self.log(
