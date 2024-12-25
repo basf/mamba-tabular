@@ -1,5 +1,5 @@
 
-## Contribute
+## Contribution Guidelines
 
 Thank you for considering contributing to our Python package! We appreciate your time and effort in helping us improve our project. Please take a moment to review the following guidelines to ensure a smooth and efficient contribution process.
 
@@ -9,17 +9,47 @@ We kindly request all contributors to adhere to our Code of Conduct when partici
 
 ### Setting Up Development Environment
 
+Before you start contributing to the project, you need to set up your development environment. This will allow you to make changes to the codebase, run tests, and build the documentation locally. The project uses `poetry` for dependency management and packaging. Along with that, `ruff` is used for source code formatting and linting.
+
 To set up the development environment for this Python package, follow these steps:
 
 1. Clone the repository to your local machine using the command:
 
 ```
 git clone https://github.com/basf/mamba-tabular
+
+cd mamba-tabular
 ```
-2. Install the required dependencies by running:
+
+2. Install tools required for setting up development environment:
+
+- Install `poetry` for dependency management and packaging. You can install it using the following command or refer to the [official documentation](https://python-poetry.org/docs/) for more information.
 
 ```
-pip install -r requirements.txt
+pip install poetry
+```
+
+- Install `just` command runner. You can install it using the following command or refer to the [official documentation](https://just.systems/man/en/) for more information.
+
+`justfile` in the source directory is used to define and run common tasks like testing, building, and formatting the codebase.
+
+3. In case you are able to successfully install `poetry` and `just`, you can run the following command to install the dependencies and set up the development environment:
+
+```
+# it will install the dependencies as defined in the pyproject.toml file
+# it will also install the pre-commit hooks
+
+just install
+```
+
+In case you are not able to install `just`, you can follow the below steps to set up the development environment:
+
+```
+cd mamaba-tabular
+
+poetry install
+
+poetry run pre-commit install
 ```
 
 If you need to update the documentation, please install the dependencies requried for documentation:
@@ -29,6 +59,7 @@ pip install -r docs/requirements_docs.txt
 ```
 
 **Note:** You can also set up a virtual environment to isolate your development environment.
+
 
 ### How to Contribute
 

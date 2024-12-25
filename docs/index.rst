@@ -41,6 +41,5 @@
    :caption: Developer Guide
    :maxdepth: 1
 
-   codeofconduct
-   development
+   contributing
    release
