@@ -67,7 +67,7 @@ class MambaTab(BaseModel):
 
         input_dim = 0
         for feature_name, input_shape in num_feature_info.items():
-            input_dim += input_shape
+            input_dim += 1
         for feature_name, input_shape in cat_feature_info.items():
             input_dim += 1
 
