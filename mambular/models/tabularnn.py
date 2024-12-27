@@ -1,9 +1,9 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_classifier import SklearnBaseClassifier
-from .sklearn_base_lss import SklearnBaseLSS
-from ..utils.docstring_generator import generate_docstring
 from ..base_models.tabularnn import TabulaRNN
 from ..configs.tabularnn_config import DefaultTabulaRNNConfig
+from ..utils.docstring_generator import generate_docstring
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class TabulaRNNRegressor(SklearnBaseRegressor):
@@ -49,9 +49,8 @@ class TabulaRNNClassifier(SklearnBaseClassifier):
 
 
 class TabulaRNNLSS(SklearnBaseLSS):
-    """
-    RNN LSS. This class extends the SklearnBaseLSS class and uses the TabulaRNN model
-    with the default TabulaRNN configuration.
+    """RNN LSS. This class extends the SklearnBaseLSS class and uses the TabulaRNN model with the default TabulaRNN
+    configuration.
 
     The accepted arguments to the TabulaRNNLSS class include both the attributes in the DefaultTabulaRNNConfig dataclass
     and the parameters for the Preprocessor class.

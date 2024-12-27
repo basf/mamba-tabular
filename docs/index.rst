@@ -28,7 +28,7 @@
    :caption: API Reference
    :maxdepth: 2
    :hidden:
- 
+
    api/models/index
    api/base_models/index
    api/preprocessing/index
@@ -41,6 +41,5 @@
    :caption: Developer Guide
    :maxdepth: 1
 
-   codeofconduct
-   development
+   contributing
    release

@@ -1,13 +1,12 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_classifier import SklearnBaseClassifier
-from .sklearn_base_lss import SklearnBaseLSS
 from ..base_models.resnet import ResNet
 from ..configs.resnet_config import DefaultResNetConfig
 from ..utils.docstring_generator import generate_docstring
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class ResNetRegressor(SklearnBaseRegressor):
-
     __doc__ = generate_docstring(
         DefaultResNetConfig,
         model_description="""

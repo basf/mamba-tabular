@@ -2,8 +2,7 @@ import torch.nn as nn
 
 
 class CNNBlock(nn.Module):
-    """
-    A modular CNN block that allows for configurable convolutional, pooling, and dropout layers.
+    """A modular CNN block that allows for configurable convolutional, pooling, and dropout layers.
 
     Attributes
     ----------

@@ -15,9 +15,7 @@ class TestMambularClassifier(unittest.TestCase):
         self.patcher_pl_trainer = patch("lightning.Trainer")
         self.mock_pl_trainer = self.patcher_pl_trainer.start()
 
-        self.patcher_base_model = patch(
-            "mambular.base_models.classifier.BaseMambularClassifier"
-        )
+        self.patcher_base_model = patch("mambular.base_models.classifier.BaseMambularClassifier")
         self.mock_base_model = self.patcher_base_model.start()
 
         self.classifier = MambularClassifier(d_model=128, dropout=0.1)
@@ -43,9 +41,7 @@ class TestMambularClassifier(unittest.TestCase):
 
     def test_split_data(self):
         """Test the data splitting functionality."""
-        X_train, X_val, y_train, y_val = self.classifier.split_data(
-            self.X, self.y, val_size=0.2, random_state=42
-        )
+        X_train, X_val, y_train, y_val = self.classifier.split_data(self.X, self.y, val_size=0.2, random_state=42)
         self.assertEqual(len(X_train), 80)
         self.assertEqual(len(X_val), 20)
         self.assertEqual(len(y_train), 80)
@@ -86,9 +82,7 @@ class TestMambularClassifier(unittest.TestCase):
         mock_predictions = np.random.choice([0, 1, 2], size=100)
         raw_probabilities = np.random.rand(100, 3)
         # Normalize these probabilities so that each row sums to 1
-        mock_probabilities = raw_probabilities / raw_probabilities.sum(
-            axis=1, keepdims=True
-        )
+        mock_probabilities = raw_probabilities / raw_probabilities.sum(axis=1, keepdims=True)
         self.classifier.predict = MagicMock(return_value=mock_predictions)
         self.classifier.predict_proba = MagicMock(return_value=mock_probabilities)
 

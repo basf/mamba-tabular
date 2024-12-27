@@ -1,15 +1,15 @@
 import torch
 import torch.nn as nn
-from ..configs.mlp_config import DefaultMLPConfig
-from .basemodel import BaseModel
+
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
+from ..configs.mlp_config import DefaultMLPConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
+from .basemodel import BaseModel
 
 
 class MLP(BaseModel):
-    """
-    A multi-layer perceptron (MLP) model for tabular data processing, with options for embedding, normalization,
-    skip connections, and customizable activation functions.
+    """A multi-layer perceptron (MLP) model for tabular data processing, with options for embedding, normalization, skip
+    connections, and customizable activation functions.
 
     Parameters
     ----------
@@ -53,7 +53,6 @@ class MLP(BaseModel):
     forward(num_features, cat_features)
         Perform a forward pass through the model, including embedding (if enabled), linear transformations,
         activation, normalization, and prediction steps.
-
     """
 
     def __init__(
@@ -61,7 +60,7 @@ class MLP(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes: int = 1,
-        config: DefaultMLPConfig = DefaultMLPConfig(),
+        config: DefaultMLPConfig = DefaultMLPConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
@@ -82,10 +81,7 @@ class MLP(BaseModel):
                 cat_feature_info=cat_feature_info,
                 config=config,
             )
-            input_dim = (
-                len(num_feature_info) * self.hparams.d_model
-                + len(cat_feature_info) * self.hparams.d_model
-            )
+            input_dim = len(num_feature_info) * self.hparams.d_model + len(cat_feature_info) * self.hparams.d_model
 
         # Input layer
         self.layers.append(nn.Linear(input_dim, self.hparams.layer_sizes[0]))
@@ -101,9 +97,7 @@ class MLP(BaseModel):
 
         # Hidden layers
         for i in range(1, len(self.hparams.layer_sizes)):
-            self.layers.append(
-                nn.Linear(self.hparams.layer_sizes[i - 1], self.hparams.layer_sizes[i])
-            )
+            self.layers.append(nn.Linear(self.hparams.layer_sizes[i - 1], self.hparams.layer_sizes[i]))
             if self.hparams.batch_norm:
                 self.layers.append(nn.BatchNorm1d(self.hparams.layer_sizes[i]))
             if self.hparams.layer_norm:
@@ -119,8 +113,7 @@ class MLP(BaseModel):
         self.layers.append(nn.Linear(self.hparams.layer_sizes[-1], num_classes))
 
     def forward(self, num_features, cat_features) -> torch.Tensor:
-        """
-        Forward pass of the MLP model.
+        """Forward pass of the MLP model.
 
         Parameters
         ----------

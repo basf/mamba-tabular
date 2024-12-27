@@ -1,9 +1,11 @@
-import torch.nn as nn
-import torch
-from rotary_embedding_torch import RotaryEmbedding
-from einops import rearrange
-import torch.nn.functional as F
+# ruff: noqa
+
 import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from einops import rearrange
+from rotary_embedding_torch import RotaryEmbedding
 
 
 class GEGLU(nn.Module):
@@ -40,7 +42,7 @@ class Attention(nn.Module):
         h = self.heads
         x = self.norm(x)
         q, k, v = self.to_qkv(x).chunk(3, dim=-1)
-        q, k, v = map(lambda t: rearrange(t, "b n (h d) -> b h n d", h=h), (q, k, v))
+        q, k, v = map(lambda t: rearrange(t, "b n (h d) -> b h n d", h=h), (q, k, v))  # type: ignore
         if self.rotary:
             q = self.rotary_embedding.rotate_queries_or_keys(q)
             k = self.rotary_embedding.rotate_queries_or_keys(k)
@@ -59,9 +61,7 @@ class Attention(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(
-        self, dim, depth, heads, dim_head, attn_dropout, ff_dropout, rotary=False
-    ):
+    def __init__(self, dim, depth, heads, dim_head, attn_dropout, ff_dropout, rotary=False):
         super().__init__()
         self.layers = nn.ModuleList([])
 
@@ -84,7 +84,7 @@ class Transformer(nn.Module):
     def forward(self, x, return_attn=False):
         post_softmax_attns = []
 
-        for attn, ff in self.layers:
+        for attn, ff in self.layers:  # type: ignore
             attn_out, post_softmax_attn = attn(x)
             post_softmax_attns.append(post_softmax_attn)
 

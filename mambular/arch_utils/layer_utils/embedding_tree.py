@@ -1,7 +1,8 @@
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
 
 
 class NeuralEmbeddingTree(nn.Module):
@@ -11,8 +12,7 @@ class NeuralEmbeddingTree(nn.Module):
         output_dim,
         temperature=0.0,
     ):
-        """
-        Initialize the neural decision tree with a neural network at each leaf.
+        """Initialize the neural decision tree with a neural network at each leaf.
 
         Parameters:
         -----------
@@ -25,7 +25,7 @@ class NeuralEmbeddingTree(nn.Module):
         lamda: float
             Regularization parameter.
         """
-        super(NeuralEmbeddingTree, self).__init__()
+        super().__init__()
 
         self.temperature = temperature
         self.output_dim = output_dim
@@ -48,9 +48,7 @@ class NeuralEmbeddingTree(nn.Module):
         if self.temperature > 0.0:
             # Replace sigmoid with Gumbel-Softmax for path_prob calculation
             logits = decision_boundaries / self.temperature
-            path_prob = (
-                (logits > 0).float() + logits.sigmoid() - logits.sigmoid().detach()
-            )
+            path_prob = (logits > 0).float() + logits.sigmoid() - logits.sigmoid().detach()
         else:
             path_prob = (decision_boundaries > 0).float()
 

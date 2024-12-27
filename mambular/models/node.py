@@ -1,13 +1,12 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_classifier import SklearnBaseClassifier
-from .sklearn_base_lss import SklearnBaseLSS
 from ..base_models.node import NODE
 from ..configs.node_config import DefaultNODEConfig
 from ..utils.docstring_generator import generate_docstring
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class NODERegressor(SklearnBaseRegressor):
-
     __doc__ = generate_docstring(
         DefaultNODEConfig,
         model_description="""
@@ -31,7 +30,7 @@ class NODEClassifier(SklearnBaseClassifier):
     __doc__ = generate_docstring(
         DefaultNODEConfig,
         model_description="""
-        Neural Oblivious Decision Ensemble (NODE) Classifier. Slightly different with a MLP as a tabular task specific head. 
+        Neural Oblivious Decision Ensemble (NODE) Classifier. Slightly different with a MLP as a tabular task specific head.
         This class extends the SklearnBaseClassifier class and uses the NODE model
         with the default NODE configuration.
         """,
@@ -52,7 +51,7 @@ class NODELSS(SklearnBaseLSS):
     __doc__ = generate_docstring(
         DefaultNODEConfig,
         model_description="""
-        Neural Oblivious Decision Ensemble (NODE) for distributional regression. Slightly different with a MLP as a tabular task specific head. 
+        Neural Oblivious Decision Ensemble (NODE) for distributional regression. Slightly different with a MLP as a tabular task specific head.
         This class extends the SklearnBaseLSS class and uses the NODE model
         with the default NODE configuration.
         """,

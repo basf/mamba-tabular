@@ -1,9 +1,9 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_lss import SklearnBaseLSS
-from .sklearn_base_classifier import SklearnBaseClassifier
 from ..base_models.mambattn import MambAttention
 from ..configs.mambattention_config import DefaultMambAttentionConfig
 from ..utils.docstring_generator import generate_docstring
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class MambAttentionRegressor(SklearnBaseRegressor):
@@ -23,9 +23,7 @@ class MambAttentionRegressor(SklearnBaseRegressor):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(
-            model=MambAttention, config=DefaultMambAttentionConfig, **kwargs
-        )
+        super().__init__(model=MambAttention, config=DefaultMambAttentionConfig, **kwargs)
 
 
 class MambAttentionClassifier(SklearnBaseClassifier):
@@ -45,9 +43,7 @@ class MambAttentionClassifier(SklearnBaseClassifier):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(
-            model=MambAttention, config=DefaultMambAttentionConfig, **kwargs
-        )
+        super().__init__(model=MambAttention, config=DefaultMambAttentionConfig, **kwargs)
 
 
 class MambAttentionLSS(SklearnBaseLSS):
@@ -67,6 +63,4 @@ class MambAttentionLSS(SklearnBaseLSS):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(
-            model=MambAttention, config=DefaultMambAttentionConfig, **kwargs
-        )
+        super().__init__(model=MambAttention, config=DefaultMambAttentionConfig, **kwargs)

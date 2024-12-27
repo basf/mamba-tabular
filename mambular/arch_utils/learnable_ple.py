@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class PeriodicLinearEncodingLayer(nn.Module):
     def __init__(self, bins=10, learn_bins=True):
-        super(PeriodicLinearEncodingLayer, self).__init__()
+        super().__init__()
         self.bins = bins
         self.learn_bins = learn_bins
 

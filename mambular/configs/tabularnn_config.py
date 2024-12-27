@@ -1,12 +1,12 @@
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
 import torch.nn as nn
-from typing import Literal
 
 
 @dataclass
 class DefaultTabulaRNNConfig:
-    """
-    Configuration class for the TabulaRNN model with predefined hyperparameters.
+    """Configuration class for the TabulaRNN model with predefined hyperparameters.
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ class DefaultTabulaRNNConfig:
     n_layers: int = 4
     rnn_dropout: float = 0.2
     norm: str = "RMSNorm"
-    activation: callable = nn.SELU()
+    activation: Callable = nn.SELU()  # noqa: RUF009
     residuals: bool = False
 
     # Embedding params
@@ -95,14 +95,14 @@ class DefaultTabulaRNNConfig:
     plr_lite: bool = False
     n_frequencies: int = 48
     frequencies_init_scale: float = 0.01
-    embedding_activation: callable = nn.ReLU()
+    embedding_activation: Callable = nn.ReLU()  # noqa: RUF009
     layer_norm_after_embedding: bool = False
 
     # Head params
-    head_layer_sizes: list = ()
+    head_layer_sizes: list = field(default_factory=list)
     head_dropout: float = 0.5
     head_skip_layers: bool = False
-    head_activation: callable = nn.SELU()
+    head_activation: Callable = nn.SELU()  # noqa: RUF009
     head_use_batch_norm: bool = False
 
     # Pooling and normalization

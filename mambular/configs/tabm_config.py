@@ -1,12 +1,13 @@
-from dataclasses import dataclass
-import torch.nn as nn
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from typing import Literal
+
+import torch.nn as nn
 
 
 @dataclass
 class DefaultTabMConfig:
-    """
-    Configuration class for the TabM model with batch ensembling and predefined hyperparameters.
+    """Configuration class for the TabM model with batch ensembling and predefined hyperparameters.
 
     Parameters
     ----------
@@ -77,10 +78,10 @@ class DefaultTabMConfig:
     lr_factor: float = 0.1
 
     # arch params
-    layer_sizes: list = (256, 256, 128)
-    activation: callable = nn.ReLU()
+    layer_sizes: list = field(default_factory=lambda: [256, 256, 128])
+    activation: Callable = nn.ReLU()  # noqa: RUF009
     dropout: float = 0.5
-    norm: str = None
+    norm: str | None = None
     use_glu: bool = False
     batch_norm: bool = False
     layer_norm: bool = False
@@ -88,11 +89,11 @@ class DefaultTabMConfig:
 
     # embedding params
     use_embeddings: bool = True
-    embedding_type: float = "plr"
+    embedding_type: str = "linear"
     embedding_bias = False
     plr_lite: bool = False
     average_embeddings: bool = False
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
     layer_norm_after_embedding: bool = False
     d_model: int = 32
     plr_lite: bool = False

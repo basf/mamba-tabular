@@ -1,13 +1,12 @@
-from .sklearn_base_regressor import SklearnBaseRegressor
-from .sklearn_base_classifier import SklearnBaseClassifier
-from .sklearn_base_lss import SklearnBaseLSS
 from ..base_models.mlp import MLP
 from ..configs.mlp_config import DefaultMLPConfig
 from ..utils.docstring_generator import generate_docstring
+from .sklearn_base_classifier import SklearnBaseClassifier
+from .sklearn_base_lss import SklearnBaseLSS
+from .sklearn_base_regressor import SklearnBaseRegressor
 
 
 class MLPRegressor(SklearnBaseRegressor):
-
     __doc__ = generate_docstring(
         DefaultMLPConfig,
         model_description="""

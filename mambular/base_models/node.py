@@ -1,15 +1,15 @@
-from .basemodel import BaseModel
-from ..configs.node_config import DefaultNODEConfig
 import torch
+
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
-from ..arch_utils.node_utils import DenseBlock
 from ..arch_utils.mlp_utils import MLPhead
+from ..arch_utils.node_utils import DenseBlock
+from ..configs.node_config import DefaultNODEConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
+from .basemodel import BaseModel
 
 
 class NODE(BaseModel):
-    """
-    A Neural Oblivious Decision Ensemble (NODE) model for tabular data, integrating feature embeddings, dense blocks,
+    """A Neural Oblivious Decision Ensemble (NODE) model for tabular data, integrating feature embeddings, dense blocks,
     and customizable heads for predictions.
 
     Parameters
@@ -48,7 +48,6 @@ class NODE(BaseModel):
     forward(num_features, cat_features)
         Perform a forward pass through the model, including embedding (if enabled), dense transformations,
         and prediction steps.
-
     """
 
     def __init__(
@@ -56,7 +55,7 @@ class NODE(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes: int = 1,
-        config: DefaultNODEConfig = DefaultNODEConfig(),
+        config: DefaultNODEConfig = DefaultNODEConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
@@ -68,12 +67,9 @@ class NODE(BaseModel):
         self.num_feature_info = num_feature_info
 
         if self.hparams.use_embeddings:
-            input_dim = (
-                len(num_feature_info) * self.hparams.d_model
-                + len(cat_feature_info) * self.hparams.d_model
-            )
+            input_dim = len(num_feature_info) * self.hparams.d_model + len(cat_feature_info) * self.hparams.d_model
 
-            self.embedding_layer = EmbeddingLayer(config)
+            self.embedding_layer = EmbeddingLayer(config)  # type: ignore
 
         else:
             input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
@@ -95,8 +91,7 @@ class NODE(BaseModel):
         )
 
     def forward(self, num_features, cat_features):
-        """
-        Forward pass through the NODE model.
+        """Forward pass through the NODE model.
 
         Parameters
         ----------

@@ -1,32 +1,29 @@
 import torch
 import torch.nn as nn
+
 from .embedding_tree import NeuralEmbeddingTree
 from .plr_layer import PeriodicEmbeddings
 
 
 class EmbeddingLayer(nn.Module):
     def __init__(self, num_feature_info, cat_feature_info, config):
-        """
-        Embedding layer that handles numerical and categorical embeddings.
+        """Embedding layer that handles numerical and categorical embeddings.
 
         Parameters
         ----------
         num_feature_info : dict
             Dictionary where keys are numerical feature names and values are their respective input dimensions.
         cat_feature_info : dict
-            Dictionary where keys are categorical feature names and values are the number of categories for each feature.
+            Dictionary where keys are categorical feature names and values are the number of categories
+            for each feature.
         config : Config
             Configuration object containing all required settings.
         """
-        super(EmbeddingLayer, self).__init__()
+        super().__init__()
 
         self.d_model = getattr(config, "d_model", 128)
-        self.embedding_activation = getattr(
-            config, "embedding_activation", nn.Identity()
-        )
-        self.layer_norm_after_embedding = getattr(
-            config, "layer_norm_after_embedding", False
-        )
+        self.embedding_activation = getattr(config, "embedding_activation", nn.Identity())
+        self.layer_norm_after_embedding = getattr(config, "layer_norm_after_embedding", False)
         self.use_cls = getattr(config, "use_cls", False)
         self.cls_position = getattr(config, "cls_position", 0)
         self.embedding_dropout = (
@@ -71,10 +68,10 @@ class EmbeddingLayer(nn.Module):
                     for feature_name, feature_info in num_feature_info.items()
                 ]
             )
+        # for splines and other embeddings
+        # splines followed by linear if n_knots actual knots is less than the defined knots
         else:
-            raise ValueError(
-                "Invalid embedding_type. Choose from 'linear', 'ndt', or 'plr'."
-            )
+            raise ValueError("Invalid embedding_type. Choose from 'linear', 'ndt', or 'plr'.")
 
         self.cat_embeddings = nn.ModuleList(
             [
@@ -104,8 +101,7 @@ class EmbeddingLayer(nn.Module):
             self.embedding_norm = nn.LayerNorm(self.d_model)
 
     def forward(self, num_features=None, cat_features=None):
-        """
-        Defines the forward pass of the model.
+        """Defines the forward pass of the model.
 
         Parameters
         ----------
@@ -128,17 +124,17 @@ class EmbeddingLayer(nn.Module):
         # Class token initialization
         if self.use_cls:
             batch_size = (
-                cat_features[0].size(0)
+                cat_features[0].size(  # type: ignore
+                    0
+                )
                 if cat_features != []
-                else num_features[0].size(0)
-            )
+                else num_features[0].size(0)  # type: ignore
+            )  # type: ignore
             cls_tokens = self.cls_token.expand(batch_size, -1, -1)
 
         # Process categorical embeddings
         if self.cat_embeddings and cat_features is not None:
-            cat_embeddings = [
-                emb(cat_features[i]) for i, emb in enumerate(self.cat_embeddings)
-            ]
+            cat_embeddings = [emb(cat_features[i]) for i, emb in enumerate(self.cat_embeddings)]
             cat_embeddings = torch.stack(cat_embeddings, dim=1)
             cat_embeddings = torch.squeeze(cat_embeddings, dim=2)
             if self.layer_norm_after_embedding:
@@ -153,9 +149,8 @@ class EmbeddingLayer(nn.Module):
                 num_features = torch.stack(num_features, dim=1).squeeze(
                     -1
                 )  # Stack features along the feature dimension
-                num_embeddings = self.num_embeddings(
-                    num_features
-                )  # Use the single PLR layer for all features
+                # Use the single PLR layer for all features
+                num_embeddings = self.num_embeddings(num_features)
                 if self.layer_norm_after_embedding:
                     num_embeddings = self.embedding_norm(num_embeddings)
             else:
@@ -163,9 +158,7 @@ class EmbeddingLayer(nn.Module):
         else:
             # For linear and ndt embeddings, handle each feature individually
             if self.num_embeddings and num_features is not None:
-                num_embeddings = [
-                    emb(num_features[i]) for i, emb in enumerate(self.num_embeddings)
-                ]
+                num_embeddings = [emb(num_features[i]) for i, emb in enumerate(self.num_embeddings)]  # type: ignore
                 num_embeddings = torch.stack(num_embeddings, dim=1)
                 if self.layer_norm_after_embedding:
                     num_embeddings = self.embedding_norm(num_embeddings)
@@ -185,13 +178,11 @@ class EmbeddingLayer(nn.Module):
         # Add class token if required
         if self.use_cls:
             if self.cls_position == 0:
-                x = torch.cat([cls_tokens, x], dim=1)
+                x = torch.cat([cls_tokens, x], dim=1)  # type: ignore
             elif self.cls_position == 1:
-                x = torch.cat([x, cls_tokens], dim=1)
+                x = torch.cat([x, cls_tokens], dim=1)  # type: ignore
             else:
-                raise ValueError(
-                    "Invalid cls_position value. It should be either 0 or 1."
-                )
+                raise ValueError("Invalid cls_position value. It should be either 0 or 1.")
 
         # Apply dropout to embeddings if specified in config
         if self.embedding_dropout is not None:
@@ -202,7 +193,7 @@ class EmbeddingLayer(nn.Module):
 
 class OneHotEncoding(nn.Module):
     def __init__(self, num_categories):
-        super(OneHotEncoding, self).__init__()
+        super().__init__()
         self.num_categories = num_categories
 
     def forward(self, x):

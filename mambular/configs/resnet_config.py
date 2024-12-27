@@ -1,11 +1,12 @@
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
 import torch.nn as nn
 
 
 @dataclass
 class DefaultResNetConfig:
-    """
-    Configuration class for the default ResNet model with predefined hyperparameters.
+    """Configuration class for the default ResNet model with predefined hyperparameters.
 
     Parameters
     ----------
@@ -61,8 +62,8 @@ class DefaultResNetConfig:
     lr_patience: int = 10
     weight_decay: float = 1e-06
     lr_factor: float = 0.1
-    layer_sizes: list = (256, 128, 32)
-    activation: callable = nn.SELU()
+    layer_sizes: list = field(default_factory=lambda: [256, 128, 32])
+    activation: Callable = nn.SELU()  # noqa: RUF009
     skip_layers: bool = False
     dropout: float = 0.5
     norm: bool = False
@@ -75,11 +76,11 @@ class DefaultResNetConfig:
 
     # embedding params
     use_embeddings: bool = True
-    embedding_type: float = "linear"
+    embedding_type: str = "linear"
     embedding_bias = False
     plr_lite: bool = False
     average_embeddings: bool = True
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
     layer_norm_after_embedding: bool = False
     d_model: int = 64
     plr_lite: bool = False

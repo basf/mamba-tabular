@@ -3,10 +3,11 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
-import torch
 from properscoring import (
     crps_gaussian,
-)  # Assuming this is the source of the CRPS function
+)
+
+# Assuming this is the source of the CRPS function
 from sklearn.metrics import mean_poisson_deviance, mean_squared_error
 
 from mambular.models import MambularLSS  # Update the import path
@@ -18,9 +19,7 @@ class TestMambularLSS(unittest.TestCase):
         self.patcher_trainer = patch("lightning.Trainer")
         self.mock_trainer = self.patcher_trainer.start()
 
-        self.patcher_base_model = patch(
-            "mambular.base_models.distributional.BaseMambularLSS"
-        )
+        self.patcher_base_model = patch("mambular.base_models.distributional.BaseMambularLSS")
         self.mock_base_model = self.patcher_base_model.start()
 
         # Initialize MambularLSS with example parameters
@@ -49,9 +48,7 @@ class TestMambularLSS(unittest.TestCase):
         self.assertEqual(self.model.config.n_layers, 4)
 
     def test_split_data(self):
-        X_train, X_val, y_train, y_val = self.model.split_data(
-            self.X, self.y, val_size=0.2, random_state=42
-        )
+        X_train, X_val, y_train, y_val = self.model.split_data(self.X, self.y, val_size=0.2, random_state=42)
         self.assertEqual(len(X_train), 80)
         self.assertEqual(len(X_val), 20)
         self.assertEqual(len(y_train), 80)
@@ -69,9 +66,7 @@ class TestMambularLSS(unittest.TestCase):
 
     def test_normal_metrics(self):
         # Mock predictions for the normal distribution: [mean, variance]
-        mock_predictions = np.column_stack(
-            (np.random.normal(size=100), np.abs(np.random.normal(size=100)))
-        )
+        mock_predictions = np.column_stack((np.random.normal(size=100), np.abs(np.random.normal(size=100))))
         self.model.predict = MagicMock(return_value=mock_predictions)
 
         # Define custom metrics or use a function that fetches appropriate metrics
@@ -79,37 +74,26 @@ class TestMambularLSS(unittest.TestCase):
             return_value={
                 "MSE": lambda y, pred: mean_squared_error(y, pred[:, 0]),
                 "CRPS": lambda y, pred: np.mean(
-                    [
-                        crps_gaussian(y[i], mu=pred[i, 0], sig=np.sqrt(pred[i, 1]))
-                        for i in range(len(y))
-                    ]
+                    [crps_gaussian(y[i], mu=pred[i, 0], sig=np.sqrt(pred[i, 1])) for i in range(len(y))]
                 ),
             }
         )
 
-        results = self.model.evaluate(
-            self.X_test, self.y_test, distribution_family="normal"
-        )
+        results = self.model.evaluate(self.X_test, self.y_test, distribution_family="normal")
 
         # Validate the MSE
         expected_mse = mean_squared_error(self.y_test, mock_predictions[:, 0])
         self.assertAlmostEqual(results["MSE"], expected_mse, places=4)
-        self.assertIn(
-            "CRPS", results
-        )  # Check for existence but not the exact value in this test
+        self.assertIn("CRPS", results)  # Check for existence but not the exact value in this test
 
     def test_poisson_metrics(self):
         # Mock predictions for Poisson
         mock_predictions = np.random.poisson(lam=3, size=100) + 1e-3
         self.model.predict = MagicMock(return_value=mock_predictions)
 
-        self.model.get_default_metrics = MagicMock(
-            return_value={"Poisson Deviance": mean_poisson_deviance}
-        )
+        self.model.get_default_metrics = MagicMock(return_value={"Poisson Deviance": mean_poisson_deviance})
 
-        results = self.model.evaluate(
-            self.X_test, self.y_test, distribution_family="poisson"
-        )
+        results = self.model.evaluate(self.X_test, self.y_test, distribution_family="poisson")
         self.assertIn("Poisson Deviance", results)
         # Optionally calculate expected deviance and check
         expected_deviance = mean_poisson_deviance(self.y_test, mock_predictions)

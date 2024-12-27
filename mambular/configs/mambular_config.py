@@ -1,12 +1,12 @@
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
 import torch.nn as nn
-from typing import Literal
 
 
 @dataclass
 class DefaultMambularConfig:
-    """
-    Configuration class for the Default Mambular model with predefined hyperparameters.
+    """Configuration class for the Default Mambular model with predefined hyperparameters.
 
     Parameters
     ----------
@@ -108,11 +108,11 @@ class DefaultMambularConfig:
     dt_min: float = 1e-04
     dt_init_floor: float = 1e-04
     norm: str = "RMSNorm"
-    activation: callable = nn.SiLU()
+    activation: Callable = nn.SiLU()  # noqa: RUF009
     layer_norm_eps: float = 1e-05
 
     # Embedding Parameters
-    embedding_activation: callable = nn.Identity()
+    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
     embedding_type: str = "linear"
     embedding_bias: bool = False
     plr_lite: bool = False
@@ -122,10 +122,10 @@ class DefaultMambularConfig:
     shuffle_embeddings: bool = False
 
     # Head Parameters
-    head_layer_sizes: list = ()
+    head_layer_sizes: list = field(default_factory=list)
     head_dropout: float = 0.5
     head_skip_layers: bool = False
-    head_activation: callable = nn.SELU()
+    head_activation: Callable = nn.SELU()  # noqa: RUF009
     head_use_batch_norm: bool = False
 
     # Additional Features

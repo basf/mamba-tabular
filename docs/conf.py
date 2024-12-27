@@ -4,18 +4,17 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import pathlib
 import sys
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../"))
-sys.path.insert(1, os.path.dirname(
-    os.path.abspath("../")) + os.sep + "mambular")
+sys.path.insert(1, os.path.dirname(os.path.abspath("../")) + os.sep + "mambular")
 
 project = "mambular"
-copyright = "2024, BASF SE"
+project_copyright = "2024, BASF SE"
 author = "Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Saefken, Soheila Samiee"
 
 VERSION_PATH = "../mambular/__version__.py"
@@ -59,7 +58,7 @@ autodoc_mock_imports = [
     "pandas",
     "sklearn",
     "properscoring",
-    "tqdm"
+    "tqdm",
 ]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -118,7 +117,7 @@ html_theme_options = {
 html_logo = "images/logo/mamba_tabular.jpg"
 
 # Override the Sphinx default title that appends `documentation`
-html_title = f"{project}"
+html_title = f"{project} {project_copyright}"
 # Format of the last updated section in the footer
 html_last_updated_fmt = "%Y-%m-%d"
 

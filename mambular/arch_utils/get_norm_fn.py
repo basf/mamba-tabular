@@ -1,16 +1,15 @@
 from .layer_utils.normalization_layers import (
-    RMSNorm,
+    BatchNorm,
+    GroupNorm,
+    InstanceNorm,
     LayerNorm,
     LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
+    RMSNorm,
 )
 
 
 def get_normalization_layer(config):
-    """
-    Function to return the appropriate normalization layer based on the configuration.
+    """Function to return the appropriate normalization layer based on the configuration.
 
     Parameters:
     -----------
