@@ -25,8 +25,11 @@ class SklearnBaseRegressor(BaseEstimator):
             "task",
             "cat_cutoff",
             "treat_all_integers_as_numerical",
-            "knots",
             "degree",
+            "n_knots",
+            "use_decision_tree_knots",
+            "knots_strategy",
+            "spline_implementation",
         ]
 
         self.config_kwargs = {
