@@ -70,7 +70,7 @@ class Preprocessor:
     knots_strategy : str, default="uniform"
         Defines the strategy for determining knot positions in spline transformations
         if `use_decision_tree_knots` is False. Options include 'uniform', 'quantile'.
-    spline_implementation : str, default="scipy"
+    spline_implementation : str, default="sklearn"
         The library to use for spline implementation. Options include 'scipy' and 'sklearn'.
 
     Attributes
@@ -96,7 +96,7 @@ class Preprocessor:
         n_knots=64,
         use_decision_tree_knots=True,
         knots_strategy="uniform",
-        spline_implementation="scipy",
+        spline_implementation="sklearn",
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = (
@@ -110,7 +110,7 @@ class Preprocessor:
             "binning",
             "one-hot",
             "standardization",
-            "min-max",
+            "minmax",
             "quantile",
             "polynomial",
             "robust",
