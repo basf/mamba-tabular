@@ -1,17 +1,16 @@
 import torch
 import torch.nn as nn
-from typing import Any
-from ..configs.resnet_config import DefaultResNetConfig
-from .basemodel import BaseModel
-from ..arch_utils.resnet_utils import ResidualBlock
+
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.resnet_utils import ResidualBlock
+from ..configs.resnet_config import DefaultResNetConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
+from .basemodel import BaseModel
 
 
 class ResNet(BaseModel):
-    """
-    A ResNet model for tabular data, combining feature embeddings, residual blocks, and customizable architecture
-    for processing categorical and numerical features.
+    """A ResNet model for tabular data, combining feature embeddings, residual blocks, and customizable architecture for
+    processing categorical and numerical features.
 
     Parameters
     ----------
@@ -53,7 +52,6 @@ class ResNet(BaseModel):
     forward(num_features, cat_features)
         Perform a forward pass through the model, including embedding (if enabled), residual blocks,
         and prediction steps.
-
     """
 
     def __init__(
@@ -61,7 +59,7 @@ class ResNet(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes: int = 1,
-        config: DefaultResNetConfig = DefaultResNetConfig(),
+        config: DefaultResNetConfig = DefaultResNetConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
@@ -72,10 +70,7 @@ class ResNet(BaseModel):
         self.num_feature_info = num_feature_info
 
         if self.hparams.use_embeddings:
-            input_dim = (
-                len(num_feature_info) * self.hparams.d_model
-                + len(cat_feature_info) * self.hparams.d_model
-            )
+            input_dim = len(num_feature_info) * self.hparams.d_model + len(cat_feature_info) * self.hparams.d_model
             # embedding layer
             self.embedding_layer = EmbeddingLayer(
                 num_feature_info=num_feature_info,

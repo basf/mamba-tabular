@@ -1,5 +1,6 @@
-from skopt.space import Real, Integer, Categorical
 import torch.nn as nn
+from skopt.space import Categorical, Integer, Real
+
 from ..arch_utils.transformer_utils import ReGLU
 
 
@@ -20,9 +21,7 @@ def get_search_space(
     },
     custom_search_space=None,
 ):
-    """
-    Given a model configuration, return the hyperparameter search space
-    based on the config attributes.
+    """Given a model configuration, return the hyperparameter search space based on the config attributes.
 
     Parameters
     ----------
@@ -75,16 +74,10 @@ def get_search_space(
         "norm_first": Categorical([True, False]),
         # Pooling, activation, and head layer settings
         "pooling_method": Categorical(["avg", "max", "cls", "sum"]),
-        "activation": Categorical(
-            ["ReLU", "SELU", "Identity", "Tanh", "LeakyReLU", "SiLU"]
-        ),
-        "embedding_activation": Categorical(
-            ["ReLU", "SELU", "Identity", "Tanh", "LeakyReLU"]
-        ),
+        "activation": Categorical(["ReLU", "SELU", "Identity", "Tanh", "LeakyReLU", "SiLU"]),
+        "embedding_activation": Categorical(["ReLU", "SELU", "Identity", "Tanh", "LeakyReLU"]),
         "rnn_activation": Categorical(["relu", "tanh"]),
-        "transformer_activation": Categorical(
-            ["ReLU", "SELU", "Identity", "Tanh", "LeakyReLU", "ReGLU"]
-        ),
+        "transformer_activation": Categorical(["ReLU", "SELU", "Identity", "Tanh", "LeakyReLU", "ReGLU"]),
         "head_skip_layers": Categorical([True, False]),
         "head_use_batch_norm": Categorical([True, False]),
         # Sequence-related settings
@@ -119,14 +112,14 @@ def get_search_space(
 
         # If no layers are desired, set head_layer_sizes to []
         if head_layer_size_length == 0:
-            setattr(config, "head_layer_sizes", [])
+            config.head_layer_sizes = []
         else:
             # Optimize the number of head layers
+            max_head_layers = 5
             param_names.append("head_layer_size_length")
             param_space.append(Integer(1, max_head_layers))
 
             # Optimize individual layer sizes
-            max_head_layers = 5
             layer_size_min, layer_size_max = 16, 512
             for i in range(max_head_layers):
                 layer_key = f"head_layer_size_{i+1}"

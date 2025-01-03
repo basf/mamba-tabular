@@ -1,15 +1,17 @@
-import math
+# black: noqa
+
 import torch
 import torch.nn as nn
+
+from ..get_norm_fn import get_normalization_layer
 from ..layer_utils.normalization_layers import (
-    RMSNorm,
+    BatchNorm,
+    GroupNorm,
+    InstanceNorm,
     LayerNorm,
     LearnableLayerScaling,
-    BatchNorm,
-    InstanceNorm,
-    GroupNorm,
+    RMSNorm,
 )
-from ..get_norm_fn import get_normalization_layer
 from .init_weights import _init_weights
 
 
@@ -77,7 +79,7 @@ class ResidualBlock(nn.Module):
             conv_bias=conv_bias,
             bias=bias,
             layer_idx=layer_idx,
-        )
+        )  # type: ignore
         self.norm = norm
 
     def _lazy_import_mamba(self, mamba_version):
@@ -85,23 +87,21 @@ class ResidualBlock(nn.Module):
         if ResidualBlock.MambaBlock is None:
             try:
                 if mamba_version == "mamba1":
-                    from mamba_ssm import Mamba as MambaBlock
+                    from mamba_ssm import Mamba as MambaBlock  # type: ignore
 
                     ResidualBlock.MambaBlock = MambaBlock
                     print("Successfully imported Mamba (version 1)")
                 elif mamba_version == "mamba2":
-                    from mamba_ssm import Mamba2 as MambaBlock
+                    from mamba_ssm import Mamba2 as MambaBlock  # type: ignore
 
                     ResidualBlock.MambaBlock = MambaBlock
                     print("Successfully imported Mamba2")
                 else:
-                    raise ValueError(
-                        f"Invalid mamba_version: {mamba_version}. Choose 'mamba1' or 'mamba2'."
-                    )
+                    raise ValueError(f"Invalid mamba_version: {mamba_version}. Choose 'mamba1' or 'mamba2'.")
             except ImportError:
                 raise ImportError(
                     f"Failed to import {mamba_version}. Please ensure the correct version is installed."
-                )
+                ) from None
 
     def forward(self, x):
         output = self.layers(self.norm(x)) + x
@@ -125,9 +125,7 @@ class MambaOriginal(nn.Module):
         norm = config.norm
         self.bidirectional = config.bidirectional
         if isinstance(norm, str) and norm in VALID_NORMALIZATION_LAYERS:
-            self.norm_f = VALID_NORMALIZATION_LAYERS[norm](
-                config.d_model, eps=config.layer_norm_eps
-            )
+            self.norm_f = VALID_NORMALIZATION_LAYERS[norm](config.d_model, eps=config.layer_norm_eps)
         else:
             raise ValueError(
                 f"Invalid normalization layer: {norm}. "
@@ -143,7 +141,7 @@ class MambaOriginal(nn.Module):
                     d_model=getattr(config, "d_model", 128),
                     d_state=getattr(config, "d_state", 256),
                     d_conv=getattr(config, "d_conv", 4),
-                    norm=get_normalization_layer(config),
+                    norm=get_normalization_layer(config),  # type: ignore
                     expand_factor=getattr(config, "expand_factor", 2),
                     dt_min=getattr(config, "dt_min", 1e-04),
                     dt_max=getattr(config, "dt_max", 0.1),
@@ -164,7 +162,7 @@ class MambaOriginal(nn.Module):
                         d_model=config.d_model,
                         d_state=config.d_state,
                         d_conv=config.d_conv,
-                        norm=get_normalization_layer(config),
+                        norm=get_normalization_layer(config),  # type: ignore
                         expand_factor=config.expand_factor,
                         dt_min=config.dt_min,
                         dt_max=config.dt_max,
@@ -188,9 +186,7 @@ class MambaOriginal(nn.Module):
 
     def allocate_inference_cache(self, batch_size, max_seqlen, dtype=None, **kwargs):
         return {
-            i: layer.allocate_inference_cache(
-                batch_size, max_seqlen, dtype=dtype, **kwargs
-            )
+            i: layer.allocate_inference_cache(batch_size, max_seqlen, dtype=dtype, **kwargs)
             for i, layer in enumerate(self.layers)
         }
 
@@ -200,14 +196,15 @@ class MambaOriginal(nn.Module):
             x_reversed = torch.flip(x, [1])
         # Forward pass through forward layers
         for layer in self.fwd_layers:
-            x = layer(x)  # Update x in-place as each forward layer processes it
+            # Update x in-place as each forward layer processes it
+            x = layer(x)
 
         if self.bidirectional:
             for layer in self.bckwd_layers:
-                x_reversed = layer(x_reversed)
+                x_reversed = layer(x_reversed)  # type: ignore
 
             # Reverse the output of the backward pass to original order
-            x_reversed = torch.flip(x_reversed, [1])
+            x_reversed = torch.flip(x_reversed, [1])  # type: ignore
 
             # Combine forward and backward outputs by averaging
             return (x + x_reversed) / 2

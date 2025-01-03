@@ -4,11 +4,11 @@ from torch.utils.data import Dataset
 
 
 class MambularDataset(Dataset):
-    """
-    Custom dataset for handling structured data with separate categorical and numerical features, tailored for
-    both regression and classification tasks.
+    """Custom dataset for handling structured data with separate categorical and
+    numerical features, tailored for both regression and classification tasks.
 
-    Parameters:
+    Parameters
+    ----------
         cat_features_list (list of Tensors): A list of tensors representing the categorical features.
         num_features_list (list of Tensors): A list of tensors representing the numerical features.
         labels (Tensor): A tensor of labels.
@@ -35,22 +35,20 @@ class MambularDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        """
-        Retrieves the features and label for a given index.
+        """Retrieves the features and label for a given index.
 
-        Parameters:
+        Parameters
+        ----------
             idx (int): The index of the data point.
 
-        Returns:
+        Returns
+        -------
             tuple: A tuple containing two lists of tensors (one for categorical features and one for numerical
             features) and a single label (float if regression is True).
         """
-        cat_features = [
-            feature_tensor[idx] for feature_tensor in self.cat_features_list
-        ]
+        cat_features = [feature_tensor[idx] for feature_tensor in self.cat_features_list]
         num_features = [
-            torch.as_tensor(feature_tensor[idx]).clone(
-            ).detach().to(torch.float32)
+            torch.as_tensor(feature_tensor[idx]).clone().detach().to(torch.float32)
             for feature_tensor in self.num_features_list
         ]
         label = self.labels[idx]

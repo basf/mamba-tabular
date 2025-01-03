@@ -33,16 +33,11 @@ def student_t_loss(y_true, y_pred, df=2):
 def negative_binomial_deviance(y_true, y_pred, alpha):
     # Here alpha is the overdispersion parameter
     mu = y_pred
-    return 2 * np.sum(
-        y_true * np.log(y_true / mu + 1e-9)
-        + (y_true + alpha) * np.log((mu + alpha) / (y_true + alpha))
-    )
+    return 2 * np.sum(y_true * np.log(y_true / mu + 1e-9) + (y_true + alpha) * np.log((mu + alpha) / (y_true + alpha)))
 
 
 def inverse_gamma_loss(y_true, y_pred):
     # Assuming y_pred includes both shape and scale
     shape = y_pred[:, 0]
     scale = np.clip(y_pred[:, 1], 1e-9, None)  # Avoid zero scale
-    return np.mean(
-        (shape + 1) * np.log(y_true / scale) + np.log(scale**shape / y_true)
-    )
+    return np.mean((shape + 1) * np.log(y_true / scale) + np.log(scale**shape / y_true))

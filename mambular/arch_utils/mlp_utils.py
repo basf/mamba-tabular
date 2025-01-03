@@ -2,9 +2,9 @@ import torch.nn as nn
 
 
 class Linear_skip_block(nn.Module):
-    """
-    A neural network block that includes a linear layer, an activation function, a dropout layer, and optionally a
-    skip connection and batch normalization. The skip connection is added if the input and output feature sizes are equal.
+    """A neural network block that includes a linear layer, an activation function, a dropout layer, and optionally a
+    skip connection and batch normalization. The skip connection is added if the input and output feature sizes are
+    equal.
 
     Parameters
     ----------
@@ -40,25 +40,24 @@ class Linear_skip_block(nn.Module):
         n_input,
         n_output,
         dropout_rate,
-        activation_fn=nn.LeakyReLU(),
+        activation_fn=nn.LeakyReLU,
         use_batch_norm=False,
     ):
-        super(Linear_skip_block, self).__init__()
+        super().__init__()
 
         self.fc = nn.Linear(n_input, n_output)
         self.act = activation_fn
         self.drop = nn.Dropout(dropout_rate)
         self.use_batch_norm = use_batch_norm
-        self.use_skip = (
-            n_input == n_output
-        )  # Only use skip connection if input and output sizes are equal
+        # Only use skip connection if input and output sizes are equal
+        self.use_skip = n_input == n_output
 
         if use_batch_norm:
-            self.batch_norm = nn.BatchNorm1d(n_output)  # Initialize batch normalization
+            # Initialize batch normalization
+            self.batch_norm = nn.BatchNorm1d(n_output)
 
     def forward(self, x):
-        """
-        Defines the forward pass of the Linear_block.
+        """Defines the forward pass of the Linear_block.
 
         Parameters
         ----------
@@ -76,7 +75,8 @@ class Linear_skip_block(nn.Module):
         x = self.act(x)
 
         if self.use_batch_norm:
-            x = self.batch_norm(x)  # Apply batch normalization after activation
+            # Apply batch normalization after activation
+            x = self.batch_norm(x)
 
         if self.use_skip:
             x = x + x0  # Add skip connection if applicable
@@ -86,8 +86,8 @@ class Linear_skip_block(nn.Module):
 
 
 class Linear_block(nn.Module):
-    """
-    A neural network block that includes a linear layer, an activation function, a dropout layer, and optionally batch normalization.
+    """A neural network block that includes a linear layer, an activation function, a dropout layer, and optionally
+    batch normalization.
 
     Parameters
     ----------
@@ -105,7 +105,8 @@ class Linear_block(nn.Module):
     Attributes
     ----------
     block : torch.nn.Sequential
-        A sequential container holding the linear layer, activation function, dropout, and optionally batch normalization.
+        A sequential container holding the linear layer, activation function, dropout,
+        and optionally batch normalization.
     """
 
     def __init__(
@@ -113,10 +114,10 @@ class Linear_block(nn.Module):
         n_input,
         n_output,
         dropout_rate,
-        activation_fn=nn.LeakyReLU(),
+        activation_fn=nn.LeakyReLU,
         batch_norm=False,
     ):
-        super(Linear_block, self).__init__()
+        super().__init__()
 
         # Initialize modules
         modules = [
@@ -133,8 +134,7 @@ class Linear_block(nn.Module):
         self.block = nn.Sequential(*modules)
 
     def forward(self, x):
-        """
-        Defines the forward pass of the Linear_block.
+        """Defines the forward pass of the Linear_block.
 
         Parameters
         ----------
@@ -152,8 +152,8 @@ class Linear_block(nn.Module):
 
 
 class MLPhead(nn.Module):
-    """
-    A multi-layer perceptron (MLP) for regression tasks, configurable with optional skip connections and batch normalization.
+    """A multi-layer perceptron (MLP) for regression tasks, configurable with optional skip connections and batch
+    normalization.
 
     Parameters
     ----------
@@ -181,13 +181,13 @@ class MLPhead(nn.Module):
     """
 
     def __init__(self, input_dim, output_dim, config):
-        super(MLPhead, self).__init__()
+        super().__init__()
 
         self.hidden_units_list = getattr(config, "head_layer_sizes", [128, 64])
         self.dropout_rate = getattr(config, "head_dropout", 0.5)
         self.skip_layers = getattr(config, "head_skip_layers", False)
         self.batch_norm = getattr(config, "head_use_batch_norm", False)
-        self.activation = getattr(config, "head_activation", nn.ReLU())
+        self.activation = getattr(config, "head_activation", nn.ReLU)
 
         layers = []
         input_units = input_dim
@@ -199,7 +199,7 @@ class MLPhead(nn.Module):
                         input_units,
                         n_hidden_units,
                         self.dropout_rate,
-                        self.activation,
+                        self.activation,  # type: ignore
                         self.batch_norm,
                     )
                 )
@@ -209,7 +209,7 @@ class MLPhead(nn.Module):
                         input_units,
                         n_hidden_units,
                         self.dropout_rate,
-                        self.activation,
+                        self.activation,  # type: ignore
                         self.batch_norm,
                     )
                 )
@@ -219,8 +219,7 @@ class MLPhead(nn.Module):
         self.linear_final = nn.Linear(input_units, output_dim)  # Final layer
 
     def forward(self, x):
-        """
-        Defines the forward pass of the MLP.
+        """Defines the forward pass of the MLP.
 
         Parameters
         ----------

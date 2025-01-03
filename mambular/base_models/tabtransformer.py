@@ -1,17 +1,16 @@
 import torch
 import torch.nn as nn
-from ..arch_utils.mlp_utils import MLPhead
+
 from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
+from ..arch_utils.mlp_utils import MLPhead
+from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 from ..configs.tabtransformer_config import DefaultTabTransformerConfig
 from .basemodel import BaseModel
-from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
-from ..arch_utils.layer_utils.normalization_layers import LayerNorm
 
 
 class TabTransformer(BaseModel):
-    """
-    A PyTorch model for tasks utilizing the Transformer architecture and various normalization techniques.
+    """A PyTorch model for tasks utilizing the Transformer architecture and various normalization techniques.
 
     Parameters
     ----------
@@ -65,14 +64,15 @@ class TabTransformer(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes=1,
-        config: DefaultTabTransformerConfig = DefaultTabTransformerConfig(),
+        config: DefaultTabTransformerConfig = DefaultTabTransformerConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
         if cat_feature_info == {}:
             raise ValueError(
-                "You are trying to fit a TabTransformer with no categorical features. Try using a different model that is better suited for tasks without categorical features."
+                "You are trying to fit a TabTransformer with no categorical features. \
+                    Try using a different model that is better suited for tasks without categorical features."
             )
 
         self.returns_ensemble = False
@@ -111,8 +111,7 @@ class TabTransformer(BaseModel):
         self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
 
     def forward(self, num_features, cat_features):
-        """
-        Defines the forward pass of the model.
+        """Defines the forward pass of the model.
 
         Parameters
         ----------
@@ -129,13 +128,13 @@ class TabTransformer(BaseModel):
         cat_embeddings = self.embedding_layer(None, cat_features)
 
         num_features = torch.cat(num_features, dim=1)
-        num_embeddings = self.norm_f(num_features)
+        num_embeddings = self.norm_f(num_features)  # type: ignore
 
         x = self.encoder(cat_embeddings)
 
         x = self.pool_sequence(x)
 
-        x = torch.cat((x, num_embeddings), axis=1)
+        x = torch.cat((x, num_embeddings), axis=1)  # type: ignore
         preds = self.tabular_head(x)
 
         return preds
