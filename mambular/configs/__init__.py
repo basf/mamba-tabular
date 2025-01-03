@@ -6,6 +6,7 @@ from .mlp_config import DefaultMLPConfig
 from .ndtf_config import DefaultNDTFConfig
 from .node_config import DefaultNODEConfig
 from .resnet_config import DefaultResNetConfig
+from .saint_config import DefaultSAINTConfig
 from .tabm_config import DefaultTabMConfig
 from .tabtransformer_config import DefaultTabTransformerConfig
 from .tabularnn_config import DefaultTabulaRNNConfig
@@ -19,6 +20,7 @@ __all__ = [
     "DefaultNDTFConfig",
     "DefaultNODEConfig",
     "DefaultResNetConfig",
+    "DefaultSAINTConfig",
     "DefaultTabMConfig",
     "DefaultTabTransformerConfig",
     "DefaultTabulaRNNConfig",

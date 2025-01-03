@@ -53,11 +53,7 @@ venv = ".venv"
 [tool.ruff]
 line-length = 120
 target-version = "py310"
-exclude = [
-  "*.ipynb",
-  "mambular/arch_utils/mamba_utils.mamba_orginal.py",
-  "mambular/preprocessing/preprocessor.py",
-]
+exclude = ["*.ipynb", "mambular/arch_utils/mamba_utils.mamba_orginal.py"]
 
 ignore = [
   "B006",

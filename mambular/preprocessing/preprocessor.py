@@ -1,22 +1,25 @@
-# ruff: noqa
-
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import (KBinsDiscretizer, MinMaxScaler,
-                                   OneHotEncoder, PolynomialFeatures,
-                                   PowerTransformer, QuantileTransformer,
-                                   RobustScaler, SplineTransformer,
-                                   StandardScaler)
+from sklearn.preprocessing import (
+    KBinsDiscretizer,
+    MinMaxScaler,
+    OneHotEncoder,
+    PolynomialFeatures,
+    PowerTransformer,
+    QuantileTransformer,
+    RobustScaler,
+    SplineTransformer,
+    StandardScaler,
+)
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+from .basis_expansion import SplineExpansion
 from .ple_encoding import PLE
-from .prepro_utils import (ContinuousOrdinalEncoder, CustomBinner,
-                           NoTransformer, OneHotFromOrdinal,
-                           ToFloatTransformer)
+from .prepro_utils import ContinuousOrdinalEncoder, CustomBinner, NoTransformer, OneHotFromOrdinal, ToFloatTransformer
 
 
 class Preprocessor:
@@ -58,9 +61,17 @@ class Preprocessor:
         If True, all integer columns will be treated as numerical, regardless
         of their unique value count or proportion.
     degree : int, default=3
-        The degree of the polynomial features to be used in preprocessing.
-    knots : int, default=12
+        The degree of the polynomial features to be used in preprocessing. It also affects the degree of
+        splines if splines are used.
+    n_knots : int, default=12
         The number of knots to be used in spline transformations.
+    use_decision_tree_knots : bool, default=True
+        If True, uses decision tree regression to determine optimal knot positions for splines.
+    knots_strategy : str, default="uniform"
+        Defines the strategy for determining knot positions in spline transformations
+        if `use_decision_tree_knots` is False. Options include 'uniform', 'quantile'.
+    spline_implementation : str, default="sklearn"
+        The library to use for spline implementation. Options include 'scipy' and 'sklearn'.
 
     Attributes
     ----------
@@ -73,7 +84,7 @@ class Preprocessor:
 
     def __init__(
         self,
-        n_bins=50,
+        n_bins=64,
         numerical_preprocessing="ple",
         categorical_preprocessing="int",
         use_decision_tree_bins=False,
@@ -82,7 +93,10 @@ class Preprocessor:
         cat_cutoff=0.03,
         treat_all_integers_as_numerical=False,
         degree=3,
-        knots=12,
+        n_knots=64,
+        use_decision_tree_knots=True,
+        knots_strategy="uniform",
+        spline_implementation="sklearn",
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = (
@@ -96,7 +110,7 @@ class Preprocessor:
             "binning",
             "one-hot",
             "standardization",
-            "min-max",
+            "minmax",
             "quantile",
             "polynomial",
             "robust",
@@ -111,8 +125,7 @@ class Preprocessor:
             )
 
         if self.categorical_preprocessing not in ["int", "one-hot", "none"]:
-            raise ValueError(
-                "invalid categorical_preprocessing value. Supported values are 'int' and 'one-hot'")
+            raise ValueError("invalid categorical_preprocessing value. Supported values are 'int' and 'one-hot'")
 
         self.use_decision_tree_bins = use_decision_tree_bins
         self.column_transformer = None
@@ -122,7 +135,10 @@ class Preprocessor:
         self.cat_cutoff = cat_cutoff
         self.treat_all_integers_as_numerical = treat_all_integers_as_numerical
         self.degree = degree
-        self.n_knots = knots
+        self.n_knots = n_knots
+        self.use_decision_tree_knots = use_decision_tree_knots
+        self.knots_strategy = knots_strategy
+        self.spline_implementation = spline_implementation
 
     def get_params(self, deep=True):
         """Get parameters for the preprocessor.
@@ -147,7 +163,9 @@ class Preprocessor:
             "cat_cutoff": self.cat_cutoff,
             "treat_all_integers_as_numerical": self.treat_all_integers_as_numerical,
             "degree": self.degree,
-            "knots": self.n_knots,
+            "n_knots": self.n_knots,
+            "use_decision_tree_knots": self.use_decision_tree_knots,
+            "knots_strategy": self.knots_strategy,
         }
         return params
 
@@ -196,13 +214,11 @@ class Preprocessor:
                 numerical_features.append(col)
             else:
                 if isinstance(self.cat_cutoff, float):
-                    cutoff_condition = (
-                        num_unique_values / total_samples) < self.cat_cutoff
+                    cutoff_condition = (num_unique_values / total_samples) < self.cat_cutoff
                 elif isinstance(self.cat_cutoff, int):
                     cutoff_condition = num_unique_values < self.cat_cutoff
                 else:
-                    raise ValueError(
-                        "cat_cutoff should be either a float or an integer.")
+                    raise ValueError("cat_cutoff should be either a float or an integer.")
 
                 if X[col].dtype.kind not in "iufc" or (X[col].dtype.kind == "i" and cutoff_condition):
                     categorical_features.append(col)
@@ -235,13 +251,29 @@ class Preprocessor:
 
         if numerical_features:
             for feature in numerical_features:
-                numeric_transformer_steps = [
-                    ("imputer", SimpleImputer(strategy="mean"))]
-
+                # extended the annotation list if new transformer is added, either from sklearn or custom
+                numeric_transformer_steps: list[
+                    tuple[
+                        str,
+                        SimpleImputer
+                        | StandardScaler
+                        | MinMaxScaler
+                        | QuantileTransformer
+                        | PolynomialFeatures
+                        | RobustScaler
+                        | SplineTransformer
+                        | KBinsDiscretizer
+                        | CustomBinner
+                        | OneHotFromOrdinal
+                        | PLE
+                        | PowerTransformer
+                        | NoTransformer
+                        | SplineExpansion,
+                    ]
+                ] = [("imputer", SimpleImputer(strategy="mean"))]
                 if self.numerical_preprocessing in ["binning", "one-hot"]:
                     bins = (
-                        self._get_decision_tree_bins(
-                            X[[feature]], y, [feature])
+                        self._get_decision_tree_bins(X[[feature]], y, [feature])
                         if self.use_decision_tree_bins
                         else self.n_bins
                     )
@@ -251,22 +283,20 @@ class Preprocessor:
                                 (
                                     "discretizer",
                                     KBinsDiscretizer(
-                                        n_bins=(bins if isinstance(
-                                            bins, int) else len(bins) - 1),
+                                        n_bins=(bins if isinstance(bins, int) else len(bins) - 1),
                                         encode="ordinal",
-                                        strategy=self.binning_strategy,
-                                        subsample=200_000 if len(
-                                            X) > 200_000 else None,
+                                        strategy=self.binning_strategy,  # type: ignore
+                                        subsample=200_000 if len(X) > 200_000 else None,
                                     ),
                                 ),
                             ]
                         )
                     else:
-                        numeric_transformer_steps.extend(
+                        numeric_transformer_steps.append(
                             [
                                 (
                                     "discretizer",
-                                    CustomBinner(bins=bins),
+                                    CustomBinner(bins=bins),  # type: ignore
                                 ),
                             ]
                         )
@@ -279,63 +309,56 @@ class Preprocessor:
                         )
 
                 elif self.numerical_preprocessing == "standardization":
-                    numeric_transformer_steps.append(
-                        ("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(("scaler", StandardScaler()))
 
                 elif self.numerical_preprocessing == "minmax":
-                    numeric_transformer_steps.append(
-                        ("minmax", MinMaxScaler(feature_range=(-1, 1))))
+                    numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
 
                 elif self.numerical_preprocessing == "quantile":
                     numeric_transformer_steps.append(
                         (
                             "quantile",
-                            QuantileTransformer(
-                                n_quantiles=self.n_bins, random_state=101),
+                            QuantileTransformer(n_quantiles=self.n_bins, random_state=101),
                         )
                     )
 
                 elif self.numerical_preprocessing == "polynomial":
-                    numeric_transformer_steps.append(
-                        ("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(("scaler", StandardScaler()))
                     numeric_transformer_steps.append(
                         (
                             "polynomial",
-                            PolynomialFeatures(
-                                self.degree, include_bias=False),
+                            PolynomialFeatures(self.degree, include_bias=False),
                         )
                     )
 
                 elif self.numerical_preprocessing == "robust":
-                    numeric_transformer_steps.append(
-                        ("robust", RobustScaler()))
+                    numeric_transformer_steps.append(("robust", RobustScaler()))
 
                 elif self.numerical_preprocessing == "splines":
-                    numeric_transformer_steps.append(
-                        ("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(("scaler", StandardScaler()))
                     numeric_transformer_steps.append(
                         (
                             "splines",
-                            SplineTransformer(
-                                degree=self.degree,
+                            SplineExpansion(
                                 n_knots=self.n_knots,
-                                include_bias=False,
+                                degree=self.degree,
+                                use_decision_tree=self.use_decision_tree_knots,
+                                task=self.task,
+                                strategy=self.knots_strategy,
+                                spline_implementation=self.spline_implementation,
                             ),
                         ),
                     )
 
                 elif self.numerical_preprocessing == "ple":
-                    numeric_transformer_steps.append(
-                        ("minmax", MinMaxScaler(feature_range=(-1, 1))))
-                    numeric_transformer_steps.append(
-                        ("ple", PLE(n_bins=self.n_bins, task=self.task)))
+                    numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
+                    numeric_transformer_steps.append(("ple", PLE(n_bins=self.n_bins, task=self.task)))
 
                 elif self.numerical_preprocessing == "box-cox":
                     numeric_transformer_steps.append(
                         (
                             "box-cox",
-                            PowerTransformer(method="box-cox",
-                                             standardize=True),
+                            PowerTransformer(method="box-cox", standardize=True),
                         )
                     )
 
@@ -343,8 +366,7 @@ class Preprocessor:
                     numeric_transformer_steps.append(
                         (
                             "yeo-johnson",
-                            PowerTransformer(
-                                method="yeo-johnson", standardize=True),
+                            PowerTransformer(method="yeo-johnson", standardize=True),
                         )
                     )
 
@@ -358,8 +380,7 @@ class Preprocessor:
 
                 numeric_transformer = Pipeline(numeric_transformer_steps)
 
-                transformers.append(
-                    (f"num_{feature}", numeric_transformer, [feature]))
+                transformers.append((f"num_{feature}", numeric_transformer, [feature]))
 
         if categorical_features:
             for feature in categorical_features:
@@ -390,15 +411,12 @@ class Preprocessor:
                         ]
                     )
                 else:
-                    raise ValueError(
-                        f"Unknown categorical_preprocessing type: {self.categorical_preprocessing}")
+                    raise ValueError(f"Unknown categorical_preprocessing type: {self.categorical_preprocessing}")
 
                 # Append the transformer for the current categorical feature
-                transformers.append(
-                    (f"cat_{feature}", categorical_transformer, [feature]))
+                transformers.append((f"cat_{feature}", categorical_transformer, [feature]))
 
-        self.column_transformer = ColumnTransformer(
-            transformers=transformers, remainder="passthrough")
+        self.column_transformer = ColumnTransformer(transformers=transformers, remainder="passthrough")
         self.column_transformer.fit(X, y)
 
         self.fitted = True
@@ -409,27 +427,28 @@ class Preprocessor:
 
         Parameters
         ----------
-            X (DataFrame): The input dataset containing only the numerical features for which the bin edges are to be determined.
+            X (DataFrame): The input dataset containing only the numerical features for which the bin
+            edges are to be determined.
             y (array-like): The target variable for training the decision tree models.
-            numerical_features (list of str): The names of the numerical features for which the bin edges are to be determined.
+            numerical_features (list of str): The names of the numerical features for which the bin edges
+            are to be determined.
 
 
         Returns
         -------
-            list: A list of arrays, where each array contains the bin edges determined by the decision tree for a numerical feature.
+            list: A list of arrays, where each array contains the bin edges determined by the decision tree
+            for a numerical feature.
         """
         bins = []
         for feature in numerical_features:
             tree_model = (
-                DecisionTreeClassifier(
-                    max_depth=3) if y.dtype.kind in "bi" else DecisionTreeRegressor(max_depth=3)
+                DecisionTreeClassifier(max_depth=3) if y.dtype.kind in "bi" else DecisionTreeRegressor(max_depth=3)
             )
             tree_model.fit(X[[feature]], y)
-            thresholds = tree_model.tree_.threshold[tree_model.tree_.feature != -2]
+            thresholds = tree_model.tree_.threshold[tree_model.tree_.feature != -2]  # type: ignore
             bin_edges = np.sort(np.unique(thresholds))
 
-            bins.append(np.concatenate(
-                ([X[feature].min()], bin_edges, [X[feature].max()])))
+            bins.append(np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()])))
         return bins
 
     def transform(self, X):
@@ -459,7 +478,7 @@ class Preprocessor:
             raise NotFittedError(
                 "The preprocessor must be fitted before transforming new data. Use .fit or .fit_transform"
             )
-        transformed_X = self.column_transformer.transform(X)
+        transformed_X = self.column_transformer.transform(X)  # type: ignore
 
         # Now let's convert this into a dictionary of arrays, one per column
         transformed_dict = self._split_transformed_output(X, transformed_X)
@@ -485,7 +504,7 @@ class Preprocessor:
         """
         start = 0
         transformed_dict = {}
-        for name, transformer, columns in self.column_transformer.transformers_:
+        for name, transformer, columns in self.column_transformer.transformers_:  # type: ignore
             if transformer != "drop":
                 end = start + transformer.transform(X[[columns[0]]]).shape[1]
 
@@ -497,8 +516,7 @@ class Preprocessor:
                     dtype = float  # Default to float for other encodings
 
                 # Assign transformed data with the correct dtype
-                transformed_dict[name] = transformed_X[:,
-                                                       start:end].astype(dtype)
+                transformed_dict[name] = transformed_X[:, start:end].astype(dtype)
                 start = end
         return transformed_dict
 
@@ -514,7 +532,8 @@ class Preprocessor:
 
         Returns
         -------
-            dict: A dictionary with the transformed data, where keys are the base feature names and values are the transformed features as arrays.
+            dict: A dictionary with the transformed data, where keys are the base feature names and
+            values are the transformed features as arrays.
         """
         self.fit(X, y)
         self.fitted = True
@@ -585,14 +604,12 @@ class Preprocessor:
                         "categories": None,  # Numerical features don't have categories
                     }
                     if verbose:
-                        print(
-                            f"Numerical Feature: {feature_name}, Info: {numerical_feature_info[feature_name]}")
+                        print(f"Numerical Feature: {feature_name}, Info: {numerical_feature_info[feature_name]}")
 
                 # Categorical features
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
-                    categories = len(
-                        step.mapping_[columns.index(feature_name)])
+                    categories = len(step.mapping_[columns.index(feature_name)])
                     dimension = 1  # Ordinal encoding always outputs one dimension
                     categorical_feature_info[feature_name] = {
                         "preprocessing": preprocessing_type,
@@ -639,8 +656,7 @@ class Preprocessor:
                             "categories": None,  # Numerical features don't have categories
                         }
                     if verbose:
-                        print(
-                            f"Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}")
+                        print(f"Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}")
 
                 if verbose:
                     print("-" * 50)

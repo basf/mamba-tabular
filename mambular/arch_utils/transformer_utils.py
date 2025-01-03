@@ -168,7 +168,7 @@ class BatchEnsembleTransformerEncoderLayer(nn.Module):
         else:
             raise ValueError(f"Invalid activation '{activation}'. Choose from 'relu' or 'gelu'.")
 
-    def forward(self, src, src_mask: torch.Tensor | None = None):
+    def forward(self, src, src_mask: torch.Tensor = None):  # type: ignore
         """Pass the input through the encoder layer.
 
         Parameters
@@ -313,7 +313,7 @@ class BatchEnsembleTransformerEncoder(nn.Module):
 
         self.ensemble_projections = ensemble_projections
 
-    def forward(self, x, mask: torch.Tensor | None = None):
+    def forward(self, x, mask: torch.Tensor = None):  # type: ignore
         """Pass the input through the encoder layers in turn.
 
         Parameters

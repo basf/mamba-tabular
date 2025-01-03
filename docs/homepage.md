@@ -34,6 +34,7 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 | `TabulaRNN`      | A Recurrent Neural Network for Tabular data, introduced [here](https://arxiv.org/pdf/2411.17207).                                                   |
 | `MambAttention`  | A combination between Mamba and Transformers, also introduced [here](https://arxiv.org/pdf/2411.17207).                                             |
 | `NDTF`           | A neural decision forest using soft decision trees. See [Kontschieder et al.](https://openaccess.thecvf.com/content_iccv_2015/html/Kontschieder_Deep_Neural_Decision_ICCV_2015_paper.html) for inspiration. |
+| `SAINT`          | Improve neural networs via Row Attention and Contrastive Pre-Training, introduced [here](https://arxiv.org/pdf/2106.01342).                                              |
 
 
 
@@ -88,7 +89,8 @@ Mambular simplifies data preprocessing with a range of tools designed for easy t
 
 
 <h2> Fit a Model </h2>
-Fitting a model in mambular is as simple as it gets. All models in mambular are sklearn BaseEstimators. Thus the `.fit` method is implemented for all of them. Additionally, this allows for using all other sklearn inherent methods such as their built in hyperparameter optimization tools.
+
+Fitting a model in mambular is as simple as it gets. All models in mambular are sklearn BaseEstimators. Thus, the `fit` method is implemented for all of them. Additionally, this allows for using all other sklearn inherent methods such as their built in hyperparameter optimization tools.
 
 ```python
 from mambular.models import MambularClassifier
@@ -100,12 +102,12 @@ model = MambularClassifier(
     n_bins=50,
     d_conv=8
 )
-
 # X can be a dataframe or something that can be easily transformed into a pd.DataFrame as a np.array
 model.fit(X, y, max_epochs=150, lr=1e-04)
 ```
 
 Predictions are also easily obtained:
+
 ```python
 # simple predictions
 preds = model.predict(X)
@@ -115,6 +117,7 @@ preds = model.predict_proba(X)
 ```
 
 <h3> Hyperparameter Optimization</h3>
+
 Since all of the models are sklearn base estimators, you can use the built-in hyperparameter optimizatino from sklearn.
 
 ```python
@@ -144,7 +147,11 @@ random_search.fit(X, y, **fit_params)
 print("Best Parameters:", random_search.best_params_)
 print("Best Score:", random_search.best_score_)
 ```
-Note, that using this, you can also optimize the preprocessing. Just use the prefix ``prepro__`` when specifying the preprocessor arguments you want to optimize:
+
+
+**Note:** that using this, you can also optimize the preprocessing. Just use the prefix ``prepro__`` when specifying the preprocessor arguments you want to optimize:
+
+
 ```python
 param_dist = {
     'd_model': randint(32, 128),  
@@ -154,7 +161,6 @@ param_dist = {
 }
 
 ```
-
 
 Since we have early stopping integrated and return the best model with respect to the validation loss, setting max_epochs to a large number is sensible.
 
@@ -299,6 +305,7 @@ Here's how you can implement a custom model with Mambular:
    ```
 
 # Custom Training
+
 If you prefer to setup custom training, preprocessing and evaluation, you can simply use the `mambular.base_models`.
 Just be careful that all basemodels expect lists of features as inputs. More precisely as list for numerical features and a list for categorical features. A custom training loop, with random data could look like this.
 
