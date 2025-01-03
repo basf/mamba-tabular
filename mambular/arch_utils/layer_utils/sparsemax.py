@@ -36,13 +36,13 @@ class SparsemaxFunction(Function):
     """
 
     @staticmethod
-    def forward(ctx, input, dim=-1):
+    def forward(ctx, input_, dim=-1):
         """
         Forward pass of sparsemax: a normalizing, sparse transformation.
 
         Parameters
         ----------
-        input : torch.Tensor
+        input_ : torch.Tensor
             The input tensor on which sparsemax will be applied.
         dim : int, optional
             Dimension along which to apply sparsemax. Default is -1.
@@ -53,10 +53,10 @@ class SparsemaxFunction(Function):
             A tensor with the same shape as the input, with sparsemax applied.
         """
         ctx.dim = dim
-        max_val, _ = input.max(dim=dim, keepdim=True)
-        input -= max_val  # Numerical stability trick, as with softmax.
-        tau, supp_size = SparsemaxFunction._threshold_and_support(input, dim=dim)
-        output = torch.clamp(input - tau, min=0)
+        max_val, _ = input_.max(dim=dim, keepdim=True)
+        input_ -= max_val  # Numerical stability trick, as with softmax.
+        tau, supp_size = SparsemaxFunction._threshold_and_support(input_, dim=dim)
+        output = torch.clamp(input_ - tau, min=0)
         ctx.save_for_backward(supp_size, output)
         return output
 
@@ -86,7 +86,7 @@ class SparsemaxFunction(Function):
         return grad_input, None
 
     @staticmethod
-    def _threshold_and_support(input, dim=-1):
+    def _threshold_and_support(input_, dim=-1):
         """
         Computes the threshold and support for sparsemax.
 
@@ -103,14 +103,14 @@ class SparsemaxFunction(Function):
             - torch.Tensor : The threshold value for sparsemax.
             - torch.Tensor : The support size tensor.
         """
-        input_srt, _ = torch.sort(input, descending=True, dim=dim)
+        input_srt, _ = torch.sort(input_, descending=True, dim=dim)
         input_cumsum = input_srt.cumsum(dim) - 1
-        rhos = _make_ix_like(input, dim)
+        rhos = _make_ix_like(input_, dim)
         support = rhos * input_srt > input_cumsum
 
         support_size = support.sum(dim=dim).unsqueeze(dim)
         tau = input_cumsum.gather(dim, support_size - 1)
-        tau /= support_size.to(input.dtype)
+        tau /= support_size.to(input_.dtype)
         return tau, support_size
 
 
