@@ -86,7 +86,7 @@ class SparsemaxFunction(Function):
         return grad_input, None
 
     @staticmethod
-    def _threshold_and_support(x, dim=-1):
+    def _threshold_and_support(input, dim=-1):
         """
         Computes the threshold and support for sparsemax.
 
@@ -103,14 +103,14 @@ class SparsemaxFunction(Function):
             - torch.Tensor : The threshold value for sparsemax.
             - torch.Tensor : The support size tensor.
         """
-        input_srt, _ = torch.sort(x, descending=True, dim=dim)
+        input_srt, _ = torch.sort(input, descending=True, dim=dim)
         input_cumsum = input_srt.cumsum(dim) - 1
         rhos = _make_ix_like(input, dim)
         support = rhos * input_srt > input_cumsum
 
         support_size = support.sum(dim=dim).unsqueeze(dim)
         tau = input_cumsum.gather(dim, support_size - 1)
-        tau /= support_size.to(x.dtype)
+        tau /= support_size.to(input.dtype)
         return tau, support_size
 
 
