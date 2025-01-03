@@ -1,6 +1,7 @@
 import torch.nn as nn
-from .mamba_arch import ResidualBlock
+
 from ..get_norm_fn import get_normalization_layer
+from .mamba_arch import ResidualBlock
 
 
 class MambAttn(nn.Module):
@@ -8,7 +9,8 @@ class MambAttn(nn.Module):
 
     Attributes:
         config (MambaConfig): Configuration object for the Mamba model.
-        layers (nn.ModuleList): List of alternating ResidualBlock (Mamba layers) and attention layers constituting the model.
+        layers (nn.ModuleList): List of alternating ResidualBlock (Mamba layers) and
+        attention layers constituting the model.
     """
 
     def __init__(
@@ -20,15 +22,12 @@ class MambAttn(nn.Module):
         # Define Mamba and Attention layers alternation
         self.layers = nn.ModuleList()
 
-        total_blocks = (
-            config.n_layers + config.n_attention_layers
-        )  # Total blocks to be created
+        total_blocks = config.n_layers + config.n_attention_layers  # Total blocks to be created
         attention_count = 0
 
         for i in range(total_blocks):
-            if (i + 1) % (
-                config.n_mamba_per_attention + 1
-            ) == 0:  # Insert attention layer after N Mamba layers
+            # Insert attention layer after N Mamba layers
+            if (i + 1) % (config.n_mamba_per_attention + 1) == 0:
                 self.layers.append(
                     nn.MultiheadAttention(
                         embed_dim=config.d_model,
@@ -53,7 +52,7 @@ class MambAttn(nn.Module):
                         dt_max=config.dt_max,
                         dt_min=config.dt_min,
                         dt_init_floor=config.dt_init_floor,
-                        norm=get_normalization_layer(config),
+                        norm=get_normalization_layer(config),  # type: ignore
                         activation=config.activation,
                         bidirectional=config.bidirectional,
                         use_learnable_interaction=config.use_learnable_interaction,
@@ -91,7 +90,7 @@ class MambAttn(nn.Module):
                         dt_max=config.dt_max,
                         dt_min=config.dt_min,
                         dt_init_floor=config.dt_init_floor,
-                        norm=get_normalization_layer(config),
+                        norm=get_normalization_layer(config),  # type: ignore
                         activation=config.activation,
                         bidirectional=config.bidirectional,
                         use_learnable_interaction=config.use_learnable_interaction,
@@ -106,11 +105,11 @@ class MambAttn(nn.Module):
         for layer in self.layers:
             if isinstance(layer, nn.MultiheadAttention):
                 # If it's an attention layer, handle input shape (seq_len, batch, embed_dim)
-                x = x.transpose(
-                    0, 1
-                )  # Switch to (seq_len, batch, embed_dim) for attention
+                # Switch to (seq_len, batch, embed_dim) for attention
+                x = x.transpose(0, 1)
                 x, _ = layer(x, x, x)
-                x = x.transpose(0, 1)  # Switch back to (batch, seq_len, embed_dim)
+                # Switch back to (batch, seq_len, embed_dim)
+                x = x.transpose(0, 1)
             else:
                 # Otherwise, pass through Mamba block
                 x = layer(x)

@@ -13,8 +13,7 @@ class NeuralDecisionTree(nn.Module):
         temperature=0.0,
         node_sampling=0.3,
     ):
-        """
-        Initialize the neural decision tree with a neural network at each leaf.
+        """Initialize the neural decision tree with a neural network at each leaf.
 
         Parameters:
         -----------
@@ -27,7 +26,7 @@ class NeuralDecisionTree(nn.Module):
         lamda: float
             Regularization parameter.
         """
-        super(NeuralDecisionTree, self).__init__()
+        super().__init__()
         self.internal_node_num_ = 2**depth - 1
         self.leaf_node_num_ = 2**depth
         self.lamda = lamda
@@ -52,7 +51,7 @@ class NeuralDecisionTree(nn.Module):
             _mu = self._forward(X)
         y_pred = self.leaf_nodes(_mu)
         if return_penalty:
-            return y_pred, _penalty
+            return y_pred, _penalty  # type: ignore
         else:
             return y_pred
 
@@ -68,9 +67,7 @@ class NeuralDecisionTree(nn.Module):
         if self.temperature > 0.0:
             # Replace sigmoid with Gumbel-Softmax for path_prob calculation
             logits = decision_boundaries / self.temperature
-            path_prob = (
-                (logits > 0).float() + logits.sigmoid() - logits.sigmoid().detach()
-            )
+            path_prob = (logits > 0).float() + logits.sigmoid() - logits.sigmoid().detach()
         else:
             path_prob = (decision_boundaries > 0).float()
 
@@ -115,9 +112,7 @@ class NeuralDecisionTree(nn.Module):
         if self.temperature > 0.0:
             # Replace sigmoid with Gumbel-Softmax for path_prob calculation
             logits = decision_boundaries / self.temperature
-            path_prob = (
-                (logits > 0).float() + logits.sigmoid() - logits.sigmoid().detach()
-            )
+            path_prob = (logits > 0).float() + logits.sigmoid() - logits.sigmoid().detach()
         else:
             path_prob = (decision_boundaries > 0).float()
 
@@ -147,9 +142,7 @@ class NeuralDecisionTree(nn.Module):
         return mu
 
     def _cal_penalty(self, layer_idx, _mu, _path_prob):
-        """
-        Calculate the regularization penalty by sampling a fraction of nodes with safeguards against NaNs.
-        """
+        """Calculate the regularization penalty by sampling a fraction of nodes with safeguards against NaNs."""
         batch_size = _mu.size(0)
 
         # Reshape _mu and _path_prob for broadcasting
@@ -167,9 +160,7 @@ class NeuralDecisionTree(nn.Module):
 
         # Calculate alpha in a batched manner
         epsilon = 1e-6  # Small constant to prevent division by zero
-        alpha = torch.sum(sampled_path_prob * sampled_mu, dim=0) / (
-            torch.sum(sampled_mu, dim=0) + epsilon
-        )
+        alpha = torch.sum(sampled_path_prob * sampled_mu, dim=0) / (torch.sum(sampled_mu, dim=0) + epsilon)
 
         # Clip alpha to avoid NaNs in log calculation
         alpha = alpha.clamp(epsilon, 1 - epsilon)

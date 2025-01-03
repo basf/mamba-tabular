@@ -1,19 +1,12 @@
-import numpy as np
-from tqdm import tqdm
-import pandas as pd
-import bisect
 import re
-from sklearn.tree import _tree
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-import pandas as pd
+
 import numpy as np
-from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, _tree
 
 
 def tree_to_code(tree, feature_names):
-    """
-    Convert a scikit-learn decision tree into a list of conditions.
+    """Convert a scikit-learn decision tree into a list of conditions.
 
     Args:
         tree (sklearn.tree.DecisionTreeRegressor or sklearn.tree.DecisionTreeClassifier):
@@ -30,12 +23,9 @@ def tree_to_code(tree, feature_names):
     """
 
     tree_ = tree.tree_
-    feature_name = [
-        feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
-        for i in tree_.feature
-    ]
+    feature_name = [feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!" for i in tree_.feature]  # type: ignore
 
-    pathto = dict()
+    pathto = {}
     my_list = []
 
     global k
@@ -45,18 +35,18 @@ def tree_to_code(tree, feature_names):
         global k
         indent = "  " * depth
 
-        if tree_.feature[node] != _tree.TREE_UNDEFINED:
+        if tree_.feature[node] != _tree.TREE_UNDEFINED:  # type: ignore
             # name = df_name + "[" + "'" + feature_name[node]+ "'" + "]"
             name = feature_name[node]
             threshold = tree_.threshold[node]
-            s = "{} <= {} ".format(name, threshold, node)
+            s = f"{name} <= {threshold} "
             if node == 0:
                 pathto[node] = "(" + s + ")"
             else:
                 pathto[node] = "(" + pathto[parent] + ")" + " & " + "(" + s + ")"
 
             recurse(tree_.children_left[node], depth + 1, node)
-            s = "{} > {}".format(name, threshold)
+            s = f"{name} > {threshold}"
             if node == 0:
                 pathto[node] = s
             else:
@@ -73,18 +63,15 @@ def tree_to_code(tree, feature_names):
 
 
 class PLE(BaseEstimator, TransformerMixin):
-    def __init__(
-        self, n_bins=20, tree_params={}, task="regression", conditions=None, **kwargs
-    ):
-        super(PLE, self).__init__(**kwargs)
+    def __init__(self, n_bins=20, tree_params={}, task="regression", conditions=None, **kwargs):
+        super().__init__(**kwargs)
 
         self.task = task
         self.tree_params = tree_params
         self.n_bins = n_bins
         self.conditions = conditions
-        self.pattern = (
-            r"-?\d+\.?\d*[eE]?[+-]?\d*"  # This pattern matches integers and floats
-        )
+        # This pattern matches integers and floats
+        self.pattern = r"-?\d+\.?\d*[eE]?[+-]?\d*"
 
     def fit(self, feature, target):
         if self.task == "regression":
@@ -105,8 +92,8 @@ class PLE(BaseEstimator, TransformerMixin):
         else:
             feature = feature
         result_list = []
-        for idx, cond in enumerate(self.conditions):
-            result_list.append(eval(cond) * (idx + 1))
+        for idx, cond in enumerate(self.conditions):  # type: ignore
+            result_list.append(eval(cond) * (idx + 1))  # type: ignore
 
         encoded_feature = np.expand_dims(np.sum(np.stack(result_list).T, axis=1), 1)
 
@@ -115,7 +102,7 @@ class PLE(BaseEstimator, TransformerMixin):
         # Initialize an empty list to store the extracted numbers
         locations = []
         # Iterate through the strings and extract numbers
-        for string in self.conditions:
+        for string in self.conditions:  # type: ignore
             matches = re.findall(self.pattern, string)
             locations.extend(matches)
 
@@ -137,10 +124,7 @@ class PLE(BaseEstimator, TransformerMixin):
             else:
                 ple_encoded_feature[idx][encoded_feature[idx]] = (
                     feature[idx] - locations[(encoded_feature[idx] - 1)[0]]
-                ) / (
-                    locations[(encoded_feature[idx])[0]]
-                    - locations[(encoded_feature[idx] - 1)[0]]
-                )
+                ) / (locations[(encoded_feature[idx])[0]] - locations[(encoded_feature[idx] - 1)[0]])
 
                 ple_encoded_feature[idx, : encoded_feature[idx][0]] = 1
 

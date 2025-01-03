@@ -3,8 +3,7 @@ import torch.nn as nn
 
 class ResidualBlock(nn.Module):
     def __init__(self, input_dim, output_dim, activation, norm=False, dropout=0.0):
-        """
-        Residual Block used in ResNet.
+        """Residual Block used in ResNet.
 
         Parameters
         ----------
@@ -19,7 +18,7 @@ class ResidualBlock(nn.Module):
         dropout : float, optional
             Dropout rate, by default 0.0.
         """
-        super(ResidualBlock, self).__init__()
+        super().__init__()
         self.linear1 = nn.Linear(input_dim, output_dim)
         self.linear2 = nn.Linear(output_dim, output_dim)
         self.activation = activation

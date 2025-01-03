@@ -1,7 +1,9 @@
+import math
+
 import torch
 import torch.nn as nn
 from torch.nn.parameter import Parameter
-import math
+
 from .sn_linear import SNLinear
 
 

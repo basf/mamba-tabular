@@ -19,9 +19,7 @@ class SNLinear(nn.Module):
 
     def forward(self, x):
         if x.ndim != 3:
-            raise ValueError(
-                "SNLinear requires a 3D input (batch, features, embedding)."
-            )
+            raise ValueError("SNLinear requires a 3D input (batch, features, embedding).")
         if x.shape[-(self.weight.ndim - 1) :] != self.weight.shape[:-1]:
             raise ValueError("Input shape mismatch with weight dimensions.")
 

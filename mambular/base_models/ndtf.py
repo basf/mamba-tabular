@@ -1,15 +1,15 @@
+import numpy as np
 import torch
 import torch.nn as nn
-from ..configs.ndtf_config import DefaultNDTFConfig
-from .basemodel import BaseModel
+
 from ..arch_utils.neural_decision_tree import NeuralDecisionTree
-import numpy as np
+from ..configs.ndtf_config import DefaultNDTFConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
+from .basemodel import BaseModel
 
 
 class NDTF(BaseModel):
-    """
-    A Neural Decision Tree Forest (NDTF) model for tabular data, composed of an ensemble of neural decision trees
+    """A Neural Decision Tree Forest (NDTF) model for tabular data, composed of an ensemble of neural decision trees
     with convolutional feature interactions, capable of producing predictions and penalty-based regularization.
 
     Parameters
@@ -21,7 +21,8 @@ class NDTF(BaseModel):
     num_classes : int, optional
         The number of output classes or target dimensions for regression, by default 1.
     config : DefaultNDTFConfig, optional
-        Configuration object containing model hyperparameters such as the number of ensembles, tree depth, penalty factor,
+        Configuration object containing model hyperparameters such as the number of ensembles,
+        tree depth, penalty factor,
         sampling settings, and temperature, by default DefaultNDTFConfig().
     **kwargs : dict
         Additional keyword arguments for the BaseModel class.
@@ -49,7 +50,6 @@ class NDTF(BaseModel):
         Perform a forward pass through the model, producing predictions based on an ensemble of neural decision trees.
     penalty_forward(num_features, cat_features) -> tuple of torch.Tensor
         Perform a forward pass with penalty regularization, returning predictions and the calculated penalty term.
-
     """
 
     def __init__(
@@ -57,7 +57,7 @@ class NDTF(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes: int = 1,
-        config: DefaultNDTFConfig = DefaultNDTFConfig(),
+        config: DefaultNDTFConfig = DefaultNDTFConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
@@ -78,13 +78,10 @@ class NDTF(BaseModel):
             [
                 NeuralDecisionTree(
                     input_dim=self.input_dimensions[idx],
-                    depth=np.random.randint(
-                        self.hparams.min_depth, self.hparams.max_depth
-                    ),
+                    depth=np.random.randint(self.hparams.min_depth, self.hparams.max_depth),
                     output_dim=num_classes,
                     lamda=self.hparams.lamda,
-                    temperature=self.hparams.temperature
-                    + np.abs(np.random.normal(0, 0.1)),
+                    temperature=self.hparams.temperature + np.abs(np.random.normal(0, 0.1)),
                     node_sampling=self.hparams.node_sampling,
                 )
                 for idx in range(self.hparams.n_ensembles)
@@ -94,9 +91,10 @@ class NDTF(BaseModel):
         self.conv_layer = nn.Conv1d(
             in_channels=self.input_dimensions[0],
             out_channels=1,  # Single channel output if one feature interaction is desired
-            kernel_size=self.input_dimensions[0],  # Choose appropriate kernel size
-            padding=self.input_dimensions[0]
-            - 1,  # To keep output size the same as input_dim if desired
+            # Choose appropriate kernel size
+            kernel_size=self.input_dimensions[0],
+            # To keep output size the same as input_dim if desired
+            padding=self.input_dimensions[0] - 1,
             bias=True,
         )
 
@@ -106,8 +104,7 @@ class NDTF(BaseModel):
         )
 
     def forward(self, num_features, cat_features) -> torch.Tensor:
-        """
-        Forward pass of the NDTF model.
+        """Forward pass of the NDTF model.
 
         Parameters
         ----------
@@ -135,8 +132,7 @@ class NDTF(BaseModel):
         return preds @ self.tree_weights
 
     def penalty_forward(self, num_features, cat_features) -> torch.Tensor:
-        """
-        Forward pass of the NDTF model.
+        """Forward pass of the NDTF model.
 
         Parameters
         ----------
@@ -168,4 +164,4 @@ class NDTF(BaseModel):
 
         # Stack predictions and calculate mean across trees
         preds = torch.stack(preds, dim=1).squeeze(-1)
-        return preds @ self.tree_weights, self.hparams.penalty_factor * penalty
+        return preds @ self.tree_weights, self.hparams.penalty_factor * penalty  # type: ignore

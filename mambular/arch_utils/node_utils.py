@@ -4,9 +4,10 @@ from warnings import warn
 import numpy as np
 import torch
 import torch.nn as nn
-from .layer_utils.sparsemax import sparsemax, sparsemoid
-import torch.functional as F
+import torch.nn.functional as F
+
 from .data_aware_initialization import ModuleWithInit
+from .layer_utils.sparsemax import sparsemax, sparsemoid
 from .numpy_utils import check_numpy
 
 
@@ -25,8 +26,7 @@ class ODST(ModuleWithInit):
         threshold_init_beta=1.0,
         threshold_init_cutoff=1.0,
     ):
-        """
-        Oblivious Differentiable Sparsemax Trees (ODST).
+        """Oblivious Differentiable Sparsemax Trees (ODST).
 
         ODST is a differentiable module for decision tree-based models, where each tree
         is trained using sparsemax to compute feature weights and sparsemoid to compute
@@ -97,14 +97,10 @@ class ODST(ModuleWithInit):
             threshold_init_cutoff,
         )
 
-        self.response = nn.Parameter(
-            torch.zeros([num_trees, tree_dim, 2**depth]), requires_grad=True
-        )
+        self.response = nn.Parameter(torch.zeros([num_trees, tree_dim, 2**depth]), requires_grad=True)
         initialize_response_(self.response)
 
-        self.feature_selection_logits = nn.Parameter(
-            torch.zeros([in_features, num_trees, depth]), requires_grad=True
-        )
+        self.feature_selection_logits = nn.Parameter(torch.zeros([in_features, num_trees, depth]), requires_grad=True)
         initialize_selection_logits_(self.feature_selection_logits)
 
         self.feature_thresholds = nn.Parameter(
@@ -121,16 +117,13 @@ class ODST(ModuleWithInit):
         with torch.no_grad():
             indices = torch.arange(2**self.depth)
             offsets = 2 ** torch.arange(self.depth)
-            bin_codes = (indices.view(1, -1) // offsets.view(-1, 1) % 2).to(
-                torch.float32
-            )
+            bin_codes = (indices.view(1, -1) // offsets.view(-1, 1) % 2).to(torch.float32)
             bin_codes_1hot = torch.stack([bin_codes, 1.0 - bin_codes], dim=-1)
             self.bin_codes_1hot = nn.Parameter(bin_codes_1hot, requires_grad=False)
             # ^-- [depth, 2 ** depth, 2]
 
-    def forward(self, input):
-        """
-        Forward pass through ODST model.
+    def forward(self, x):  # type: ignore
+        """Forward pass through ODST model.
 
         Parameters
         ----------
@@ -143,23 +136,20 @@ class ODST(ModuleWithInit):
             Output tensor of shape [batch_size, num_trees * tree_dim] if `flatten_output` is True,
             otherwise [batch_size, num_trees, tree_dim].
         """
-        assert len(input.shape) >= 2
-        if len(input.shape) > 2:
-            return self.forward(input.view(-1, input.shape[-1])).view(
-                *input.shape[:-1], -1
-            )
+        if len(x.shape) < 2:
+            raise ValueError("Input tensor must have at least 2 dimensions")
+        if len(x.shape) > 2:
+            return self.forward(x.view(-1, x.shape[-1])).view(*x.shape[:-1], -1)
         # new input shape: [batch_size, in_features]
 
         feature_logits = self.feature_selection_logits
         feature_selectors = self.choice_function(feature_logits, dim=0)
         # ^--[in_features, num_trees, depth]
 
-        feature_values = torch.einsum("bi,ind->bnd", input, feature_selectors)
+        feature_values = torch.einsum("bi,ind->bnd", x, feature_selectors)
         # ^--[batch_size, num_trees, depth]
 
-        threshold_logits = (feature_values - self.feature_thresholds) * torch.exp(
-            -self.log_temperatures
-        )
+        threshold_logits = (feature_values - self.feature_thresholds) * torch.exp(-self.log_temperatures)
 
         threshold_logits = torch.stack([-threshold_logits, threshold_logits], dim=-1)
         # ^--[batch_size, num_trees, depth, 2]
@@ -178,9 +168,8 @@ class ODST(ModuleWithInit):
 
         return response.flatten(1, 2) if self.flatten_output else response
 
-    def initialize(self, input, eps=1e-6):
-        """
-        Data-aware initialization of thresholds and log-temperatures based on input data.
+    def initialize(self, x, eps=1e-6):
+        """Data-aware initialization of thresholds and log-temperatures based on input data.
 
         Parameters
         ----------
@@ -190,20 +179,19 @@ class ODST(ModuleWithInit):
             Small value added to avoid log(0) errors in temperature initialization. Default is 1e-6.
         """
         # data-aware initializer
-        assert len(input.shape) == 2
-        if input.shape[0] < 1000:
-            warn(
+        if len(x.shape) != 2:
+            raise ValueError("Input tensor must have 2 dimensions")
+        if x.shape[0] < 1000:
+            warn(  # noqa
                 "Data-aware initialization is performed on less than 1000 data points. This may cause instability."
                 "To avoid potential problems, run this model on a data batch with at least 1000 data samples."
                 "You can do so manually before training. Use with torch.no_grad() for memory efficiency."
             )
         with torch.no_grad():
-            feature_selectors = self.choice_function(
-                self.feature_selection_logits, dim=0
-            )
+            feature_selectors = self.choice_function(self.feature_selection_logits, dim=0)
             # ^--[in_features, num_trees, depth]
 
-            feature_values = torch.einsum("bi,ind->bnd", input, feature_selectors)
+            feature_values = torch.einsum("bi,ind->bnd", x, feature_selectors)
             # ^--[batch_size, num_trees, depth]
 
             # initialize thresholds: sample random percentiles of data
@@ -233,26 +221,18 @@ class ODST(ModuleWithInit):
 
             # if threshold_init_cutoff > 1, scale everything down by it
             temperatures /= max(1.0, self.threshold_init_cutoff)
-            self.log_temperatures.data[...] = torch.log(
-                torch.as_tensor(temperatures) + eps
-            )
+            self.log_temperatures.data[...] = torch.log(torch.as_tensor(temperatures) + eps)
 
     def __repr__(self):
-        return "{}(in_features={}, num_trees={}, depth={}, tree_dim={}, flatten_output={})".format(
-            self.__class__.__name__,
-            self.feature_selection_logits.shape[0],
-            self.num_trees,
-            self.depth,
-            self.tree_dim,
-            self.flatten_output,
-        )
+        return f"{self.__class__.__name__}(in_features={self.feature_selection_logits.shape[0]}, \
+            num_trees={self.num_trees}, depth={self.depth}, tree_dim={self.tree_dim}, \
+            flatten_output={self.flatten_output})"
 
 
 class DenseBlock(nn.Sequential):
-    """
-    DenseBlock is a multi-layer module that sequentially stacks instances of `Module`,
-    typically decision tree models like `ODST`. Each layer in the block produces additional
-    features, enabling the model to learn complex representations.
+    """DenseBlock is a multi-layer module that sequentially stacks instances of `Module`,
+    typically decision tree models like `ODST`. Each layer in the block produces additional features,
+    enabling the model to learn complex representations.
 
     Parameters
     ----------
@@ -308,16 +288,12 @@ class DenseBlock(nn.Sequential):
         input_dropout=0.0,
         flatten_output=True,
         Module=ODST,
-        **kwargs
+        **kwargs,
     ):
         layers = []
         for i in range(num_layers):
-            oddt = Module(
-                input_dim, layer_dim, tree_dim=tree_dim, flatten_output=True, **kwargs
-            )
-            input_dim = min(
-                input_dim + layer_dim * tree_dim, max_features or float("inf")
-            )
+            oddt = Module(input_dim, layer_dim, tree_dim=tree_dim, flatten_output=True, **kwargs)
+            input_dim = min(input_dim + layer_dim * tree_dim, max_features or float("inf"))
             layers.append(oddt)
 
         super().__init__(*layers)
@@ -325,9 +301,8 @@ class DenseBlock(nn.Sequential):
         self.max_features, self.flatten_output = max_features, flatten_output
         self.input_dropout = input_dropout
 
-    def forward(self, x):
-        """
-        Forward pass through the DenseBlock.
+    def forward(self, x):  # type: ignore
+        """Forward pass through the DenseBlock.
 
         Parameters
         ----------
@@ -346,9 +321,7 @@ class DenseBlock(nn.Sequential):
         for layer in self:
             layer_inp = x
             if self.max_features is not None:
-                tail_features = (
-                    min(self.max_features, layer_inp.shape[-1]) - initial_features
-                )
+                tail_features = min(self.max_features, layer_inp.shape[-1]) - initial_features
                 if tail_features != 0:
                     layer_inp = torch.cat(
                         [
@@ -364,7 +337,5 @@ class DenseBlock(nn.Sequential):
 
         outputs = x[..., initial_features:]
         if not self.flatten_output:
-            outputs = outputs.view(
-                *outputs.shape[:-1], self.num_layers * self.layer_dim, self.tree_dim
-            )
+            outputs = outputs.view(*outputs.shape[:-1], self.num_layers * self.layer_dim, self.tree_dim)
         return outputs

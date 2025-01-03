@@ -1,14 +1,10 @@
-import torch.nn as nn
-import torch
-
-
 import torch
 import torch.nn as nn
 
 
 class Reshape(nn.Module):
     def __init__(self, j, dim, method="linear"):
-        super(Reshape, self).__init__()
+        super().__init__()
         self.j = j
         self.dim = dim
         self.method = method
@@ -30,19 +26,15 @@ class Reshape(nn.Module):
 
         if self.method == "linear" or self.method == "embedding":
             x_reshaped = self.layer(x)  # shape: (batch_size, j * dim)
-            x_reshaped = x_reshaped.view(
-                batch_size, self.j, self.dim
-            )  # shape: (batch_size, j, dim)
+            x_reshaped = x_reshaped.view(batch_size, self.j, self.dim)  # shape: (batch_size, j, dim)
         elif self.method == "conv1d":
             # For Conv1d, add dummy dimension and reshape
             x = x.unsqueeze(-1)  # Add dummy dimension for convolution
             x_reshaped = self.layer(x)  # shape: (batch_size, j * dim, 1)
             x_reshaped = x_reshaped.squeeze(-1)  # Remove dummy dimension
-            x_reshaped = x_reshaped.view(
-                batch_size, self.j, self.dim
-            )  # shape: (batch_size, j, dim)
+            x_reshaped = x_reshaped.view(batch_size, self.j, self.dim)  # shape: (batch_size, j, dim)
 
-        return x_reshaped
+        return x_reshaped  # type: ignore
 
 
 class AttentionNetBlock(nn.Module):
@@ -65,7 +57,7 @@ class AttentionNetBlock(nn.Module):
         norm_f,
         method,
     ):
-        super(AttentionNetBlock, self).__init__()
+        super().__init__()
 
         self.reshape = Reshape(channels, in_channels, method)
 

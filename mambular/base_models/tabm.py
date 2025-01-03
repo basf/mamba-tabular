@@ -1,12 +1,13 @@
 import torch
 import torch.nn as nn
-from ..configs.tabm_config import DefaultTabMConfig
-from .basemodel import BaseModel
+
 from ..arch_utils.get_norm_fn import get_normalization_layer
-from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.layer_utils.batch_ensemble_layer import LinearBatchEnsembleLayer
+from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.layer_utils.sn_linear import SNLinear
+from ..configs.tabm_config import DefaultTabMConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
+from .basemodel import BaseModel
 
 
 class TabM(BaseModel):
@@ -15,7 +16,7 @@ class TabM(BaseModel):
         cat_feature_info,
         num_feature_info,
         num_classes: int = 1,
-        config: DefaultTabMConfig = DefaultTabMConfig(),
+        config: DefaultTabMConfig = DefaultTabMConfig(),  # noqa: B008
         **kwargs,
     ):
         # Pass config to BaseModel
@@ -42,9 +43,7 @@ class TabM(BaseModel):
             if self.hparams.average_embeddings:
                 input_dim = self.hparams.d_model
             else:
-                input_dim = (
-                    len(num_feature_info) + len(cat_feature_info)
-                ) * config.d_model
+                input_dim = (len(num_feature_info) + len(cat_feature_info)) * config.d_model
 
         else:
             input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
@@ -72,11 +71,7 @@ class TabM(BaseModel):
         if self.hparams.use_glu:
             self.layers.append(nn.GLU())
         else:
-            self.layers.append(
-                self.hparams.activation
-                if hasattr(self.hparams, "activation")
-                else nn.SELU()
-            )
+            self.layers.append(self.hparams.activation if hasattr(self.hparams, "activation") else nn.SELU())
         if self.hparams.dropout > 0.0:
             self.layers.append(nn.Dropout(self.hparams.dropout))
 
@@ -110,11 +105,7 @@ class TabM(BaseModel):
             if self.hparams.use_glu:
                 self.layers.append(nn.GLU())
             else:
-                self.layers.append(
-                    self.hparams.activation
-                    if hasattr(self.hparams, "activation")
-                    else nn.SELU()
-                )
+                self.layers.append(self.hparams.activation if hasattr(self.hparams, "activation") else nn.SELU())
             if self.hparams.dropout > 0.0:
                 self.layers.append(nn.Dropout(self.hparams.dropout))
 
@@ -128,8 +119,7 @@ class TabM(BaseModel):
             )
 
     def forward(self, num_features, cat_features) -> torch.Tensor:
-        """
-        Forward pass of the TabM model with batch ensembling.
+        """Forward pass of the TabM model with batch ensembling.
 
         Parameters
         ----------
@@ -163,11 +153,7 @@ class TabM(BaseModel):
             if isinstance(self.layers[i], LinearBatchEnsembleLayer):
                 out = self.layers[i](x)
                 # `out` shape is expected to be (batch_size, ensemble_size, out_features)
-                if (
-                    hasattr(self, "skip_connections")
-                    and self.skip_connections
-                    and x.shape == out.shape
-                ):
+                if hasattr(self, "skip_connections") and self.skip_connections and x.shape == out.shape:
                     x = x + out
                 else:
                     x = out
@@ -175,14 +161,14 @@ class TabM(BaseModel):
                 x = self.layers[i](x)
 
         # Final ensemble output from the last ConfigurableBatchEnsembleLayer
-        x = self.layers[-1](x)  # Shape (batch_size, ensemble_size, num_classes)
+        # Shape (batch_size, ensemble_size, num_classes)
+        x = self.layers[-1](x)
 
         if self.hparams.average_ensembles:
             x = x.mean(axis=1)  # Shape (batch_size, num_classes)
 
-        x = self.final_layer(
-            x
-        )  # Shape (batch_size, (ensemble_size), num_classes) if not averaged
+        # Shape (batch_size, (ensemble_size), num_classes) if not averaged
+        x = self.final_layer(x)
 
         if not self.hparams.average_ensembles:
             x = x.squeeze(-1)

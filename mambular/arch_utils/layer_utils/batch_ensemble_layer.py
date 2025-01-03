@@ -1,14 +1,14 @@
+import math
+from collections.abc import Callable
+from typing import Literal
+
 import torch
 import torch.nn as nn
-from typing import Literal, List
-import math
-from typing import Callable
 import torch.nn.functional as F
 
 
 class LinearBatchEnsembleLayer(nn.Module):
-    """
-    A configurable BatchEnsemble layer that supports optional input scaling, output scaling,
+    """A configurable BatchEnsemble layer that supports optional input scaling, output scaling,
     and output bias terms as per the 'BatchEnsemble' paper.
     It provides initialization options for scaling terms to diversify ensemble members.
     """
@@ -23,7 +23,7 @@ class LinearBatchEnsembleLayer(nn.Module):
         ensemble_bias: bool = False,
         scaling_init: Literal["ones", "random-signs"] = "ones",
     ):
-        super(LinearBatchEnsembleLayer, self).__init__()
+        super().__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.ensemble_size = ensemble_size
@@ -32,24 +32,12 @@ class LinearBatchEnsembleLayer(nn.Module):
         self.W = nn.Parameter(torch.randn(out_features, in_features))
 
         # Optional scaling factors and shifts for each ensemble member
-        self.r = (
-            nn.Parameter(torch.empty(ensemble_size, in_features))
-            if ensemble_scaling_in
-            else None
-        )
-        self.s = (
-            nn.Parameter(torch.empty(ensemble_size, out_features))
-            if ensemble_scaling_out
-            else None
-        )
+        self.r = nn.Parameter(torch.empty(ensemble_size, in_features)) if ensemble_scaling_in else None
+        self.s = nn.Parameter(torch.empty(ensemble_size, out_features)) if ensemble_scaling_out else None
         self.bias = (
             nn.Parameter(torch.empty(out_features))
             if not ensemble_bias and out_features > 0
-            else (
-                nn.Parameter(torch.empty(ensemble_size, out_features))
-                if ensemble_bias
-                else None
-            )
+            else (nn.Parameter(torch.empty(ensemble_size, out_features)) if ensemble_bias else None)
         )
 
         # Initialize parameters
@@ -80,13 +68,10 @@ class LinearBatchEnsembleLayer(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if x.dim() == 2:
-            x = x.unsqueeze(1).expand(
-                -1, self.ensemble_size, -1
-            )  # Shape: (B, n_ensembles, N)
+            # Shape: (B, n_ensembles, N)
+            x = x.unsqueeze(1).expand(-1, self.ensemble_size, -1)
         elif x.size(1) != self.ensemble_size:
-            raise ValueError(
-                f"Input shape {x.shape} is invalid. Expected shape: (B, n_ensembles, N)"
-            )
+            raise ValueError(f"Input shape {x.shape} is invalid. Expected shape: (B, n_ensembles, N)")
 
         # Apply input scaling if enabled
         if self.r is not None:
@@ -119,8 +104,7 @@ class RNNBatchEnsembleLayer(nn.Module):
         ensemble_bias: bool = False,
         scaling_init: Literal["ones", "random-signs", "normal"] = "ones",
     ):
-        """
-        A batch ensemble RNN layer with optional bidirectionality and shared weights.
+        """A batch ensemble RNN layer with optional bidirectionality and shared weights.
 
         Parameters
         ----------
@@ -141,7 +125,7 @@ class RNNBatchEnsembleLayer(nn.Module):
         ensemble_bias : bool, default=False
             Whether to use a unique bias term for each ensemble member.
         """
-        super(RNNBatchEnsembleLayer, self).__init__()
+        super().__init__()
         self.input_size = input_size
         self.ensemble_size = ensemble_size
         self.nonlinearity = nonlinearity
@@ -155,21 +139,9 @@ class RNNBatchEnsembleLayer(nn.Module):
         self.W_hh = nn.Parameter(torch.empty(hidden_size, hidden_size))
 
         # Ensemble-specific scaling factors and bias for each ensemble member
-        self.r = (
-            nn.Parameter(torch.empty(ensemble_size, input_size))
-            if ensemble_scaling_in
-            else None
-        )
-        self.s = (
-            nn.Parameter(torch.empty(ensemble_size, hidden_size))
-            if ensemble_scaling_out
-            else None
-        )
-        self.bias = (
-            nn.Parameter(torch.zeros(ensemble_size, hidden_size))
-            if ensemble_bias
-            else None
-        )
+        self.r = nn.Parameter(torch.empty(ensemble_size, input_size)) if ensemble_scaling_in else None
+        self.s = nn.Parameter(torch.empty(ensemble_size, hidden_size)) if ensemble_scaling_out else None
+        self.bias = nn.Parameter(torch.zeros(ensemble_size, hidden_size)) if ensemble_bias else None
 
         # Initialize parameters
         self.reset_parameters(scaling_init)
@@ -195,9 +167,8 @@ class RNNBatchEnsembleLayer(nn.Module):
         if self.bias is not None:
             nn.init.zeros_(self.bias)
 
-    def forward(self, x: torch.Tensor, hidden: torch.Tensor = None) -> torch.Tensor:
-        """
-        Forward pass for the BatchEnsembleRNNLayer.
+    def forward(self, x: torch.Tensor, hidden: torch.Tensor = None) -> torch.Tensor:  # type: ignore
+        """Forward pass for the BatchEnsembleRNNLayer.
 
         Parameters
         ----------
@@ -214,21 +185,14 @@ class RNNBatchEnsembleLayer(nn.Module):
         # Check input shape and expand if necessary
         if x.dim() == 3:  # Case: (B, L, D) - no ensembles
             batch_size, seq_len, input_size = x.shape
-            x = x.unsqueeze(2).expand(
-                -1, -1, self.ensemble_size, -1
-            )  # Shape: (B, L, ensemble_size, D)
-        elif (
-            x.dim() == 4 and x.size(2) == self.ensemble_size
-        ):  # Case: (B, L, ensemble_size, D)
+            # Shape: (B, L, ensemble_size, D)
+            x = x.unsqueeze(2).expand(-1, -1, self.ensemble_size, -1)
+        elif x.dim() == 4 and x.size(2) == self.ensemble_size:  # Case: (B, L, ensemble_size, D)
             batch_size, seq_len, ensemble_size, _ = x.shape
             if ensemble_size != self.ensemble_size:
-                raise ValueError(
-                    f"Input shape {x.shape} is invalid. Expected shape: (B, S, ensemble_size, N)"
-                )
+                raise ValueError(f"Input shape {x.shape} is invalid. Expected shape: (B, S, ensemble_size, N)")
         else:
-            raise ValueError(
-                f"Input shape {x.shape} is invalid. Expected shape: (B, L, D) or (B, L, ensemble_size, D)"
-            )
+            raise ValueError(f"Input shape {x.shape} is invalid. Expected shape: (B, L, D) or (B, L, ensemble_size, D)")
 
         # Initialize hidden state if not provided
         if hidden is None:
@@ -258,13 +222,11 @@ class RNNBatchEnsembleLayer(nn.Module):
                 # Input and hidden term calculations with shared weights
                 input_term = torch.einsum("bki,hi->bkh", x_t, self.W_ih)
                 # Access the hidden state for the current direction, reshape for matrix multiplication
-                hidden_direction = hidden[direction]  # Shape: (E, B, hidden_size)
-                hidden_direction = hidden_direction.permute(
-                    1, 0, 2
-                )  # Shape: (B, E, hidden_size)
-                hidden_term = torch.einsum(
-                    "bki,hi->bkh", hidden_direction, self.W_hh
-                )  # Shape: (B, E, hidden_size)
+                # Shape: (E, B, hidden_size)
+                hidden_direction = hidden[direction]
+                hidden_direction = hidden_direction.permute(1, 0, 2)  # Shape: (B, E, hidden_size)
+                # Shape: (B, E, hidden_size)
+                hidden_term = torch.einsum("bki,hi->bkh", hidden_direction, self.W_hh)
                 hidden_next = input_term + hidden_term
 
                 # Apply output scaling, bias, and non-linearity
@@ -298,16 +260,15 @@ class RNNBatchEnsembleLayer(nn.Module):
             outputs, dim=1
         )  # Shape: (batch_size, seq_len, ensemble_size, hidden_size * num_directions)
 
-        return outputs, hidden
+        return outputs, hidden  # type: ignore
 
 
 class MultiHeadAttentionBatchEnsemble(nn.Module):
-    """
-    Multi-head attention module with batch ensembling.
+    """Multi-head attention module with batch ensembling.
 
-    This module implements the multi-head attention mechanism with optional batch ensembling on selected projections.
-    Batch ensembling allows for efficient ensembling by sharing weights across ensemble members while introducing
-    diversity through scaling factors.
+    This module implements the multi-head attention mechanism with optional batch
+    ensembling on selected projections. Batch ensembling allows for efficient ensembling
+    by sharing weights across ensemble members while introducing diversity through scaling factors.
 
     Parameters
     ----------
@@ -369,13 +330,12 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
         num_heads: int,
         ensemble_size: int,
         scaling_init: Literal["ones", "random-signs", "normal"] = "ones",
-        batch_ensemble_projections: List[str] = ["query"],
+        batch_ensemble_projections: list[str] = ["query"],
     ):
-        super(MultiHeadAttentionBatchEnsemble, self).__init__()
+        super().__init__()
         # Ensure embedding dimension is divisible by the number of heads
-        assert (
-            embed_dim % num_heads == 0
-        ), "Embedding dimension must be divisible by number of heads."
+        if embed_dim % num_heads != 0:
+            raise ValueError("Embedding dimension must be divisible by number of heads.")
 
         self.embed_dim = embed_dim
         self.num_heads = num_heads
@@ -405,12 +365,8 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
                 self.r["value"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
                 self.s["value"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
             elif proj_name == "out_proj":
-                self.r["out_proj"] = nn.Parameter(
-                    torch.Tensor(ensemble_size, embed_dim)
-                )
-                self.s["out_proj"] = nn.Parameter(
-                    torch.Tensor(ensemble_size, embed_dim)
-                )
+                self.r["out_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
+                self.s["out_proj"] = nn.Parameter(torch.Tensor(ensemble_size, embed_dim))
             else:
                 raise ValueError(
                     f"Invalid projection name '{proj_name}'. Must be one of 'query', 'key', 'value', 'out_proj'."
@@ -420,8 +376,7 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
         self.reset_parameters(scaling_init)
 
     def reset_parameters(self, scaling_init: Literal["ones", "random-signs", "normal"]):
-        """
-        Initialize the parameters of the module.
+        """Initialize the parameters of the module.
 
         Parameters
         ----------
@@ -458,9 +413,7 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
 
         init_fn = scaling_init_fn.get(scaling_init)
         if init_fn is None:
-            raise ValueError(
-                f"Invalid scaling_init '{scaling_init}'. Must be one of 'ones', 'random-signs', 'normal'."
-            )
+            raise ValueError(f"Invalid scaling_init '{scaling_init}'. Must be one of 'ones', 'random-signs', 'normal'.")
 
         # Initialize r and s for specified projections
         for key in self.r.keys():
@@ -469,8 +422,7 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
             init_fn(self.s[key])
 
     def forward(self, query, key, value, mask=None):
-        """
-        Perform the forward pass of the multi-head attention with batch ensembling.
+        """Perform the forward pass of the multi-head attention with batch ensembling.
 
         Parameters
         ----------
@@ -485,7 +437,8 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
         value : torch.Tensor
             The value tensor of shape (N, S, E, D).
         mask : torch.Tensor, optional
-            An optional mask tensor that is broadcastable to shape (N, 1, 1, 1, S). Positions with zero in the mask will be masked out.
+            An optional mask tensor that is broadcastable to shape (N, 1, 1, 1, S).
+            Positions with zero in the mask will be masked out.
 
         Returns
         -------
@@ -499,7 +452,8 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
         """
 
         N, S, E, D = query.size()
-        assert E == self.ensemble_size, "Ensemble size mismatch."
+        if E != self.ensemble_size:
+            raise ValueError("Ensemble size mismatch.")
 
         # Process projections with or without batch ensembling
         Q = self.process_projection(query, self.q_proj, "query")  # Shape: (N, S, E, D)
@@ -507,42 +461,36 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
         V = self.process_projection(value, self.v_proj, "value")  # Shape: (N, S, E, D)
 
         # Reshape for multi-head attention
-        Q = Q.view(N, S, E, self.num_heads, self.head_dim).permute(
-            0, 2, 3, 1, 4
-        )  # (N, E, num_heads, S, head_dim)
+        Q = Q.view(N, S, E, self.num_heads, self.head_dim).permute(0, 2, 3, 1, 4)  # (N, E, num_heads, S, head_dim)
         K = K.view(N, S, E, self.num_heads, self.head_dim).permute(0, 2, 3, 1, 4)
         V = V.view(N, S, E, self.num_heads, self.head_dim).permute(0, 2, 3, 1, 4)
 
         # Compute scaled dot-product attention
-        attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(
-            self.head_dim
-        )  # (N, E, num_heads, S, S)
+        # (N, E, num_heads, S, S)
+        attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(self.head_dim)
 
         if mask is not None:
             # Expand mask to match attn_scores shape
             mask = mask.unsqueeze(1).unsqueeze(1)  # (N, 1, 1, 1, S)
             attn_scores = attn_scores.masked_fill(mask == 0, float("-inf"))
 
-        attn_weights = F.softmax(attn_scores, dim=-1)  # (N, E, num_heads, S, S)
+        # (N, E, num_heads, S, S)
+        attn_weights = F.softmax(attn_scores, dim=-1)
 
         # Apply attention weights to values
-        context = torch.matmul(attn_weights, V)  # (N, E, num_heads, S, head_dim)
+        # (N, E, num_heads, S, head_dim)
+        context = torch.matmul(attn_weights, V)
 
         # Reshape and permute back to (N, S, E, D)
-        context = (
-            context.permute(0, 3, 1, 2, 4).contiguous().view(N, S, E, self.embed_dim)
-        )  # (N, S, E, D)
+        context = context.permute(0, 3, 1, 2, 4).contiguous().view(N, S, E, self.embed_dim)  # (N, S, E, D)
 
         # Apply output projection
-        output = self.process_projection(
-            context, self.out_proj, "out_proj"
-        )  # (N, S, E, D)
+        output = self.process_projection(context, self.out_proj, "out_proj")  # (N, S, E, D)
 
         return output
 
     def process_projection(self, x, linear_layer, proj_name):
-        """
-        Process a projection (query, key, value, or output) with or without batch ensembling.
+        """Process a projection (query, key, value, or output) with or without batch ensembling.
 
         Parameters
         ----------
@@ -577,8 +525,7 @@ class MultiHeadAttentionBatchEnsemble(nn.Module):
             return y
 
     def batch_ensemble_linear(self, x, linear_layer, r, s):
-        """
-        Apply a linear transformation with batch ensembling.
+        """Apply a linear transformation with batch ensembling.
 
         Parameters
         ----------

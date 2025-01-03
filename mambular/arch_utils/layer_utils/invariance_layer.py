@@ -1,3 +1,5 @@
+# ruff: noqa
+
 import torch
 import torch.nn as nn
 
@@ -57,17 +59,11 @@ class PositionalInvariance(nn.Module):
         super().__init__()
         # Select the appropriate layer based on config.invariance_type
         if invariance_type == "lfm":  # Learnable Fourier Mask
-            self.layer = LearnableFourierMask(
-                sequence_length=seq_len, keep_ratio=getattr(config, "keep_ratio", 0.5)
-            )
+            self.layer = LearnableFourierMask(sequence_length=seq_len, keep_ratio=getattr(config, "keep_ratio", 0.5))
         elif invariance_type == "lff":  # Learnable Fourier Features
-            self.layer = LearnableFourierFeatures(
-                num_features=seq_len, d_model=config.d_model
-            )
+            self.layer = LearnableFourierFeatures(num_features=seq_len, d_model=config.d_model)
         elif invariance_type == "lprp":  # Learnable Positional Random Perturbation
-            self.layer = LearnableRandomPositionalPerturbation(
-                num_features=seq_len, d_model=config.d_model
-            )
+            self.layer = LearnableRandomPositionalPerturbation(num_features=seq_len, d_model=config.d_model)
         elif invariance_type == "lrp":  # Learnable Random Projection
             self.layer = LearnableRandomProjection(
                 d_model=config.d_model,
@@ -76,17 +72,15 @@ class PositionalInvariance(nn.Module):
 
         elif invariance_type == "conv":
             self.layer = nn.Conv1d(
-                in_channels=in_channels,
-                out_channels=in_channels,
+                in_channels=in_channels,  # type: ignore
+                out_channels=in_channels,  # type: ignore
                 kernel_size=config.d_conv,
                 padding=config.d_conv - 1,
                 bias=config.conv_bias,
-                groups=in_channels,
+                groups=in_channels,  # type: ignore
             )
         else:
-            raise ValueError(
-                f"Unknown positional invariance type: {config.invariance_type}"
-            )
+            raise ValueError(f"Unknown positional invariance type: {config.invariance_type}")
 
     def forward(self, input):
         # Pass the input through the selected layer

@@ -1,11 +1,9 @@
 from dataclasses import dataclass
-import torch.nn as nn
 
 
 @dataclass
 class DefaultNDTFConfig:
-    """
-    Configuration class for the default Neural Decision Tree Forest (NDTF) model with predefined hyperparameters.
+    """Configuration class for the default Neural Decision Tree Forest (NDTF) model with predefined hyperparameters.
 
     Parameters
     ----------
@@ -24,9 +22,11 @@ class DefaultNDTFConfig:
     temperature : float, default=0.1
         Temperature parameter for softening the node decisions during path probability calculation.
     node_sampling : float, default=0.3
-        Fraction of nodes sampled for regularization penalty calculation. Reduces computation by focusing on a subset of nodes.
+        Fraction of nodes sampled for regularization penalty calculation. Reduces computation by focusing
+        on a subset of nodes.
     lamda : float, default=0.3
-        Regularization parameter to control the complexity of the paths, penalizing overconfident or imbalanced paths.
+        Regularization parameter to control the complexity of the paths, penalizing overconfident
+        or imbalanced paths.
     n_ensembles : int, default=12
         Number of trees in the forest
     penalty_factor : float, default=0.01
