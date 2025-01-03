@@ -62,6 +62,7 @@ autodoc_mock_imports = [
     "einops",
     "accelerate",
     "scikit-optimize",
+    "scipy",
 ]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
