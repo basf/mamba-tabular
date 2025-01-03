@@ -6,7 +6,8 @@ Please follow the steps below for installing `mambular`.
 
 ```bash
 cd mamba-tabular
-pip install .
+
+poetry install
 ```
 
 Note: Make sure you in the same directory where `setup.py` file resides.
