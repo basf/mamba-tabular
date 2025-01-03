@@ -167,7 +167,7 @@ class RNNBatchEnsembleLayer(nn.Module):
         if self.bias is not None:
             nn.init.zeros_(self.bias)
 
-    def forward(self, x: torch.Tensor, hidden: torch.Tensor | None = None) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, hidden: torch.Tensor = None) -> torch.Tensor:  # type: ignore
         """Forward pass for the BatchEnsembleRNNLayer.
 
         Parameters
