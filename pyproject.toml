@@ -23,6 +23,7 @@ properscoring = "^0.1"
 scikit-optimize = "^0.10.2"
 einops = "^0.8.0"
 accelerate = "^1.2.1"
+scipy = "^1.15.0"
 
 
 [tool.poetry.group.dev.dependencies]
