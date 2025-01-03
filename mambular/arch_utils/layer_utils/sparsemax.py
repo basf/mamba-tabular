@@ -92,7 +92,7 @@ class SparsemaxFunction(Function):
 
         Parameters
         ----------
-        input : torch.Tensor
+        input_ : torch.Tensor
             The input tensor on which to compute the threshold and support.
         dim : int, optional
             Dimension along which to compute the threshold and support. Default is -1.
