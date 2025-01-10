@@ -17,7 +17,7 @@ from sklearn.preprocessing import (
 )
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-from .basis_expansion import SplineExpansion
+from .basis_expansion import RBFExpansion, SigmoidExpansion, SplineExpansion
 from .ple_encoding import PLE
 from .prepro_utils import ContinuousOrdinalEncoder, CustomBinner, NoTransformer, OneHotFromOrdinal, ToFloatTransformer
 
@@ -38,7 +38,7 @@ class Preprocessor:
         only if `numerical_preprocessing` is set to 'binning', 'ple' or 'one-hot'.
     numerical_preprocessing : str, default="ple"
         The preprocessing strategy for numerical features. Valid options are
-        'ple', 'binning', 'one-hot', 'standardization', 'min-max', 'quantile', 'polynomial', 'robust',
+        'ple', 'binning', 'one-hot', 'standardization', 'min-max', 'quantile', 'polynomial', 'robust', 'rbf', 'sigmoid'.
         'splines', 'box-cox', 'yeo-johnson' and None
     categorical_preprocessing : str, default="int"
         The preprocessing strategy for categorical features. Valid options are
@@ -67,7 +67,7 @@ class Preprocessor:
         The number of knots to be used in spline transformations.
     use_decision_tree_knots : bool, default=True
         If True, uses decision tree regression to determine optimal knot positions for splines.
-    knots_strategy : str, default="uniform"
+    knots_strategy : str, default="quantile"
         Defines the strategy for determining knot positions in spline transformations
         if `use_decision_tree_knots` is False. Options include 'uniform', 'quantile'.
     spline_implementation : str, default="sklearn"
@@ -117,11 +117,14 @@ class Preprocessor:
             "splines",
             "box-cox",
             "yeo-johnson",
+            "rbf",
+            "sigmoid",
             "none",
         ]:
             raise ValueError(
                 "Invalid numerical_preprocessing value. Supported values are 'ple', 'binning', 'box-cox', \
-                'one-hot', 'standardization', 'quantile', 'polynomial', 'splines', 'minmax' , 'robust' or 'None'."
+                'one-hot', 'standardization', 'quantile', 'polynomial', 'splines', 'minmax' , 'robust',\
+                      'rbf', 'sigmoid', or 'None'."
             )
 
         if self.categorical_preprocessing not in ["int", "one-hot", "none"]:
@@ -247,6 +250,8 @@ class Preprocessor:
             X = pd.DataFrame(X)
 
         numerical_features, categorical_features = self._detect_column_types(X)
+        print("Numerical features:", numerical_features)
+        print("Categorical features:", categorical_features)
         transformers = []
 
         if numerical_features:
@@ -268,7 +273,9 @@ class Preprocessor:
                         | PLE
                         | PowerTransformer
                         | NoTransformer
-                        | SplineExpansion,
+                        | SplineExpansion
+                        | RBFExpansion
+                        | SigmoidExpansion,
                     ]
                 ] = [("imputer", SimpleImputer(strategy="mean"))]
                 if self.numerical_preprocessing in ["binning", "one-hot"]:
@@ -335,7 +342,8 @@ class Preprocessor:
                     numeric_transformer_steps.append(("robust", RobustScaler()))
 
                 elif self.numerical_preprocessing == "splines":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
+                    # numeric_transformer_steps.append(("scaler", StandardScaler()))
                     numeric_transformer_steps.append(
                         (
                             "splines",
@@ -348,6 +356,34 @@ class Preprocessor:
                                 spline_implementation=self.spline_implementation,
                             ),
                         ),
+                    )
+
+                elif self.numerical_preprocessing == "rbf":
+                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(
+                        (
+                            "rbf",
+                            RBFExpansion(
+                                n_centers=self.n_knots,
+                                use_decision_tree=self.use_decision_tree_knots,
+                                strategy=self.knots_strategy,
+                                task=self.task,
+                            ),
+                        )
+                    )
+
+                elif self.numerical_preprocessing == "sigmoid":
+                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    numeric_transformer_steps.append(
+                        (
+                            "sigmoid",
+                            SigmoidExpansion(
+                                n_centers=self.n_knots,
+                                use_decision_tree=self.use_decision_tree_knots,
+                                strategy=self.knots_strategy,
+                                task=self.task,
+                            ),
+                        )
                     )
 
                 elif self.numerical_preprocessing == "ple":
