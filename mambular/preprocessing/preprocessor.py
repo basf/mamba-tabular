@@ -60,6 +60,9 @@ class Preprocessor:
     treat_all_integers_as_numerical : bool, default=False
         If True, all integer columns will be treated as numerical, regardless
         of their unique value count or proportion.
+    scaling_strategy : str, default="minmax"
+        The scaling strategy to use for numerical features before applying PLE, Splines, RBF or Sigmoid.
+        Options include 'standardization', 'minmax', 'none'.
     degree : int, default=3
         The degree of the polynomial features to be used in preprocessing. It also affects the degree of
         splines if splines are used.
@@ -93,6 +96,7 @@ class Preprocessor:
         cat_cutoff=0.03,
         treat_all_integers_as_numerical=False,
         degree=3,
+        scaling_strategy="minmax",
         n_knots=64,
         use_decision_tree_knots=True,
         knots_strategy="uniform",
@@ -138,6 +142,7 @@ class Preprocessor:
         self.cat_cutoff = cat_cutoff
         self.treat_all_integers_as_numerical = treat_all_integers_as_numerical
         self.degree = degree
+        self.scaling_strategy = scaling_strategy
         self.n_knots = n_knots
         self.use_decision_tree_knots = use_decision_tree_knots
         self.knots_strategy = knots_strategy
@@ -166,6 +171,7 @@ class Preprocessor:
             "cat_cutoff": self.cat_cutoff,
             "treat_all_integers_as_numerical": self.treat_all_integers_as_numerical,
             "degree": self.degree,
+            "scaling_strategy": self.scaling_strategy,
             "n_knots": self.n_knots,
             "use_decision_tree_knots": self.use_decision_tree_knots,
             "knots_strategy": self.knots_strategy,
@@ -330,7 +336,10 @@ class Preprocessor:
                     )
 
                 elif self.numerical_preprocessing == "polynomial":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    if self.scaling_strategy == "standardization":
+                        numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    elif self.scaling_strategy == "minmax":
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "polynomial",
@@ -342,8 +351,10 @@ class Preprocessor:
                     numeric_transformer_steps.append(("robust", RobustScaler()))
 
                 elif self.numerical_preprocessing == "splines":
-                    numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
-                    # numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    if self.scaling_strategy == "standardization":
+                        numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    elif self.scaling_strategy == "minmax":
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "splines",
@@ -359,7 +370,10 @@ class Preprocessor:
                     )
 
                 elif self.numerical_preprocessing == "rbf":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    if self.scaling_strategy == "standardization":
+                        numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    elif self.scaling_strategy == "minmax":
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "rbf",
@@ -373,7 +387,10 @@ class Preprocessor:
                     )
 
                 elif self.numerical_preprocessing == "sigmoid":
-                    numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    if self.scaling_strategy == "standardization":
+                        numeric_transformer_steps.append(("scaler", StandardScaler()))
+                    elif self.scaling_strategy == "minmax":
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "sigmoid",
