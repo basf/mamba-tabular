@@ -27,8 +27,12 @@ class SklearnBaseClassifier(BaseEstimator):
             "task",
             "cat_cutoff",
             "treat_all_integers_as_numerical",
-            "knots",
             "degree",
+            "scaling_strategy",
+            "n_knots",
+            "use_decision_tree_knots",
+            "knots_strategy",
+            "spline_implementation",
         ]
 
         self.config_kwargs = {
@@ -146,7 +150,7 @@ class SklearnBaseClassifier(BaseEstimator):
             The validation target values. Required if `X_val` is provided.
         random_state : int, default=101
             Controls the shuffling applied to the data before applying the split.
-        batch_size : int, default=64
+        batch_size : int, default=128
             Number of samples per gradient update.
         shuffle : bool, default=True
             Whether to shuffle the training data before each epoch.

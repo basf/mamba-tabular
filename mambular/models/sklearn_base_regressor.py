@@ -26,6 +26,7 @@ class SklearnBaseRegressor(BaseEstimator):
             "cat_cutoff",
             "treat_all_integers_as_numerical",
             "degree",
+            "scaling_strategy",
             "n_knots",
             "use_decision_tree_knots",
             "knots_strategy",
