@@ -85,11 +85,12 @@ class DefaultCNNConfig:
     input_channels: int = 1
     num_layers: int = 4
     out_channels_list: list = (64, 64, 128, 128)
-    kernel_size_list: list = (3, 3, 3, 3)
+    kernel_size_list: list = (5, 3, 3, 3)
     stride_list: list = (1, 1, 1, 1)
     padding_list: list = (1, 1, 1, 1)
     pooling_method: str = "max"
     pooling_kernel_size_list: list = (2, 2, 1, 1)
     pooling_stride_list: list = (2, 2, 1, 1)
-    dropout_rate: float = 0.5  # Probability to drop neurons
-    dropout_positions: list = None
+    dropout_rate: float = 0.2  # Probability to drop neurons
+    dropout_positions: list = (1, 3)
+    attention: str = None

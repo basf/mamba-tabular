@@ -134,8 +134,8 @@ class MambularDataModule(pl.LightningDataModule):
 
         # Update feature info based on the actual processed data
         (
-            self.cat_feature_info,
             self.num_feature_info,
+            self.cat_feature_info,
         ) = self.preprocessor.get_feature_info()
 
     def setup(self, stage: str):
