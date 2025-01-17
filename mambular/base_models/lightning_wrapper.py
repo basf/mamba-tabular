@@ -302,6 +302,28 @@ class TaskModel(pl.LightningModule):
 
         return test_loss
 
+    def predict_step(self, batch, batch_idx):
+        """Predict step for a single batch.
+
+        Parameters
+        ----------
+        batch : tuple
+            Batch of data containing numerical features, categorical features, and labels.
+        batch_idx : int
+            Index of the batch.
+
+        Returns
+        -------
+        Tensor
+            Predictions.
+        """
+
+        cat_features, num_features, labels = batch
+        preds = self(num_features=num_features, cat_features=cat_features)
+
+        return preds
+
+
     def on_validation_epoch_end(self):
         """Callback executed at the end of each validation epoch.
 
