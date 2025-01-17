@@ -318,7 +318,7 @@ class TaskModel(pl.LightningModule):
             Predictions.
         """
 
-        cat_features, num_features, labels = batch
+        cat_features, num_features = batch
         preds = self(num_features=num_features, cat_features=cat_features)
 
         return preds
