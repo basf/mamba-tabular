@@ -153,8 +153,10 @@ class MambularDataModule(pl.LightningDataModule):
             for key in self.cat_feature_info:  # type: ignore
                 dtype = (
                     torch.float32
-                    if "onehot"
-                    in self.cat_feature_info[key]["preprocessing"]  # type: ignore
+                    if any(
+                        x in self.cat_feature_info[key]["preprocessing"]
+                        for x in ["onehot", "pretrained"]
+                    )
                     else torch.long
                 )
 
@@ -226,8 +228,10 @@ class MambularDataModule(pl.LightningDataModule):
         for key in self.cat_feature_info:  # type: ignore
             dtype = (
                 torch.float32
-                if "onehot"
-                in self.cat_feature_info[key]["preprocessing"]  # type: ignore
+                if any(
+                    x in self.cat_feature_info[key]["preprocessing"]
+                    for x in ["onehot", "pretrained"]
+                )
                 else torch.long
             )
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'

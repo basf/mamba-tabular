@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
+from sentence_transformers import SentenceTransformer
 
 
 class CustomBinner(TransformerMixin):
@@ -10,6 +11,7 @@ class CustomBinner(TransformerMixin):
 
     def fit(self, X, y=None):
         # Fit doesn't need to do anything as we are directly using provided bins
+        self.n_features_in_ = 1
         return self
 
     def transform(self, X):
@@ -56,7 +58,10 @@ class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
             self: Returns the instance itself.
         """
         # Fit should determine the mapping from original categories to sequential integers starting from 0
-        self.mapping_ = [{category: i + 1 for i, category in enumerate(np.unique(col))} for col in X.T]
+        self.mapping_ = [
+            {category: i + 1 for i, category in enumerate(np.unique(col))}
+            for col in X.T
+        ]
         for mapping in self.mapping_:
             mapping[None] = 0  # Assign 0 to unknown values
         return self
@@ -71,7 +76,12 @@ class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
             X_transformed (ndarray of shape (n_samples, n_features)): The transformed data with integer values.
         """
         # Transform the categories to their mapped integer values
-        X_transformed = np.array([[self.mapping_[col].get(value, 0) for col, value in enumerate(row)] for row in X])
+        X_transformed = np.array(
+            [
+                [self.mapping_[col].get(value, 0) for col, value in enumerate(row)]
+                for row in X
+            ]
+        )
         return X_transformed
 
     def get_feature_names_out(self, input_features=None):
@@ -113,7 +123,9 @@ class OneHotFromOrdinal(TransformerMixin, BaseEstimator):
         Returns:
             self: Returns the instance itself.
         """
-        self.max_bins_ = np.max(X, axis=0).astype(int) + 1  # Find the maximum bin index for each feature
+        self.max_bins_ = (
+            np.max(X, axis=0).astype(int) + 1
+        )  # Find the maximum bin index for each feature
         return self
 
     def transform(self, X):
@@ -172,6 +184,7 @@ class NoTransformer(TransformerMixin, BaseEstimator):
         Returns:
             self: Returns the instance itself.
         """
+        self.n_features_in_ = 1
         return self
 
     def transform(self, X):
@@ -195,7 +208,9 @@ class NoTransformer(TransformerMixin, BaseEstimator):
             feature_names (array of shape (n_features,)): The original feature names.
         """
         if input_features is None:
-            raise ValueError("input_features must be provided to generate feature names.")
+            raise ValueError(
+                "input_features must be provided to generate feature names."
+            )
         return np.array(input_features)
 
 
@@ -203,7 +218,51 @@ class ToFloatTransformer(TransformerMixin, BaseEstimator):
     """A transformer that converts input data to float type."""
 
     def fit(self, X, y=None):
+        self.n_features_in_ = 1
         return self
 
     def transform(self, X):
         return X.astype(float)
+
+
+class LanguageEmbeddingTransformer(TransformerMixin, BaseEstimator):
+    """A transformer that encodes categorical text features into embeddings using a pre-trained language model."""
+
+    def __init__(self, model_name="paraphrase-MiniLM-L3-v2"):
+        """
+        Initializes the transformer with a language embedding model.
+
+        Parameters:
+        - model_name (str): The name of the SentenceTransformer model to use.
+        """
+        self.model_name = model_name
+        self.model = SentenceTransformer(model_name)
+
+    def fit(self, X, y=None):
+        """
+        Fit method (not required for a transformer but included for compatibility).
+        """
+        self.n_features_in_ = X.shape[1] if len(X.shape) > 1 else 1
+        return self
+
+    def transform(self, X):
+        """
+        Transforms input categorical text features into numerical embeddings.
+
+        Parameters:
+        - X: A 1D or 2D array-like of categorical text features.
+
+        Returns:
+        - A 2D numpy array with embeddings for each text input.
+        """
+        if isinstance(X, np.ndarray):
+            X = (
+                X.flatten().astype(str).tolist()
+            )  # Convert to a list of strings if passed as an array
+        elif isinstance(X, list):
+            X = [str(x) for x in X]  # Ensure everything is a string
+
+        embeddings = self.model.encode(
+            X, convert_to_numpy=True
+        )  # Get sentence embeddings
+        return embeddings
