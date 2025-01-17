@@ -254,6 +254,12 @@ class MambularDataModule(pl.LightningDataModule):
             cat_tensors, num_tensors, labels=None, regression=self.regression
         )
 
+    def assign_predict_dataset(self, X):
+        self.predict_dataset = self.preprocess_new_data(X)
+
+    def assign_test_dataset(self, X):
+        self.test_dataset = self.preprocess_new_data(X)
+
     def train_dataloader(self):
         """Returns the training dataloader.
 
