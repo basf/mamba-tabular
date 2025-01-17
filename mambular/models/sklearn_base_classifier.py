@@ -376,125 +376,98 @@ class SklearnBaseClassifier(BaseEstimator):
         return self
 
     def predict(self, X, device=None):
-        """Predicts target values for the given input samples.
-
+        """Predicts target labels for the given input samples.
+    
         Parameters
         ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict target values.
-
-
+    
         Returns
         -------
-        predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
-            The predicted target values.
+        predictions : ndarray, shape (n_samples,)
+            The predicted class labels.
         """
         # Ensure model and data module are initialized
         if self.task_model is None or self.data_module is None:
             raise ValueError("The model or data module has not been fitted yet.")
-
+    
         # Preprocess the data using the data module
-        cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
-
-        # Move tensors to appropriate device
-        if device is None:
-            device = next(self.task_model.parameters()).device
-        if isinstance(cat_tensors, list):
-            cat_tensors = [tensor.to(device) for tensor in cat_tensors]
-        else:
-            cat_tensors = cat_tensors.to(device)
-
-        if isinstance(num_tensors, list):
-            num_tensors = [tensor.to(device) for tensor in num_tensors]
-        else:
-            num_tensors = num_tensors.to(device)
-
+        self.data_module.predict_dataset = self.data_module.preprocess_new_data(X)
+    
         # Set model to evaluation mode
         self.task_model.eval()
-
-        # Perform inference
-        with torch.no_grad():
-            logits = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
-
-            # Check if ensemble is used
-            if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
-                # Average logits across the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
-                logits = logits.mean(dim=1)
-                if logits.dim() == 1:  # Check if logits has only one dimension (shape (N,))
-                    logits = logits.unsqueeze(1)
-
-            # Check the shape of the logits to determine binary or multi-class classification
-            if logits.shape[1] == 1:
-                # Binary classification
-                probabilities = torch.sigmoid(logits)
-                predictions = (probabilities > 0.5).long().squeeze()
-            else:
-                # Multi-class classification
-                probabilities = torch.softmax(logits, dim=1)
-                predictions = torch.argmax(probabilities, dim=1)
-
+    
+        # Perform inference using PyTorch Lightning's predict function
+        logits_list = self.trainer.predict(self.task_model, self.data_module)
+    
+        # Concatenate predictions from all batches
+        logits = torch.cat(logits_list, dim=0)
+    
+        # Check if ensemble is used
+        if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
+            logits = logits.mean(dim=1)  # Average over ensemble dimension
+            if logits.dim() == 1:  # Ensure correct shape
+                logits = logits.unsqueeze(1)
+    
+        # Check the shape of the logits to determine binary or multi-class classification
+        if logits.shape[1] == 1:
+            # Binary classification
+            probabilities = torch.sigmoid(logits)
+            predictions = (probabilities > 0.5).long().squeeze()
+        else:
+            # Multi-class classification
+            probabilities = torch.softmax(logits, dim=1)
+            predictions = torch.argmax(probabilities, dim=1)
+    
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()
-
+    
+    
     def predict_proba(self, X, device=None):
-        """Predict class probabilities for the given input samples.
-
+        """Predicts class probabilities for the given input samples.
+    
         Parameters
         ----------
-        X : array-like or pd.DataFrame of shape (n_samples, n_features)
+        X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict class probabilities.
-
-
-        Notes
-        -----
-        The method preprocesses the input data using the same preprocessor used during training,
-        sets the model to evaluation mode, and then performs inference to predict the class probabilities.
-        Softmax is applied to the logits to obtain probabilities, which are then converted from a PyTorch tensor
-        to a NumPy array before being returned.
-
+    
         Returns
         -------
-        probabilities : ndarray of shape (n_samples, n_classes)
-            Predicted class probabilities for each input sample.
+        probabilities : ndarray, shape (n_samples, n_classes)
+            The predicted class probabilities.
         """
-        # Preprocess the data
-        if not isinstance(X, pd.DataFrame):
-            X = pd.DataFrame(X)
-        device = next(self.task_model.parameters()).device  # type: ignore
-        cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
-        if isinstance(cat_tensors, list):
-            cat_tensors = [tensor.to(device) for tensor in cat_tensors]
+        # Ensure model and data module are initialized
+        if self.task_model is None or self.data_module is None:
+            raise ValueError("The model or data module has not been fitted yet.")
+    
+        # Preprocess the data using the data module
+        self.data_module.predict_dataset = self.data_module.preprocess_new_data(X)
+    
+        # Set model to evaluation mode
+        self.task_model.eval()
+    
+        # Perform inference using PyTorch Lightning's predict function
+        logits_list = self.trainer.predict(self.task_model, self.data_module)
+    
+        # Concatenate predictions from all batches
+        logits = torch.cat(logits_list, dim=0)
+    
+        # Check if ensemble is used
+        if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
+            logits = logits.mean(dim=1)  # Average over ensemble dimension
+            if logits.dim() == 1:  # Ensure correct shape
+                logits = logits.unsqueeze(1)
+    
+        # Compute probabilities
+        if logits.shape[1] > 1:
+            probabilities = torch.softmax(logits, dim=1)  # Multi-class classification
         else:
-            cat_tensors = cat_tensors.to(device)
-
-        if isinstance(num_tensors, list):
-            num_tensors = [tensor.to(device) for tensor in num_tensors]
-        else:
-            num_tensors = num_tensors.to(device)
-
-        # Set the model to evaluation mode
-        self.task_model.eval()  # type: ignore
-
-        # Perform inference
-        with torch.no_grad():
-            logits = self.task_model(  # type: ignore
-                num_features=num_tensors, cat_features=cat_tensors
-            )
-            # Check if ensemble is used
-            # If using ensemble
-            if hasattr(self.task_model.base_model, "returns_ensemble"):  # type: ignore
-                # Average logits across the ensemble dimension
-                # (assuming shape: (batch_size, ensemble_size, output_dim))
-                logits = logits.mean(dim=1)
-                if logits.dim() == 1:  # Check if logits has only one dimension (shape (N,))
-                    logits = logits.unsqueeze(1)
-            if logits.shape[1] > 1:
-                probabilities = torch.softmax(logits, dim=1)
-            else:
-                probabilities = torch.sigmoid(logits)
-
+            probabilities = torch.sigmoid(logits)  # Binary classification
+    
         # Convert probabilities to NumPy array and return
         return probabilities.cpu().numpy()
+
 
     def evaluate(self, X, y_true, metrics=None):
         """Evaluate the model on the given data using specified metrics.

@@ -421,7 +421,7 @@ class SklearnBaseLSS(BaseEstimator):
 
         return self
 
-    def predict(self, X, raw=False, device=None):
+    def predict(self, X, device=None):
         """Predicts target values for the given input samples.
 
         Parameters
@@ -440,38 +440,23 @@ class SklearnBaseLSS(BaseEstimator):
             raise ValueError("The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
-        cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
-
-        # Move tensors to appropriate device
-        if device is not None:
-            device = next(self.task_model.parameters()).device
-        if isinstance(cat_tensors, list):
-            cat_tensors = [tensor.to(device) for tensor in cat_tensors]
-        else:
-            cat_tensors = cat_tensors.to(device)
-
-        if isinstance(num_tensors, list):
-            num_tensors = [tensor.to(device) for tensor in num_tensors]
-        else:
-            num_tensors = num_tensors.to(device)
+        self.data_module.predict_dataset = self.data_module.preprocess_new_data(X)
 
         # Set model to evaluation mode
         self.task_model.eval()
 
-        # Perform inference
-        with torch.no_grad():
-            predictions = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
-
+        # Perform inference using PyTorch Lightning's predict function
+        predictions_list = self.trainer.predict(self.task_model, self.data_module)
+    
+        # Concatenate predictions from all batches
+        predictions = torch.cat(predictions_list, dim=0)
+    
         # Check if ensemble is used
-        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
-            # Average over the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
-            predictions = predictions.mean(dim=1)
-
-        if not raw:
-            result = self.task_model.family(predictions).cpu().numpy()  # type: ignore
-            return result
-        else:
-            return predictions.cpu().numpy()
+        if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
+            predictions = predictions.mean(dim=1)  # Average over ensemble dimension
+    
+        # Convert predictions to NumPy array and return
+        return predictions.cpu().numpy()
 
     def evaluate(self, X, y_true, metrics=None, distribution_family=None):
         """Evaluate the model on the given data using specified metrics.
