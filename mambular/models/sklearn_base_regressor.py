@@ -429,7 +429,7 @@ class SklearnBaseRegressor(BaseEstimator):
         predictions = torch.cat(predictions_list, dim=0)
 
         # Check if ensemble is used
-        if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
+        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
             predictions = predictions.mean(dim=1)  # Average over ensemble dimension
 
         # Convert predictions to NumPy array and return

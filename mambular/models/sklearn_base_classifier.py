@@ -435,7 +435,7 @@ class SklearnBaseClassifier(BaseEstimator):
         logits = torch.cat(logits_list, dim=0)
 
         # Check if ensemble is used
-        if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
+        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
             logits = logits.mean(dim=1)  # Average over ensemble dimension
             if logits.dim() == 1:  # Ensure correct shape
                 logits = logits.unsqueeze(1)
@@ -483,7 +483,7 @@ class SklearnBaseClassifier(BaseEstimator):
         logits = torch.cat(logits_list, dim=0)
 
         # Check if ensemble is used
-        if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
+        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
             logits = logits.mean(dim=1)  # Average over ensemble dimension
             if logits.dim() == 1:  # Ensure correct shape
                 logits = logits.unsqueeze(1)

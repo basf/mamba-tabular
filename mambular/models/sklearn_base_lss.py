@@ -451,7 +451,7 @@ class SklearnBaseLSS(BaseEstimator):
 
         return self
 
-    def predict(self, X, device=None):
+    def predict(self, X, raw=False, device=None):
         """Predicts target values for the given input samples.
 
         Parameters
@@ -482,11 +482,14 @@ class SklearnBaseLSS(BaseEstimator):
         predictions = torch.cat(predictions_list, dim=0)
 
         # Check if ensemble is used
-        if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
+        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
             predictions = predictions.mean(dim=1)  # Average over ensemble dimension
 
-        # Convert predictions to NumPy array and return
-        return predictions.cpu().numpy()
+        if not raw:
+            result = self.task_model.family(predictions).cpu().numpy()  # type: ignore
+            return result
+        else:
+            return predictions.cpu().numpy()
 
     def evaluate(self, X, y_true, metrics=None, distribution_family=None):
         """Evaluate the model on the given data using specified metrics.
