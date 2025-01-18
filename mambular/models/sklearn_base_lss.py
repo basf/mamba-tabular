@@ -39,6 +39,8 @@ from ..utils.distributions import (
     Quantile,
     StudentTDistribution,
 )
+from tqdm import tqdm
+from torch.utils.data import DataLoader
 
 
 class SklearnBaseLSS(BaseEstimator):
@@ -198,8 +200,12 @@ class SklearnBaseLSS(BaseEstimator):
             Learning rate for the optimizer.
         lr_patience : int, default=10
             Number of epochs with no improvement on the validation loss to wait before reducing the learning rate.
-        factor : float, default=0.1
+        lr_factor : float, default=0.1
             Factor by which the learning rate will be reduced.
+        train_metrics : dict, default=None
+            torch.metrics dict to be logged during training.
+        val_metrics : dict, default=None
+            torch.metrics dict to be logged during validation.
         weight_decay : float, default=0.025
             Weight decay (L2 penalty) coefficient.
         dataloader_kwargs: dict, default={}
@@ -361,6 +367,10 @@ class SklearnBaseLSS(BaseEstimator):
             Weight decay (L2 penalty) coefficient.
         distributional_kwargs : dict, default=None
             any arguments taht are specific for a certain distribution.
+        train_metrics : dict, default=None
+            torch.metrics dict to be logged during training.
+        val_metrics : dict, default=None
+            torch.metrics dict to be logged during validation.
         checkpoint_path : str, default="model_checkpoints"
             Path where the checkpoints are being saved.
         dataloader_kwargs: dict, default={}
@@ -595,6 +605,47 @@ class SklearnBaseLSS(BaseEstimator):
         predictions = self.predict(X)
         score = self.task_model.family.evaluate_nll(y, predictions)  # type: ignore
         return score
+
+    def encode(self, X, batch_size=64):
+        """
+        Encodes input data using the trained model's embedding layer.
+
+        Parameters
+        ----------
+        X : array-like or DataFrame
+            Input data to be encoded.
+        batch_size : int, optional, default=64
+            Batch size for encoding.
+
+        Returns
+        -------
+        torch.Tensor
+            Encoded representations of the input data.
+
+        Raises
+        ------
+        ValueError
+            If the model or data module is not fitted.
+        """
+        # Ensure model and data module are initialized
+        if self.task_model is None or self.data_module is None:
+            raise ValueError("The model or data module has not been fitted yet.")
+        encoded_dataset = self.data_module.preprocess_new_data(X)
+
+        data_loader = DataLoader(encoded_dataset, batch_size=batch_size, shuffle=False)
+
+        # Process data in batches
+        encoded_outputs = []
+        for num_features, cat_features in tqdm(data_loader):
+            embeddings = self.task_model.base_model.encode(
+                num_features, cat_features
+            )  # Call your encode function
+            encoded_outputs.append(embeddings)
+
+        # Concatenate all encoded outputs
+        encoded_outputs = torch.cat(encoded_outputs, dim=0)
+
+        return encoded_outputs
 
     def optimize_hparams(
         self,

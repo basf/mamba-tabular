@@ -16,6 +16,8 @@ from ..utils.config_mapper import (
     get_search_space,
     round_to_nearest_16,
 )
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 
 class SklearnBaseRegressor(BaseEstimator):
@@ -178,6 +180,10 @@ class SklearnBaseRegressor(BaseEstimator):
             Factor by which the learning rate will be reduced.
         weight_decay : float, default=0.025
             Weight decay (L2 penalty) coefficient.
+        train_metrics : dict, default=None
+            torch.metrics dict to be logged during training.
+        val_metrics : dict, default=None
+            torch.metrics dict to be logged during validation.
         dataloader_kwargs: dict, default={}
             The kwargs for the pytorch dataloader class.
 
@@ -333,6 +339,12 @@ class SklearnBaseRegressor(BaseEstimator):
             Path where the checkpoints are being saved.
         dataloader_kwargs: dict, default={}
             The kwargs for the pytorch dataloader class.
+        train_metrics : dict, default=None
+            torch.metrics dict to be logged during training.
+        val_metrics : dict, default=None
+            torch.metrics dict to be logged during validation.
+        rebuild: bool, default=True
+            Whether to rebuild the model when it already was built.
         **trainer_kwargs : Additional keyword arguments for PyTorch Lightning's Trainer class.
 
 
@@ -491,6 +503,47 @@ class SklearnBaseRegressor(BaseEstimator):
         """
         predictions = self.predict(X)
         return metric(y, predictions)
+
+    def encode(self, X, batch_size=64):
+        """
+        Encodes input data using the trained model's embedding layer.
+
+        Parameters
+        ----------
+        X : array-like or DataFrame
+            Input data to be encoded.
+        batch_size : int, optional, default=64
+            Batch size for encoding.
+
+        Returns
+        -------
+        torch.Tensor
+            Encoded representations of the input data.
+
+        Raises
+        ------
+        ValueError
+            If the model or data module is not fitted.
+        """
+        # Ensure model and data module are initialized
+        if self.task_model is None or self.data_module is None:
+            raise ValueError("The model or data module has not been fitted yet.")
+        encoded_dataset = self.data_module.preprocess_new_data(X)
+
+        data_loader = DataLoader(encoded_dataset, batch_size=batch_size, shuffle=False)
+
+        # Process data in batches
+        encoded_outputs = []
+        for num_features, cat_features in tqdm(data_loader):
+            embeddings = self.task_model.base_model.encode(
+                num_features, cat_features
+            )  # Call your encode function
+            encoded_outputs.append(embeddings)
+
+        # Concatenate all encoded outputs
+        encoded_outputs = torch.cat(encoded_outputs, dim=0)
+
+        return encoded_outputs
 
     def optimize_hparams(
         self,
