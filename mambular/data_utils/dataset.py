@@ -20,7 +20,9 @@ class MambularDataset(Dataset):
         regression (bool, optional): A flag indicating if the dataset is for a regression task. Defaults to True.
     """
 
-    def __init__(self, cat_features_list, num_features_list, labels=None, regression=True):
+    def __init__(
+        self, cat_features_list, num_features_list, labels=None, regression=True
+    ):
         self.cat_features_list = cat_features_list  # Categorical features tensors
         self.num_features_list = num_features_list  # Numerical features tensors
         self.regression = regression
@@ -54,7 +56,9 @@ class MambularDataset(Dataset):
             tuple: A tuple containing two lists of tensors (one for categorical features and one for numerical features)
             and a single label (if available).
         """
-        cat_features = [feature_tensor[idx] for feature_tensor in self.cat_features_list]
+        cat_features = [
+            feature_tensor[idx] for feature_tensor in self.cat_features_list
+        ]
         num_features = [
             torch.as_tensor(feature_tensor[idx]).clone().detach().to(torch.float32)
             for feature_tensor in self.num_features_list
@@ -68,7 +72,6 @@ class MambularDataset(Dataset):
                 label = label.clone().detach().to(torch.float32)
             else:
                 label = label.clone().detach().to(torch.long)
-            return cat_features, num_features, label
+            return num_features, cat_features, label
         else:
-            return cat_features, num_features  # No label in prediction mode
-
+            return num_features, cat_features  # No label in prediction mode

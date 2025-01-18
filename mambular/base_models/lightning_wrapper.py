@@ -188,7 +188,7 @@ class TaskModel(pl.LightningModule):
         Tensor
             Training loss.
         """
-        cat_features, num_features, labels = batch
+        num_features, cat_features, labels = batch
 
         # Check if the model has a `penalty_forward` method
         if hasattr(self.base_model, "penalty_forward"):
@@ -235,7 +235,7 @@ class TaskModel(pl.LightningModule):
             Validation loss.
         """
 
-        cat_features, num_features, labels = batch
+        num_features, cat_features, labels = batch
         preds = self(num_features=num_features, cat_features=cat_features)
         val_loss = self.compute_loss(preds, labels)
 
@@ -277,7 +277,7 @@ class TaskModel(pl.LightningModule):
         Tensor
             Test loss.
         """
-        cat_features, num_features, labels = batch
+        num_features, cat_features, labels = batch
         preds = self(num_features=num_features, cat_features=cat_features)
         test_loss = self.compute_loss(preds, labels)
 
@@ -308,7 +308,7 @@ class TaskModel(pl.LightningModule):
             Predictions.
         """
 
-        cat_features, num_features = batch
+        num_features, cat_features = batch
         preds = self(num_features=num_features, cat_features=cat_features)
 
         return preds
