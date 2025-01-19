@@ -19,7 +19,14 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from .basis_expansion import RBFExpansion, SigmoidExpansion, SplineExpansion
 from .ple_encoding import PLE
-from .prepro_utils import ContinuousOrdinalEncoder, CustomBinner, NoTransformer, OneHotFromOrdinal, ToFloatTransformer
+from .prepro_utils import (
+    ContinuousOrdinalEncoder,
+    CustomBinner,
+    LanguageEmbeddingTransformer,
+    NoTransformer,
+    OneHotFromOrdinal,
+    ToFloatTransformer,
+)
 
 
 class Preprocessor:
@@ -131,8 +138,15 @@ class Preprocessor:
                       'rbf', 'sigmoid', or 'None'."
             )
 
-        if self.categorical_preprocessing not in ["int", "one-hot", "none"]:
-            raise ValueError("invalid categorical_preprocessing value. Supported values are 'int' and 'one-hot'")
+        if self.categorical_preprocessing not in [
+            "int",
+            "one-hot",
+            "pretrained",
+            "none",
+        ]:
+            raise ValueError(
+                "invalid categorical_preprocessing value. Supported values are 'int', 'pretrained', 'none' and 'one-hot'"
+            )
 
         self.use_decision_tree_bins = use_decision_tree_bins
         self.column_transformer = None
@@ -256,8 +270,6 @@ class Preprocessor:
             X = pd.DataFrame(X)
 
         numerical_features, categorical_features = self._detect_column_types(X)
-        print("Numerical features:", numerical_features)
-        print("Categorical features:", categorical_features)
         transformers = []
 
         if numerical_features:
@@ -461,6 +473,13 @@ class Preprocessor:
                         [
                             ("imputer", SimpleImputer(strategy="most_frequent")),
                             ("none", NoTransformer()),
+                        ]
+                    )
+                elif self.categorical_preprocessing == "pretrained":
+                    categorical_transformer = Pipeline(
+                        [
+                            ("imputer", SimpleImputer(strategy="most_frequent")),
+                            ("pretrained", LanguageEmbeddingTransformer()),
                         ]
                     )
                 else:
@@ -709,7 +728,9 @@ class Preprocessor:
                             "categories": None,  # Numerical features don't have categories
                         }
                     if verbose:
-                        print(f"Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}")
+                        print(
+                            f"Categorical Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}"
+                        )
 
                 if verbose:
                     print("-" * 50)

@@ -123,7 +123,9 @@ class MambularDataModule(pl.LightningDataModule):
             self.y_val = y_val
 
         # Fit the preprocessor on the combined training and validation data
-        combined_X = pd.concat([self.X_train, self.X_val], axis=0).reset_index(drop=True)
+        combined_X = pd.concat([self.X_train, self.X_val], axis=0).reset_index(
+            drop=True
+        )
         combined_y = np.concatenate((self.y_train, self.y_val), axis=0)
 
         # Fit the preprocessor
@@ -151,34 +153,60 @@ class MambularDataModule(pl.LightningDataModule):
             for key in self.cat_feature_info:  # type: ignore
                 dtype = (
                     torch.float32
-                    if "onehot"
-                    in self.cat_feature_info[key]["preprocessing"]  # type: ignore
+                    if any(
+                        x in self.cat_feature_info[key]["preprocessing"]
+                        for x in ["onehot", "pretrained"]
+                    )
                     else torch.long
                 )
 
-                cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
+                cat_key = (
+                    "cat_" + key
+                )  # Assuming categorical keys are prefixed with 'cat_'
                 if cat_key in train_preprocessed_data:
-                    train_cat_tensors.append(torch.tensor(train_preprocessed_data[cat_key], dtype=dtype))
+                    train_cat_tensors.append(
+                        torch.tensor(train_preprocessed_data[cat_key], dtype=dtype)
+                    )
                 if cat_key in val_preprocessed_data:
-                    val_cat_tensors.append(torch.tensor(val_preprocessed_data[cat_key], dtype=dtype))
+                    val_cat_tensors.append(
+                        torch.tensor(val_preprocessed_data[cat_key], dtype=dtype)
+                    )
 
                 binned_key = "num_" + key  # for binned features
                 if binned_key in train_preprocessed_data:
-                    train_cat_tensors.append(torch.tensor(train_preprocessed_data[binned_key], dtype=dtype))
+                    train_cat_tensors.append(
+                        torch.tensor(train_preprocessed_data[binned_key], dtype=dtype)
+                    )
 
                 if binned_key in val_preprocessed_data:
-                    val_cat_tensors.append(torch.tensor(val_preprocessed_data[binned_key], dtype=dtype))
+                    val_cat_tensors.append(
+                        torch.tensor(val_preprocessed_data[binned_key], dtype=dtype)
+                    )
 
             # Populate tensors for numerical features, if present in processed data
             for key in self.num_feature_info:  # type: ignore
-                num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
+                num_key = (
+                    "num_" + key
+                )  # Assuming numerical keys are prefixed with 'num_'
                 if num_key in train_preprocessed_data:
-                    train_num_tensors.append(torch.tensor(train_preprocessed_data[num_key], dtype=torch.float32))
+                    train_num_tensors.append(
+                        torch.tensor(
+                            train_preprocessed_data[num_key], dtype=torch.float32
+                        )
+                    )
                 if num_key in val_preprocessed_data:
-                    val_num_tensors.append(torch.tensor(val_preprocessed_data[num_key], dtype=torch.float32))
+                    val_num_tensors.append(
+                        torch.tensor(
+                            val_preprocessed_data[num_key], dtype=torch.float32
+                        )
+                    )
 
-            train_labels = torch.tensor(self.y_train, dtype=self.labels_dtype).unsqueeze(dim=1)
-            val_labels = torch.tensor(self.y_val, dtype=self.labels_dtype).unsqueeze(dim=1)
+            train_labels = torch.tensor(
+                self.y_train, dtype=self.labels_dtype
+            ).unsqueeze(dim=1)
+            val_labels = torch.tensor(self.y_val, dtype=self.labels_dtype).unsqueeze(
+                dim=1
+            )
 
             # Create datasets
             self.train_dataset = MambularDataset(
@@ -187,49 +215,54 @@ class MambularDataModule(pl.LightningDataModule):
                 train_labels,
                 regression=self.regression,
             )
-            self.val_dataset = MambularDataset(val_cat_tensors, val_num_tensors, val_labels, regression=self.regression)
-        elif stage == "test":
-            if not self.test_preprocessor_fitted:
-                raise ValueError(
-                    "The preprocessor has not been fitted. Please fit the preprocessor before transforming the test data."
-                )
-
-            self.test_dataset = MambularDataset(
-                self.test_cat_tensors,
-                self.test_num_tensors,
-                train_labels,  # type: ignore
-                regression=self.regression,
+            self.val_dataset = MambularDataset(
+                val_cat_tensors, val_num_tensors, val_labels, regression=self.regression
             )
 
-    def preprocess_test_data(self, X):
-        self.test_cat_tensors = []
-        self.test_num_tensors = []
-        test_preprocessed_data = self.preprocessor.transform(X)
+    def preprocess_new_data(self, X):
+        cat_tensors = []
+        num_tensors = []
+        preprocessed_data = self.preprocessor.transform(X)
 
         # Populate tensors for categorical features, if present in processed data
         for key in self.cat_feature_info:  # type: ignore
             dtype = (
                 torch.float32
-                if "onehot"
-                in self.cat_feature_info[key]["preprocessing"]  # type: ignore
+                if any(
+                    x in self.cat_feature_info[key]["preprocessing"]
+                    for x in ["onehot", "pretrained"]
+                )
                 else torch.long
             )
             cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
-            if cat_key in test_preprocessed_data:
-                self.test_cat_tensors.append(torch.tensor(test_preprocessed_data[cat_key], dtype=dtype))
+            if cat_key in preprocessed_data:
+                cat_tensors.append(
+                    torch.tensor(preprocessed_data[cat_key], dtype=dtype)
+                )
 
             binned_key = "num_" + key  # for binned features
-            if binned_key in test_preprocessed_data:
-                self.test_cat_tensors.append(torch.tensor(test_preprocessed_data[binned_key], dtype=dtype))
+            if binned_key in preprocessed_data:
+                cat_tensors.append(
+                    torch.tensor(preprocessed_data[binned_key], dtype=dtype)
+                )
 
         # Populate tensors for numerical features, if present in processed data
         for key in self.num_feature_info:  # type: ignore
             num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
-            if num_key in test_preprocessed_data:
-                self.test_num_tensors.append(torch.tensor(test_preprocessed_data[num_key], dtype=torch.float32))
+            if num_key in preprocessed_data:
+                num_tensors.append(
+                    torch.tensor(preprocessed_data[num_key], dtype=torch.float32)
+                )
 
-        self.test_preprocessor_fitted = True
-        return self.test_cat_tensors, self.test_num_tensors
+        return MambularDataset(
+            cat_tensors, num_tensors, labels=None, regression=self.regression
+        )
+
+    def assign_predict_dataset(self, X):
+        self.predict_dataset = self.preprocess_new_data(X)
+
+    def assign_test_dataset(self, X):
+        self.test_dataset = self.preprocess_new_data(X)
 
     def train_dataloader(self):
         """Returns the training dataloader.
@@ -237,13 +270,15 @@ class MambularDataModule(pl.LightningDataModule):
         Returns:
             DataLoader: DataLoader instance for the training dataset.
         """
-
-        return DataLoader(
-            self.train_dataset,
-            batch_size=self.batch_size,
-            shuffle=self.shuffle,
-            **self.dataloader_kwargs,
-        )
+        if hasattr(self, "train_dataset"):
+            return DataLoader(
+                self.train_dataset,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                **self.dataloader_kwargs,
+            )
+        else:
+            raise ValueError("No training dataset provided!")
 
     def val_dataloader(self):
         """Returns the validation dataloader.
@@ -251,7 +286,12 @@ class MambularDataModule(pl.LightningDataModule):
         Returns:
             DataLoader: DataLoader instance for the validation dataset.
         """
-        return DataLoader(self.val_dataset, batch_size=self.batch_size, **self.dataloader_kwargs)
+        if hasattr(self, "val_dataset"):
+            return DataLoader(
+                self.val_dataset, batch_size=self.batch_size, **self.dataloader_kwargs
+            )
+        else:
+            raise ValueError("No validation dataset provided!")
 
     def test_dataloader(self):
         """Returns the test dataloader.
@@ -259,4 +299,19 @@ class MambularDataModule(pl.LightningDataModule):
         Returns:
             DataLoader: DataLoader instance for the test dataset.
         """
-        return DataLoader(self.test_dataset, batch_size=self.batch_size, **self.dataloader_kwargs)
+        if hasattr(self, "test_dataset"):
+            return DataLoader(
+                self.test_dataset, batch_size=self.batch_size, **self.dataloader_kwargs
+            )
+        else:
+            raise ValueError("No test dataset provided!")
+
+    def predict_dataloader(self):
+        if hasattr(self, "predict_dataset"):
+            return DataLoader(
+                self.predict_dataset,
+                batch_size=self.batch_size,
+                **self.dataloader_kwargs,
+            )
+        else:
+            raise ValueError("No predict dataset provided!")

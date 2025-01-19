@@ -1,4 +1,5 @@
 import warnings
+from collections.abc import Callable
 
 import lightning as pl
 import pandas as pd
@@ -7,11 +8,17 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSum
 from sklearn.base import BaseEstimator
 from sklearn.metrics import mean_squared_error
 from skopt import gp_minimize
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
-from ..utils.config_mapper import activation_mapper, get_search_space, round_to_nearest_16
+from ..utils.config_mapper import (
+    activation_mapper,
+    get_search_space,
+    round_to_nearest_16,
+)
 
 
 class SklearnBaseRegressor(BaseEstimator):
@@ -106,9 +113,7 @@ class SklearnBaseRegressor(BaseEstimator):
                 for key, value in config_params.items():
                     setattr(self.config, key, value)
             else:
-                self.config = self.config_class(  # type: ignore
-                    **self.config_kwargs
-                )
+                self.config = self.config_class(**self.config_kwargs)  # type: ignore
 
         if preprocessor_params:
             self.preprocessor.set_params(**preprocessor_params)
@@ -129,6 +134,8 @@ class SklearnBaseRegressor(BaseEstimator):
         lr_patience: int | None = None,
         lr_factor: float | None = None,
         weight_decay: float | None = None,
+        train_metrics: dict[str, Callable] | None = None,
+        val_metrics: dict[str, Callable] | None = None,
         dataloader_kwargs={},
     ):
         """Builds the model using the provided training data.
@@ -160,6 +167,10 @@ class SklearnBaseRegressor(BaseEstimator):
             Factor by which the learning rate will be reduced.
         weight_decay : float, default=0.025
             Weight decay (L2 penalty) coefficient.
+        train_metrics : dict, default=None
+            torch.metrics dict to be logged during training.
+        val_metrics : dict, default=None
+            torch.metrics dict to be logged during validation.
         dataloader_kwargs: dict, default={}
             The kwargs for the pytorch dataloader class.
 
@@ -203,6 +214,8 @@ class SklearnBaseRegressor(BaseEstimator):
             lr_patience=(lr_patience if lr_patience is not None else self.config.lr_patience),
             lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
             weight_decay=(weight_decay if weight_decay is not None else self.config.weight_decay),
+            train_metrics=train_metrics,
+            val_metrics=val_metrics,
             optimizer_type=self.optimizer_type,
             optimizer_args=self.optimizer_kwargs,
         )
@@ -258,6 +271,8 @@ class SklearnBaseRegressor(BaseEstimator):
         weight_decay: float | None = None,
         checkpoint_path="model_checkpoints",
         dataloader_kwargs={},
+        train_metrics: dict[str, Callable] | None = None,
+        val_metrics: dict[str, Callable] | None = None,
         rebuild=True,
         **trainer_kwargs,
     ):
@@ -303,6 +318,12 @@ class SklearnBaseRegressor(BaseEstimator):
             Path where the checkpoints are being saved.
         dataloader_kwargs: dict, default={}
             The kwargs for the pytorch dataloader class.
+        train_metrics : dict, default=None
+            torch.metrics dict to be logged during training.
+        val_metrics : dict, default=None
+            torch.metrics dict to be logged during validation.
+        rebuild: bool, default=True
+            Whether to rebuild the model when it already was built.
         **trainer_kwargs : Additional keyword arguments for PyTorch Lightning's Trainer class.
 
 
@@ -326,6 +347,8 @@ class SklearnBaseRegressor(BaseEstimator):
                 lr_factor=lr_factor,
                 weight_decay=weight_decay,
                 dataloader_kwargs=dataloader_kwargs,
+                train_metrics=train_metrics,
+                val_metrics=val_metrics,
             )
 
         else:
@@ -362,9 +385,7 @@ class SklearnBaseRegressor(BaseEstimator):
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
             checkpoint = torch.load(best_model_path)
-            self.task_model.load_state_dict(  # type: ignore
-                checkpoint["state_dict"]
-            )
+            self.task_model.load_state_dict(checkpoint["state_dict"])  # type: ignore
 
         return self
 
@@ -387,32 +408,20 @@ class SklearnBaseRegressor(BaseEstimator):
             raise ValueError("The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
-        cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
-
-        # Move tensors to appropriate device
-        if device is None:
-            device = next(self.task_model.parameters()).device
-        if isinstance(cat_tensors, list):
-            cat_tensors = [tensor.to(device) for tensor in cat_tensors]
-        else:
-            cat_tensors = cat_tensors.to(device)
-
-        if isinstance(num_tensors, list):
-            num_tensors = [tensor.to(device) for tensor in num_tensors]
-        else:
-            num_tensors = num_tensors.to(device)
+        self.data_module.assign_predict_dataset(X)
 
         # Set model to evaluation mode
         self.task_model.eval()
 
-        # Perform inference
-        with torch.no_grad():
-            predictions = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
+        # Perform inference using PyTorch Lightning's predict function
+        predictions_list = self.trainer.predict(self.task_model, self.data_module)
+
+        # Concatenate predictions from all batches
+        predictions = torch.cat(predictions_list, dim=0)
 
         # Check if ensemble is used
-        if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
-            # Average over the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
-            predictions = predictions.mean(dim=1)
+        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
+            predictions = predictions.mean(dim=1)  # Average over ensemble dimension
 
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()
@@ -473,6 +482,45 @@ class SklearnBaseRegressor(BaseEstimator):
         """
         predictions = self.predict(X)
         return metric(y, predictions)
+
+    def encode(self, X, batch_size=64):
+        """
+        Encodes input data using the trained model's embedding layer.
+
+        Parameters
+        ----------
+        X : array-like or DataFrame
+            Input data to be encoded.
+        batch_size : int, optional, default=64
+            Batch size for encoding.
+
+        Returns
+        -------
+        torch.Tensor
+            Encoded representations of the input data.
+
+        Raises
+        ------
+        ValueError
+            If the model or data module is not fitted.
+        """
+        # Ensure model and data module are initialized
+        if self.task_model is None or self.data_module is None:
+            raise ValueError("The model or data module has not been fitted yet.")
+        encoded_dataset = self.data_module.preprocess_new_data(X)
+
+        data_loader = DataLoader(encoded_dataset, batch_size=batch_size, shuffle=False)
+
+        # Process data in batches
+        encoded_outputs = []
+        for num_features, cat_features in tqdm(data_loader):
+            embeddings = self.task_model.base_model.encode(num_features, cat_features)  # Call your encode function
+            encoded_outputs.append(embeddings)
+
+        # Concatenate all encoded outputs
+        encoded_outputs = torch.cat(encoded_outputs, dim=0)
+
+        return encoded_outputs
 
     def optimize_hparams(
         self,

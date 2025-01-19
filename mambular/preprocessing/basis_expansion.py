@@ -43,8 +43,6 @@ class SplineExpansion(BaseEstimator, TransformerMixin):
         if spline_implementation not in ["scipy", "sklearn"]:
             raise ValueError("Invalid spline implementation. Choose 'scipy' or 'sklearn'.")
 
-        self.fitted = False
-
     @staticmethod
     def knot_identification_using_decision_tree(X, y, task="regression", n_knots=5):
         # Use DecisionTreeClassifier for classification tasks
@@ -76,6 +74,7 @@ class SplineExpansion(BaseEstimator, TransformerMixin):
             raise ValueError("Target variable 'y' must be provided when use_decision_tree=True.")
 
         self.knots = []
+        self.n_features_in_ = X.shape[1]
 
         if self.use_decision_tree and self.spline_implementation == "scipy":
             self.knots = self.knot_identification_using_decision_tree(X, y, self.task, self.n_knots)

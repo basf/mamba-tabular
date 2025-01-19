@@ -1,4 +1,5 @@
 import warnings
+from collections.abc import Callable
 from typing import Optional
 
 import lightning as pl
@@ -9,6 +10,8 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSum
 from sklearn.base import BaseEstimator
 from sklearn.metrics import accuracy_score, log_loss, mean_squared_error
 from skopt import gp_minimize
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
@@ -108,9 +111,7 @@ class SklearnBaseClassifier(BaseEstimator):
                 for key, value in config_params.items():
                     setattr(self.config, key, value)
             else:
-                self.config = self.config_class(  # type: ignore
-                    **self.config_kwargs
-                )
+                self.config = self.config_class(**self.config_kwargs)  # type: ignore
 
         if preprocessor_params:
             self.preprocessor.set_params(**preprocessor_params)
@@ -131,6 +132,8 @@ class SklearnBaseClassifier(BaseEstimator):
         lr_patience: int | None = None,
         lr_factor: float | None = None,
         weight_decay: float | None = None,
+        train_metrics: dict[str, Callable] | None = None,
+        val_metrics: dict[str, Callable] | None = None,
         dataloader_kwargs={},
     ):
         """Builds the model using the provided training data.
@@ -158,8 +161,12 @@ class SklearnBaseClassifier(BaseEstimator):
             Learning rate for the optimizer.
         lr_patience : int, default=10
             Number of epochs with no improvement on the validation loss to wait before reducing the learning rate.
-        factor : float, default=0.1
+        lr_factor : float, default=0.1
             Factor by which the learning rate will be reduced.
+        train_metrics : dict, default=None
+            torch.metrics dict to be logged during training.
+        val_metrics : dict, default=None
+            torch.metrics dict to be logged during validation.
         weight_decay : float, default=0.025
             Weight decay (L2 penalty) coefficient.
         dataloader_kwargs: dict, default={}
@@ -208,6 +215,8 @@ class SklearnBaseClassifier(BaseEstimator):
             lr=lr if lr is not None else self.config.lr,
             lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
             weight_decay=(weight_decay if weight_decay is not None else self.config.weight_decay),
+            train_metrics=train_metrics,
+            val_metrics=val_metrics,
             optimizer_type=self.optimizer_type,
             optimizer_args=self.optimizer_kwargs,
         )
@@ -262,6 +271,8 @@ class SklearnBaseClassifier(BaseEstimator):
         lr_factor: float | None = None,
         weight_decay: float | None = None,
         checkpoint_path="model_checkpoints",
+        train_metrics: dict[str, Callable] | None = None,
+        val_metrics: dict[str, Callable] | None = None,
         dataloader_kwargs={},
         rebuild=True,
         **trainer_kwargs,
@@ -306,6 +317,10 @@ class SklearnBaseClassifier(BaseEstimator):
             Weight decay (L2 penalty) coefficient.
         checkpoint_path : str, default="model_checkpoints"
             Path where the checkpoints are being saved.
+        train_metrics : dict, default=None
+            torch.metrics dict to be logged during training.
+        val_metrics : dict, default=None
+            torch.metrics dict to be logged during validation.
         dataloader_kwargs: dict, default={}
             The kwargs for the pytorch dataloader class.
         rebuild: bool, default=True
@@ -332,6 +347,8 @@ class SklearnBaseClassifier(BaseEstimator):
                 lr_patience=lr_patience,
                 lr_factor=lr_factor,
                 weight_decay=weight_decay,
+                train_metrics=train_metrics,
+                val_metrics=val_metrics,
                 dataloader_kwargs=dataloader_kwargs,
             )
 
@@ -369,129 +386,98 @@ class SklearnBaseClassifier(BaseEstimator):
         best_model_path = checkpoint_callback.best_model_path
         if best_model_path:
             checkpoint = torch.load(best_model_path)
-            self.task_model.load_state_dict(  # type: ignore
-                checkpoint["state_dict"]
-            )
+            self.task_model.load_state_dict(checkpoint["state_dict"])  # type: ignore
 
         return self
 
     def predict(self, X, device=None):
-        """Predicts target values for the given input samples.
+        """Predicts target labels for the given input samples.
 
         Parameters
         ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict target values.
 
-
         Returns
         -------
-        predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
-            The predicted target values.
+        predictions : ndarray, shape (n_samples,)
+            The predicted class labels.
         """
         # Ensure model and data module are initialized
         if self.task_model is None or self.data_module is None:
             raise ValueError("The model or data module has not been fitted yet.")
 
         # Preprocess the data using the data module
-        cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
-
-        # Move tensors to appropriate device
-        if device is None:
-            device = next(self.task_model.parameters()).device
-        if isinstance(cat_tensors, list):
-            cat_tensors = [tensor.to(device) for tensor in cat_tensors]
-        else:
-            cat_tensors = cat_tensors.to(device)
-
-        if isinstance(num_tensors, list):
-            num_tensors = [tensor.to(device) for tensor in num_tensors]
-        else:
-            num_tensors = num_tensors.to(device)
+        self.data_module.assign_predict_dataset(X)
 
         # Set model to evaluation mode
         self.task_model.eval()
 
-        # Perform inference
-        with torch.no_grad():
-            logits = self.task_model(num_features=num_tensors, cat_features=cat_tensors)
+        # Perform inference using PyTorch Lightning's predict function
+        logits_list = self.trainer.predict(self.task_model, self.data_module)
 
-            # Check if ensemble is used
-            if hasattr(self.task_model.base_model, "returns_ensemble"):  # If using ensemble
-                # Average logits across the ensemble dimension (assuming shape: (batch_size, ensemble_size, output_dim))
-                logits = logits.mean(dim=1)
-                if logits.dim() == 1:  # Check if logits has only one dimension (shape (N,))
-                    logits = logits.unsqueeze(1)
+        # Concatenate predictions from all batches
+        logits = torch.cat(logits_list, dim=0)  # type: ignore
 
-            # Check the shape of the logits to determine binary or multi-class classification
-            if logits.shape[1] == 1:
-                # Binary classification
-                probabilities = torch.sigmoid(logits)
-                predictions = (probabilities > 0.5).long().squeeze()
-            else:
-                # Multi-class classification
-                probabilities = torch.softmax(logits, dim=1)
-                predictions = torch.argmax(probabilities, dim=1)
+        # Check if ensemble is used
+        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
+            logits = logits.mean(dim=1)  # Average over ensemble dimension
+            if logits.dim() == 1:  # Ensure correct shape
+                logits = logits.unsqueeze(1)
+
+        # Check the shape of the logits to determine binary or multi-class classification
+        if logits.shape[1] == 1:
+            # Binary classification
+            probabilities = torch.sigmoid(logits)
+            predictions = (probabilities > 0.5).long().squeeze()
+        else:
+            # Multi-class classification
+            probabilities = torch.softmax(logits, dim=1)
+            predictions = torch.argmax(probabilities, dim=1)
 
         # Convert predictions to NumPy array and return
         return predictions.cpu().numpy()
 
     def predict_proba(self, X, device=None):
-        """Predict class probabilities for the given input samples.
+        """Predicts class probabilities for the given input samples.
 
         Parameters
         ----------
-        X : array-like or pd.DataFrame of shape (n_samples, n_features)
+        X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict class probabilities.
-
-
-        Notes
-        -----
-        The method preprocesses the input data using the same preprocessor used during training,
-        sets the model to evaluation mode, and then performs inference to predict the class probabilities.
-        Softmax is applied to the logits to obtain probabilities, which are then converted from a PyTorch tensor
-        to a NumPy array before being returned.
 
         Returns
         -------
-        probabilities : ndarray of shape (n_samples, n_classes)
-            Predicted class probabilities for each input sample.
+        probabilities : ndarray, shape (n_samples, n_classes)
+            The predicted class probabilities.
         """
-        # Preprocess the data
-        if not isinstance(X, pd.DataFrame):
-            X = pd.DataFrame(X)
-        device = next(self.task_model.parameters()).device  # type: ignore
-        cat_tensors, num_tensors = self.data_module.preprocess_test_data(X)
-        if isinstance(cat_tensors, list):
-            cat_tensors = [tensor.to(device) for tensor in cat_tensors]
+        # Ensure model and data module are initialized
+        if self.task_model is None or self.data_module is None:
+            raise ValueError("The model or data module has not been fitted yet.")
+
+        # Preprocess the data using the data module
+        self.data_module.assign_predict_dataset(X)
+
+        # Set model to evaluation mode
+        self.task_model.eval()
+
+        # Perform inference using PyTorch Lightning's predict function
+        logits_list = self.trainer.predict(self.task_model, self.data_module)
+
+        # Concatenate predictions from all batches
+        logits = torch.cat(logits_list, dim=0)
+
+        # Check if ensemble is used
+        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
+            logits = logits.mean(dim=1)  # Average over ensemble dimension
+            if logits.dim() == 1:  # Ensure correct shape
+                logits = logits.unsqueeze(1)
+
+        # Compute probabilities
+        if logits.shape[1] > 1:
+            probabilities = torch.softmax(logits, dim=1)  # Multi-class classification
         else:
-            cat_tensors = cat_tensors.to(device)
-
-        if isinstance(num_tensors, list):
-            num_tensors = [tensor.to(device) for tensor in num_tensors]
-        else:
-            num_tensors = num_tensors.to(device)
-
-        # Set the model to evaluation mode
-        self.task_model.eval()  # type: ignore
-
-        # Perform inference
-        with torch.no_grad():
-            logits = self.task_model(  # type: ignore
-                num_features=num_tensors, cat_features=cat_tensors
-            )
-            # Check if ensemble is used
-            # If using ensemble
-            if hasattr(self.task_model.base_model, "returns_ensemble"):  # type: ignore
-                # Average logits across the ensemble dimension
-                # (assuming shape: (batch_size, ensemble_size, output_dim))
-                logits = logits.mean(dim=1)
-                if logits.dim() == 1:  # Check if logits has only one dimension (shape (N,))
-                    logits = logits.unsqueeze(1)
-            if logits.shape[1] > 1:
-                probabilities = torch.softmax(logits, dim=1)
-            else:
-                probabilities = torch.sigmoid(logits)
+            probabilities = torch.sigmoid(logits)  # Binary classification
 
         # Convert probabilities to NumPy array and return
         return probabilities.cpu().numpy()
@@ -576,6 +562,45 @@ class SklearnBaseClassifier(BaseEstimator):
         else:
             predictions = self.predict(X)
             return metric_func(y, predictions)
+
+    def encode(self, X, batch_size=64):
+        """
+        Encodes input data using the trained model's embedding layer.
+
+        Parameters
+        ----------
+        X : array-like or DataFrame
+            Input data to be encoded.
+        batch_size : int, optional, default=64
+            Batch size for encoding.
+
+        Returns
+        -------
+        torch.Tensor
+            Encoded representations of the input data.
+
+        Raises
+        ------
+        ValueError
+            If the model or data module is not fitted.
+        """
+        # Ensure model and data module are initialized
+        if self.task_model is None or self.data_module is None:
+            raise ValueError("The model or data module has not been fitted yet.")
+        encoded_dataset = self.data_module.preprocess_new_data(X)
+
+        data_loader = DataLoader(encoded_dataset, batch_size=batch_size, shuffle=False)
+
+        # Process data in batches
+        encoded_outputs = []
+        for num_features, cat_features in tqdm(data_loader):
+            embeddings = self.task_model.base_model.encode(num_features, cat_features)  # Call your encode function
+            encoded_outputs.append(embeddings)
+
+        # Concatenate all encoded outputs
+        encoded_outputs = torch.cat(encoded_outputs, dim=0)
+
+        return encoded_outputs
 
     def optimize_hparams(
         self,
