@@ -22,10 +22,10 @@ from .ple_encoding import PLE
 from .prepro_utils import (
     ContinuousOrdinalEncoder,
     CustomBinner,
+    LanguageEmbeddingTransformer,
     NoTransformer,
     OneHotFromOrdinal,
     ToFloatTransformer,
-    LanguageEmbeddingTransformer,
 )
 
 
@@ -111,14 +111,10 @@ class Preprocessor:
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = (
-            numerical_preprocessing.lower()
-            if numerical_preprocessing is not None
-            else "none"
+            numerical_preprocessing.lower() if numerical_preprocessing is not None else "none"
         )
         self.categorical_preprocessing = (
-            categorical_preprocessing.lower()
-            if categorical_preprocessing is not None
-            else "none"
+            categorical_preprocessing.lower() if categorical_preprocessing is not None else "none"
         )
         if self.numerical_preprocessing not in [
             "ple",
@@ -241,19 +237,13 @@ class Preprocessor:
                 numerical_features.append(col)
             else:
                 if isinstance(self.cat_cutoff, float):
-                    cutoff_condition = (
-                        num_unique_values / total_samples
-                    ) < self.cat_cutoff
+                    cutoff_condition = (num_unique_values / total_samples) < self.cat_cutoff
                 elif isinstance(self.cat_cutoff, int):
                     cutoff_condition = num_unique_values < self.cat_cutoff
                 else:
-                    raise ValueError(
-                        "cat_cutoff should be either a float or an integer."
-                    )
+                    raise ValueError("cat_cutoff should be either a float or an integer.")
 
-                if X[col].dtype.kind not in "iufc" or (
-                    X[col].dtype.kind == "i" and cutoff_condition
-                ):
+                if X[col].dtype.kind not in "iufc" or (X[col].dtype.kind == "i" and cutoff_condition):
                     categorical_features.append(col)
                 else:
                     numerical_features.append(col)
@@ -318,11 +308,7 @@ class Preprocessor:
                                 (
                                     "discretizer",
                                     KBinsDiscretizer(
-                                        n_bins=(
-                                            bins
-                                            if isinstance(bins, int)
-                                            else len(bins) - 1
-                                        ),
+                                        n_bins=(bins if isinstance(bins, int) else len(bins) - 1),
                                         encode="ordinal",
                                         strategy=self.binning_strategy,  # type: ignore
                                         subsample=200_000 if len(X) > 200_000 else None,
@@ -351,17 +337,13 @@ class Preprocessor:
                     numeric_transformer_steps.append(("scaler", StandardScaler()))
 
                 elif self.numerical_preprocessing == "minmax":
-                    numeric_transformer_steps.append(
-                        ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                    )
+                    numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
 
                 elif self.numerical_preprocessing == "quantile":
                     numeric_transformer_steps.append(
                         (
                             "quantile",
-                            QuantileTransformer(
-                                n_quantiles=self.n_bins, random_state=101
-                            ),
+                            QuantileTransformer(n_quantiles=self.n_bins, random_state=101),
                         )
                     )
 
@@ -369,9 +351,7 @@ class Preprocessor:
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
-                        numeric_transformer_steps.append(
-                            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                        )
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "polynomial",
@@ -386,9 +366,7 @@ class Preprocessor:
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
-                        numeric_transformer_steps.append(
-                            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                        )
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "splines",
@@ -407,9 +385,7 @@ class Preprocessor:
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
-                        numeric_transformer_steps.append(
-                            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                        )
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "rbf",
@@ -426,9 +402,7 @@ class Preprocessor:
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
-                        numeric_transformer_steps.append(
-                            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                        )
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "sigmoid",
@@ -442,12 +416,8 @@ class Preprocessor:
                     )
 
                 elif self.numerical_preprocessing == "ple":
-                    numeric_transformer_steps.append(
-                        ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                    )
-                    numeric_transformer_steps.append(
-                        ("ple", PLE(n_bins=self.n_bins, task=self.task))
-                    )
+                    numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
+                    numeric_transformer_steps.append(("ple", PLE(n_bins=self.n_bins, task=self.task)))
 
                 elif self.numerical_preprocessing == "box-cox":
                     numeric_transformer_steps.append(
@@ -513,18 +483,12 @@ class Preprocessor:
                         ]
                     )
                 else:
-                    raise ValueError(
-                        f"Unknown categorical_preprocessing type: {self.categorical_preprocessing}"
-                    )
+                    raise ValueError(f"Unknown categorical_preprocessing type: {self.categorical_preprocessing}")
 
                 # Append the transformer for the current categorical feature
-                transformers.append(
-                    (f"cat_{feature}", categorical_transformer, [feature])
-                )
+                transformers.append((f"cat_{feature}", categorical_transformer, [feature]))
 
-        self.column_transformer = ColumnTransformer(
-            transformers=transformers, remainder="passthrough"
-        )
+        self.column_transformer = ColumnTransformer(transformers=transformers, remainder="passthrough")
         self.column_transformer.fit(X, y)
 
         self.fitted = True
@@ -550,17 +514,13 @@ class Preprocessor:
         bins = []
         for feature in numerical_features:
             tree_model = (
-                DecisionTreeClassifier(max_depth=3)
-                if y.dtype.kind in "bi"
-                else DecisionTreeRegressor(max_depth=3)
+                DecisionTreeClassifier(max_depth=3) if y.dtype.kind in "bi" else DecisionTreeRegressor(max_depth=3)
             )
             tree_model.fit(X[[feature]], y)
             thresholds = tree_model.tree_.threshold[tree_model.tree_.feature != -2]  # type: ignore
             bin_edges = np.sort(np.unique(thresholds))
 
-            bins.append(
-                np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()]))
-            )
+            bins.append(np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()])))
         return bins
 
     def transform(self, X):
@@ -716,9 +676,7 @@ class Preprocessor:
                         "categories": None,  # Numerical features don't have categories
                     }
                     if verbose:
-                        print(
-                            f"Numerical Feature: {feature_name}, Info: {numerical_feature_info[feature_name]}"
-                        )
+                        print(f"Numerical Feature: {feature_name}, Info: {numerical_feature_info[feature_name]}")
 
                 # Categorical features
                 elif "continuous_ordinal" in steps:

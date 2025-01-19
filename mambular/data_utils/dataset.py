@@ -3,11 +3,6 @@ import torch
 from torch.utils.data import Dataset
 
 
-import numpy as np
-import torch
-from torch.utils.data import Dataset
-
-
 class MambularDataset(Dataset):
     """Custom dataset for handling structured data with separate categorical and
     numerical features, tailored for both regression and classification tasks.
@@ -20,9 +15,7 @@ class MambularDataset(Dataset):
         regression (bool, optional): A flag indicating if the dataset is for a regression task. Defaults to True.
     """
 
-    def __init__(
-        self, cat_features_list, num_features_list, labels=None, regression=True
-    ):
+    def __init__(self, cat_features_list, num_features_list, labels=None, regression=True):
         self.cat_features_list = cat_features_list  # Categorical features tensors
         self.num_features_list = num_features_list  # Numerical features tensors
         self.regression = regression
@@ -56,9 +49,7 @@ class MambularDataset(Dataset):
             tuple: A tuple containing two lists of tensors (one for categorical features and one for numerical features)
             and a single label (if available).
         """
-        cat_features = [
-            feature_tensor[idx] for feature_tensor in self.cat_features_list
-        ]
+        cat_features = [feature_tensor[idx] for feature_tensor in self.cat_features_list]
         num_features = [
             torch.as_tensor(feature_tensor[idx]).clone().detach().to(torch.float32)
             for feature_tensor in self.num_features_list

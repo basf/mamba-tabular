@@ -74,7 +74,7 @@ class PLE(BaseEstimator, TransformerMixin):
         self.pattern = r"-?\d+\.?\d*[eE]?[+-]?\d*"
 
     def fit(self, feature, target):
-        self.n_features_in_ = 1 
+        self.n_features_in_ = 1
         if self.task == "regression":
             dt = DecisionTreeRegressor(max_leaf_nodes=self.n_bins)
         elif self.task == "classification":
@@ -85,11 +85,10 @@ class PLE(BaseEstimator, TransformerMixin):
         dt.fit(feature, target)
 
         self.conditions = tree_to_code(dt, ["feature"])
-        #self.fitted = True
+        # self.fitted = True
         return self
 
     def transform(self, feature):
-        
         if feature.shape == (feature.shape[0], 1):
             feature = np.squeeze(feature, axis=1)
         else:
@@ -136,8 +135,6 @@ class PLE(BaseEstimator, TransformerMixin):
 
         else:
             return np.array(ple_encoded_feature, dtype=np.float32)
-
-        
 
     def get_feature_names_out(self, input_features=None):
         if input_features is None:

@@ -1,4 +1,5 @@
 import warnings
+from collections.abc import Callable
 
 import lightning as pl
 import pandas as pd
@@ -7,7 +8,9 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSum
 from sklearn.base import BaseEstimator
 from sklearn.metrics import mean_squared_error
 from skopt import gp_minimize
-from collections.abc import Callable
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
 from ..base_models.lightning_wrapper import TaskModel
 from ..data_utils.datamodule import MambularDataModule
 from ..preprocessing import Preprocessor
@@ -16,8 +19,6 @@ from ..utils.config_mapper import (
     get_search_space,
     round_to_nearest_16,
 )
-from torch.utils.data import DataLoader
-from tqdm import tqdm
 
 
 class SklearnBaseRegressor(BaseEstimator):
@@ -40,15 +41,11 @@ class SklearnBaseRegressor(BaseEstimator):
         ]
 
         self.config_kwargs = {
-            k: v
-            for k, v in kwargs.items()
-            if k not in self.preprocessor_arg_names and not k.startswith("optimizer")
+            k: v for k, v in kwargs.items() if k not in self.preprocessor_arg_names and not k.startswith("optimizer")
         }
         self.config = config(**self.config_kwargs)
 
-        preprocessor_kwargs = {
-            k: v for k, v in kwargs.items() if k in self.preprocessor_arg_names
-        }
+        preprocessor_kwargs = {k: v for k, v in kwargs.items() if k in self.preprocessor_arg_names}
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
         self.base_model = model
@@ -68,8 +65,7 @@ class SklearnBaseRegressor(BaseEstimator):
         self.optimizer_kwargs = {
             k: v
             for k, v in kwargs.items()
-            if k
-            not in ["lr", "weight_decay", "patience", "lr_patience", "optimizer_type"]
+            if k not in ["lr", "weight_decay", "patience", "lr_patience", "optimizer_type"]
             and k.startswith("optimizer_")
         }
 
@@ -90,10 +86,7 @@ class SklearnBaseRegressor(BaseEstimator):
         params.update(self.config_kwargs)
 
         if deep:
-            preprocessor_params = {
-                "prepro__" + key: value
-                for key, value in self.preprocessor.get_params().items()
-            }
+            preprocessor_params = {"prepro__" + key: value for key, value in self.preprocessor.get_params().items()}
             params.update(preprocessor_params)
 
         return params
@@ -111,14 +104,8 @@ class SklearnBaseRegressor(BaseEstimator):
         self : object
             Estimator instance.
         """
-        config_params = {
-            k: v for k, v in parameters.items() if not k.startswith("prepro__")
-        }
-        preprocessor_params = {
-            k.split("__")[1]: v
-            for k, v in parameters.items()
-            if k.startswith("prepro__")
-        }
+        config_params = {k: v for k, v in parameters.items() if not k.startswith("prepro__")}
+        preprocessor_params = {k.split("__")[1]: v for k, v in parameters.items() if k.startswith("prepro__")}
 
         if config_params:
             self.config_kwargs.update(config_params)
@@ -216,9 +203,7 @@ class SklearnBaseRegressor(BaseEstimator):
             **dataloader_kwargs,
         )
 
-        self.data_module.preprocess_data(
-            X, y, X_val, y_val, val_size=val_size, random_state=random_state
-        )
+        self.data_module.preprocess_data(X, y, X_val, y_val, val_size=val_size, random_state=random_state)
 
         self.task_model = TaskModel(
             model_class=self.base_model,  # type: ignore
@@ -226,13 +211,9 @@ class SklearnBaseRegressor(BaseEstimator):
             cat_feature_info=self.data_module.cat_feature_info,
             num_feature_info=self.data_module.num_feature_info,
             lr=lr if lr is not None else self.config.lr,
-            lr_patience=(
-                lr_patience if lr_patience is not None else self.config.lr_patience
-            ),
+            lr_patience=(lr_patience if lr_patience is not None else self.config.lr_patience),
             lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
-            weight_decay=(
-                weight_decay if weight_decay is not None else self.config.weight_decay
-            ),
+            weight_decay=(weight_decay if weight_decay is not None else self.config.weight_decay),
             train_metrics=train_metrics,
             val_metrics=val_metrics,
             optimizer_type=self.optimizer_type,
@@ -263,9 +244,7 @@ class SklearnBaseRegressor(BaseEstimator):
             If the model has not been built prior to calling this method.
         """
         if not self.built:
-            raise ValueError(
-                "The model must be built before the number of parameters can be estimated"
-            )
+            raise ValueError("The model must be built before the number of parameters can be estimated")
         else:
             if requires_grad:
                 return sum(p.numel() for p in self.task_model.parameters() if p.requires_grad)  # type: ignore
@@ -535,9 +514,7 @@ class SklearnBaseRegressor(BaseEstimator):
         # Process data in batches
         encoded_outputs = []
         for num_features, cat_features in tqdm(data_loader):
-            embeddings = self.task_model.base_model.encode(
-                num_features, cat_features
-            )  # Call your encode function
+            embeddings = self.task_model.base_model.encode(num_features, cat_features)  # Call your encode function
             encoded_outputs.append(embeddings)
 
         # Concatenate all encoded outputs
@@ -605,13 +582,11 @@ class SklearnBaseRegressor(BaseEstimator):
         best_val_loss = float("inf")
 
         if X_val is not None and y_val is not None:
-            val_loss = self.evaluate(
-                X_val, y_val, metrics={"Mean Squared Error": mean_squared_error}
-            )["Mean Squared Error"]
-        else:
-            val_loss = self.trainer.validate(self.task_model, self.data_module)[0][
-                "val_loss"
+            val_loss = self.evaluate(X_val, y_val, metrics={"Mean Squared Error": mean_squared_error})[
+                "Mean Squared Error"
             ]
+        else:
+            val_loss = self.trainer.validate(self.task_model, self.data_module)[0]["val_loss"]
 
         best_val_loss = val_loss
         best_epoch_val_loss = self.task_model.epoch_val_loss_at(  # type: ignore
@@ -637,9 +612,7 @@ class SklearnBaseRegressor(BaseEstimator):
                         if param_value in activation_mapper:
                             setattr(self.config, key, activation_mapper[param_value])
                         else:
-                            raise ValueError(
-                                f"Unknown activation function: {param_value}"
-                            )
+                            raise ValueError(f"Unknown activation function: {param_value}")
                     else:
                         setattr(self.config, key, param_value)
 
@@ -648,15 +621,11 @@ class SklearnBaseRegressor(BaseEstimator):
                 self.config.head_layer_sizes = head_layer_sizes[:head_layer_size_length]
 
             # Build the model with updated hyperparameters
-            self.build_model(
-                X, y, X_val=X_val, y_val=y_val, lr=self.config.lr, **optimize_kwargs
-            )
+            self.build_model(X, y, X_val=X_val, y_val=y_val, lr=self.config.lr, **optimize_kwargs)
 
             # Dynamically set the early pruning threshold
             if prune_by_epoch:
-                early_pruning_threshold = (
-                    best_epoch_val_loss * 1.5
-                )  # Prune based on specific epoch loss
+                early_pruning_threshold = best_epoch_val_loss * 1.5  # Prune based on specific epoch loss
             else:
                 # Prune based on the best overall validation loss
                 early_pruning_threshold = best_val_loss * 1.5
@@ -667,19 +636,15 @@ class SklearnBaseRegressor(BaseEstimator):
 
             try:
                 # Wrap the risky operation (model fitting) in a try-except block
-                self.fit(
-                    X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs, rebuild=False
-                )
+                self.fit(X, y, X_val=X_val, y_val=y_val, max_epochs=max_epochs, rebuild=False)
 
                 # Evaluate validation loss
                 if X_val is not None and y_val is not None:
-                    val_loss = self.evaluate(
-                        X_val, y_val, metrics={"Mean Squared Error": mean_squared_error}
-                    )["Mean Squared Error"]
+                    val_loss = self.evaluate(X_val, y_val, metrics={"Mean Squared Error": mean_squared_error})[
+                        "Mean Squared Error"
+                    ]
                 else:
-                    val_loss = self.trainer.validate(self.task_model, self.data_module)[
-                        0
-                    ]["val_loss"]
+                    val_loss = self.trainer.validate(self.task_model, self.data_module)[0]["val_loss"]
 
                 # Pruning based on validation loss at specific epoch
                 epoch_val_loss = self.task_model.epoch_val_loss_at(  # type: ignore
@@ -696,21 +661,15 @@ class SklearnBaseRegressor(BaseEstimator):
 
             except Exception as e:
                 # Penalize the hyperparameter configuration with a large value
-                print(
-                    f"Error encountered during fit with hyperparameters {hyperparams}: {e}"
-                )
-                return (
-                    best_val_loss * 100
-                )  # Large value to discourage this configuration
+                print(f"Error encountered during fit with hyperparameters {hyperparams}: {e}")
+                return best_val_loss * 100  # Large value to discourage this configuration
 
         # Perform Bayesian optimization using scikit-optimize
         result = gp_minimize(_objective, param_space, n_calls=time, random_state=42)
 
         # Update the model with the best-found hyperparameters
         best_hparams = result.x  # type: ignore
-        head_layer_sizes = (
-            [] if "head_layer_sizes" in self.config.__dataclass_fields__ else None
-        )
+        head_layer_sizes = [] if "head_layer_sizes" in self.config.__dataclass_fields__ else None
         layer_sizes = [] if "layer_sizes" in self.config.__dataclass_fields__ else None
 
         # Iterate over the best hyperparameters found by optimization

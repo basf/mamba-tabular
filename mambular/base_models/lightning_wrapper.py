@@ -1,4 +1,5 @@
 from collections.abc import Callable
+
 import lightning as pl
 import torch
 import torch.nn as nn
@@ -144,10 +145,7 @@ class TaskModel(pl.LightningModule):
                 )
 
         if getattr(self.base_model, "returns_ensemble", False):  # Ensemble case
-            if (
-                self.loss_fct.__class__.__name__ == "CrossEntropyLoss"
-                and predictions.dim() == 3
-            ):
+            if self.loss_fct.__class__.__name__ == "CrossEntropyLoss" and predictions.dim() == 3:
                 # Classification case with ensemble: predictions (N, E, k), y_true (N,)
                 N, E, k = predictions.shape
                 loss = 0.0
@@ -192,18 +190,14 @@ class TaskModel(pl.LightningModule):
 
         # Check if the model has a `penalty_forward` method
         if hasattr(self.base_model, "penalty_forward"):
-            preds, penalty = self.base_model.penalty_forward(
-                num_features=num_features, cat_features=cat_features
-            )
+            preds, penalty = self.base_model.penalty_forward(num_features=num_features, cat_features=cat_features)
             loss = self.compute_loss(preds, labels) + penalty
         else:
             preds = self(num_features=num_features, cat_features=cat_features)
             loss = self.compute_loss(preds, labels)
 
         # Log the training loss
-        self.log(
-            "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
-        )
+        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         # Log custom training metrics
         for metric_name, metric_fn in self.train_metrics.items():
@@ -352,13 +346,8 @@ class TaskModel(pl.LightningModule):
 
             # Apply pruning logic if needed
             if self.current_epoch >= self.pruning_epoch:
-                if (
-                    self.early_pruning_threshold is not None
-                    and val_loss_value > self.early_pruning_threshold
-                ):
-                    print(
-                        f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}"
-                    )
+                if self.early_pruning_threshold is not None and val_loss_value > self.early_pruning_threshold:
+                    print(f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}")
                     self.trainer.should_stop = True  # Stop training early
 
     def epoch_val_loss_at(self, epoch):
