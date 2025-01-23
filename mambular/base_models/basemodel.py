@@ -223,7 +223,7 @@ class BaseModel(nn.Module):
         else:
             raise ValueError(f"Invalid pooling method: {self.hparams.pooling_method}")
 
-    def encode(self, num_features, cat_features):
+    def encode(self, data):
         if not hasattr(self, "embedding_layer"):
             raise ValueError("The model does not have an embedding layer")
 
@@ -237,7 +237,7 @@ class BaseModel(nn.Module):
             raise ValueError("The model does not generate contextualized embeddings")
 
         # Get the actual layer and call it
-        x = self.embedding_layer(num_features=num_features, cat_features=cat_features)
+        x = self.embedding_layer(*data)
 
         if getattr(self.hparams, "shuffle_embeddings", False):
             x = x[:, self.perm, :]
