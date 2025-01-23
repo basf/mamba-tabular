@@ -97,6 +97,7 @@ class DefaultTabulaRNNConfig:
     frequencies_init_scale: float = 0.01
     embedding_activation: Callable = nn.ReLU()  # noqa: RUF009
     layer_norm_after_embedding: bool = False
+    embedding_projection: bool = True
 
     # Head params
     head_layer_sizes: list = field(default_factory=list)

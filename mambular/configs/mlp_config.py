@@ -83,3 +83,4 @@ class DefaultMLPConfig:
     plr_lite: bool = False
     n_frequencies: int = 48
     frequencies_init_scale: float = 0.01
+    embedding_projection: bool = True
