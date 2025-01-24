@@ -101,20 +101,21 @@ class EmbeddingLayer(nn.Module):
             ]
         )
 
-        if self.embedding_projection:
-            self.emb_embeddings = nn.ModuleList(
-                [
-                    nn.Sequential(
-                        nn.Linear(
-                            feature_info["dimension"],
-                            self.d_model,
-                            bias=self.embedding_bias,
-                        ),
-                        self.embedding_activation,
-                    )
-                    for feature_name, feature_info in emb_feature_info.items()
-                ]
-            )
+        if len(emb_feature_info) >= 1:
+            if self.embedding_projection:
+                self.emb_embeddings = nn.ModuleList(
+                    [
+                        nn.Sequential(
+                            nn.Linear(
+                                feature_info["dimension"],
+                                self.d_model,
+                                bias=self.embedding_bias,
+                            ),
+                            self.embedding_activation,
+                        )
+                        for feature_name, feature_info in emb_feature_info.items()
+                    ]
+                )
 
         # Class token if required
         if self.use_cls:
@@ -181,15 +182,16 @@ class EmbeddingLayer(nn.Module):
                 if self.layer_norm_after_embedding:
                     num_embeddings = self.embedding_norm(num_embeddings)
 
-        if self.embedding_projection:
-            emb_embeddings = [
-                emb(emb_features[i]) for i, emb in enumerate(self.emb_embeddings)
-            ]
-            emb_embeddings = torch.stack(emb_embeddings, dim=1)
-        else:
-            emb_embeddings = torch.stack(emb_features, dim=1)
-        if self.layer_norm_after_embedding:
-            emb_embeddings = self.embedding_norm(emb_embeddings)
+        if emb_features != []:
+            if self.embedding_projection:
+                emb_embeddings = [
+                    emb(emb_features[i]) for i, emb in enumerate(self.emb_embeddings)
+                ]
+                emb_embeddings = torch.stack(emb_embeddings, dim=1)
+            else:
+                emb_embeddings = torch.stack(emb_features, dim=1)
+            if self.layer_norm_after_embedding:
+                emb_embeddings = self.embedding_norm(emb_embeddings)
 
         embeddings = [
             e for e in [cat_embeddings, num_embeddings, emb_embeddings] if e is not None

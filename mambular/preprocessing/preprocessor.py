@@ -727,7 +727,7 @@ class Preprocessor:
                     "categories": None,
                 }
         else:
-            embedding_feature_info = None
+            embedding_feature_info = {}
 
         if not self.column_transformer:
             raise RuntimeError("The preprocessor has not been fitted yet.")
