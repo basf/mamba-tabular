@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import numpy as np
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.resnet_utils import ResidualBlock
 from ..configs.resnet_config import DefaultResNetConfig
@@ -56,30 +56,26 @@ class ResNet(BaseModel):
 
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes: int = 1,
         config: DefaultResNetConfig = DefaultResNetConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
 
         self.returns_ensemble = False
-        self.cat_feature_info = cat_feature_info
-        self.num_feature_info = num_feature_info
 
         if self.hparams.use_embeddings:
-            input_dim = len(num_feature_info) * self.hparams.d_model + len(cat_feature_info) * self.hparams.d_model
-            # embedding layer
             self.embedding_layer = EmbeddingLayer(
-                num_feature_info=num_feature_info,
-                cat_feature_info=cat_feature_info,
+                *feature_information,
                 config=config,
             )
-
+            input_dim = np.sum(
+                [len(info) * self.hparams.d_model for info in feature_information]
+            )
         else:
-            input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
+            input_dim = get_feature_dimensions(*feature_information)
 
         self.initial_layer = nn.Linear(input_dim, self.hparams.layer_sizes[0])
 
@@ -102,14 +98,25 @@ class ResNet(BaseModel):
 
         self.output_layer = nn.Linear(self.hparams.layer_sizes[-1], num_classes)
 
-    def forward(self, num_features, cat_features):
+    def forward(self, *data):
+        """Forward pass of the ResNet model.
+
+        Parameters
+        ----------
+        data : tuple
+            Input tuple of tensors of num_features, cat_features, embeddings.
+
+        Returns
+        -------
+        torch.Tensor
+            Output tensor.
+        """
         if self.hparams.use_embeddings:
-            x = self.embedding_layer(num_features, cat_features)
+            x = self.embedding_layer(*data)
             B, S, D = x.shape
             x = x.reshape(B, S * D)
         else:
-            x = num_features + cat_features
-            x = torch.cat(x, dim=1)
+            x = torch.cat([t for tensors in data for t in tensors], dim=1)
 
         x = self.initial_layer(x)
         for block in self.blocks:

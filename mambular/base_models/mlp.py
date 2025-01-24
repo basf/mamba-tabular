@@ -1,11 +1,10 @@
 import torch
 import torch.nn as nn
-
+import numpy as np
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..configs.mlp_config import DefaultMLPConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
 from .basemodel import BaseModel
-import numpy as np
 
 
 class MLP(BaseModel):
@@ -58,7 +57,7 @@ class MLP(BaseModel):
 
     def __init__(
         self,
-        feature_information: tuple,  # Expecting (cat_feature_info, num_feature_info, embedding_feature_info)
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes: int = 1,
         config: DefaultMLPConfig = DefaultMLPConfig(),  # noqa: B008
         **kwargs,
@@ -71,8 +70,6 @@ class MLP(BaseModel):
         # Initialize layers
         self.layers = nn.ModuleList()
 
-        input_dim = get_feature_dimensions(*feature_information)
-
         if self.hparams.use_embeddings:
             self.embedding_layer = EmbeddingLayer(
                 *feature_information,
@@ -81,6 +78,8 @@ class MLP(BaseModel):
             input_dim = np.sum(
                 [len(info) * self.hparams.d_model for info in feature_information]
             )
+        else:
+            input_dim = get_feature_dimensions(*feature_information)
 
         # Input layer
         self.layers.append(nn.Linear(input_dim, self.hparams.layer_sizes[0]))

@@ -1,5 +1,4 @@
 from dataclasses import replace
-
 import torch
 import torch.nn as nn
 
@@ -15,13 +14,13 @@ class TabulaRNN(BaseModel):
 
     def __init__(
         self,
-        feature_information: tuple,  # Expecting (cat_feature_info, num_feature_info, embedding_feature_info)
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes=1,
         config: DefaultTabulaRNNConfig = DefaultTabulaRNNConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
 
         self.returns_ensemble = False
 

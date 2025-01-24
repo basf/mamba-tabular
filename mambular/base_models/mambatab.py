@@ -5,6 +5,7 @@ from ..arch_utils.layer_utils.normalization_layers import LayerNorm
 from ..arch_utils.mamba_utils.mamba_arch import Mamba
 from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 from ..arch_utils.mlp_utils import MLPhead
+from ..utils.get_feature_dimensions import get_feature_dimensions
 from ..configs.mambatab_config import DefaultMambaTabConfig
 from .basemodel import BaseModel
 
@@ -56,23 +57,16 @@ class MambaTab(BaseModel):
 
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes=1,
         config: DefaultMambaTabConfig = DefaultMambaTabConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
 
-        input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            input_dim += 1
-        for feature_name, input_shape in cat_feature_info.items():
-            input_dim += 1
+        input_dim = get_feature_dimensions(*feature_information)
 
-        self.cat_feature_info = cat_feature_info
-        self.num_feature_info = num_feature_info
         self.returns_ensemble = False
 
         self.initial_layer = nn.Linear(input_dim, config.d_model)
@@ -93,9 +87,20 @@ class MambaTab(BaseModel):
         else:
             self.mamba = MambaOriginal(config)
 
-    def forward(self, num_features, cat_features):
-        x = num_features + cat_features
-        x = torch.cat(x, dim=1)
+    def forward(self, *data):
+        """Forward pass of the Mambatab model
+
+        Parameters
+        ----------
+        data : tuple
+            Input tuple of tensors of num_features, cat_features, embeddings.
+
+        Returns
+        -------
+        torch.Tensor
+            Output tensor.
+        """
+        x = torch.cat([t for tensors in data for t in tensors], dim=1)
 
         x = self.initial_layer(x)
         if self.axis == 1:

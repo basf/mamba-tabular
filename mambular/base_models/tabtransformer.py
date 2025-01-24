@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import numpy as np
 from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mlp_utils import MLPhead
@@ -61,14 +61,14 @@ class TabTransformer(BaseModel):
 
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes=1,
         config: DefaultTabTransformerConfig = DefaultTabTransformerConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
+        num_feature_info, cat_feature_info, emb_feature_info = feature_information
         if cat_feature_info == {}:
             raise ValueError(
                 "You are trying to fit a TabTransformer with no categorical features. \
@@ -76,13 +76,10 @@ class TabTransformer(BaseModel):
             )
 
         self.returns_ensemble = False
-        self.cat_feature_info = cat_feature_info
-        self.num_feature_info = num_feature_info
 
         # embedding layer
         self.embedding_layer = EmbeddingLayer(
-            num_feature_info=num_feature_info,
-            cat_feature_info=cat_feature_info,
+            *({}, cat_feature_info, emb_feature_info),
             config=config,
         )
 
@@ -107,25 +104,24 @@ class TabTransformer(BaseModel):
         )
 
         # pooling
-        n_inputs = len(num_feature_info) + len(cat_feature_info)
+        n_inputs = n_inputs = [len(info) for info in feature_information]
         self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
 
-    def forward(self, num_features, cat_features):
+    def forward(self, *data):
         """Defines the forward pass of the model.
 
         Parameters
         ----------
-        num_features : Tensor
-            Tensor containing the numerical features.
-        cat_features : Tensor
-            Tensor containing the categorical features.
+        ata : tuple
+            Input tuple of tensors of num_features, cat_features, embeddings.
 
         Returns
         -------
         Tensor
             The output predictions of the model.
         """
-        cat_embeddings = self.embedding_layer(None, cat_features)
+        num_features, cat_features, emb_features = data
+        cat_embeddings = self.embedding_layer(*(None, cat_features, emb_features))
 
         num_features = torch.cat(num_features, dim=1)
         num_embeddings = self.norm_f(num_features)  # type: ignore
