@@ -64,6 +64,12 @@ class DefaultMambularConfig(BaseConfig):
         Whether to use PSCAN for the state-space model.
     mamba_version : str, default="mamba-torch"
         Version of the Mamba model to use ('mamba-torch', 'mamba1', 'mamba2').
+    conv_bias : bool, default=False
+        Whether to use a bias in the 1D convolution before each mamba block
+    AD_weight_decay: bool = True
+        Whether to use weight decay als for the A and D matrices in Mamba
+    BC_layer_norm: bool = False
+        Whether to use layer norm on the B and C matrices
     """
 
     # Architecture Parameters
@@ -82,6 +88,9 @@ class DefaultMambularConfig(BaseConfig):
     dt_init_floor: float = 1e-04
     norm: str = "RMSNorm"
     activation: Callable = nn.SiLU()  # noqa: RUF009
+    conv_bias: bool = False
+    AD_weight_decay: bool = True
+    BC_layer_norm: bool = False
 
     # Embedding Parameters
     shuffle_embeddings: bool = False
