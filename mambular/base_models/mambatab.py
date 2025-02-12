@@ -72,7 +72,7 @@ class MambaTab(BaseModel):
         self.initial_layer = nn.Linear(input_dim, config.d_model)
         self.norm_f = LayerNorm(config.d_model)
 
-        self.embedding_activation = self.hparams.num_embedding_activation
+        self.embedding_activation = self.hparams.embedding_activation
 
         self.axis = config.axis
 

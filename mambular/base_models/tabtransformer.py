@@ -93,8 +93,8 @@ class TabTransformer(BaseModel):
         )
 
         mlp_input_dim = 0
-        for feature_name, input_shape in num_feature_info.items():
-            mlp_input_dim += input_shape
+        for feature_name, info in num_feature_info.items():
+            mlp_input_dim += info["dimension"]
         mlp_input_dim += self.hparams.d_model
 
         self.tabular_head = MLPhead(

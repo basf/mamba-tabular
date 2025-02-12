@@ -4,6 +4,7 @@ from ..arch_utils.mlp_utils import MLPhead
 from ..arch_utils.transformer_utils import RowColTransformer
 from ..configs.saint_config import DefaultSAINTConfig
 from .basemodel import BaseModel
+import numpy as np
 
 
 class SAINT(BaseModel):
