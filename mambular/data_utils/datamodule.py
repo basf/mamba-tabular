@@ -212,8 +212,8 @@ class MambularDataModule(pl.LightningDataModule):
                     else torch.long
                 )
 
-                cat_key = (
-                    "cat_" + key
+                cat_key = "cat_" + str(
+                    key
                 )  # Assuming categorical keys are prefixed with 'cat_'
                 if cat_key in train_preprocessed_data:
                     train_cat_tensors.append(
@@ -224,7 +224,7 @@ class MambularDataModule(pl.LightningDataModule):
                         torch.tensor(val_preprocessed_data[cat_key], dtype=dtype)
                     )
 
-                binned_key = "num_" + key  # for binned features
+                binned_key = "num_" + str(key)  # for binned features
                 if binned_key in train_preprocessed_data:
                     train_cat_tensors.append(
                         torch.tensor(train_preprocessed_data[binned_key], dtype=dtype)
@@ -237,8 +237,8 @@ class MambularDataModule(pl.LightningDataModule):
 
             # Populate tensors for numerical features, if present in processed data
             for key in self.num_feature_info:  # type: ignore
-                num_key = (
-                    "num_" + key
+                num_key = "num_" + str(
+                    key
                 )  # Assuming numerical keys are prefixed with 'num_'
                 if num_key in train_preprocessed_data:
                     train_num_tensors.append(
@@ -306,13 +306,15 @@ class MambularDataModule(pl.LightningDataModule):
                 )
                 else torch.long
             )
-            cat_key = "cat_" + key  # Assuming categorical keys are prefixed with 'cat_'
+            cat_key = "cat_" + str(
+                key
+            )  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in preprocessed_data:
                 cat_tensors.append(
                     torch.tensor(preprocessed_data[cat_key], dtype=dtype)
                 )
 
-            binned_key = "num_" + key  # for binned features
+            binned_key = "num_" + str(key)  # for binned features
             if binned_key in preprocessed_data:
                 cat_tensors.append(
                     torch.tensor(preprocessed_data[binned_key], dtype=dtype)
@@ -320,7 +322,9 @@ class MambularDataModule(pl.LightningDataModule):
 
         # Populate tensors for numerical features, if present in processed data
         for key in self.num_feature_info:  # type: ignore
-            num_key = "num_" + key  # Assuming numerical keys are prefixed with 'num_'
+            num_key = "num_" + str(
+                key
+            )  # Assuming numerical keys are prefixed with 'num_'
             if num_key in preprocessed_data:
                 num_tensors.append(
                     torch.tensor(preprocessed_data[num_key], dtype=torch.float32)
