@@ -22,6 +22,7 @@ jobs:
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           export PATH="$HOME/.local/bin:$PATH"
 
       - name: Install Dependencies
@@ -30,7 +31,14 @@ jobs:
           poetry install
           pip install pytest
 
+      - name: Install Package Locally
+        run: |
+          poetry build
+          pip install dist/*.whl  # Install the built package to fix "No module named 'mambular'"
+
       - name: Run Unit Tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}  # Ensure the package is discoverable
         run: pytest tests/
 
       - name: Verify Tests Passed
