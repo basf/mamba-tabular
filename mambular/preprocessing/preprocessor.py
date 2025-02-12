@@ -467,6 +467,9 @@ class Preprocessor:
 
                 elif self.numerical_preprocessing == "box-cox":
                     numeric_transformer_steps.append(
+                        ("check_positive", MinMaxScaler(feature_range=(1e-3, 1)))
+                    )
+                    numeric_transformer_steps.append(
                         (
                             "box-cox",
                             PowerTransformer(method="box-cox", standardize=True),
@@ -752,11 +755,12 @@ class Preprocessor:
                         "quantile",
                         "polynomial",
                         "splines",
+                        "box-cox",
                     ]
                 ):
                     last_step = transformer_pipeline.steps[-1][1]
                     if hasattr(last_step, "transform"):
-                        dummy_input = np.zeros((1, 1))
+                        dummy_input = np.zeros((1, 1)) + 1e-05
                         transformed_feature = last_step.transform(dummy_input)
                         dimension = transformed_feature.shape[1]
                     numerical_feature_info[feature_name] = {
