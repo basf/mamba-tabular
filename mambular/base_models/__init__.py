@@ -12,6 +12,7 @@ from .saint import SAINT
 from .tabm import TabM
 from .tabtransformer import TabTransformer
 from .tabularnn import TabulaRNN
+from .autoint import AutoInt
 
 __all__ = [
     "MLP",
@@ -28,4 +29,5 @@ __all__ = [
     "TabTransformer",
     "TabulaRNN",
     "TaskModel",
+    "AutoInt",
 ]
