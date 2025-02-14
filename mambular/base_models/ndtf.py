@@ -54,20 +54,17 @@ class NDTF(BaseModel):
 
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes: int = 1,
         config: DefaultNDTFConfig = DefaultNDTFConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
 
-        self.cat_feature_info = cat_feature_info
-        self.num_feature_info = num_feature_info
         self.returns_ensemble = False
 
-        input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
+        input_dim = get_feature_dimensions(*feature_information)
 
         self.input_dimensions = [input_dim]
 
@@ -78,10 +75,13 @@ class NDTF(BaseModel):
             [
                 NeuralDecisionTree(
                     input_dim=self.input_dimensions[idx],
-                    depth=np.random.randint(self.hparams.min_depth, self.hparams.max_depth),
+                    depth=np.random.randint(
+                        self.hparams.min_depth, self.hparams.max_depth
+                    ),
                     output_dim=num_classes,
                     lamda=self.hparams.lamda,
-                    temperature=self.hparams.temperature + np.abs(np.random.normal(0, 0.1)),
+                    temperature=self.hparams.temperature
+                    + np.abs(np.random.normal(0, 0.1)),
                     node_sampling=self.hparams.node_sampling,
                 )
                 for idx in range(self.hparams.n_ensembles)
@@ -103,21 +103,20 @@ class NDTF(BaseModel):
             requires_grad=True,
         )
 
-    def forward(self, num_features, cat_features) -> torch.Tensor:
+    def forward(self, *data) -> torch.Tensor:
         """Forward pass of the NDTF model.
 
         Parameters
         ----------
-        x : torch.Tensor
-            Input tensor.
+        data : tuple
+            Input tuple of tensors of num_features, cat_features, embeddings.
 
         Returns
         -------
         torch.Tensor
             Output tensor.
         """
-        x = num_features + cat_features
-        x = torch.cat(x, dim=1)
+        x = torch.cat([t for tensors in data for t in tensors], dim=1)
         x = self.conv_layer(x.unsqueeze(2))
         x = x.transpose(1, 2).squeeze(-1)
 
@@ -131,21 +130,20 @@ class NDTF(BaseModel):
 
         return preds @ self.tree_weights
 
-    def penalty_forward(self, num_features, cat_features) -> torch.Tensor:
+    def penalty_forward(self, *data) -> torch.Tensor:
         """Forward pass of the NDTF model.
 
         Parameters
         ----------
-        x : torch.Tensor
-            Input tensor.
+        data : tuple
+            Input tuple of tensors of num_features, cat_features, embeddings.
 
         Returns
         -------
         torch.Tensor
             Output tensor.
         """
-        x = num_features + cat_features
-        x = torch.cat(x, dim=1)
+        x = torch.cat([t for tensors in data for t in tensors], dim=1)
         x = self.conv_layer(x.unsqueeze(2))
         x = x.transpose(1, 2).squeeze(-1)
 

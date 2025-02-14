@@ -6,6 +6,7 @@ from ..arch_utils.node_utils import DenseBlock
 from ..configs.node_config import DefaultNODEConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
 from .basemodel import BaseModel
+import numpy as np
 
 
 class NODE(BaseModel):
@@ -52,8 +53,7 @@ class NODE(BaseModel):
 
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes: int = 1,
         config: DefaultNODEConfig = DefaultNODEConfig(),  # noqa: B008
         **kwargs,
@@ -63,16 +63,17 @@ class NODE(BaseModel):
 
         self.returns_ensemble = False
 
-        self.cat_feature_info = cat_feature_info
-        self.num_feature_info = num_feature_info
-
         if self.hparams.use_embeddings:
-            input_dim = len(num_feature_info) * self.hparams.d_model + len(cat_feature_info) * self.hparams.d_model
-
-            self.embedding_layer = EmbeddingLayer(config)  # type: ignore
+            self.embedding_layer = EmbeddingLayer(
+                *feature_information,
+                config=config,
+            )
+            input_dim = np.sum(
+                [len(info) * self.hparams.d_model for info in feature_information]
+            )
 
         else:
-            input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
+            input_dim = get_feature_dimensions(*feature_information)
 
         self.d_out = num_classes
         self.block = DenseBlock(
@@ -90,7 +91,7 @@ class NODE(BaseModel):
             output_dim=num_classes,
         )
 
-    def forward(self, num_features, cat_features):
+    def forward(self, *data):
         """Forward pass through the NODE model.
 
         Parameters
@@ -106,12 +107,11 @@ class NODE(BaseModel):
             Model output of shape [batch_size, num_classes].
         """
         if self.hparams.use_embeddings:
-            x = self.embedding_layer(num_features, cat_features)
+            x = self.embedding_layer(*data)
             B, S, D = x.shape
             x = x.reshape(B, S * D)
         else:
-            x = num_features + cat_features
-            x = torch.cat(x, dim=1)
+            x = torch.cat([t for tensors in data for t in tensors], dim=1)
 
         x = self.block(x).squeeze(-1)
         x = self.tabular_head(x)

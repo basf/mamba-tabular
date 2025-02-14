@@ -11,13 +11,22 @@ class MambularDataset(Dataset):
     ----------
         cat_features_list (list of Tensors): A list of tensors representing the categorical features.
         num_features_list (list of Tensors): A list of tensors representing the numerical features.
+        embeddings_list (list of Tensors, optional): A list of tensors representing the embeddings.
         labels (Tensor, optional): A tensor of labels. If None, the dataset is used for prediction.
         regression (bool, optional): A flag indicating if the dataset is for a regression task. Defaults to True.
     """
 
-    def __init__(self, cat_features_list, num_features_list, labels=None, regression=True):
+    def __init__(
+        self,
+        cat_features_list,
+        num_features_list,
+        embeddings_list=None,
+        labels=None,
+        regression=True,
+    ):
         self.cat_features_list = cat_features_list  # Categorical features tensors
         self.num_features_list = num_features_list  # Numerical features tensors
+        self.embeddings_list = embeddings_list  # Embeddings tensors (optional)
         self.regression = regression
 
         if labels is not None:
@@ -46,14 +55,24 @@ class MambularDataset(Dataset):
 
         Returns
         -------
-            tuple: A tuple containing two lists of tensors (one for categorical features and one for numerical features)
-            and a single label (if available).
+            tuple: A tuple containing lists of tensors for numerical features, categorical features, embeddings
+            (if available), and a label (if available).
         """
-        cat_features = [feature_tensor[idx] for feature_tensor in self.cat_features_list]
+        cat_features = [
+            feature_tensor[idx] for feature_tensor in self.cat_features_list
+        ]
         num_features = [
             torch.as_tensor(feature_tensor[idx]).clone().detach().to(torch.float32)
             for feature_tensor in self.num_features_list
         ]
+
+        if self.embeddings_list is not None:
+            embeddings = [
+                torch.as_tensor(embed_tensor[idx]).clone().detach().to(torch.float32)
+                for embed_tensor in self.embeddings_list
+            ]
+        else:
+            embeddings = None
 
         if self.labels is not None:
             label = self.labels[idx]
@@ -63,6 +82,7 @@ class MambularDataset(Dataset):
                 label = label.clone().detach().to(torch.float32)
             else:
                 label = label.clone().detach().to(torch.long)
-            return num_features, cat_features, label
+
+            return (num_features, cat_features, embeddings), label
         else:
-            return num_features, cat_features  # No label in prediction mode
+            return (num_features, cat_features, embeddings)

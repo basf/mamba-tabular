@@ -6,7 +6,7 @@ from .plr_layer import PeriodicEmbeddings
 
 
 class EmbeddingLayer(nn.Module):
-    def __init__(self, num_feature_info, cat_feature_info, config):
+    def __init__(self, num_feature_info, cat_feature_info, emb_feature_info, config):
         """Embedding layer that handles numerical and categorical embeddings.
 
         Parameters
@@ -28,6 +28,7 @@ class EmbeddingLayer(nn.Module):
         self.layer_norm_after_embedding = getattr(
             config, "layer_norm_after_embedding", False
         )
+        self.embedding_projection = getattr(config, "embedding_projection", True)
         self.use_cls = getattr(config, "use_cls", False)
         self.cls_position = getattr(config, "cls_position", 0)
         self.embedding_dropout = (
@@ -100,6 +101,22 @@ class EmbeddingLayer(nn.Module):
             ]
         )
 
+        if len(emb_feature_info) >= 1:
+            if self.embedding_projection:
+                self.emb_embeddings = nn.ModuleList(
+                    [
+                        nn.Sequential(
+                            nn.Linear(
+                                feature_info["dimension"],
+                                self.d_model,
+                                bias=self.embedding_bias,
+                            ),
+                            self.embedding_activation,
+                        )
+                        for feature_name, feature_info in emb_feature_info.items()
+                    ]
+                )
+
         # Class token if required
         if self.use_cls:
             self.cls_token = nn.Parameter(torch.zeros(1, 1, self.d_model))
@@ -108,15 +125,12 @@ class EmbeddingLayer(nn.Module):
         if self.layer_norm_after_embedding:
             self.embedding_norm = nn.LayerNorm(self.d_model)
 
-    def forward(self, num_features=None, cat_features=None):
+    def forward(self, num_features, cat_features, emb_features):
         """Defines the forward pass of the model.
 
         Parameters
         ----------
-        num_features : Tensor, optional
-            Tensor containing the numerical features.
-        cat_features : Tensor, optional
-            Tensor containing the categorical features.
+        data: tuple of lists of tensors
 
         Returns
         -------
@@ -128,6 +142,7 @@ class EmbeddingLayer(nn.Module):
         ValueError
             If no features are provided to the model.
         """
+        num_embeddings, cat_embeddings, emb_embeddings = None, None, None
 
         # Class token initialization
         if self.use_cls:
@@ -147,8 +162,6 @@ class EmbeddingLayer(nn.Module):
             cat_embeddings = torch.squeeze(cat_embeddings, dim=2)
             if self.layer_norm_after_embedding:
                 cat_embeddings = self.embedding_norm(cat_embeddings)
-        else:
-            cat_embeddings = None
 
         # Process numerical embeddings based on embedding_type
         if self.embedding_type == "plr":
@@ -161,8 +174,6 @@ class EmbeddingLayer(nn.Module):
                 num_embeddings = self.num_embeddings(num_features)
                 if self.layer_norm_after_embedding:
                     num_embeddings = self.embedding_norm(num_embeddings)
-            else:
-                num_embeddings = None
         else:
             # For linear and ndt embeddings, handle each feature individually
             if self.num_embeddings and num_features is not None:
@@ -170,16 +181,24 @@ class EmbeddingLayer(nn.Module):
                 num_embeddings = torch.stack(num_embeddings, dim=1)
                 if self.layer_norm_after_embedding:
                     num_embeddings = self.embedding_norm(num_embeddings)
-            else:
-                num_embeddings = None
 
-        # Combine categorical and numerical embeddings
-        if cat_embeddings is not None and num_embeddings is not None:
-            x = torch.cat([cat_embeddings, num_embeddings], dim=1)
-        elif cat_embeddings is not None:
-            x = cat_embeddings
-        elif num_embeddings is not None:
-            x = num_embeddings
+        if emb_features != []:
+            if self.embedding_projection:
+                emb_embeddings = [
+                    emb(emb_features[i]) for i, emb in enumerate(self.emb_embeddings)
+                ]
+                emb_embeddings = torch.stack(emb_embeddings, dim=1)
+            else:
+                emb_embeddings = torch.stack(emb_features, dim=1)
+            if self.layer_norm_after_embedding:
+                emb_embeddings = self.embedding_norm(emb_embeddings)
+
+        embeddings = [
+            e for e in [cat_embeddings, num_embeddings, emb_embeddings] if e is not None
+        ]
+
+        if embeddings:
+            x = torch.cat(embeddings, dim=1) if len(embeddings) > 1 else embeddings[0]
         else:
             raise ValueError("No features provided to the model.")
 

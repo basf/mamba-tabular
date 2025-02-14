@@ -1,23 +1,15 @@
 from collections.abc import Callable
 from dataclasses import dataclass, field
-
 import torch.nn as nn
+from .base_config import BaseConfig
 
 
 @dataclass
-class DefaultMambularConfig:
+class DefaultMambularConfig(BaseConfig):
     """Configuration class for the Default Mambular model with predefined hyperparameters.
 
     Parameters
     ----------
-    lr : float, default=1e-04
-        Learning rate for the optimizer.
-    lr_patience : int, default=10
-        Number of epochs with no improvement after which the learning rate will be reduced.
-    weight_decay : float, default=1e-06
-        Weight decay (L2 penalty) for the optimizer.
-    lr_factor : float, default=0.1
-        Factor by which the learning rate will be reduced.
     d_model : int, default=64
         Dimensionality of the model.
     n_layers : int, default=4
@@ -28,6 +20,8 @@ class DefaultMambularConfig:
         Whether to use bias in the linear layers.
     dropout : float, default=0.0
         Dropout rate for regularization.
+    d_conv : int, default=4
+        Size of convolution over columns.
     dt_rank : str, default="auto"
         Rank of the decision tree used in the model.
     d_state : int, default=128
@@ -46,22 +40,6 @@ class DefaultMambularConfig:
         Type of normalization used ('RMSNorm', etc.).
     activation : callable, default=nn.SiLU()
         Activation function for the model.
-    layer_norm_eps : float, default=1e-05
-        Epsilon value for layer normalization.
-    embedding_activation : callable, default=nn.Identity()
-        Activation function for embeddings.
-    embedding_type : str, default="linear"
-        Type of embedding to use ('linear', etc.).
-    embedding_bias : bool, default=False
-        Whether to use bias in the embedding layers.
-    plr_lite : bool, default=False
-        Whether to use a lightweight version of Piecewise Linear Regression (PLR).
-    n_frequencies : int, default=48
-        Number of frequencies for PLR embeddings.
-    frequencies_init_scale : float, default=0.01
-        Initial scale for frequency parameters in embeddings.
-    layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding layers.
     shuffle_embeddings : bool, default=False
         Whether to shuffle embeddings before being passed to Mamba layers.
     head_layer_sizes : list, default=()
@@ -86,17 +64,18 @@ class DefaultMambularConfig:
         Whether to use PSCAN for the state-space model.
     mamba_version : str, default="mamba-torch"
         Version of the Mamba model to use ('mamba-torch', 'mamba1', 'mamba2').
+    conv_bias : bool, default=False
+        Whether to use a bias in the 1D convolution before each mamba block
+    AD_weight_decay: bool = True
+        Whether to use weight decay als for the A and D matrices in Mamba
+    BC_layer_norm: bool = False
+        Whether to use layer norm on the B and C matrices
     """
-
-    # Optimizer Parameters
-    lr: float = 1e-04
-    lr_patience: int = 10
-    weight_decay: float = 1e-06
-    lr_factor: float = 0.1
 
     # Architecture Parameters
     d_model: int = 64
     n_layers: int = 4
+    d_conv: int = 4
     expand_factor: int = 2
     bias: bool = False
     dropout: float = 0.0
@@ -109,16 +88,11 @@ class DefaultMambularConfig:
     dt_init_floor: float = 1e-04
     norm: str = "RMSNorm"
     activation: Callable = nn.SiLU()  # noqa: RUF009
-    layer_norm_eps: float = 1e-05
+    conv_bias: bool = False
+    AD_weight_decay: bool = True
+    BC_layer_norm: bool = False
 
     # Embedding Parameters
-    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
-    embedding_type: str = "linear"
-    embedding_bias: bool = False
-    plr_lite: bool = False
-    n_frequencies: int = 48
-    frequencies_init_scale: float = 0.01
-    layer_norm_after_embedding: bool = False
     shuffle_embeddings: bool = False
 
     # Head Parameters
