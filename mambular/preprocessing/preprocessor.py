@@ -270,7 +270,21 @@ class Preprocessor:
 
         return numerical_features, categorical_features
 
-    def fit(self, X, y=None):
+    def _fit_embeddings(self, embeddings):
+        if embeddings is not None:
+            self.embeddings = True
+            self.embedding_dimensions = {}
+            if isinstance(embeddings, np.ndarray):
+                self.embedding_dimensions["embeddings_1"] = embeddings.shape[1]
+            elif isinstance(embeddings, list) and all(
+                isinstance(e, np.ndarray) for e in embeddings
+            ):
+                for idx, e in enumerate(embeddings):
+                    self.embedding_dimensions[f"embedding_{idx+1}"] = e.shape[1]
+        else:
+            self.embeddings = False
+
+    def fit(self, X, y=None, embeddings=None):
         """Fits the preprocessor to the data by identifying feature types and configuring the appropriate
         transformations for each feature. It sets up a column transformer with a pipeline of transformations for
         numerical and categorical features based on the specified preprocessing strategy.
@@ -288,6 +302,8 @@ class Preprocessor:
         """
         if isinstance(X, dict):
             X = pd.DataFrame(X)
+
+        self._fit_embeddings(embeddings)
 
         numerical_features, categorical_features = self._detect_column_types(X)
         transformers = []
@@ -455,6 +471,7 @@ class Preprocessor:
                         )
                     )
 
+
                 elif feature_preprocessing == "ple":
                     numeric_transformer_steps.append(
                         ("minmax", MinMaxScaler(feature_range=(-1, 1)))
@@ -466,6 +483,9 @@ class Preprocessor:
                 elif feature_preprocessing == "box-cox":
                     numeric_transformer_steps.append(
                         ("minmax", MinMaxScaler(feature_range=(1e-03, 1)))
+                    )
+                    numeric_transformer_steps.append(
+                        ("check_positive", MinMaxScaler(feature_range=(1e-3, 1)))
                     )
                     numeric_transformer_steps.append(
                         (
@@ -583,7 +603,7 @@ class Preprocessor:
             )
         return bins
 
-    def transform(self, X):
+    def transform(self, X, embeddings=None):
         """Transforms the input data using the preconfigured column transformer and converts the output into a
         dictionary format with keys corresponding to transformed feature names and values as arrays of transformed data.
 
@@ -598,8 +618,7 @@ class Preprocessor:
         Parameters
         ----------
             X (DataFrame): The input data to be transformed.
-            X (DataFrame): The input data to be transformed.
-
+            embeddings (np.array or list of np.arrays, optional): The embedding data to include in the transformation.
 
         Returns
         -------
@@ -614,6 +633,33 @@ class Preprocessor:
 
         # Now let's convert this into a dictionary of arrays, one per column
         transformed_dict = self._split_transformed_output(X, transformed_X)
+        if embeddings is not None:
+            assert self.embeddings is True, "self.embeddings should be True but is not."
+
+            if isinstance(embeddings, np.ndarray):
+                assert (
+                    self.embedding_dimensions["embedding_1"] == embeddings.shape[1]
+                ), (
+                    f"Expected embedding dimension {self.embedding_dimensions['embeddings']}, "
+                    f"but got {embeddings.shape[1]}"
+                )
+                transformed_dict["embedding_1"] = embeddings.astype(np.float32)
+            elif isinstance(embeddings, list) and all(
+                isinstance(e, np.ndarray) for e in embeddings
+            ):
+                for idx, e in enumerate(embeddings):
+                    key = f"embedding_{idx+1}"
+                    assert self.embedding_dimensions[key] == e.shape[1], (
+                        f"Expected embedding dimension {self.embedding_dimensions[key]} for {key}, "
+                        f"but got {e.shape[1]}"
+                    )
+                    transformed_dict[key] = e.astype(np.float32)
+        else:
+            assert (
+                self.embeddings is False
+            ), "self.embeddings should be False when embeddings are None."
+            self.embeddings = False
+
         return transformed_dict
 
     def _split_transformed_output(self, X, transformed_X):
@@ -652,7 +698,7 @@ class Preprocessor:
                 start = end
         return transformed_dict
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X, y=None, embeddings=None):
         """Fits the preprocessor to the data and then transforms the data using the fitted preprocessing pipelines. This
         is a convenience method that combines `fit` and `transform`.
 
@@ -667,9 +713,9 @@ class Preprocessor:
             dict: A dictionary with the transformed data, where keys are the base feature names and
             values are the transformed features as arrays.
         """
-        self.fit(X, y)
+        self.fit(X, y, embeddings)
         self.fitted = True
-        return self.transform(X)
+        return self.transform(X, embeddings)
 
     def get_feature_info(self, verbose=True):
         """Retrieves information about how features are encoded within the model's preprocessor. This method identifies
@@ -679,23 +725,33 @@ class Preprocessor:
         This method should only be called after the preprocessor has been fitted, as it relies on the structure and
         configuration of the `column_transformer` attribute.
 
-
         Raises
         ------
             RuntimeError: If the `column_transformer` is not yet fitted, indicating that the preprocessor must be
             fitted before invoking this method.
 
-
         Returns
         -------
-            tuple of (dict, dict):
+            tuple of (dict, dict, dict):
                 - The first dictionary maps feature names to their respective number of bins or categories if they are
                   processed using discretization or ordinal encoding.
                 - The second dictionary includes feature names with other encoding details, such as the dimension of
                   features after encoding transformations (e.g., one-hot encoding dimensions).
+                - The third dictionary includes feature information for embeddings if available.
         """
         numerical_feature_info = {}
         categorical_feature_info = {}
+
+        if self.embeddings:
+            embedding_feature_info = {}
+            for key, dim in self.embedding_dimensions.items():
+                embedding_feature_info[key] = {
+                    "preprocessing": None,
+                    "dimension": dim,
+                    "categories": None,
+                }
+        else:
+            embedding_feature_info = {}
 
         if not self.column_transformer:
             raise RuntimeError("The preprocessor has not been fitted yet.")
@@ -708,12 +764,10 @@ class Preprocessor:
             steps = [step[0] for step in transformer_pipeline.steps]
 
             for feature_name in columns:
-                # Initialize common fields
                 preprocessing_type = " -> ".join(steps)
                 dimension = None
                 categories = None
 
-                # Numerical features
                 if "discretizer" in steps or any(
                     step in steps
                     for step in [
@@ -722,29 +776,28 @@ class Preprocessor:
                         "quantile",
                         "polynomial",
                         "splines",
+                        "box-cox",
                     ]
                 ):
                     last_step = transformer_pipeline.steps[-1][1]
                     if hasattr(last_step, "transform"):
-                        # Single-column input for dimension check
-                        dummy_input = np.zeros((1, 1))
+                        dummy_input = np.zeros((1, 1)) + 1e-05
                         transformed_feature = last_step.transform(dummy_input)
                         dimension = transformed_feature.shape[1]
                     numerical_feature_info[feature_name] = {
                         "preprocessing": preprocessing_type,
                         "dimension": dimension,
-                        "categories": None,  # Numerical features don't have categories
+                        "categories": None,
                     }
                     if verbose:
                         print(
                             f"Numerical Feature: {feature_name}, Info: {numerical_feature_info[feature_name]}"
                         )
 
-                # Categorical features
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
                     categories = len(step.mapping_[columns.index(feature_name)])
-                    dimension = 1  # Ordinal encoding always outputs one dimension
+                    dimension = 1
                     categorical_feature_info[feature_name] = {
                         "preprocessing": preprocessing_type,
                         "dimension": dimension,
@@ -759,7 +812,7 @@ class Preprocessor:
                     step = transformer_pipeline.named_steps["onehot"]
                     if hasattr(step, "categories_"):
                         categories = sum(len(cat) for cat in step.categories_)
-                        dimension = categories  # One-hot encoding expands into multiple dimensions
+                        dimension = categories
                     categorical_feature_info[feature_name] = {
                         "preprocessing": preprocessing_type,
                         "dimension": dimension,
@@ -770,7 +823,6 @@ class Preprocessor:
                             f"Categorical Feature (One-Hot): {feature_name}, Info: {categorical_feature_info[feature_name]}"
                         )
 
-                # Fallback for other transformations
                 else:
                     last_step = transformer_pipeline.steps[-1][1]
                     if hasattr(last_step, "transform"):
@@ -781,20 +833,25 @@ class Preprocessor:
                         categorical_feature_info[feature_name] = {
                             "preprocessing": preprocessing_type,
                             "dimension": dimension,
-                            "categories": None,  # Categories not defined for unknown categorical transformations
+                            "categories": None,
                         }
                     else:
                         numerical_feature_info[feature_name] = {
                             "preprocessing": preprocessing_type,
                             "dimension": dimension,
-                            "categories": None,  # Numerical features don't have categories
+                            "categories": None,
                         }
                     if verbose:
                         print(
-                            f"Categorical Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}"
+                            f"Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}"
                         )
 
                 if verbose:
                     print("-" * 50)
 
-        return numerical_feature_info, categorical_feature_info
+        if verbose and self.embeddings:
+            print("Embeddings:")
+            for key, value in embedding_feature_info.items():
+                print(f"  Feature: {key}, Dimension: {value['dimension']}")
+
+        return numerical_feature_info, categorical_feature_info, embedding_feature_info

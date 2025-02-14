@@ -1,5 +1,4 @@
 from dataclasses import replace
-
 import torch
 import torch.nn as nn
 
@@ -12,26 +11,23 @@ from .basemodel import BaseModel
 
 
 class TabulaRNN(BaseModel):
+
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes=1,
         config: DefaultTabulaRNNConfig = DefaultTabulaRNNConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
 
         self.returns_ensemble = False
-        self.cat_feature_info = cat_feature_info
-        self.num_feature_info = num_feature_info
 
         self.rnn = ConvRNN(config)
 
         self.embedding_layer = EmbeddingLayer(
-            num_feature_info=num_feature_info,
-            cat_feature_info=cat_feature_info,
+            *feature_information,
             config=config,
         )
 
@@ -50,10 +46,10 @@ class TabulaRNN(BaseModel):
         self.norm_f = get_normalization_layer(temp_config)
 
         # pooling
-        n_inputs = len(num_feature_info) + len(cat_feature_info)
+        n_inputs = [len(info) for info in feature_information]
         self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
 
-    def forward(self, num_features, cat_features):
+    def forward(self, *data):
         """Defines the forward pass of the model.
 
         Parameters
@@ -69,7 +65,7 @@ class TabulaRNN(BaseModel):
             The output predictions of the model.
         """
 
-        x = self.embedding_layer(num_features, cat_features)
+        x = self.embedding_layer(*data)
         # RNN forward pass
         out, _ = self.rnn(x)
         z = self.linear(torch.mean(x, dim=1))

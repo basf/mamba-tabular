@@ -30,8 +30,7 @@ class TaskModel(pl.LightningModule):
         self,
         model_class: type[nn.Module],
         config,
-        cat_feature_info,
-        num_feature_info,
+        feature_information,
         num_classes=1,
         lss=False,
         family=None,
@@ -91,13 +90,12 @@ class TaskModel(pl.LightningModule):
 
         self.base_model = model_class(
             config=config,
-            num_feature_info=num_feature_info,
-            cat_feature_info=cat_feature_info,
+            feature_information=feature_information,
             num_classes=output_dim,
             **kwargs,
         )
 
-    def forward(self, num_features, cat_features):
+    def forward(self, num_features, cat_features, embeddings):
         """Forward pass through the model.
 
         Parameters
@@ -113,7 +111,7 @@ class TaskModel(pl.LightningModule):
             Model output.
         """
 
-        return self.base_model.forward(num_features, cat_features)
+        return self.base_model.forward(num_features, cat_features, embeddings)
 
     def compute_loss(self, predictions, y_true):
         """Compute the loss for the given predictions and true labels.
@@ -145,7 +143,10 @@ class TaskModel(pl.LightningModule):
                 )
 
         if getattr(self.base_model, "returns_ensemble", False):  # Ensemble case
-            if self.loss_fct.__class__.__name__ == "CrossEntropyLoss" and predictions.dim() == 3:
+            if (
+                self.loss_fct.__class__.__name__ == "CrossEntropyLoss"
+                and predictions.dim() == 3
+            ):
                 # Classification case with ensemble: predictions (N, E, k), y_true (N,)
                 N, E, k = predictions.shape
                 loss = 0.0
@@ -186,18 +187,20 @@ class TaskModel(pl.LightningModule):
         Tensor
             Training loss.
         """
-        num_features, cat_features, labels = batch
+        data, labels = batch
 
         # Check if the model has a `penalty_forward` method
         if hasattr(self.base_model, "penalty_forward"):
-            preds, penalty = self.base_model.penalty_forward(num_features=num_features, cat_features=cat_features)
+            preds, penalty = self.base_model.penalty_forward(*data)
             loss = self.compute_loss(preds, labels) + penalty
         else:
-            preds = self(num_features=num_features, cat_features=cat_features)
+            preds = self(*data)
             loss = self.compute_loss(preds, labels)
 
         # Log the training loss
-        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log(
+            "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+        )
 
         # Log custom training metrics
         for metric_name, metric_fn in self.train_metrics.items():
@@ -229,8 +232,8 @@ class TaskModel(pl.LightningModule):
             Validation loss.
         """
 
-        num_features, cat_features, labels = batch
-        preds = self(num_features=num_features, cat_features=cat_features)
+        data, labels = batch
+        preds = self(*data)
         val_loss = self.compute_loss(preds, labels)
 
         self.log(
@@ -271,8 +274,8 @@ class TaskModel(pl.LightningModule):
         Tensor
             Test loss.
         """
-        num_features, cat_features, labels = batch
-        preds = self(num_features=num_features, cat_features=cat_features)
+        data, labels = batch
+        preds = self(*data)
         test_loss = self.compute_loss(preds, labels)
 
         self.log(
@@ -302,8 +305,7 @@ class TaskModel(pl.LightningModule):
             Predictions.
         """
 
-        num_features, cat_features = batch
-        preds = self(num_features=num_features, cat_features=cat_features)
+        preds = self(*batch)
 
         return preds
 
@@ -346,8 +348,13 @@ class TaskModel(pl.LightningModule):
 
             # Apply pruning logic if needed
             if self.current_epoch >= self.pruning_epoch:
-                if self.early_pruning_threshold is not None and val_loss_value > self.early_pruning_threshold:
-                    print(f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}")
+                if (
+                    self.early_pruning_threshold is not None
+                    and val_loss_value > self.early_pruning_threshold
+                ):
+                    print(
+                        f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}"
+                    )
                     self.trainer.should_stop = True  # Stop training early
 
     def epoch_val_loss_at(self, epoch):
