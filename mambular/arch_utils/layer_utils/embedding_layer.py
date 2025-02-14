@@ -141,8 +141,10 @@ class EmbeddingLayer(nn.Module):
         # Process categorical embeddings
         if self.cat_embeddings and cat_features is not None:
             cat_embeddings = [
-                emb(cat_features[i]) for i, emb in enumerate(self.cat_embeddings)
+                emb(cat_features[i]) if emb(cat_features[i]).ndim == 3 else emb(cat_features[i]).unsqueeze(1)
+                for i, emb in enumerate(self.cat_embeddings)
             ]
+
             cat_embeddings = torch.stack(cat_embeddings, dim=1)
             cat_embeddings = torch.squeeze(cat_embeddings, dim=2)
             if self.layer_norm_after_embedding:
@@ -175,6 +177,7 @@ class EmbeddingLayer(nn.Module):
 
         # Combine categorical and numerical embeddings
         if cat_embeddings is not None and num_embeddings is not None:
+            
             x = torch.cat([cat_embeddings, num_embeddings], dim=1)
         elif cat_embeddings is not None:
             x = cat_embeddings

@@ -465,6 +465,9 @@ class Preprocessor:
 
                 elif feature_preprocessing == "box-cox":
                     numeric_transformer_steps.append(
+                        ("minmax", MinMaxScaler(feature_range=(1e-03, 1)))
+                    )
+                    numeric_transformer_steps.append(
                         (
                             "box-cox",
                             PowerTransformer(method="box-cox", standardize=True),
