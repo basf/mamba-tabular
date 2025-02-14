@@ -25,6 +25,7 @@ class SklearnBaseRegressor(BaseEstimator):
     def __init__(self, model, config, **kwargs):
         self.preprocessor_arg_names = [
             "n_bins",
+            "feature_preprocessing",
             "numerical_preprocessing",
             "categorical_preprocessing",
             "use_decision_tree_bins",
