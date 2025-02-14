@@ -156,8 +156,10 @@ class EmbeddingLayer(nn.Module):
         # Process categorical embeddings
         if self.cat_embeddings and cat_features is not None:
             cat_embeddings = [
-                emb(cat_features[i]) for i, emb in enumerate(self.cat_embeddings)
+                emb(cat_features[i]) if emb(cat_features[i]).ndim == 3 else emb(cat_features[i]).unsqueeze(1)
+                for i, emb in enumerate(self.cat_embeddings)
             ]
+
             cat_embeddings = torch.stack(cat_embeddings, dim=1)
             cat_embeddings = torch.squeeze(cat_embeddings, dim=2)
             if self.layer_norm_after_embedding:
@@ -189,6 +191,7 @@ class EmbeddingLayer(nn.Module):
                 ]
                 emb_embeddings = torch.stack(emb_embeddings, dim=1)
             else:
+
                 emb_embeddings = torch.stack(emb_features, dim=1)
             if self.layer_norm_after_embedding:
                 emb_embeddings = self.embedding_norm(emb_embeddings)
@@ -199,6 +202,7 @@ class EmbeddingLayer(nn.Module):
 
         if embeddings:
             x = torch.cat(embeddings, dim=1) if len(embeddings) > 1 else embeddings[0]
+
         else:
             raise ValueError("No features provided to the model.")
 

@@ -40,6 +40,14 @@ class Preprocessor:
 
     Parameters
     ----------
+    feature_preprocessing: dict or None
+            Dictionary mapping column names to preprocessing techniques. Example:
+            {
+                "num_feature1": "minmax",
+                "num_feature2": "ple",
+                "cat_feature1": "one-hot",
+                "cat_feature2": "int"
+            }
     n_bins : int, default=50
         The number of bins to use for numerical feature binning. This parameter is relevant
         only if `numerical_preprocessing` is set to 'binning', 'ple' or 'one-hot'.
@@ -94,6 +102,7 @@ class Preprocessor:
 
     def __init__(
         self,
+        feature_preprocessing=None,
         n_bins=64,
         numerical_preprocessing="ple",
         categorical_preprocessing="int",
@@ -153,6 +162,7 @@ class Preprocessor:
             )
 
         self.use_decision_tree_bins = use_decision_tree_bins
+        self.feature_preprocessing = feature_preprocessing or {}
         self.column_transformer = None
         self.fitted = False
         self.binning_strategy = binning_strategy
@@ -300,6 +310,10 @@ class Preprocessor:
 
         if numerical_features:
             for feature in numerical_features:
+                feature_preprocessing = self.feature_preprocessing.get(
+                    feature, self.numerical_preprocessing
+                )
+
                 # extended the annotation list if new transformer is added, either from sklearn or custom
                 numeric_transformer_steps: list[
                     tuple[
@@ -322,7 +336,7 @@ class Preprocessor:
                         | SigmoidExpansion,
                     ]
                 ] = [("imputer", SimpleImputer(strategy="mean"))]
-                if self.numerical_preprocessing in ["binning", "one-hot"]:
+                if feature_preprocessing in ["binning", "one-hot"]:
                     bins = (
                         self._get_decision_tree_bins(X[[feature]], y, [feature])
                         if self.use_decision_tree_bins
@@ -356,22 +370,22 @@ class Preprocessor:
                             ]
                         )
 
-                    if self.numerical_preprocessing == "one-hot":
+                    if feature_preprocessing == "one-hot":
                         numeric_transformer_steps.extend(
                             [
                                 ("onehot_from_ordinal", OneHotFromOrdinal()),
                             ]
                         )
 
-                elif self.numerical_preprocessing == "standardization":
+                elif feature_preprocessing == "standardization":
                     numeric_transformer_steps.append(("scaler", StandardScaler()))
 
-                elif self.numerical_preprocessing == "minmax":
+                elif feature_preprocessing == "minmax":
                     numeric_transformer_steps.append(
                         ("minmax", MinMaxScaler(feature_range=(-1, 1)))
                     )
 
-                elif self.numerical_preprocessing == "quantile":
+                elif feature_preprocessing == "quantile":
                     numeric_transformer_steps.append(
                         (
                             "quantile",
@@ -381,7 +395,7 @@ class Preprocessor:
                         )
                     )
 
-                elif self.numerical_preprocessing == "polynomial":
+                elif feature_preprocessing == "polynomial":
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
@@ -395,10 +409,10 @@ class Preprocessor:
                         )
                     )
 
-                elif self.numerical_preprocessing == "robust":
+                elif feature_preprocessing == "robust":
                     numeric_transformer_steps.append(("robust", RobustScaler()))
 
-                elif self.numerical_preprocessing == "splines":
+                elif feature_preprocessing == "splines":
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
@@ -419,7 +433,7 @@ class Preprocessor:
                         ),
                     )
 
-                elif self.numerical_preprocessing == "rbf":
+                elif feature_preprocessing == "rbf":
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
@@ -438,7 +452,7 @@ class Preprocessor:
                         )
                     )
 
-                elif self.numerical_preprocessing == "sigmoid":
+                elif feature_preprocessing == "sigmoid":
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
@@ -457,7 +471,8 @@ class Preprocessor:
                         )
                     )
 
-                elif self.numerical_preprocessing == "ple":
+
+                elif feature_preprocessing == "ple":
                     numeric_transformer_steps.append(
                         ("minmax", MinMaxScaler(feature_range=(-1, 1)))
                     )
@@ -465,7 +480,10 @@ class Preprocessor:
                         ("ple", PLE(n_bins=self.n_bins, task=self.task))
                     )
 
-                elif self.numerical_preprocessing == "box-cox":
+                elif feature_preprocessing == "box-cox":
+                    numeric_transformer_steps.append(
+                        ("minmax", MinMaxScaler(feature_range=(1e-03, 1)))
+                    )
                     numeric_transformer_steps.append(
                         ("check_positive", MinMaxScaler(feature_range=(1e-3, 1)))
                     )
@@ -476,7 +494,7 @@ class Preprocessor:
                         )
                     )
 
-                elif self.numerical_preprocessing == "yeo-johnson":
+                elif feature_preprocessing == "yeo-johnson":
                     numeric_transformer_steps.append(
                         (
                             "yeo-johnson",
@@ -484,7 +502,7 @@ class Preprocessor:
                         )
                     )
 
-                elif self.numerical_preprocessing == "none":
+                elif feature_preprocessing == "none":
                     numeric_transformer_steps.append(
                         (
                             "none",
@@ -498,7 +516,10 @@ class Preprocessor:
 
         if categorical_features:
             for feature in categorical_features:
-                if self.categorical_preprocessing == "int":
+                feature_preprocessing = self.feature_preprocessing.get(
+                    feature, self.categorical_preprocessing
+                )
+                if feature_preprocessing == "int":
                     # Use ContinuousOrdinalEncoder for "int"
                     categorical_transformer = Pipeline(
                         [
@@ -506,7 +527,7 @@ class Preprocessor:
                             ("continuous_ordinal", ContinuousOrdinalEncoder()),
                         ]
                     )
-                elif self.categorical_preprocessing == "one-hot":
+                elif feature_preprocessing == "one-hot":
                     # Use OneHotEncoder for "one-hot"
                     categorical_transformer = Pipeline(
                         [
@@ -516,7 +537,7 @@ class Preprocessor:
                         ]
                     )
 
-                elif self.categorical_preprocessing == "none":
+                elif feature_preprocessing == "none":
                     # Use OneHotEncoder for "one-hot"
                     categorical_transformer = Pipeline(
                         [
@@ -524,7 +545,7 @@ class Preprocessor:
                             ("none", NoTransformer()),
                         ]
                     )
-                elif self.categorical_preprocessing == "pretrained":
+                elif feature_preprocessing == "pretrained":
                     categorical_transformer = Pipeline(
                         [
                             ("imputer", SimpleImputer(strategy="most_frequent")),
@@ -533,7 +554,7 @@ class Preprocessor:
                     )
                 else:
                     raise ValueError(
-                        f"Unknown categorical_preprocessing type: {self.categorical_preprocessing}"
+                        f"Unknown categorical_preprocessing type: {feature_preprocessing}"
                     )
 
                 # Append the transformer for the current categorical feature
