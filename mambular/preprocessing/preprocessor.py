@@ -120,14 +120,10 @@ class Preprocessor:
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = (
-            numerical_preprocessing.lower()
-            if numerical_preprocessing is not None
-            else "none"
+            numerical_preprocessing.lower() if numerical_preprocessing is not None else "none"
         )
         self.categorical_preprocessing = (
-            categorical_preprocessing.lower()
-            if categorical_preprocessing is not None
-            else "none"
+            categorical_preprocessing.lower() if categorical_preprocessing is not None else "none"
         )
         if self.numerical_preprocessing not in [
             "ple",
@@ -251,19 +247,13 @@ class Preprocessor:
                 numerical_features.append(col)
             else:
                 if isinstance(self.cat_cutoff, float):
-                    cutoff_condition = (
-                        num_unique_values / total_samples
-                    ) < self.cat_cutoff
+                    cutoff_condition = (num_unique_values / total_samples) < self.cat_cutoff
                 elif isinstance(self.cat_cutoff, int):
                     cutoff_condition = num_unique_values < self.cat_cutoff
                 else:
-                    raise ValueError(
-                        "cat_cutoff should be either a float or an integer."
-                    )
+                    raise ValueError("cat_cutoff should be either a float or an integer.")
 
-                if X[col].dtype.kind not in "iufc" or (
-                    X[col].dtype.kind == "i" and cutoff_condition
-                ):
+                if X[col].dtype.kind not in "iufc" or (X[col].dtype.kind == "i" and cutoff_condition):
                     categorical_features.append(col)
                 else:
                     numerical_features.append(col)
@@ -276,11 +266,9 @@ class Preprocessor:
             self.embedding_dimensions = {}
             if isinstance(embeddings, np.ndarray):
                 self.embedding_dimensions["embeddings_1"] = embeddings.shape[1]
-            elif isinstance(embeddings, list) and all(
-                isinstance(e, np.ndarray) for e in embeddings
-            ):
+            elif isinstance(embeddings, list) and all(isinstance(e, np.ndarray) for e in embeddings):
                 for idx, e in enumerate(embeddings):
-                    self.embedding_dimensions[f"embedding_{idx+1}"] = e.shape[1]
+                    self.embedding_dimensions[f"embedding_{idx + 1}"] = e.shape[1]
         else:
             self.embeddings = False
 
@@ -310,9 +298,7 @@ class Preprocessor:
 
         if numerical_features:
             for feature in numerical_features:
-                feature_preprocessing = self.feature_preprocessing.get(
-                    feature, self.numerical_preprocessing
-                )
+                feature_preprocessing = self.feature_preprocessing.get(feature, self.numerical_preprocessing)
 
                 # extended the annotation list if new transformer is added, either from sklearn or custom
                 numeric_transformer_steps: list[
@@ -348,11 +334,7 @@ class Preprocessor:
                                 (
                                     "discretizer",
                                     KBinsDiscretizer(
-                                        n_bins=(
-                                            bins
-                                            if isinstance(bins, int)
-                                            else len(bins) - 1
-                                        ),
+                                        n_bins=(bins if isinstance(bins, int) else len(bins) - 1),
                                         encode="ordinal",
                                         strategy=self.binning_strategy,  # type: ignore
                                         subsample=200_000 if len(X) > 200_000 else None,
@@ -381,17 +363,13 @@ class Preprocessor:
                     numeric_transformer_steps.append(("scaler", StandardScaler()))
 
                 elif feature_preprocessing == "minmax":
-                    numeric_transformer_steps.append(
-                        ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                    )
+                    numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
 
                 elif feature_preprocessing == "quantile":
                     numeric_transformer_steps.append(
                         (
                             "quantile",
-                            QuantileTransformer(
-                                n_quantiles=self.n_bins, random_state=101
-                            ),
+                            QuantileTransformer(n_quantiles=self.n_bins, random_state=101),
                         )
                     )
 
@@ -399,9 +377,7 @@ class Preprocessor:
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
-                        numeric_transformer_steps.append(
-                            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                        )
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "polynomial",
@@ -416,9 +392,7 @@ class Preprocessor:
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
-                        numeric_transformer_steps.append(
-                            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                        )
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "splines",
@@ -437,9 +411,7 @@ class Preprocessor:
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
-                        numeric_transformer_steps.append(
-                            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                        )
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "rbf",
@@ -456,9 +428,7 @@ class Preprocessor:
                     if self.scaling_strategy == "standardization":
                         numeric_transformer_steps.append(("scaler", StandardScaler()))
                     elif self.scaling_strategy == "minmax":
-                        numeric_transformer_steps.append(
-                            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                        )
+                        numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
                     numeric_transformer_steps.append(
                         (
                             "sigmoid",
@@ -471,21 +441,16 @@ class Preprocessor:
                         )
                     )
 
-
                 elif feature_preprocessing == "ple":
-                    numeric_transformer_steps.append(
-                        ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-                    )
-                    numeric_transformer_steps.append(
-                        ("ple", PLE(n_bins=self.n_bins, task=self.task))
-                    )
+                    numeric_transformer_steps.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
+                    numeric_transformer_steps.append(("ple", PLE(n_bins=self.n_bins, task=self.task)))
 
                 elif feature_preprocessing == "box-cox":
                     numeric_transformer_steps.append(
-                        ("minmax", MinMaxScaler(feature_range=(1e-03, 1)))
+                        ("minmax", MinMaxScaler(feature_range=(1e-03, 1)))  # type: ignore
                     )
                     numeric_transformer_steps.append(
-                        ("check_positive", MinMaxScaler(feature_range=(1e-3, 1)))
+                        ("check_positive", MinMaxScaler(feature_range=(1e-3, 1)))  # type: ignore
                     )
                     numeric_transformer_steps.append(
                         (
@@ -516,9 +481,7 @@ class Preprocessor:
 
         if categorical_features:
             for feature in categorical_features:
-                feature_preprocessing = self.feature_preprocessing.get(
-                    feature, self.categorical_preprocessing
-                )
+                feature_preprocessing = self.feature_preprocessing.get(feature, self.categorical_preprocessing)
                 if feature_preprocessing == "int":
                     # Use ContinuousOrdinalEncoder for "int"
                     categorical_transformer = Pipeline(
@@ -553,18 +516,12 @@ class Preprocessor:
                         ]
                     )
                 else:
-                    raise ValueError(
-                        f"Unknown categorical_preprocessing type: {feature_preprocessing}"
-                    )
+                    raise ValueError(f"Unknown categorical_preprocessing type: {feature_preprocessing}")
 
                 # Append the transformer for the current categorical feature
-                transformers.append(
-                    (f"cat_{feature}", categorical_transformer, [feature])
-                )
+                transformers.append((f"cat_{feature}", categorical_transformer, [feature]))
 
-        self.column_transformer = ColumnTransformer(
-            transformers=transformers, remainder="passthrough"
-        )
+        self.column_transformer = ColumnTransformer(transformers=transformers, remainder="passthrough")
         self.column_transformer.fit(X, y)
 
         self.fitted = True
@@ -590,17 +547,13 @@ class Preprocessor:
         bins = []
         for feature in numerical_features:
             tree_model = (
-                DecisionTreeClassifier(max_depth=3)
-                if y.dtype.kind in "bi"
-                else DecisionTreeRegressor(max_depth=3)
+                DecisionTreeClassifier(max_depth=3) if y.dtype.kind in "bi" else DecisionTreeRegressor(max_depth=3)
             )
             tree_model.fit(X[[feature]], y)
             thresholds = tree_model.tree_.threshold[tree_model.tree_.feature != -2]  # type: ignore
             bin_edges = np.sort(np.unique(thresholds))
 
-            bins.append(
-                np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()]))
-            )
+            bins.append(np.concatenate(([X[feature].min()], bin_edges, [X[feature].max()])))
         return bins
 
     def transform(self, X, embeddings=None):
@@ -634,30 +587,27 @@ class Preprocessor:
         # Now let's convert this into a dictionary of arrays, one per column
         transformed_dict = self._split_transformed_output(X, transformed_X)
         if embeddings is not None:
-            assert self.embeddings is True, "self.embeddings should be True but is not."
+            if not self.embeddings:
+                raise ValueError("self.embeddings should be True but is not.")
 
             if isinstance(embeddings, np.ndarray):
-                assert (
-                    self.embedding_dimensions["embedding_1"] == embeddings.shape[1]
-                ), (
-                    f"Expected embedding dimension {self.embedding_dimensions['embeddings']}, "
-                    f"but got {embeddings.shape[1]}"
-                )
-                transformed_dict["embedding_1"] = embeddings.astype(np.float32)
-            elif isinstance(embeddings, list) and all(
-                isinstance(e, np.ndarray) for e in embeddings
-            ):
-                for idx, e in enumerate(embeddings):
-                    key = f"embedding_{idx+1}"
-                    assert self.embedding_dimensions[key] == e.shape[1], (
-                        f"Expected embedding dimension {self.embedding_dimensions[key]} for {key}, "
-                        f"but got {e.shape[1]}"
+                if self.embedding_dimensions["embedding_1"] != embeddings.shape[1]:
+                    raise ValueError(
+                        f"Expected embedding dimension {self.embedding_dimensions['embedding_1']}, "
+                        f"but got {embeddings.shape[1]}"
                     )
+                transformed_dict["embedding_1"] = embeddings.astype(np.float32)
+            elif isinstance(embeddings, list) and all(isinstance(e, np.ndarray) for e in embeddings):
+                for idx, e in enumerate(embeddings):
+                    key = f"embedding_{idx + 1}"
+                    if self.embedding_dimensions[key] != e.shape[1]:
+                        raise ValueError(
+                            f"Expected embedding dimension {self.embedding_dimensions[key]} for {key}, but got {e.shape[1]}"
+                        )
                     transformed_dict[key] = e.astype(np.float32)
         else:
-            assert (
-                self.embeddings is False
-            ), "self.embeddings should be False when embeddings are None."
+            if self.embeddings is not False:
+                raise ValueError("self.embeddings should be False when embeddings are None.")
             self.embeddings = False
 
         return transformed_dict
@@ -790,9 +740,7 @@ class Preprocessor:
                         "categories": None,
                     }
                     if verbose:
-                        print(
-                            f"Numerical Feature: {feature_name}, Info: {numerical_feature_info[feature_name]}"
-                        )
+                        print(f"Numerical Feature: {feature_name}, Info: {numerical_feature_info[feature_name]}")
 
                 elif "continuous_ordinal" in steps:
                     step = transformer_pipeline.named_steps["continuous_ordinal"]
@@ -842,9 +790,7 @@ class Preprocessor:
                             "categories": None,
                         }
                     if verbose:
-                        print(
-                            f"Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}"
-                        )
+                        print(f"Feature: {feature_name}, Info: {preprocessing_type}, Dimension: {dimension}")
 
                 if verbose:
                     print("-" * 50)
