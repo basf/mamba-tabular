@@ -1,51 +1,29 @@
 from collections.abc import Callable
 from dataclasses import dataclass, field
-
 import torch.nn as nn
+from .base_config import BaseConfig
 
 
 @dataclass
-class DefaultTabulaRNNConfig:
+class DefaultTabulaRNNConfig(BaseConfig):
     """Configuration class for the TabulaRNN model with predefined hyperparameters.
 
     Parameters
     ----------
-    lr : float, default=1e-04
-        Learning rate for the optimizer.
-    lr_patience : int, default=10
-        Number of epochs with no improvement after which learning rate will be reduced.
-    weight_decay : float, default=1e-06
-        Weight decay (L2 penalty) for the optimizer.
-    lr_factor : float, default=0.1
-        Factor by which the learning rate will be reduced.
     model_type : str, default="RNN"
         Type of model, one of "RNN", "LSTM", "GRU", "mLSTM", "sLSTM".
-    d_model : int, default=128
-        Dimensionality of the model.
     n_layers : int, default=4
         Number of layers in the RNN.
     rnn_dropout : float, default=0.2
         Dropout rate for the RNN layers.
+    d_model : int, default=128
+        Dimensionality of embeddings or model representations.
     norm : str, default="RMSNorm"
         Normalization method to be used.
     activation : callable, default=nn.SELU()
         Activation function for the RNN layers.
     residuals : bool, default=False
         Whether to include residual connections in the RNN.
-    embedding_type : str, default="linear"
-        Type of embedding for features ('linear', 'plr', etc.).
-    embedding_bias : bool, default=False
-        Whether to use bias in the embedding layers.
-    plr_lite : bool, default=False
-        Whether to use a lightweight version of Piecewise Linear Regression (PLR).
-    n_frequencies : int, default=48
-        Number of frequencies for PLR embeddings.
-    frequencies_init_scale : float, default=0.01
-        Initial scale for frequency parameters in embeddings.
-    embedding_activation : callable, default=nn.ReLU()
-        Activation function for embeddings.
-    layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding layers.
     head_layer_sizes : list, default=()
         Sizes of the layers in the head of the model.
     head_dropout : float, default=0.5
@@ -74,12 +52,6 @@ class DefaultTabulaRNNConfig:
         Whether to use bias in the convolutional layers.
     """
 
-    # Optimizer params
-    lr: float = 1e-04
-    lr_patience: int = 10
-    weight_decay: float = 1e-06
-    lr_factor: float = 0.1
-
     # Architecture params
     model_type: str = "RNN"
     d_model: int = 128
@@ -88,15 +60,6 @@ class DefaultTabulaRNNConfig:
     norm: str = "RMSNorm"
     activation: Callable = nn.SELU()  # noqa: RUF009
     residuals: bool = False
-
-    # Embedding params
-    embedding_type: str = "linear"
-    embedding_bias: bool = False
-    plr_lite: bool = False
-    n_frequencies: int = 48
-    frequencies_init_scale: float = 0.01
-    embedding_activation: Callable = nn.ReLU()  # noqa: RUF009
-    layer_norm_after_embedding: bool = False
 
     # Head params
     head_layer_sizes: list = field(default_factory=list)

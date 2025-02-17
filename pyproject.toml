@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mambular"
-version = "1.1.0"
+version = "1.2.0"
 description = "A python package for tabular deep learning with mamba blocks."
 authors = ["Anton Thielmann", "Manish Kumar", "Christoph Weisser"]
 readme = "README.md"
@@ -11,12 +11,12 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
-python = ">=3.10, <=3.12"
+python = ">=3.10, <=3.13"
 numpy = "<=1.26.4"
 pandas = "^2.0.3"
 lightning = "^2.3.3"
 scikit-learn = "^1.3.2"
-torch = "^2.5.1"
+torch = ">=2.2.2, <=2.5.1"
 torchmetrics = "^1.5.2"
 setuptools = "^75.3.0"
 properscoring = "^0.1"
@@ -24,7 +24,6 @@ scikit-optimize = "^0.10.2"
 einops = "^0.8.0"
 accelerate = "^1.2.1"
 scipy = "^1.15.0"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1"
@@ -56,19 +55,6 @@ line-length = 120
 target-version = "py310"
 exclude = ["*.ipynb", "mambular/arch_utils/mamba_utils.mamba_orginal.py"]
 
-ignore = [
-  "B006",
-  "F401", # Ignore unused imports
-  "F841", # Ignore unused local variables
-  "E501", # Ignore line length
-  "D100", # Missing module-level docstring
-  "D101", # Missing class-level docstring
-  "D102", # Missing method-level docstring
-  "D103", # Missing function-level docstring
-  "B007",
-  "S307",
-]
-
 [tool.ruff.lint]
 select = [
   "A",   # flake8-buildins
@@ -81,6 +67,19 @@ select = [
   "S",   # flake8-bandit
   "UP",  # pyupgrade
   "W",   # pycodestyle - warnings
+]
+
+ignore = [
+  "B006",
+  "F401", # Ignore unused imports
+  "F841", # Ignore unused local variables
+  "E501", # Ignore line length
+  "D100", # Missing module-level docstring
+  "D101", # Missing class-level docstring
+  "D102", # Missing method-level docstring
+  "D103", # Missing function-level docstring
+  "B007",
+  "S307",
 ]
 
 

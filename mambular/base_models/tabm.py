@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import numpy as np
 from ..arch_utils.get_norm_fn import get_normalization_layer
 from ..arch_utils.layer_utils.batch_ensemble_layer import LinearBatchEnsembleLayer
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
@@ -11,10 +11,10 @@ from .basemodel import BaseModel
 
 
 class TabM(BaseModel):
+
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes: int = 1,
         config: DefaultTabMConfig = DefaultTabMConfig(),  # noqa: B008
         **kwargs,
@@ -23,7 +23,7 @@ class TabM(BaseModel):
         super().__init__(config=config, **kwargs)
 
         # Save hparams including config attributes
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
         if not self.hparams.average_ensembles:
             self.returns_ensemble = True  # Directly set ensemble flag
         else:
@@ -35,18 +35,19 @@ class TabM(BaseModel):
         # Conditionally initialize EmbeddingLayer based on self.hparams
         if self.hparams.use_embeddings:
             self.embedding_layer = EmbeddingLayer(
-                num_feature_info=num_feature_info,
-                cat_feature_info=cat_feature_info,
+                *feature_information,
                 config=config,
             )
 
             if self.hparams.average_embeddings:
                 input_dim = self.hparams.d_model
             else:
-                input_dim = (len(num_feature_info) + len(cat_feature_info)) * config.d_model
+                input_dim = np.sum(
+                    [len(info) * self.hparams.d_model for info in feature_information]
+                )
 
         else:
-            input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
+            input_dim = get_feature_dimensions(*feature_information)
 
         # Input layer with batch ensembling
         self.layers.append(
@@ -71,7 +72,11 @@ class TabM(BaseModel):
         if self.hparams.use_glu:
             self.layers.append(nn.GLU())
         else:
-            self.layers.append(self.hparams.activation if hasattr(self.hparams, "activation") else nn.SELU())
+            self.layers.append(
+                self.hparams.activation
+                if hasattr(self.hparams, "activation")
+                else nn.SELU()
+            )
         if self.hparams.dropout > 0.0:
             self.layers.append(nn.Dropout(self.hparams.dropout))
 
@@ -105,7 +110,11 @@ class TabM(BaseModel):
             if self.hparams.use_glu:
                 self.layers.append(nn.GLU())
             else:
-                self.layers.append(self.hparams.activation if hasattr(self.hparams, "activation") else nn.SELU())
+                self.layers.append(
+                    self.hparams.activation
+                    if hasattr(self.hparams, "activation")
+                    else nn.SELU()
+                )
             if self.hparams.dropout > 0.0:
                 self.layers.append(nn.Dropout(self.hparams.dropout))
 
@@ -118,15 +127,13 @@ class TabM(BaseModel):
                 num_classes,
             )
 
-    def forward(self, num_features, cat_features) -> torch.Tensor:
+    def forward(self, *data) -> torch.Tensor:
         """Forward pass of the TabM model with batch ensembling.
 
         Parameters
         ----------
-        num_features : torch.Tensor
-            Numerical features tensor.
-        cat_features : torch.Tensor
-            Categorical features tensor.
+        data : tuple
+            Input tuple of tensors of num_features, cat_features, embeddings.
 
         Returns
         -------
@@ -135,7 +142,7 @@ class TabM(BaseModel):
         """
         # Handle embeddings if used
         if self.hparams.use_embeddings:
-            x = self.embedding_layer(num_features, cat_features)
+            x = self.embedding_layer(*data)
             # Option 1: Average over feature dimension (N)
             if self.hparams.average_embeddings:
                 x = x.mean(dim=1)  # Shape: (B, D)
@@ -145,15 +152,18 @@ class TabM(BaseModel):
                 x = x.reshape(B, N * D)  # Shape: (B, N * D)
 
         else:
-            x = num_features + cat_features
-            x = torch.cat(x, dim=1)
+            x = torch.cat([t for tensors in data for t in tensors], dim=1)
 
         # Process through layers with optional skip connections
         for i in range(len(self.layers) - 1):
             if isinstance(self.layers[i], LinearBatchEnsembleLayer):
                 out = self.layers[i](x)
                 # `out` shape is expected to be (batch_size, ensemble_size, out_features)
-                if hasattr(self, "skip_connections") and self.skip_connections and x.shape == out.shape:
+                if (
+                    hasattr(self, "skip_connections")
+                    and self.skip_connections
+                    and x.shape == out.shape
+                ):
                     x = x + out
                 else:
                     x = out

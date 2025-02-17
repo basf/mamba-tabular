@@ -1,82 +1,111 @@
-import unittest
-
+import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-
-from mambular.utils.preprocessor import Preprocessor
-
-
-class TestPreprocessor(unittest.TestCase):
-    def setUp(self):
-        # Sample data for testing
-        self.data = pd.DataFrame(
-            {
-                "numerical": np.random.randn(500),
-                "categorical": np.random.choice(["A", "B", "C"], size=500),
-                "mixed": np.random.choice([1, "A", "B"], size=500),
-            }
-        )
-        self.target = np.random.randn(500)
-
-    def test_initialization(self):
-        """Test initialization of the Preprocessor with default parameters."""
-        pp = Preprocessor(n_bins=20, numerical_preprocessing="binning")
-        self.assertEqual(pp.n_bins, 20)
-        self.assertEqual(pp.numerical_preprocessing, "binning")
-        self.assertFalse(pp.use_decision_tree_bins)
-
-    def test_fit(self):
-        """Test the fitting process of the preprocessor."""
-        pp = Preprocessor(numerical_preprocessing="binning", n_bins=20)
-        pp.fit(self.data, self.target)
-        self.assertIsNotNone(pp.column_transformer)
-
-    def test_transform_not_fitted(self):
-        """Test that transform raises an error if called before fitting."""
-        pp = Preprocessor()
-        with self.assertRaises(NotFittedError):
-            pp.transform(self.data)
-
-    def test_fit_transform(self):
-        """Test fitting and transforming the data."""
-        pp = Preprocessor(numerical_preprocessing="standardization")
-        transformed_data = pp.fit_transform(self.data, self.target)
-        self.assertIsInstance(transformed_data, dict)
-        self.assertTrue("num_numerical" in transformed_data)
-        self.assertTrue("cat_categorical" in transformed_data)
-
-    def test_ple(self):
-        """Test fitting and transforming the data."""
-        pp = Preprocessor(numerical_preprocessing="ple", n_bins=20)
-        transformed_data = pp.fit_transform(self.data, self.target)
-        self.assertIsInstance(transformed_data, dict)
-        self.assertTrue("num_numerical" in transformed_data)
-        self.assertTrue("cat_categorical" in transformed_data)
-
-    def test_transform_with_missing_values(self):
-        """Ensure the preprocessor can handle missing values."""
-        data_with_missing = self.data.copy()
-        data_with_missing.loc[0, "numerical"] = np.nan
-        data_with_missing.loc[1, "categorical"] = np.nan
-        pp = Preprocessor(numerical_preprocessing="normalization")
-        transformed_data = pp.fit_transform(data_with_missing, self.target)
-        self.assertNotIn(np.nan, transformed_data["num_numerical"])
-        self.assertNotIn(np.nan, transformed_data["cat_categorical"])
-
-    def test_decision_tree_bins(self):
-        """Test the usage of decision tree for binning."""
-        pp = Preprocessor(use_decision_tree_bins=True, numerical_preprocessing="binning", n_bins=5)
-        pp.fit(self.data, self.target)
-        # Checking if the preprocessor setup decision tree bins properly
-        self.assertTrue(
-            all(
-                isinstance(x, np.ndarray)
-                for x in pp._get_decision_tree_bins(self.data[["numerical"]], self.target, ["numerical"])
-            )
-        )
+from mambular.preprocessing import Preprocessor
 
 
-# Running the tests
-if __name__ == "__main__":
-    unittest.main()
+@pytest.fixture
+def sample_data():
+    return pd.DataFrame(
+        {
+            "numerical": np.random.randn(100),
+            "categorical": np.random.choice(["A", "B", "C"], size=100),
+            "integer": np.random.randint(0, 5, size=100),
+        }
+    )
+
+
+@pytest.fixture
+def sample_target():
+    return np.random.randn(100)
+
+
+@pytest.fixture(
+    params=[
+        "ple",
+        "binning",
+        "one-hot",
+        "standardization",
+        "minmax",
+        "quantile",
+        "polynomial",
+        "robust",
+        "splines",
+        "yeo-johnson",
+        "box-cox",
+        "rbf",
+        "sigmoid",
+        "none",
+    ]
+)
+def preprocessor(request):
+    return Preprocessor(
+        numerical_preprocessing=request.param, categorical_preprocessing="one-hot"
+    )
+
+
+def test_preprocessor_initialization(preprocessor):
+    assert preprocessor.numerical_preprocessing in [
+        "ple",
+        "binning",
+        "one-hot",
+        "standardization",
+        "minmax",
+        "quantile",
+        "polynomial",
+        "robust",
+        "splines",
+        "yeo-johnson",
+        "box-cox",
+        "rbf",
+        "sigmoid",
+        "none",
+    ]
+    assert preprocessor.categorical_preprocessing == "one-hot"
+    assert not preprocessor.fitted
+
+
+def test_preprocessor_fit(preprocessor, sample_data, sample_target):
+    preprocessor.fit(sample_data, sample_target)
+    assert preprocessor.fitted
+    assert preprocessor.column_transformer is not None
+
+
+def test_preprocessor_transform(preprocessor, sample_data, sample_target):
+    preprocessor.fit(sample_data, sample_target)
+    transformed = preprocessor.transform(sample_data)
+    assert isinstance(transformed, dict)
+    assert len(transformed) > 0
+
+
+def test_preprocessor_fit_transform(preprocessor, sample_data, sample_target):
+    transformed = preprocessor.fit_transform(sample_data, sample_target)
+    assert isinstance(transformed, dict)
+    assert len(transformed) > 0
+
+
+def test_preprocessor_get_params(preprocessor):
+    params = preprocessor.get_params()
+    assert "n_bins" in params
+    assert "numerical_preprocessing" in params
+
+
+def test_preprocessor_set_params(preprocessor):
+    preprocessor.set_params(n_bins=128)
+    assert preprocessor.n_bins == 128
+
+
+def test_transform_before_fit_raises_error(preprocessor, sample_data):
+    with pytest.raises(NotFittedError):
+        preprocessor.transform(sample_data)
+
+
+def test_get_feature_info(preprocessor, sample_data, sample_target):
+    preprocessor.fit(sample_data, sample_target)
+    numerical_info, categorical_info, embedding_info = preprocessor.get_feature_info(
+        verbose=False
+    )
+    assert isinstance(numerical_info, dict)
+    assert isinstance(categorical_info, dict)
+    assert isinstance(embedding_info, dict)

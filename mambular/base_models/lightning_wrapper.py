@@ -3,7 +3,6 @@ from collections.abc import Callable
 import lightning as pl
 import torch
 import torch.nn as nn
-import torchmetrics
 
 
 class TaskModel(pl.LightningModule):
@@ -31,8 +30,7 @@ class TaskModel(pl.LightningModule):
         self,
         model_class: type[nn.Module],
         config,
-        cat_feature_info,
-        num_feature_info,
+        feature_information,
         num_classes=1,
         lss=False,
         family=None,
@@ -41,6 +39,8 @@ class TaskModel(pl.LightningModule):
         pruning_epoch=5,
         optimizer_type: str = "Adam",
         optimizer_args: dict | None = None,
+        train_metrics: dict[str, Callable] | None = None,
+        val_metrics: dict[str, Callable] | None = None,
         **kwargs,
     ):
         super().__init__()
@@ -52,6 +52,10 @@ class TaskModel(pl.LightningModule):
         self.early_pruning_threshold = early_pruning_threshold
         self.pruning_epoch = pruning_epoch
         self.val_losses = []
+
+        # Store custom metrics
+        self.train_metrics = train_metrics or {}
+        self.val_metrics = val_metrics or {}
 
         self.optimizer_params = {
             k.replace("optimizer_", ""): v
@@ -65,16 +69,10 @@ class TaskModel(pl.LightningModule):
             if num_classes == 2:
                 if not self.loss_fct:
                     self.loss_fct = nn.BCEWithLogitsLoss()
-                self.acc = torchmetrics.Accuracy(task="binary")
-                self.auroc = torchmetrics.AUROC(task="binary")
-                self.precision = torchmetrics.Precision(task="binary")
                 self.num_classes = 1
             elif num_classes > 2:
                 if not self.loss_fct:
                     self.loss_fct = nn.CrossEntropyLoss()
-                self.acc = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes)
-                self.auroc = torchmetrics.AUROC(task="multiclass", num_classes=num_classes)
-                self.precision = torchmetrics.Precision(task="multiclass", num_classes=num_classes)
             else:
                 self.loss_fct = nn.MSELoss()
 
@@ -92,13 +90,12 @@ class TaskModel(pl.LightningModule):
 
         self.base_model = model_class(
             config=config,
-            num_feature_info=num_feature_info,
-            cat_feature_info=cat_feature_info,
+            feature_information=feature_information,
             num_classes=output_dim,
             **kwargs,
         )
 
-    def forward(self, num_features, cat_features):
+    def forward(self, num_features, cat_features, embeddings):
         """Forward pass through the model.
 
         Parameters
@@ -114,7 +111,7 @@ class TaskModel(pl.LightningModule):
             Model output.
         """
 
-        return self.base_model.forward(num_features, cat_features)
+        return self.base_model.forward(num_features, cat_features, embeddings)
 
     def compute_loss(self, predictions, y_true):
         """Compute the loss for the given predictions and true labels.
@@ -146,7 +143,10 @@ class TaskModel(pl.LightningModule):
                 )
 
         if getattr(self.base_model, "returns_ensemble", False):  # Ensemble case
-            if self.loss_fct.__class__.__name__ == "CrossEntropyLoss" and predictions.dim() == 3:
+            if (
+                self.loss_fct.__class__.__name__ == "CrossEntropyLoss"
+                and predictions.dim() == 3
+            ):
                 # Classification case with ensemble: predictions (N, E, k), y_true (N,)
                 N, E, k = predictions.shape
                 loss = 0.0
@@ -187,31 +187,32 @@ class TaskModel(pl.LightningModule):
         Tensor
             Training loss.
         """
-        cat_features, num_features, labels = batch
+        data, labels = batch
 
         # Check if the model has a `penalty_forward` method
         if hasattr(self.base_model, "penalty_forward"):
-            preds, penalty = self.base_model.penalty_forward(num_features=num_features, cat_features=cat_features)
+            preds, penalty = self.base_model.penalty_forward(*data)
             loss = self.compute_loss(preds, labels) + penalty
         else:
-            preds = self(num_features=num_features, cat_features=cat_features)
+            preds = self(*data)
             loss = self.compute_loss(preds, labels)
 
         # Log the training loss
-        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log(
+            "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+        )
 
-        # Log additional metrics
-        if not self.lss and not hasattr(self.base_model, "returns_ensemble"):
-            if self.num_classes > 1:
-                acc = self.acc(preds, labels)
-                self.log(
-                    "train_acc",
-                    acc,
-                    on_step=True,
-                    on_epoch=True,
-                    prog_bar=True,
-                    logger=True,
-                )
+        # Log custom training metrics
+        for metric_name, metric_fn in self.train_metrics.items():
+            metric_value = metric_fn(preds, labels)
+            self.log(
+                f"train_{metric_name}",
+                metric_value,
+                on_step=True,
+                on_epoch=True,
+                prog_bar=True,
+                logger=True,
+            )
 
         return loss
 
@@ -231,8 +232,8 @@ class TaskModel(pl.LightningModule):
             Validation loss.
         """
 
-        cat_features, num_features, labels = batch
-        preds = self(num_features=num_features, cat_features=cat_features)
+        data, labels = batch
+        preds = self(*data)
         val_loss = self.compute_loss(preds, labels)
 
         self.log(
@@ -244,18 +245,17 @@ class TaskModel(pl.LightningModule):
             logger=True,
         )
 
-        # Log additional metrics
-        if not self.lss and not hasattr(self.base_model, "returns_ensemble"):
-            if self.num_classes > 1:
-                acc = self.acc(preds, labels)
-                self.log(
-                    "val_acc",
-                    acc,
-                    on_step=False,
-                    on_epoch=True,
-                    prog_bar=True,
-                    logger=True,
-                )
+        # Log custom validation metrics
+        for metric_name, metric_fn in self.val_metrics.items():
+            metric_value = metric_fn(preds, labels)
+            self.log(
+                f"val_{metric_name}",
+                metric_value,
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+                logger=True,
+            )
 
         return val_loss
 
@@ -274,8 +274,8 @@ class TaskModel(pl.LightningModule):
         Tensor
             Test loss.
         """
-        cat_features, num_features, labels = batch
-        preds = self(num_features=num_features, cat_features=cat_features)
+        data, labels = batch
+        preds = self(*data)
         test_loss = self.compute_loss(preds, labels)
 
         self.log(
@@ -287,20 +287,27 @@ class TaskModel(pl.LightningModule):
             logger=True,
         )
 
-        # Log additional metrics
-        if not self.lss and not hasattr(self.base_model, "returns_ensemble"):
-            if self.num_classes > 1:
-                acc = self.acc(preds, labels)
-                self.log(
-                    "test_acc",
-                    acc,
-                    on_step=False,
-                    on_epoch=True,
-                    prog_bar=True,
-                    logger=True,
-                )
-
         return test_loss
+
+    def predict_step(self, batch, batch_idx):
+        """Predict step for a single batch.
+
+        Parameters
+        ----------
+        batch : tuple
+            Batch of data containing numerical features, categorical features, and labels.
+        batch_idx : int
+            Index of the batch.
+
+        Returns
+        -------
+        Tensor
+            Predictions.
+        """
+
+        preds = self(*batch)
+
+        return preds
 
     def on_validation_epoch_end(self):
         """Callback executed at the end of each validation epoch.
@@ -341,8 +348,13 @@ class TaskModel(pl.LightningModule):
 
             # Apply pruning logic if needed
             if self.current_epoch >= self.pruning_epoch:
-                if self.early_pruning_threshold is not None and val_loss_value > self.early_pruning_threshold:
-                    print(f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}")
+                if (
+                    self.early_pruning_threshold is not None
+                    and val_loss_value > self.early_pruning_threshold
+                ):
+                    print(
+                        f"Pruned at epoch {self.current_epoch}, val_loss {val_loss_value}"
+                    )
                     self.trainer.should_stop = True  # Stop training early
 
     def epoch_val_loss_at(self, epoch):

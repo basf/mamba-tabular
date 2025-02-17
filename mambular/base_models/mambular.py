@@ -6,6 +6,7 @@ from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 from ..arch_utils.mlp_utils import MLPhead
 from ..configs.mambular_config import DefaultMambularConfig
 from .basemodel import BaseModel
+import numpy as np
 
 
 class Mambular(BaseModel):
@@ -52,21 +53,19 @@ class Mambular(BaseModel):
 
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (cat_feature_info, num_feature_info, embedding_feature_info)
         num_classes=1,
         config: DefaultMambularConfig = DefaultMambularConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
 
         self.returns_ensemble = False
 
         # embedding layer
         self.embedding_layer = EmbeddingLayer(
-            num_feature_info=num_feature_info,
-            cat_feature_info=cat_feature_info,
+            *feature_information,
             config=config,
         )
 
@@ -85,25 +84,23 @@ class Mambular(BaseModel):
             self.perm = torch.randperm(self.embedding_layer.seq_len)
 
         # pooling
-        n_inputs = len(num_feature_info) + len(cat_feature_info)
+        n_inputs = np.sum([len(info) for info in feature_information])
         self.initialize_pooling_layers(config=config, n_inputs=n_inputs)
 
-    def forward(self, num_features, cat_features):
+    def forward(self, *data):
         """Defines the forward pass of the model.
 
         Parameters
         ----------
-        num_features : Tensor
-            Tensor containing the numerical features.
-        cat_features : Tensor
-            Tensor containing the categorical features.
+        data : tuple
+            Input tuple of tensors of num_features, cat_features, embeddings.
 
         Returns
         -------
         Tensor
             The output predictions of the model.
         """
-        x = self.embedding_layer(num_features, cat_features)
+        x = self.embedding_layer(*data)
 
         if self.hparams.shuffle_embeddings:
             x = x[:, self.perm, :]
