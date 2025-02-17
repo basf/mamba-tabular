@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import numpy as np
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..configs.mlp_config import DefaultMLPConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
@@ -57,31 +57,29 @@ class MLP(BaseModel):
 
     def __init__(
         self,
-        cat_feature_info,
-        num_feature_info,
+        feature_information: tuple,  # Expecting (num_feature_info, cat_feature_info, embedding_feature_info)
         num_classes: int = 1,
         config: DefaultMLPConfig = DefaultMLPConfig(),  # noqa: B008
         **kwargs,
     ):
         super().__init__(config=config, **kwargs)
-        self.save_hyperparameters(ignore=["cat_feature_info", "num_feature_info"])
+        self.save_hyperparameters(ignore=["feature_information"])
 
         self.returns_ensemble = False
-        self.cat_feature_info = cat_feature_info
-        self.num_feature_info = num_feature_info
 
         # Initialize layers
         self.layers = nn.ModuleList()
 
-        input_dim = get_feature_dimensions(num_feature_info, cat_feature_info)
-
         if self.hparams.use_embeddings:
             self.embedding_layer = EmbeddingLayer(
-                num_feature_info=num_feature_info,
-                cat_feature_info=cat_feature_info,
+                *feature_information,
                 config=config,
             )
-            input_dim = len(num_feature_info) * self.hparams.d_model + len(cat_feature_info) * self.hparams.d_model
+            input_dim = np.sum(
+                [len(info) * self.hparams.d_model for info in feature_information]
+            )
+        else:
+            input_dim = get_feature_dimensions(*feature_information)
 
         # Input layer
         self.layers.append(nn.Linear(input_dim, self.hparams.layer_sizes[0]))
@@ -97,7 +95,9 @@ class MLP(BaseModel):
 
         # Hidden layers
         for i in range(1, len(self.hparams.layer_sizes)):
-            self.layers.append(nn.Linear(self.hparams.layer_sizes[i - 1], self.hparams.layer_sizes[i]))
+            self.layers.append(
+                nn.Linear(self.hparams.layer_sizes[i - 1], self.hparams.layer_sizes[i])
+            )
             if self.hparams.batch_norm:
                 self.layers.append(nn.BatchNorm1d(self.hparams.layer_sizes[i]))
             if self.hparams.layer_norm:
@@ -112,26 +112,26 @@ class MLP(BaseModel):
         # Output layer
         self.layers.append(nn.Linear(self.hparams.layer_sizes[-1], num_classes))
 
-    def forward(self, num_features, cat_features) -> torch.Tensor:
+    def forward(self, *data) -> torch.Tensor:
         """Forward pass of the MLP model.
 
         Parameters
         ----------
-        x : torch.Tensor
-            Input tensor.
+        data : tuple
+            Input tuple of tensors of num_features, cat_features, embeddings.
 
         Returns
         -------
         torch.Tensor
             Output tensor.
         """
+
         if self.hparams.use_embeddings:
-            x = self.embedding_layer(num_features, cat_features)
+            x = self.embedding_layer(*data)
             B, S, D = x.shape
             x = x.reshape(B, S * D)
         else:
-            x = num_features + cat_features
-            x = torch.cat(x, dim=1)
+            x = torch.cat([t for tensors in data for t in tensors], dim=1)
 
         for i in range(len(self.layers) - 1):
             if isinstance(self.layers[i], nn.Linear):

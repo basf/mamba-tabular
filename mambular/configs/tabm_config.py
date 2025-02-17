@@ -1,24 +1,16 @@
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Literal
-
 import torch.nn as nn
+from .base_config import BaseConfig
 
 
 @dataclass
-class DefaultTabMConfig:
+class DefaultTabMConfig(BaseConfig):
     """Configuration class for the TabM model with batch ensembling and predefined hyperparameters.
 
     Parameters
     ----------
-    lr : float, default=1e-04
-        Learning rate for the optimizer.
-    lr_patience : int, default=10
-        Number of epochs with no improvement after which the learning rate will be reduced.
-    weight_decay : float, default=1e-06
-        Weight decay (L2 penalty) for the optimizer.
-    lr_factor : float, default=0.1
-        Factor by which the learning rate is reduced when there is no improvement.
     layer_sizes : list, default=(512, 512, 128)
         Sizes of the layers in the model.
     activation : callable, default=nn.ReLU()
@@ -29,32 +21,6 @@ class DefaultTabMConfig:
         Normalization method to be used, if any.
     use_glu : bool, default=False
         Whether to use Gated Linear Units (GLU) in the model.
-    batch_norm : bool, default=False
-        Whether to use batch normalization in the model layers.
-    layer_norm : bool, default=False
-        Whether to use layer normalization in the model layers.
-    layer_norm_eps : float, default=1e-05
-        Epsilon value for layer normalization.
-    use_embeddings : bool, default=True
-        Whether to use embedding layers for all features.
-    embedding_type : str, default="plr"
-        Type of embedding to use ('plr', etc.).
-    embedding_bias : bool, default=False
-        Whether to use bias in the embedding layers.
-    plr_lite : bool, default=False
-        Whether to use a lightweight version of Piecewise Linear Regression (PLR).
-    n_frequencies : int, default=48
-        Number of frequencies for PLR embeddings.
-    frequencies_init_scale : float, default=0.01
-        Initial scale for frequency parameters in embeddings.
-    average_embeddings : bool, default=False
-        Whether to average embeddings during the forward pass.
-    embedding_activation : callable, default=nn.ReLU()
-        Activation function for embeddings.
-    layer_norm_after_embedding : bool, default=False
-        Whether to apply layer normalization after embedding layers.
-    d_model : int, default=64
-        Dimensionality of the embeddings.
     ensemble_size : int, default=32
         Number of ensemble members for batch ensembling.
     ensemble_scaling_in : bool, default=True
@@ -71,34 +37,12 @@ class DefaultTabMConfig:
         Model type to use ('mini' for reduced version, 'full' for complete model).
     """
 
-    # lr params
-    lr: float = 1e-04
-    lr_patience: int = 10
-    weight_decay: float = 1e-05
-    lr_factor: float = 0.1
-
     # arch params
     layer_sizes: list = field(default_factory=lambda: [256, 256, 128])
     activation: Callable = nn.ReLU()  # noqa: RUF009
     dropout: float = 0.5
     norm: str | None = None
     use_glu: bool = False
-    batch_norm: bool = False
-    layer_norm: bool = False
-    layer_norm_eps: float = 1e-05
-
-    # embedding params
-    use_embeddings: bool = True
-    embedding_type: str = "linear"
-    embedding_bias = False
-    plr_lite: bool = False
-    average_embeddings: bool = False
-    embedding_activation: Callable = nn.Identity()  # noqa: RUF009
-    layer_norm_after_embedding: bool = False
-    d_model: int = 32
-    plr_lite: bool = False
-    n_frequencies: int = 48
-    frequencies_init_scale: float = 0.01
 
     # Batch ensembling specific configurations
     ensemble_size: int = 32
