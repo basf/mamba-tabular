@@ -10,8 +10,10 @@ from .saint import SAINT
 from .tabm import TabM
 from .tabtransformer import TabTransformer
 from .tabularnn import TabulaRNN
+from .autoint import AutoInt
 
 __all__ = [
+    "AutoInt",
     "MLP",
     "NDTF",
     "NODE",

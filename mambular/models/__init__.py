@@ -25,8 +25,12 @@ from .tabtransformer import (
     TabTransformerRegressor,
 )
 from .tabularnn import TabulaRNNClassifier, TabulaRNNLSS, TabulaRNNRegressor
+from .autoint import AutoIntClassifier, AutoIntLSS, AutoIntRegressor
 
 __all__ = [
+    "AutoIntClassifier",
+    "AutoIntLSS",
+    "AutoIntRegressor",
     "MLPLSS",
     "NDTFLSS",
     "NODELSS",
