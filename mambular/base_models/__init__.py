@@ -11,8 +11,10 @@ from .tabm import TabM
 from .tabtransformer import TabTransformer
 from .tabularnn import TabulaRNN
 from .autoint import AutoInt
+from .trompt import Trompt
 
 __all__ = [
+    "Trompt",
     "AutoInt",
     "MLP",
     "NDTF",
