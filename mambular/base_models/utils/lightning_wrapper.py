@@ -3,6 +3,7 @@ from collections.abc import Callable
 import lightning as pl
 import torch
 import torch.nn as nn
+from tqdm import tqdm
 
 
 class TaskModel(pl.LightningModule):
@@ -415,3 +416,186 @@ class TaskModel(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
+    def pretrain_embeddings(
+        self,
+        train_dataloader,
+        pretrain_epochs=5,
+        k_neighbors=5,
+        temperature=0.1,
+        save_path="pretrained_embeddings.pth",
+        regression=True,
+        lr=1e-04
+    ):
+        """Pretrain embeddings before full model training.
+
+        Parameters
+        ----------
+        train_dataloader : DataLoader
+            Training dataloader for embedding pretraining.
+        pretrain_epochs : int, default=5
+            Number of epochs for pretraining the embeddings.
+        k_neighbors : int, default=5
+            Number of nearest neighbors for positive samples in contrastive learning.
+        temperature : float, default=0.1
+            Temperature parameter for contrastive loss.
+        save_path : str, default="pretrained_embeddings.pth"
+            Path to save the pretrained embeddings.
+        """
+        print("🚀 Pretraining embeddings...")
+        self.base_model.train()
+
+        optimizer = torch.optim.Adam(self.base_model.embedding_parameters(), lr=lr)
+
+        # 🔥 Single tqdm progress bar across all epochs and batches
+        total_batches = pretrain_epochs * len(train_dataloader)
+        progress_bar = tqdm(total=total_batches, desc="Pretraining", unit="batch")
+
+        for epoch in range(pretrain_epochs):
+            total_loss = 0.0
+
+            for batch in train_dataloader:
+                data, labels = batch
+                optimizer.zero_grad()
+
+                # Forward pass through embeddings only
+                embeddings = self.base_model.encode(data, grad=True)
+
+                # Compute nearest neighbors based on task type
+                knn_indices = self.get_knn(labels, k_neighbors, regression)
+
+                # Compute contrastive loss
+                loss = self.contrastive_loss(embeddings, knn_indices, temperature)
+                loss.backward()
+                optimizer.step()
+
+                batch_loss = loss.item()
+                total_loss += batch_loss
+
+                # 🔥 Update tqdm progress bar with loss
+                progress_bar.set_postfix(loss=batch_loss)
+                progress_bar.update(1)
+
+            avg_loss = total_loss / len(train_dataloader)
+
+        progress_bar.close()
+
+        # Save pretrained embeddings
+        torch.save(self.base_model.get_embedding_state_dict(), save_path)
+        print(f"✅ Embeddings saved to {save_path}")
+
+    def get_knn(self, labels, k_neighbors=5, regression=True, device=""):
+        """Finds k-nearest neighbors based on class labels (classification) or target distances (regression).
+
+        Parameters
+        ----------
+        labels : Tensor
+            Class labels (classification) or target values (regression) for the batch.
+        k_neighbors : int, default=5
+            Number of positive pairs to select.
+        regression : bool, default=True
+            If True, uses target similarity (Euclidean distance). If False, finds neighbors based on class labels.
+
+        Returns
+        -------
+        Tensor
+            Indices of positive samples for each instance.
+        """
+        batch_size = labels.size(0)
+
+        # Ensure k_neighbors doesn't exceed available samples
+        k_neighbors = min(k_neighbors, batch_size - 1)
+
+        knn_indices = torch.zeros(
+            batch_size, k_neighbors, dtype=torch.long, device=labels.device
+        )
+
+        if not regression:
+            # Classification: Find samples with the same class label
+            for i in range(batch_size):
+                same_class_indices = (labels == labels[i]).nonzero(as_tuple=True)[0]
+                same_class_indices = same_class_indices[
+                    same_class_indices != i
+                ]  # Remove self-index
+
+                if len(same_class_indices) >= k_neighbors:
+                    knn_indices[i] = same_class_indices[
+                        torch.randperm(len(same_class_indices))[:k_neighbors]
+                    ]
+                else:
+                    knn_indices[i, : len(same_class_indices)] = same_class_indices
+                    knn_indices[i, len(same_class_indices) :] = same_class_indices[
+                        torch.randint(
+                            len(same_class_indices),
+                            (k_neighbors - len(same_class_indices),),
+                        )
+                    ]
+
+        else:
+            # Regression: Find nearest neighbors using Euclidean distance
+            with torch.no_grad():
+                target_distances = torch.cdist(
+                    labels.float(), labels.float(), p=2
+                ).squeeze(-1)
+
+            knn_indices = target_distances.topk(k_neighbors + 1, largest=False).indices[
+                :, 1:
+            ]  # Exclude self
+
+        return knn_indices
+
+    def contrastive_loss(self, embeddings, knn_indices, temperature=0.1):
+        """Computes contrastive loss per token position for embeddings (N, S, D) by looping over sequence axis (S).
+
+        Parameters
+        ----------
+        embeddings : Tensor
+            Feature embeddings with shape (N, S, D).
+        knn_indices : Tensor
+            Indices of k-nearest neighbors for each sample (N, k_neighbors).
+        temperature : float, default=0.1
+            Temperature parameter for softmax scaling.
+
+        Returns
+        -------
+        Tensor
+            Contrastive loss value.
+        """
+        N, S, D = embeddings.shape  # Batch size, sequence length, embedding dim
+        k_neighbors = knn_indices.shape[1]  # Number of neighbors
+
+        # Normalize embeddings
+        embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=-1)  # (N, S, D)
+
+        loss = 0.0  # Accumulate loss across sequence steps
+        loss_fn = torch.nn.CosineEmbeddingLoss(margin=0.0, reduction="mean")
+
+        for s in range(S):  # Loop over sequence length
+            embeddings_s = embeddings[
+                :, s, :
+            ]  # Shape: (N, D) -> Single token per sample
+
+            # Gather nearest neighbor embeddings for this time step
+            positive_pairs = torch.gather(
+                embeddings[:, s, :].unsqueeze(1).expand(-1, k_neighbors, -1),
+                0,
+                knn_indices.unsqueeze(-1).expand(-1, -1, D),
+            )  # Shape: (N, k_neighbors, D)
+
+            # Flatten batch and neighbors into a single batch dimension
+            embeddings_s = embeddings_s.repeat_interleave(
+                k_neighbors, dim=0
+            )  # (N * k_neighbors, D)
+            positive_pairs = positive_pairs.view(-1, D)  # (N * k_neighbors, D)
+
+            # Labels: +1 for positive similarity
+            labels = torch.ones(
+                embeddings_s.shape[0], device=embeddings.device
+            )  # Shape: (N * k_neighbors)
+
+            # Compute cosine embedding loss
+            loss += -1.0*loss_fn(embeddings_s, positive_pairs, labels)
+
+        # Average loss across all sequence steps
+        loss /= S
+        return loss

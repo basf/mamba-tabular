@@ -7,7 +7,7 @@ from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 from ..arch_utils.mlp_utils import MLPhead
 from ..utils.get_feature_dimensions import get_feature_dimensions
 from ..configs.mambatab_config import DefaultMambaTabConfig
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 
 
 class MambaTab(BaseModel):

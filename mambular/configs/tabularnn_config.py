@@ -48,6 +48,8 @@ class DefaultTabulaRNNConfig(BaseConfig):
         Size of the feedforward network.
     d_conv : int, default=4
         Size of the convolutional layer for embedding features.
+    dilation : int, default=1
+        Dilation factor for the convolution.
     conv_bias : bool, default=True
         Whether to use bias in the convolutional layers.
     """
@@ -78,4 +80,5 @@ class DefaultTabulaRNNConfig(BaseConfig):
     rnn_activation: str = "relu"
     dim_feedforward: int = 256
     d_conv: int = 4
+    dilation: int = 1
     conv_bias: bool = True

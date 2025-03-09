@@ -1,9 +1,9 @@
 from ..base_models.tabtransformer import TabTransformer
 from ..configs.tabtransformer_config import DefaultTabTransformerConfig
 from ..utils.docstring_generator import generate_docstring
-from .sklearn_base_classifier import SklearnBaseClassifier
-from .sklearn_base_lss import SklearnBaseLSS
-from .sklearn_base_regressor import SklearnBaseRegressor
+from .utils.sklearn_base_classifier import SklearnBaseClassifier
+from .utils.sklearn_base_lss import SklearnBaseLSS
+from .utils.sklearn_base_regressor import SklearnBaseRegressor
 
 
 class TabTransformerRegressor(SklearnBaseRegressor):
@@ -23,7 +23,9 @@ class TabTransformerRegressor(SklearnBaseRegressor):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(model=TabTransformer, config=DefaultTabTransformerConfig, **kwargs)
+        super().__init__(
+            model=TabTransformer, config=DefaultTabTransformerConfig, **kwargs
+        )
 
 
 class TabTransformerClassifier(SklearnBaseClassifier):
@@ -43,7 +45,9 @@ class TabTransformerClassifier(SklearnBaseClassifier):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(model=TabTransformer, config=DefaultTabTransformerConfig, **kwargs)
+        super().__init__(
+            model=TabTransformer, config=DefaultTabTransformerConfig, **kwargs
+        )
 
 
 class TabTransformerLSS(SklearnBaseLSS):
@@ -63,4 +67,6 @@ class TabTransformerLSS(SklearnBaseLSS):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(model=TabTransformer, config=DefaultTabTransformerConfig, **kwargs)
+        super().__init__(
+            model=TabTransformer, config=DefaultTabTransformerConfig, **kwargs
+        )

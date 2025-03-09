@@ -3,7 +3,7 @@ import inspect
 import torch
 import os
 import importlib
-from mambular.base_models.basemodel import BaseModel
+from mambular.base_models.utils import BaseModel
 
 # Paths for models and configs
 MODEL_MODULE_PATH = "mambular.base_models"

@@ -5,7 +5,7 @@ import torch.nn as nn
 from ..arch_utils.neural_decision_tree import NeuralDecisionTree
 from ..configs.ndtf_config import DefaultNDTFConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 
 
 class NDTF(BaseModel):

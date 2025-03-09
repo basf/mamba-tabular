@@ -5,7 +5,7 @@ from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.resnet_utils import ResidualBlock
 from ..configs.resnet_config import DefaultResNetConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 
 
 class ResNet(BaseModel):

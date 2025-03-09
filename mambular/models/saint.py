@@ -1,9 +1,9 @@
 from ..base_models.saint import SAINT
 from ..configs.saint_config import DefaultSAINTConfig
 from ..utils.docstring_generator import generate_docstring
-from .sklearn_base_classifier import SklearnBaseClassifier
-from .sklearn_base_lss import SklearnBaseLSS
-from .sklearn_base_regressor import SklearnBaseRegressor
+from .utils.sklearn_base_classifier import SklearnBaseClassifier
+from .utils.sklearn_base_lss import SklearnBaseLSS
+from .utils.sklearn_base_regressor import SklearnBaseRegressor
 
 
 class SAINTRegressor(SklearnBaseRegressor):

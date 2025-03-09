@@ -10,9 +10,13 @@ from .saint_config import DefaultSAINTConfig
 from .tabm_config import DefaultTabMConfig
 from .tabtransformer_config import DefaultTabTransformerConfig
 from .tabularnn_config import DefaultTabulaRNNConfig
+from .autoint_config import DefaultAutoIntConfig
+from .trompt_config import DefaultTromptConfig
 from .base_config import BaseConfig
 
 __all__ = [
+    "DefaultTromptConfig",
+    "DefaultAutoIntConfig",
     "DefaultFTTransformerConfig",
     "DefaultMLPConfig",
     "DefaultMambAttentionConfig",
@@ -25,5 +29,5 @@ __all__ = [
     "DefaultTabMConfig",
     "DefaultTabTransformerConfig",
     "DefaultTabulaRNNConfig",
-    "BaseConfig"
+    "BaseConfig",
 ]
