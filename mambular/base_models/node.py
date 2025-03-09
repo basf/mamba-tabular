@@ -5,7 +5,7 @@ from ..arch_utils.mlp_utils import MLPhead
 from ..arch_utils.node_utils import DenseBlock
 from ..configs.node_config import DefaultNODEConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 import numpy as np
 
 

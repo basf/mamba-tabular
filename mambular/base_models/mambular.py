@@ -5,7 +5,7 @@ from ..arch_utils.mamba_utils.mamba_arch import Mamba
 from ..arch_utils.mamba_utils.mamba_original import MambaOriginal
 from ..arch_utils.mlp_utils import MLPhead
 from ..configs.mambular_config import DefaultMambularConfig
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 import numpy as np
 
 

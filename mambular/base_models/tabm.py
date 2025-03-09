@@ -7,7 +7,7 @@ from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.layer_utils.sn_linear import SNLinear
 from ..configs.tabm_config import DefaultTabMConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 
 
 class TabM(BaseModel):
@@ -21,6 +21,8 @@ class TabM(BaseModel):
     ):
         # Pass config to BaseModel
         super().__init__(config=config, **kwargs)
+
+        
 
         # Save hparams including config attributes
         self.save_hyperparameters(ignore=["feature_information"])
@@ -176,7 +178,7 @@ class TabM(BaseModel):
 
         if self.hparams.average_ensembles:
             x = x.mean(axis=1)  # Shape (batch_size, num_classes)
-
+            print(x.shape)
         # Shape (batch_size, (ensemble_size), num_classes) if not averaged
         x = self.final_layer(x)
 

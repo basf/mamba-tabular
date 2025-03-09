@@ -5,7 +5,7 @@ from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mamba_utils.mambattn_arch import MambAttn
 from ..arch_utils.mlp_utils import MLPhead
 from ..configs.mambattention_config import DefaultMambAttentionConfig
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 
 
 class MambAttention(BaseModel):
