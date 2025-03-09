@@ -1,6 +1,4 @@
-from .basemodel import BaseModel
 from .ft_transformer import FTTransformer
-from .lightning_wrapper import TaskModel
 from .mambatab import MambaTab
 from .mambattn import MambAttention
 from .mambular import Mambular
@@ -18,7 +16,6 @@ __all__ = [
     "NDTF",
     "NODE",
     "SAINT",
-    "BaseModel",
     "FTTransformer",
     "MambAttention",
     "MambaTab",
@@ -27,5 +24,4 @@ __all__ = [
     "TabM",
     "TabTransformer",
     "TabulaRNN",
-    "TaskModel",
 ]
