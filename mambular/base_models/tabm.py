@@ -22,8 +22,6 @@ class TabM(BaseModel):
         # Pass config to BaseModel
         super().__init__(config=config, **kwargs)
 
-        
-
         # Save hparams including config attributes
         self.save_hyperparameters(ignore=["feature_information"])
         if not self.hparams.average_ensembles:
