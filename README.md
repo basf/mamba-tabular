@@ -211,13 +211,13 @@ random_search.fit(X, y, **fit_params)
 print("Best Parameters:", random_search.best_params_)
 print("Best Score:", random_search.best_score_)
 ```
-Note, that using this, you can also optimize the preprocessing. Just use the prefix ``prepro__`` when specifying the preprocessor arguments you want to optimize:
+Note, that using this, you can also optimize the preprocessing. Just specify the necessary parameters when specifying the preprocessor arguments you want to optimize:
 ```python
 param_dist = {
     'd_model': randint(32, 128),  
     'n_layers': randint(2, 10),  
     'lr': uniform(1e-5, 1e-3),
-    "prepro__numerical_preprocessing": ["ple", "standardization", "box-cox"]
+    "numerical_preprocessing": ["ple", "standardization", "box-cox"]
 }
 
 ```
@@ -321,7 +321,7 @@ Here's how you can implement a custom model with Mambular:
    Define your custom model just as you would for an `nn.Module`. The main difference is that you will inherit from `BaseModel` and use the provided feature information to construct your layers. To integrate your model into the existing API, you only need to define the architecture and the forward pass.
 
    ```python
-   from mambular.base_models import BaseModel
+   from mambular.base_models.utils import BaseModel
    from mambular.utils.get_feature_dimensions import get_feature_dimensions
    import torch
    import torch.nn
@@ -365,7 +365,7 @@ Here's how you can implement a custom model with Mambular:
    You can build a regression, classification, or distributional regression model that can leverage all of Mambular's built-in methods by using the following:
 
    ```python
-   from mambular.models import SklearnBaseRegressor
+   from mambular.models.utils import SklearnBaseRegressor
 
    class MyRegressor(SklearnBaseRegressor):
        def __init__(self, **kwargs):
