@@ -52,3 +52,4 @@ class DefaultTabMConfig(BaseConfig):
     scaling_init: Literal["ones", "random-signs", "normal"] = "ones"
     average_ensembles: bool = False
     model_type: Literal["mini", "full"] = "mini"
+    average_embeddings: bool = True
