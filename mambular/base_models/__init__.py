@@ -12,8 +12,10 @@ from .tabtransformer import TabTransformer
 from .tabularnn import TabulaRNN
 from .autoint import AutoInt
 from .trompt import Trompt
+from .enode import ENODE
 
 __all__ = [
+    "ENODE",
     "Trompt",
     "AutoInt",
     "MLP",

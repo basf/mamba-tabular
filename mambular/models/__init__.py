@@ -27,8 +27,12 @@ from .tabtransformer import (
 from .tabularnn import TabulaRNNClassifier, TabulaRNNLSS, TabulaRNNRegressor
 from .autoint import AutoIntClassifier, AutoIntLSS, AutoIntRegressor
 from .trompt import TromptClassifier, TromptLSS, TromptRegressor
+from .enode import ENODEClassifier, ENODELSS, ENODERegressor
 
 __all__ = [
+    "ENODEClassifier",
+    "ENODELSS",
+    "ENODERegressor",
     "TromptClassifier",
     "TromptLSS",
     "TromptRegressor",
