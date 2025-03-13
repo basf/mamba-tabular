@@ -625,6 +625,10 @@ class Preprocessor(TransformerMixin):
             raise NotFittedError(
                 "The preprocessor must be fitted before transforming new data. Use .fit or .fit_transform"
             )
+        if isinstance(X, np.ndarray):
+            X = pd.DataFrame(X)
+        else:
+            X = X.copy()
         transformed_X = self.column_transformer.transform(X)  # type: ignore
 
         # Now let's convert this into a dictionary of arrays, one per column

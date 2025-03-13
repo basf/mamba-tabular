@@ -130,9 +130,7 @@ class MambularDataModule(pl.LightningDataModule):
                     embeddings_val = [embeddings_val]
 
                 split_data += embeddings_train
-                split_result = train_test_split(
-                    *split_data, test_size=val_size, random_state=random_state
-                )
+                split_result = train_test_split(*split_data, test_size=val_size, random_state=random_state)
 
                 self.X_train, self.X_val, self.y_train, self.y_val = split_result[:4]
                 self.embeddings_train = split_result[4::2]
@@ -161,17 +159,13 @@ class MambularDataModule(pl.LightningDataModule):
                 self.embeddings_val = None
 
         # Fit the preprocessor on the combined training and validation data
-        combined_X = pd.concat([self.X_train, self.X_val], axis=0).reset_index(
-            drop=True
-        )
+        combined_X = pd.concat([self.X_train, self.X_val], axis=0).reset_index(drop=True)
         combined_y = np.concatenate((self.y_train, self.y_val), axis=0)
 
         if self.embeddings_train is not None and self.embeddings_val is not None:
             combined_embeddings = [
                 np.concatenate((emb_train, emb_val), axis=0)
-                for emb_train, emb_val in zip(
-                    self.embeddings_train, self.embeddings_val
-                )
+                for emb_train, emb_val in zip(self.embeddings_train, self.embeddings_val, strict=False)
             ]
         else:
             combined_embeddings = None
@@ -179,19 +173,17 @@ class MambularDataModule(pl.LightningDataModule):
         self.preprocessor.fit(combined_X, combined_y, combined_embeddings)
 
         # Update feature info based on the actual processed data
-        (self.num_feature_info, self.cat_feature_info, self.embedding_feature_info) = (
-            self.preprocessor.get_feature_info()
-        )
+        (
+            self.num_feature_info,
+            self.cat_feature_info,
+            self.embedding_feature_info,
+        ) = self.preprocessor.get_feature_info()
 
     def setup(self, stage: str):
         """Transform the data and create DataLoaders."""
         if stage == "fit":
-            train_preprocessed_data = self.preprocessor.transform(
-                self.X_train, self.embeddings_train
-            )
-            val_preprocessed_data = self.preprocessor.transform(
-                self.X_val, self.embeddings_val
-            )
+            train_preprocessed_data = self.preprocessor.transform(self.X_train, self.embeddings_train)
+            val_preprocessed_data = self.preprocessor.transform(self.X_val, self.embeddings_val)
 
             # Initialize lists for tensors
             train_cat_tensors = []
@@ -205,75 +197,40 @@ class MambularDataModule(pl.LightningDataModule):
             for key in self.cat_feature_info:  # type: ignore
                 dtype = (
                     torch.float32
-                    if any(
-                        x in self.cat_feature_info[key]["preprocessing"]
-                        for x in ["onehot", "pretrained"]
-                    )
+                    if any(x in self.cat_feature_info[key]["preprocessing"] for x in ["onehot", "pretrained"])  # type: ignore
                     else torch.long
                 )
 
-                cat_key = "cat_" + str(
-                    key
-                )  # Assuming categorical keys are prefixed with 'cat_'
+                cat_key = "cat_" + str(key)  # Assuming categorical keys are prefixed with 'cat_'
                 if cat_key in train_preprocessed_data:
-                    train_cat_tensors.append(
-                        torch.tensor(train_preprocessed_data[cat_key], dtype=dtype)
-                    )
+                    train_cat_tensors.append(torch.tensor(train_preprocessed_data[cat_key], dtype=dtype))
                 if cat_key in val_preprocessed_data:
-                    val_cat_tensors.append(
-                        torch.tensor(val_preprocessed_data[cat_key], dtype=dtype)
-                    )
+                    val_cat_tensors.append(torch.tensor(val_preprocessed_data[cat_key], dtype=dtype))
 
                 binned_key = "num_" + str(key)  # for binned features
                 if binned_key in train_preprocessed_data:
-                    train_cat_tensors.append(
-                        torch.tensor(train_preprocessed_data[binned_key], dtype=dtype)
-                    )
+                    train_cat_tensors.append(torch.tensor(train_preprocessed_data[binned_key], dtype=dtype))
 
                 if binned_key in val_preprocessed_data:
-                    val_cat_tensors.append(
-                        torch.tensor(val_preprocessed_data[binned_key], dtype=dtype)
-                    )
+                    val_cat_tensors.append(torch.tensor(val_preprocessed_data[binned_key], dtype=dtype))
 
             # Populate tensors for numerical features, if present in processed data
             for key in self.num_feature_info:  # type: ignore
-                num_key = "num_" + str(
-                    key
-                )  # Assuming numerical keys are prefixed with 'num_'
+                num_key = "num_" + str(key)  # Assuming numerical keys are prefixed with 'num_'
                 if num_key in train_preprocessed_data:
-                    train_num_tensors.append(
-                        torch.tensor(
-                            train_preprocessed_data[num_key], dtype=torch.float32
-                        )
-                    )
+                    train_num_tensors.append(torch.tensor(train_preprocessed_data[num_key], dtype=torch.float32))
                 if num_key in val_preprocessed_data:
-                    val_num_tensors.append(
-                        torch.tensor(
-                            val_preprocessed_data[num_key], dtype=torch.float32
-                        )
-                    )
+                    val_num_tensors.append(torch.tensor(val_preprocessed_data[num_key], dtype=torch.float32))
 
             if self.embedding_feature_info is not None:
                 for key in self.embedding_feature_info:
                     if key in train_preprocessed_data:
-                        train_emb_tensors.append(
-                            torch.tensor(
-                                train_preprocessed_data[key], dtype=torch.float32
-                            )
-                        )
+                        train_emb_tensors.append(torch.tensor(train_preprocessed_data[key], dtype=torch.float32))
                     if key in val_preprocessed_data:
-                        val_emb_tensors.append(
-                            torch.tensor(
-                                val_preprocessed_data[key], dtype=torch.float32
-                            )
-                        )
+                        val_emb_tensors.append(torch.tensor(val_preprocessed_data[key], dtype=torch.float32))
 
-            train_labels = torch.tensor(
-                self.y_train, dtype=self.labels_dtype
-            ).unsqueeze(dim=1)
-            val_labels = torch.tensor(self.y_val, dtype=self.labels_dtype).unsqueeze(
-                dim=1
-            )
+            train_labels = torch.tensor(self.y_train, dtype=self.labels_dtype).unsqueeze(dim=1)
+            val_labels = torch.tensor(self.y_val, dtype=self.labels_dtype).unsqueeze(dim=1)
 
             self.train_dataset = MambularDataset(
                 train_cat_tensors,
@@ -300,42 +257,27 @@ class MambularDataModule(pl.LightningDataModule):
         for key in self.cat_feature_info:  # type: ignore
             dtype = (
                 torch.float32
-                if any(
-                    x in self.cat_feature_info[key]["preprocessing"]
-                    for x in ["onehot", "pretrained"]
-                )
+                if any(x in self.cat_feature_info[key]["preprocessing"] for x in ["onehot", "pretrained"])  # type: ignore
                 else torch.long
             )
-            cat_key = "cat_" + str(
-                key
-            )  # Assuming categorical keys are prefixed with 'cat_'
+            cat_key = "cat_" + str(key)  # Assuming categorical keys are prefixed with 'cat_'
             if cat_key in preprocessed_data:
-                cat_tensors.append(
-                    torch.tensor(preprocessed_data[cat_key], dtype=dtype)
-                )
+                cat_tensors.append(torch.tensor(preprocessed_data[cat_key], dtype=dtype))
 
             binned_key = "num_" + str(key)  # for binned features
             if binned_key in preprocessed_data:
-                cat_tensors.append(
-                    torch.tensor(preprocessed_data[binned_key], dtype=dtype)
-                )
+                cat_tensors.append(torch.tensor(preprocessed_data[binned_key], dtype=dtype))
 
         # Populate tensors for numerical features, if present in processed data
         for key in self.num_feature_info:  # type: ignore
-            num_key = "num_" + str(
-                key
-            )  # Assuming numerical keys are prefixed with 'num_'
+            num_key = "num_" + str(key)  # Assuming numerical keys are prefixed with 'num_'
             if num_key in preprocessed_data:
-                num_tensors.append(
-                    torch.tensor(preprocessed_data[num_key], dtype=torch.float32)
-                )
+                num_tensors.append(torch.tensor(preprocessed_data[num_key], dtype=torch.float32))
 
         if self.embedding_feature_info is not None:
             for key in self.embedding_feature_info:
                 if key in preprocessed_data:
-                    emb_tensors.append(
-                        torch.tensor(preprocessed_data[key], dtype=torch.float32)
-                    )
+                    emb_tensors.append(torch.tensor(preprocessed_data[key], dtype=torch.float32))
 
         return MambularDataset(
             cat_tensors,
@@ -374,9 +316,7 @@ class MambularDataModule(pl.LightningDataModule):
             DataLoader: DataLoader instance for the validation dataset.
         """
         if hasattr(self, "val_dataset"):
-            return DataLoader(
-                self.val_dataset, batch_size=self.batch_size, **self.dataloader_kwargs
-            )
+            return DataLoader(self.val_dataset, batch_size=self.batch_size, **self.dataloader_kwargs)
         else:
             raise ValueError("No validation dataset provided!")
 
@@ -387,9 +327,7 @@ class MambularDataModule(pl.LightningDataModule):
             DataLoader: DataLoader instance for the test dataset.
         """
         if hasattr(self, "test_dataset"):
-            return DataLoader(
-                self.test_dataset, batch_size=self.batch_size, **self.dataloader_kwargs
-            )
+            return DataLoader(self.test_dataset, batch_size=self.batch_size, **self.dataloader_kwargs)
         else:
             raise ValueError("No test dataset provided!")
 
