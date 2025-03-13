@@ -13,8 +13,10 @@ from .tabularnn_config import DefaultTabulaRNNConfig
 from .autoint_config import DefaultAutoIntConfig
 from .trompt_config import DefaultTromptConfig
 from .base_config import BaseConfig
+from .enode_config import DefaultENODEConfig
 
 __all__ = [
+    "DefaultENODEConfig",
     "DefaultTromptConfig",
     "DefaultAutoIntConfig",
     "DefaultFTTransformerConfig",
