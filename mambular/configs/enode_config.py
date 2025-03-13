@@ -5,7 +5,7 @@ from .base_config import BaseConfig
 
 
 @dataclass
-class DefaultNODEConfig(BaseConfig):
+class DefaultENODEConfig(BaseConfig):
     """Configuration class for the Neural Oblivious Decision Ensemble (NODE) model.
 
     Parameters
@@ -34,10 +34,11 @@ class DefaultNODEConfig(BaseConfig):
 
     # Architecture Parameters
     num_layers: int = 4
-    layer_dim: int = 128
+    layer_dim: int = 64
     tree_dim: int = 1
     depth: int = 6
     norm: str | None = None
+    d_model: int = 8
 
     # Head Parameters
     head_layer_sizes: list = field(default_factory=list)

@@ -4,7 +4,7 @@ import numpy as np
 from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..configs.mlp_config import DefaultMLPConfig
 from ..utils.get_feature_dimensions import get_feature_dimensions
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 
 
 class MLP(BaseModel):

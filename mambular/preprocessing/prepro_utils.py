@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
-class CustomBinner(TransformerMixin):
+class CustomBinner(TransformerMixin, BaseEstimator):
     def __init__(self, bins):
         # bins can be a scalar (number of bins) or array-like (bin edges)
         self.bins = bins
@@ -29,6 +29,19 @@ class CustomBinner(TransformerMixin):
             include_lowest=True,
         )
         return np.expand_dims(np.array(binned_data), 1)
+
+    def get_feature_names_out(self, input_features=None):
+        """Returns the names of the transformed features.
+
+        Parameters:
+            input_features (list of str): The names of the input features.
+
+        Returns:
+            input_features (array of shape (n_features,)): The names of the output features after transformation.
+        """
+        if input_features is None:
+            raise ValueError("input_features must be specified")
+        return input_features
 
 
 class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
@@ -57,7 +70,10 @@ class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
             self: Returns the instance itself.
         """
         # Fit should determine the mapping from original categories to sequential integers starting from 0
-        self.mapping_ = [{category: i + 1 for i, category in enumerate(np.unique(col))} for col in X.T]
+        self.mapping_ = [
+            {category: i + 1 for i, category in enumerate(np.unique(col))}
+            for col in X.T
+        ]
         for mapping in self.mapping_:
             mapping[None] = 0  # Assign 0 to unknown values
         return self
@@ -72,7 +88,12 @@ class ContinuousOrdinalEncoder(BaseEstimator, TransformerMixin):
             X_transformed (ndarray of shape (n_samples, n_features)): The transformed data with integer values.
         """
         # Transform the categories to their mapped integer values
-        X_transformed = np.array([[self.mapping_[col].get(value, 0) for col, value in enumerate(row)] for row in X])
+        X_transformed = np.array(
+            [
+                [self.mapping_[col].get(value, 0) for col, value in enumerate(row)]
+                for row in X
+            ]
+        )
         return X_transformed
 
     def get_feature_names_out(self, input_features=None):
@@ -114,7 +135,9 @@ class OneHotFromOrdinal(TransformerMixin, BaseEstimator):
         Returns:
             self: Returns the instance itself.
         """
-        self.max_bins_ = np.max(X, axis=0).astype(int) + 1  # Find the maximum bin index for each feature
+        self.max_bins_ = (
+            np.max(X, axis=0).astype(int) + 1
+        )  # Find the maximum bin index for each feature
         return self
 
     def transform(self, X):
@@ -197,7 +220,9 @@ class NoTransformer(TransformerMixin, BaseEstimator):
             feature_names (array of shape (n_features,)): The original feature names.
         """
         if input_features is None:
-            raise ValueError("input_features must be provided to generate feature names.")
+            raise ValueError(
+                "input_features must be provided to generate feature names."
+            )
         return np.array(input_features)
 
 
@@ -252,11 +277,17 @@ class LanguageEmbeddingTransformer(TransformerMixin, BaseEstimator):
         - A 2D numpy array with embeddings for each text input.
         """
         if isinstance(X, np.ndarray):
-            X = X.flatten().astype(str).tolist()  # Convert to a list of strings if passed as an array
+            X = (
+                X.flatten().astype(str).tolist()
+            )  # Convert to a list of strings if passed as an array
         elif isinstance(X, list):
             X = [str(x) for x in X]  # Ensure everything is a string
 
         if self.model is None:
-            raise ValueError("Model is not initialized. Ensure that the model is properly loaded.")
-        embeddings = self.model.encode(X, convert_to_numpy=True)  # Get sentence embeddings
+            raise ValueError(
+                "Model is not initialized. Ensure that the model is properly loaded."
+            )
+        embeddings = self.model.encode(
+            X, convert_to_numpy=True
+        )  # Get sentence embeddings
         return embeddings

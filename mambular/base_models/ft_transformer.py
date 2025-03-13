@@ -5,7 +5,7 @@ from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mlp_utils import MLPhead
 from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 from ..configs.fttransformer_config import DefaultFTTransformerConfig
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 import numpy as np
 
 
@@ -100,6 +100,7 @@ class FTTransformer(BaseModel):
         Tensor
             The output predictions of the model.
         """
+        
         x = self.embedding_layer(*data)
 
         x = self.encoder(x)
