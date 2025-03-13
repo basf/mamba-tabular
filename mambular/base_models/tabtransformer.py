@@ -6,7 +6,7 @@ from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mlp_utils import MLPhead
 from ..arch_utils.transformer_utils import CustomTransformerEncoderLayer
 from ..configs.tabtransformer_config import DefaultTabTransformerConfig
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 
 
 class TabTransformer(BaseModel):

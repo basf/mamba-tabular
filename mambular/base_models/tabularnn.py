@@ -7,7 +7,7 @@ from ..arch_utils.layer_utils.embedding_layer import EmbeddingLayer
 from ..arch_utils.mlp_utils import MLPhead
 from ..arch_utils.rnn_utils import ConvRNN
 from ..configs.tabularnn_config import DefaultTabulaRNNConfig
-from .basemodel import BaseModel
+from .utils.basemodel import BaseModel
 
 
 class TabulaRNN(BaseModel):

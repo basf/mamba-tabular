@@ -21,6 +21,7 @@ class ConvRNN(nn.Module):
         self.rnn_activation = getattr(config, "rnn_activation", "relu")
         self.d_conv = getattr(config, "d_conv", 4)
         self.residuals = getattr(config, "residuals", False)
+        self.dilation = getattr(config, "dilation", 1)
 
         # Choose RNN layer based on model_type
         rnn_layer = {
@@ -37,7 +38,10 @@ class ConvRNN(nn.Module):
 
         if self.residuals:
             self.residual_matrix = nn.ParameterList(
-                [nn.Parameter(torch.randn(self.hidden_size, self.hidden_size)) for _ in range(self.num_layers)]
+                [
+                    nn.Parameter(torch.randn(self.hidden_size, self.hidden_size))
+                    for _ in range(self.num_layers)
+                ]
             )
 
         # First Conv1d layer uses input_size
@@ -49,6 +53,7 @@ class ConvRNN(nn.Module):
                 padding=self.d_conv - 1,
                 bias=self.conv_bias,
                 groups=self.input_size,
+                dilation=self.dilation,
             )
         )
         self.layernorms_conv.append(nn.LayerNorm(self.input_size))
@@ -63,6 +68,7 @@ class ConvRNN(nn.Module):
                     padding=self.d_conv - 1,
                     bias=self.conv_bias,
                     groups=self.hidden_size,
+                    dilation=self.dilation,
                 )
             )
             self.layernorms_conv.append(nn.LayerNorm(self.hidden_size))
@@ -159,7 +165,10 @@ class EnsembleConvRNN(nn.Module):
 
         if self.residuals:
             self.residual_matrix = nn.ParameterList(
-                [nn.Parameter(torch.randn(self.hidden_size, self.hidden_size)) for _ in range(self.num_layers)]
+                [
+                    nn.Parameter(torch.randn(self.hidden_size, self.hidden_size))
+                    for _ in range(self.num_layers)
+                ]
             )
 
         # First Conv1d layer uses input_size

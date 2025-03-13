@@ -22,6 +22,8 @@ class DefaultMambularConfig(BaseConfig):
         Dropout rate for regularization.
     d_conv : int, default=4
         Size of convolution over columns.
+    dilation : int, default=1
+        Dilation factor for the convolution.
     dt_rank : str, default="auto"
         Rank of the decision tree used in the model.
     d_state : int, default=128
@@ -76,6 +78,7 @@ class DefaultMambularConfig(BaseConfig):
     d_model: int = 64
     n_layers: int = 4
     d_conv: int = 4
+    dilation: int = 1
     expand_factor: int = 2
     bias: bool = False
     dropout: float = 0.0

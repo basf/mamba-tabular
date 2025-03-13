@@ -223,7 +223,7 @@ class BaseModel(nn.Module):
         else:
             raise ValueError(f"Invalid pooling method: {self.hparams.pooling_method}")
 
-    def encode(self, data):
+    def encode(self, data, grad=False):
         if not hasattr(self, "embedding_layer"):
             raise ValueError("The model does not have an embedding layer")
 
@@ -237,14 +237,48 @@ class BaseModel(nn.Module):
             raise ValueError("The model does not generate contextualized embeddings")
 
         # Get the actual layer and call it
-        x = self.embedding_layer(*data)
+        if not grad:
+            with torch.no_grad():
 
-        if getattr(self.hparams, "shuffle_embeddings", False):
-            x = x[:, self.perm, :]
+                # Get the actual layer and call it
+                x = self.embedding_layer(*data)
 
-        layer = getattr(self, available_layer)
-        if available_layer == "rnn":
-            embeddings, _ = layer(x)
+
+                if getattr(self.hparams, "shuffle_embeddings", False):
+                    x = x[:, self.perm, :]
+
+                layer = getattr(self, available_layer)
+                if available_layer == "rnn":
+                    embeddings, _ = layer(x)
+                else:
+                    embeddings = self.encoder(x)
+                    embeddings = layer(x)
         else:
-            embeddings = layer(x)
+            x = self.embedding_layer(*data)
+
+            if getattr(self.hparams, "shuffle_embeddings", False):
+                x = x[:, self.perm, :]
+
+            layer = getattr(self, available_layer)
+            if available_layer == "rnn":
+                embeddings, _ = layer(x)
+            else:
+                embeddings = layer(x)
         return embeddings
+    
+    def embedding_parameters(self):
+        """Returns only embedding parameters for pretraining."""
+        return (p for name, p in self.named_parameters() if "embedding" in name)
+
+    def encode_features(self, num_features, cat_features, embeddings):
+        """Encodes features using embeddings, returning their representations."""
+        return self.forward(num_features, cat_features, embeddings, output_embeddings=True)
+    
+    def get_embedding_state_dict(self):
+        """Returns only the state dict of the embeddings."""
+        return {k: v for k, v in self.state_dict().items() if "embedding" in k}
+    
+    def load_embedding_state_dict(self, state_dict):
+        """Loads pretrained embeddings into the model."""
+        self.load_state_dict(state_dict, strict=False)
+

@@ -1,29 +1,51 @@
 import warnings
 from collections.abc import Callable
-from typing import Optional
 
 import lightning as pl
 import numpy as np
 import pandas as pd
+import properscoring as ps
 import torch
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSummary
 from sklearn.base import BaseEstimator
-from sklearn.metrics import accuracy_score, log_loss
+from sklearn.metrics import accuracy_score, mean_squared_error
 from skopt import gp_minimize
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from ..base_models.lightning_wrapper import TaskModel
-from ..data_utils.datamodule import MambularDataModule
-from ..preprocessing import Preprocessor
-from ..utils.config_mapper import (
+from ...base_models.utils.lightning_wrapper import TaskModel
+from ...data_utils.datamodule import MambularDataModule
+from ...preprocessing import Preprocessor
+from ...utils.config_mapper import (
     activation_mapper,
     get_search_space,
     round_to_nearest_16,
 )
+from ...utils.distributional_metrics import (
+    beta_brier_score,
+    dirichlet_error,
+    gamma_deviance,
+    inverse_gamma_loss,
+    negative_binomial_deviance,
+    poisson_deviance,
+    student_t_loss,
+)
+from ...utils.distributions import (
+    BetaDistribution,
+    CategoricalDistribution,
+    DirichletDistribution,
+    GammaDistribution,
+    InverseGammaDistribution,
+    NegativeBinomialDistribution,
+    NormalDistribution,
+    PoissonDistribution,
+    Quantile,
+    StudentTDistribution,
+    JohnsonSuDistribution,
+)
 
 
-class SklearnBaseClassifier(BaseEstimator):
+class SklearnBaseLSS(BaseEstimator):
     def __init__(self, model, config, **kwargs):
         self.preprocessor_arg_names = [
             "n_bins",
@@ -60,9 +82,10 @@ class SklearnBaseClassifier(BaseEstimator):
         self.built = False
 
         # Raise a warning if task is set to 'classification'
-        if preprocessor_kwargs.get("task") == "regression":
+        if preprocessor_kwargs.get("task") == "classification":
             warnings.warn(
-                "The task is set to 'regression'. The Classifier is designed for classification tasks.",
+                "The task is set to 'classification'. Be aware of your preferred distribution,that \
+                    this might lead to unsatisfactory results.",
                 UserWarning,
                 stacklevel=2,
             )
@@ -144,8 +167,6 @@ class SklearnBaseClassifier(BaseEstimator):
         val_size: float = 0.2,
         X_val=None,
         y_val=None,
-        embeddings=None,
-        embeddings_val=None,
         random_state: int = 101,
         batch_size: int = 128,
         shuffle: bool = True,
@@ -174,7 +195,7 @@ class SklearnBaseClassifier(BaseEstimator):
             The validation target values. Required if `X_val` is provided.
         random_state : int, default=101
             Controls the shuffling applied to the data before applying the split.
-        batch_size : int, default=128
+        batch_size : int, default=64
             Number of samples per gradient update.
         shuffle : bool, default=True
             Whether to shuffle the training data before each epoch.
@@ -193,12 +214,10 @@ class SklearnBaseClassifier(BaseEstimator):
         dataloader_kwargs: dict, default={}
             The kwargs for the pytorch dataloader class.
 
-
-
         Returns
         -------
         self : object
-            The built classifier.
+            The built distributional regressor.
         """
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
@@ -223,35 +242,25 @@ class SklearnBaseClassifier(BaseEstimator):
         )
 
         self.data_module.preprocess_data(
-            X,
-            y,
-            X_val=X_val,
-            y_val=y_val,
-            embeddings_train=embeddings,
-            embeddings_val=embeddings_val,
-            val_size=val_size,
-            random_state=random_state,
+            X, y, X_val, y_val, val_size=val_size, random_state=random_state
         )
-
-        num_classes = len(np.unique(np.array(y)))
 
         self.task_model = TaskModel(
             model_class=self.base_model,  # type: ignore
-            num_classes=num_classes,
+            num_classes=self.family.param_count,
+            family=self.family,
             config=self.config,
-            feature_information=(
-                self.data_module.num_feature_info,
-                self.data_module.cat_feature_info,
-                self.data_module.embedding_feature_info,
-            ),
+            cat_feature_info=self.data_module.cat_feature_info,
+            num_feature_info=self.data_module.num_feature_info,
+            lr=lr if lr is not None else self.config.lr,
             lr_patience=(
                 lr_patience if lr_patience is not None else self.config.lr_patience
             ),
-            lr=lr if lr is not None else self.config.lr,
             lr_factor=lr_factor if lr_factor is not None else self.config.lr_factor,
             weight_decay=(
                 weight_decay if weight_decay is not None else self.config.weight_decay
             ),
+            lss=True,
             train_metrics=train_metrics,
             val_metrics=val_metrics,
             optimizer_type=self.optimizer_type,
@@ -259,6 +268,7 @@ class SklearnBaseClassifier(BaseEstimator):
         )
 
         self.built = True
+        self.base_model = self.task_model.base_model
 
         return self
 
@@ -295,11 +305,10 @@ class SklearnBaseClassifier(BaseEstimator):
         self,
         X,
         y,
+        family,
         val_size: float = 0.2,
         X_val=None,
         y_val=None,
-        embeddings=None,
-        embeddings_val=None,
         max_epochs: int = 100,
         random_state: int = 101,
         batch_size: int = 128,
@@ -312,14 +321,15 @@ class SklearnBaseClassifier(BaseEstimator):
         lr_factor: float | None = None,
         weight_decay: float | None = None,
         checkpoint_path="model_checkpoints",
+        distributional_kwargs=None,
         train_metrics: dict[str, Callable] | None = None,
         val_metrics: dict[str, Callable] | None = None,
         dataloader_kwargs={},
         rebuild=True,
         **trainer_kwargs,
     ):
-        """Trains the classification model using the provided training data. Optionally, a separate validation set can
-        be used.
+        """Trains the regression model using the provided training data. Optionally, a separate validation set can be
+        used.
 
         Parameters
         ----------
@@ -327,6 +337,9 @@ class SklearnBaseClassifier(BaseEstimator):
             The training input samples.
         y : array-like, shape (n_samples,) or (n_samples, n_targets)
             The target values (real numbers).
+        family : str
+            The name of the distribution family to use for the loss function. Examples include 'normal'
+            for regression tasks.
         val_size : float, default=0.2
             The proportion of the dataset to include in the validation split if `X_val` is None.
             Ignored if `X_val` is provided.
@@ -356,24 +369,46 @@ class SklearnBaseClassifier(BaseEstimator):
             Factor by which the learning rate will be reduced.
         weight_decay : float, default=0.025
             Weight decay (L2 penalty) coefficient.
-        checkpoint_path : str, default="model_checkpoints"
-            Path where the checkpoints are being saved.
+        distributional_kwargs : dict, default=None
+            any arguments taht are specific for a certain distribution.
         train_metrics : dict, default=None
             torch.metrics dict to be logged during training.
         val_metrics : dict, default=None
             torch.metrics dict to be logged during validation.
+        checkpoint_path : str, default="model_checkpoints"
+            Path where the checkpoints are being saved.
         dataloader_kwargs: dict, default={}
             The kwargs for the pytorch dataloader class.
-        rebuild: bool, default=True
-            Whether to rebuild the model when it already was built.
         **trainer_kwargs : Additional keyword arguments for PyTorch Lightning's Trainer class.
 
 
         Returns
         -------
         self : object
-            The fitted classifier.
+            The fitted regressor.
         """
+        distribution_classes = {
+            "normal": NormalDistribution,
+            "poisson": PoissonDistribution,
+            "gamma": GammaDistribution,
+            "beta": BetaDistribution,
+            "dirichlet": DirichletDistribution,
+            "studentt": StudentTDistribution,
+            "negativebinom": NegativeBinomialDistribution,
+            "inversegamma": InverseGammaDistribution,
+            "categorical": CategoricalDistribution,
+            "quantile": Quantile,
+            "johnsonsu": JohnsonSuDistribution,
+        }
+
+        if distributional_kwargs is None:
+            distributional_kwargs = {}
+
+        if family in distribution_classes:
+            self.family = distribution_classes[family](**distributional_kwargs)
+        else:
+            raise ValueError(f"Unsupported family: {family}")
+
         if rebuild:
             self.build_model(
                 X=X,
@@ -381,17 +416,15 @@ class SklearnBaseClassifier(BaseEstimator):
                 val_size=val_size,
                 X_val=X_val,
                 y_val=y_val,
-                embeddings=embeddings,
-                embeddings_val=embeddings_val,
                 random_state=random_state,
                 batch_size=batch_size,
                 shuffle=shuffle,
                 lr=lr,
                 lr_patience=lr_patience,
                 lr_factor=lr_factor,
-                weight_decay=weight_decay,
                 train_metrics=train_metrics,
                 val_metrics=val_metrics,
+                weight_decay=weight_decay,
                 dataloader_kwargs=dataloader_kwargs,
             )
 
@@ -433,66 +466,19 @@ class SklearnBaseClassifier(BaseEstimator):
 
         return self
 
-    def predict(self, X, embeddings=None, device=None):
-        """Predicts target labels for the given input samples.
+    def predict(self, X, raw=False, device=None):
+        """Predicts target values for the given input samples.
 
         Parameters
         ----------
         X : DataFrame or array-like, shape (n_samples, n_features)
             The input samples for which to predict target values.
 
-        Returns
-        -------
-        predictions : ndarray, shape (n_samples,)
-            The predicted class labels.
-        """
-        # Ensure model and data module are initialized
-        if self.task_model is None or self.data_module is None:
-            raise ValueError("The model or data module has not been fitted yet.")
-
-        # Preprocess the data using the data module
-        self.data_module.assign_predict_dataset(X, embeddings)
-
-        # Set model to evaluation mode
-        self.task_model.eval()
-
-        # Perform inference using PyTorch Lightning's predict function
-        logits_list = self.trainer.predict(self.task_model, self.data_module)
-
-        # Concatenate predictions from all batches
-        logits = torch.cat(logits_list, dim=0)  # type: ignore
-
-        # Check if ensemble is used
-        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
-            logits = logits.mean(dim=1)  # Average over ensemble dimension
-            if logits.dim() == 1:  # Ensure correct shape
-                logits = logits.unsqueeze(1)
-
-        # Check the shape of the logits to determine binary or multi-class classification
-        if logits.shape[1] == 1:
-            # Binary classification
-            probabilities = torch.sigmoid(logits)
-            predictions = (probabilities > 0.5).long().squeeze()
-        else:
-            # Multi-class classification
-            probabilities = torch.softmax(logits, dim=1)
-            predictions = torch.argmax(probabilities, dim=1)
-
-        # Convert predictions to NumPy array and return
-        return predictions.cpu().numpy()
-
-    def predict_proba(self, X, embeddings=None, device=None):
-        """Predicts class probabilities for the given input samples.
-
-        Parameters
-        ----------
-        X : DataFrame or array-like, shape (n_samples, n_features)
-            The input samples for which to predict class probabilities.
 
         Returns
         -------
-        probabilities : ndarray, shape (n_samples, n_classes)
-            The predicted class probabilities.
+        predictions : ndarray, shape (n_samples,) or (n_samples, n_outputs)
+            The predicted target values.
         """
         # Ensure model and data module are initialized
         if self.task_model is None or self.data_module is None:
@@ -505,27 +491,22 @@ class SklearnBaseClassifier(BaseEstimator):
         self.task_model.eval()
 
         # Perform inference using PyTorch Lightning's predict function
-        logits_list = self.trainer.predict(self.task_model, self.data_module)
+        predictions_list = self.trainer.predict(self.task_model, self.data_module)
 
         # Concatenate predictions from all batches
-        logits = torch.cat(logits_list, dim=0)
+        predictions = torch.cat(predictions_list, dim=0)
 
         # Check if ensemble is used
         if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
-            logits = logits.mean(dim=1)  # Average over ensemble dimension
-            if logits.dim() == 1:  # Ensure correct shape
-                logits = logits.unsqueeze(1)
+            predictions = predictions.mean(dim=1)  # Average over ensemble dimension
 
-        # Compute probabilities
-        if logits.shape[1] > 1:
-            probabilities = torch.softmax(logits, dim=1)  # Multi-class classification
+        if not raw:
+            result = self.task_model.family(predictions).cpu().numpy()  # type: ignore
+            return result
         else:
-            probabilities = torch.sigmoid(logits)  # Binary classification
+            return predictions.cpu().numpy()
 
-        # Convert probabilities to NumPy array and return
-        return probabilities.cpu().numpy()
-
-    def evaluate(self, X, y_true, embeddings=None, metrics=None):
+    def evaluate(self, X, y_true, metrics=None, distribution_family=None):
         """Evaluate the model on the given data using specified metrics.
 
         Parameters
@@ -534,11 +515,12 @@ class SklearnBaseClassifier(BaseEstimator):
             The input samples to predict.
         y_true : array-like of shape (n_samples,)
             The true class labels against which to evaluate the predictions.
-        embneddings : array-like or list of shape(n_samples, dimension)
-            List or array with embeddings for unstructured data inputs
         metrics : dict
             A dictionary where keys are metric names and values are tuples containing the metric function
             and a boolean indicating whether the metric requires probability scores (True) or class labels (False).
+        distribution_family : str, optional
+            Specifies the distribution family the model is predicting for. If None, it will attempt to infer based
+            on the model's settings.
 
 
         Returns
@@ -551,64 +533,85 @@ class SklearnBaseClassifier(BaseEstimator):
         -----
         This method uses either the `predict` or `predict_proba` method depending on the metric requirements.
         """
-        # Ensure input is in the correct format
-        if metrics is None:
-            metrics = {"Accuracy": (accuracy_score, False)}
+        # Infer distribution family from model settings if not provided
+        if distribution_family is None:
+            distribution_family = getattr(
+                self.task_model, "distribution_family", "normal"
+            )
 
-        if not isinstance(X, pd.DataFrame):
-            X = pd.DataFrame(X)
+        # Setup default metrics if none are provided
+        if metrics is None:
+            metrics = self.get_default_metrics(distribution_family)
+
+        # Make predictions
+        predictions = self.predict(X, raw=False)
 
         # Initialize dictionary to store results
         scores = {}
 
-        # Generate class probabilities if any metric requires them
-        if any(use_proba for _, use_proba in metrics.values()):
-            probabilities = self.predict_proba(X, embeddings)
-
-        # Generate class labels if any metric requires them
-        if any(not use_proba for _, use_proba in metrics.values()):
-            predictions = self.predict(X, embeddings)
-
         # Compute each metric
-        for metric_name, (metric_func, use_proba) in metrics.items():
-            if use_proba:
-                scores[metric_name] = metric_func(y_true, probabilities)  # type: ignore
-            else:
-                scores[metric_name] = metric_func(y_true, predictions)  # type: ignore
+        for metric_name, metric_func in metrics.items():
+            scores[metric_name] = metric_func(y_true, predictions)
 
         return scores
 
-    def score(self, X, y, embeddings=None, metric=(log_loss, True)):
+    def get_default_metrics(self, distribution_family):
+        """Provides default metrics based on the distribution family.
+
+        Parameters
+        ----------
+        distribution_family : str
+            The distribution family for which to provide default metrics.
+
+
+        Returns
+        -------
+        metrics : dict
+            A dictionary of default metric functions.
+        """
+        default_metrics = {
+            "normal": {
+                "MSE": lambda y, pred: mean_squared_error(y, pred[:, 0]),
+                "CRPS": lambda y, pred: np.mean(
+                    [
+                        ps.crps_gaussian(y[i], mu=pred[i, 0], sig=np.sqrt(pred[i, 1]))
+                        for i in range(len(y))
+                    ]
+                ),
+            },
+            "poisson": {"Poisson Deviance": poisson_deviance},
+            "gamma": {"Gamma Deviance": gamma_deviance},
+            "beta": {"Brier Score": beta_brier_score},
+            "dirichlet": {"Dirichlet Error": dirichlet_error},
+            "studentt": {"Student-T Loss": student_t_loss},
+            "negativebinom": {"Negative Binomial Deviance": negative_binomial_deviance},
+            "inversegamma": {"Inverse Gamma Loss": inverse_gamma_loss},
+            "categorical": {"Accuracy": accuracy_score},
+        }
+        return default_metrics.get(distribution_family, {})
+
+    def score(self, X, y, metric="NLL"):
         """Calculate the score of the model using the specified metric.
 
         Parameters
         ----------
         X : array-like or pd.DataFrame of shape (n_samples, n_features)
             The input samples to predict.
-        y : array-like of shape (n_samples,)
-            The true class labels against which to evaluate the predictions.
-        metric : tuple, default=(log_loss, True)
-            A tuple containing the metric function and a boolean indicating whether
-            the metric requires probability scores (True) or class labels (False).
+        y : array-like of shape (n_samples,) or (n_samples, n_outputs)
+            The true target values against which to evaluate the predictions.
+        metric : str, default="NLL"
+            So far, only negative log-likelihood is supported
 
         Returns
         -------
         score : float
             The score calculated using the specified metric.
         """
-        metric_func, use_proba = metric
+        predictions = self.predict(X)
+        score = self.task_model.family.evaluate_nll(y, predictions)  # type: ignore
+        return score
 
-        if not isinstance(X, pd.DataFrame):
-            X = pd.DataFrame(X)
-
-        if use_proba:
-            probabilities = self.predict_proba(X, embeddings)
-            return metric_func(y, probabilities)
-        else:
-            predictions = self.predict(X, embeddings)
-            return metric_func(y, predictions)
-
-    def encode(self, X, embeddings=None, batch_size=64):
+    def encode(self, X, batch_size=64):
         """
         Encodes input data using the trained model's embedding layer.
 
@@ -632,15 +635,15 @@ class SklearnBaseClassifier(BaseEstimator):
         # Ensure model and data module are initialized
         if self.task_model is None or self.data_module is None:
             raise ValueError("The model or data module has not been fitted yet.")
-        encoded_dataset = self.data_module.preprocess_new_data(X, embeddings)
+        encoded_dataset = self.data_module.preprocess_new_data(X)
 
         data_loader = DataLoader(encoded_dataset, batch_size=batch_size, shuffle=False)
 
         # Process data in batches
         encoded_outputs = []
-        for batch in tqdm(data_loader):
+        for num_features, cat_features in tqdm(data_loader):
             embeddings = self.task_model.base_model.encode(
-                batch
+                num_features, cat_features
             )  # Call your encode function
             encoded_outputs.append(embeddings)
 
@@ -655,8 +658,6 @@ class SklearnBaseClassifier(BaseEstimator):
         y,
         X_val=None,
         y_val=None,
-        embeddings=None,
-        embeddings_val=None,
         time=100,
         max_epochs=200,
         prune_by_epoch=True,
@@ -699,164 +700,17 @@ class SklearnBaseClassifier(BaseEstimator):
             Best hyperparameters found during optimization.
         """
 
-        # Define the hyperparameter search space from the model config
-        param_names, param_space = get_search_space(
-            self.config,
-            fixed_params=fixed_params,
-            custom_search_space=custom_search_space,
-        )
-
-        # Initial model fitting to get the baseline validation loss
-        self.fit(
+        return super().optimize_hparams(
             X,
             y,
+            regression=False,
             X_val=X_val,
             y_val=y_val,
-            embeddings=embeddings,
-            embeddings_val=embeddings_val,
+            time=time,
             max_epochs=max_epochs,
+            prune_by_epoch=prune_by_epoch,
+            prune_epoch=prune_epoch,
+            fixed_params=fixed_params,
+            custom_search_space=custom_search_space,
+            **optimize_kwargs,
         )
-        best_val_loss = float("inf")
-
-        if X_val is not None and y_val is not None:
-            val_loss = self.evaluate(
-                X_val, y_val, metrics={"Accuracy": (accuracy_score, False)}
-            )["Accuracy"]
-        else:
-            val_loss = self.trainer.validate(self.task_model, self.data_module)[0][
-                "val_loss"
-            ]
-
-        best_val_loss = val_loss
-        best_epoch_val_loss = self.task_model.epoch_val_loss_at(  # type: ignore
-            prune_epoch
-        )
-
-        def _objective(hyperparams):
-            nonlocal best_val_loss, best_epoch_val_loss  # Access across trials
-
-            head_layer_sizes = []
-            head_layer_size_length = None
-
-            for key, param_value in zip(param_names, hyperparams, strict=False):
-                if key == "head_layer_size_length":
-                    head_layer_size_length = param_value
-                elif key.startswith("head_layer_size_"):
-                    head_layer_sizes.append(round_to_nearest_16(param_value))
-                else:
-                    field_type = self.config.__dataclass_fields__[key].type
-
-                    # Check if the field is a callable (e.g., activation function)
-                    if field_type == callable and isinstance(param_value, str):
-                        if param_value in activation_mapper:
-                            setattr(self.config, key, activation_mapper[param_value])
-                        else:
-                            raise ValueError(
-                                f"Unknown activation function: {param_value}"
-                            )
-                    else:
-                        setattr(self.config, key, param_value)
-
-            # Truncate or use part of head_layer_sizes based on the optimized length
-            if head_layer_size_length is not None:
-                self.config.head_layer_sizes = head_layer_sizes[:head_layer_size_length]
-
-            # Build the model with updated hyperparameters
-            self.build_model(
-                X, y, X_val=X_val, y_val=y_val, lr=self.config.lr, **optimize_kwargs
-            )
-
-            # Dynamically set the early pruning threshold
-            if prune_by_epoch:
-                early_pruning_threshold = (
-                    best_epoch_val_loss * 1.5
-                )  # Prune based on specific epoch loss
-            else:
-                # Prune based on the best overall validation loss
-                early_pruning_threshold = best_val_loss * 1.5
-
-            # Initialize the model with pruning
-            self.task_model.early_pruning_threshold = early_pruning_threshold  # type: ignore
-            self.task_model.pruning_epoch = prune_epoch  # type: ignore
-
-            # Fit the model (limit epochs for faster optimization)
-            try:
-                # Wrap the risky operation (model fitting) in a try-except block
-                self.fit(
-                    X,
-                    y,
-                    X_val=X_val,
-                    y_val=y_val,
-                    embeddings=embeddings,
-                    embeddings_val=embeddings_val,
-                    max_epochs=max_epochs,
-                    rebuild=False,
-                )
-
-                # Evaluate validation loss
-                if X_val is not None and y_val is not None:
-                    val_loss = self.evaluate(X_val, y_val, metrics={"Accuracy": (accuracy_score, False)})[  # type: ignore
-                        "Mean Squared Error"
-                    ]
-                else:
-                    val_loss = self.trainer.validate(self.task_model, self.data_module)[
-                        0
-                    ]["val_loss"]
-
-                # Pruning based on validation loss at specific epoch
-                epoch_val_loss = self.task_model.epoch_val_loss_at(  # type: ignore
-                    prune_epoch
-                )
-
-                if prune_by_epoch and epoch_val_loss < best_epoch_val_loss:
-                    best_epoch_val_loss = epoch_val_loss
-
-                if val_loss < best_val_loss:
-                    best_val_loss = val_loss
-
-                return val_loss
-
-            except Exception as e:
-                # Penalize the hyperparameter configuration with a large value
-                print(
-                    f"Error encountered during fit with hyperparameters {hyperparams}: {e}"
-                )
-                return (
-                    best_val_loss * 100
-                )  # Large value to discourage this configuration
-
-        # Perform Bayesian optimization using scikit-optimize
-        result = gp_minimize(_objective, param_space, n_calls=time, random_state=42)
-
-        # Update the model with the best-found hyperparameters
-        best_hparams = result.x  # type: ignore
-        head_layer_sizes = (
-            [] if "head_layer_sizes" in self.config.__dataclass_fields__ else None
-        )
-        layer_sizes = [] if "layer_sizes" in self.config.__dataclass_fields__ else None
-
-        # Iterate over the best hyperparameters found by optimization
-        for key, param_value in zip(param_names, best_hparams, strict=False):
-            if key.startswith("head_layer_size_") and head_layer_sizes is not None:
-                # These are the individual head layer sizes
-                head_layer_sizes.append(round_to_nearest_16(param_value))
-            elif key.startswith("layer_size_") and layer_sizes is not None:
-                # These are the individual layer sizes
-                layer_sizes.append(round_to_nearest_16(param_value))
-            else:
-                # For all other config values, update normally
-                field_type = self.config.__dataclass_fields__[key].type
-                if field_type == callable and isinstance(param_value, str):
-                    setattr(self.config, key, activation_mapper[param_value])
-                else:
-                    setattr(self.config, key, param_value)
-
-        # After the loop, set head_layer_sizes or layer_sizes in the config
-        if head_layer_sizes is not None and head_layer_sizes:
-            self.config.head_layer_sizes = head_layer_sizes
-        if layer_sizes is not None and layer_sizes:
-            self.config.layer_sizes = layer_sizes
-
-        print("Best hyperparameters found:", best_hparams)
-
-        return best_hparams

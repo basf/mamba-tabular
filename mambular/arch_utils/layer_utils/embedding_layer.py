@@ -156,7 +156,11 @@ class EmbeddingLayer(nn.Module):
         # Process categorical embeddings
         if self.cat_embeddings and cat_features is not None:
             cat_embeddings = [
-                emb(cat_features[i]) if emb(cat_features[i]).ndim == 3 else emb(cat_features[i]).unsqueeze(1)
+                (
+                    emb(cat_features[i])
+                    if emb(cat_features[i]).ndim == 3
+                    else emb(cat_features[i]).unsqueeze(1)
+                )
                 for i, emb in enumerate(self.cat_embeddings)
             ]
 

@@ -247,7 +247,7 @@ class MambularDataModule(pl.LightningDataModule):
                 regression=self.regression,
             )
 
-    def preprocess_new_data(self, X, embeddings):
+    def preprocess_new_data(self, X, embeddings=None):
         cat_tensors = []
         num_tensors = []
         emb_tensors = []
