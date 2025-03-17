@@ -249,7 +249,7 @@ class SklearnBaseRegressor(SklearnBase):
 
         # Check if ensemble is used
         if getattr(
-            self.task_model.base_model, "returns_ensemble", False
+            self.task_model.estimator, "returns_ensemble", False
         ):  # If using ensemble
             predictions = predictions.mean(dim=1)  # Average over ensemble dimension
 
@@ -360,7 +360,7 @@ class SklearnBaseRegressor(SklearnBase):
         Notes
         -----
         - This function requires that `self.build_model()` has been called beforehand.
-        - The pretraining method uses `self.task_model.base_model.embedding_layer`.
+        - The pretraining method uses `self.task_model.estimator.embedding_layer`.
         - The method invokes `super()._pretrain()` with regression mode enabled.
 
         """
@@ -369,13 +369,13 @@ class SklearnBaseRegressor(SklearnBase):
                 "The model has not been built yet. Call model.build_model(**args) first."
             )
 
-        if not hasattr(self.task_model.base_model, "embedding_layer"):
+        if not hasattr(self.task_model.estimator, "embedding_layer"):
             raise ValueError("The model does not have an embedding layer")
 
         self.data_module.setup("fit")
 
         super()._pretrain(
-            self.task_model.base_model,
+            self.task_model.estimator,
             self.data_module,
             pretrain_epochs=pretrain_epochs,
             k_neighbors=k_neighbors,

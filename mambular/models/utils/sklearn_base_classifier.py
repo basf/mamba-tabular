@@ -248,7 +248,7 @@ class SklearnBaseClassifier(SklearnBase):
         logits = torch.cat(logits_list, dim=0)  # type: ignore
 
         # Check if ensemble is used
-        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
+        if getattr(self.estimator, "returns_ensemble", False):  # If using ensemble
             logits = logits.mean(dim=1)  # Average over ensemble dimension
             if logits.dim() == 1:  # Ensure correct shape
                 logits = logits.unsqueeze(1)
@@ -296,7 +296,7 @@ class SklearnBaseClassifier(SklearnBase):
         logits = torch.cat(logits_list, dim=0)
 
         # Check if ensemble is used
-        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
+        if getattr(self.estimator, "returns_ensemble", False):  # If using ensemble
             logits = logits.mean(dim=1)  # Average over ensemble dimension
             if logits.dim() == 1:  # Ensure correct shape
                 logits = logits.unsqueeze(1)
@@ -439,7 +439,7 @@ class SklearnBaseClassifier(SklearnBase):
         Notes
         -----
         - This function requires that `self.build_model()` has been called beforehand.
-        - The pretraining method uses `self.task_model.base_model.embedding_layer`.
+        - The pretraining method uses `self.task_model.estimator.embedding_layer`.
         - The method invokes `super()._pretrain()` with regression mode enabled.
 
         """
@@ -448,13 +448,13 @@ class SklearnBaseClassifier(SklearnBase):
                 "The model has not been built yet. Call model.build_model(**args) first."
             )
 
-        if not hasattr(self.task_model.base_model, "embedding_layer"):
+        if not hasattr(self.task_model.estimator, "embedding_layer"):
             raise ValueError("The model does not have an embedding layer")
 
         self.data_module.setup("fit")
 
         super()._pretrain(
-            self.task_model.base_model,
+            self.task_model.estimator,
             self.data_module,
             pretrain_epochs=pretrain_epochs,
             k_neighbors=k_neighbors,
