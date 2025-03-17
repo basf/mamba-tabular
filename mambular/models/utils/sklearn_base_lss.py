@@ -9,18 +9,13 @@ import torch
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSummary
 from sklearn.base import BaseEstimator
 from sklearn.metrics import accuracy_score, mean_squared_error
-from skopt import gp_minimize
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from ...base_models.utils.lightning_wrapper import TaskModel
 from ...data_utils.datamodule import MambularDataModule
 from ...preprocessing import Preprocessor
-from ...utils.config_mapper import (
-    activation_mapper,
-    get_search_space,
-    round_to_nearest_16,
-)
+
 from ...utils.distributional_metrics import (
     beta_brier_score,
     dirichlet_error,
@@ -78,7 +73,7 @@ class SklearnBaseLSS(BaseEstimator):
 
         self.preprocessor = Preprocessor(**preprocessor_kwargs)
         self.task_model = None
-        self.base_model = model
+        self.estimator = model
         self.built = False
 
         # Raise a warning if task is set to 'classification'
@@ -246,7 +241,7 @@ class SklearnBaseLSS(BaseEstimator):
         )
 
         self.task_model = TaskModel(
-            model_class=self.base_model,  # type: ignore
+            model_class=self.estimator,  # type: ignore
             num_classes=self.family.param_count,
             family=self.family,
             config=self.config,
@@ -268,7 +263,7 @@ class SklearnBaseLSS(BaseEstimator):
         )
 
         self.built = True
-        self.base_model = self.task_model.base_model
+        self.estimator = self.task_model.estimator
 
         return self
 
@@ -497,7 +492,7 @@ class SklearnBaseLSS(BaseEstimator):
         predictions = torch.cat(predictions_list, dim=0)
 
         # Check if ensemble is used
-        if getattr(self.base_model, "returns_ensemble", False):  # If using ensemble
+        if getattr(self.estimator, "returns_ensemble", False):  # If using ensemble
             predictions = predictions.mean(dim=1)  # Average over ensemble dimension
 
         if not raw:
@@ -642,7 +637,7 @@ class SklearnBaseLSS(BaseEstimator):
         # Process data in batches
         encoded_outputs = []
         for num_features, cat_features in tqdm(data_loader):
-            embeddings = self.task_model.base_model.encode(
+            embeddings = self.task_model.estimator.encode(
                 num_features, cat_features
             )  # Call your encode function
             encoded_outputs.append(embeddings)

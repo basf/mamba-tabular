@@ -13,8 +13,10 @@ from .tabularnn import TabulaRNN
 from .autoint import AutoInt
 from .trompt import Trompt
 from .enode import ENODE
+from .tangos import Tangos
 
 __all__ = [
+    "Tangos",
     "ENODE",
     "Trompt",
     "AutoInt",

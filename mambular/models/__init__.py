@@ -28,8 +28,12 @@ from .tabularnn import TabulaRNNClassifier, TabulaRNNLSS, TabulaRNNRegressor
 from .autoint import AutoIntClassifier, AutoIntLSS, AutoIntRegressor
 from .trompt import TromptClassifier, TromptLSS, TromptRegressor
 from .enode import ENODEClassifier, ENODELSS, ENODERegressor
+from .tangos import TangosClassifier, TangosLSS, TangosRegressor
 
 __all__ = [
+    "TangosClassifier",
+    "TangosLSS",
+    "TangosRegressor",
     "ENODEClassifier",
     "ENODELSS",
     "ENODERegressor",

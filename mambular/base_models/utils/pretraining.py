@@ -20,8 +20,8 @@ class ContrastivePretrainer(pl.LightningModule):
         pool_sequence=True,
     ):
         super().__init__()
-        self.base_model = base_model
-        self.base_model.eval()
+        self.estimator = base_model
+        self.estimator.eval()
         self.k_neighbors = k_neighbors
         self.temperature = temperature
         self.lr = lr
@@ -33,9 +33,9 @@ class ContrastivePretrainer(pl.LightningModule):
         self.loss_fn = nn.CosineEmbeddingLoss(margin=margin, reduction="mean")
 
     def forward(self, x):
-        x = self.base_model.encode(x, grad=True)
+        x = self.estimator.encode(x, grad=True)
         if self.pool_sequence:
-            return self.base_model.pool_sequence(x)
+            return self.estimator.pool_sequence(x)
         return x  # Return unpooled sequence embeddings (N, S, D)
 
     def get_knn(self, labels):
@@ -140,7 +140,7 @@ class ContrastivePretrainer(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
 
-        self.base_model.embedding_layer.train()
+        self.estimator.embedding_layer.train()
 
         data, labels = batch
         embeddings = self(data)
@@ -173,7 +173,7 @@ class ContrastivePretrainer(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        params = chain(self.base_model.parameters())
+        params = chain(self.estimator.parameters())
         return torch.optim.Adam(params, lr=self.lr)
 
 
