@@ -14,8 +14,10 @@ from .autoint_config import DefaultAutoIntConfig
 from .trompt_config import DefaultTromptConfig
 from .base_config import BaseConfig
 from .enode_config import DefaultENODEConfig
+from .tangos_config import DefaultTangosConfig
 
 __all__ = [
+    "DefaultTangosConfig",
     "DefaultENODEConfig",
     "DefaultTromptConfig",
     "DefaultAutoIntConfig",
