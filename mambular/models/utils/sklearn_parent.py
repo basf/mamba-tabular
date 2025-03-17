@@ -54,7 +54,7 @@ class SklearnBase(BaseEstimator):
         }
 
         self.preprocessor = Preprocessor(**self.preprocessor_kwargs)
-        self.base_model = model
+        self.estimator = model
         self.task_model = None
         self.built = False
 
@@ -208,7 +208,7 @@ class SklearnBase(BaseEstimator):
         )
 
         self.task_model = TaskModel(
-            model_class=self.base_model,  # type: ignore
+            model_class=self.estimator,  # type: ignore
             config=self.config,
             feature_information=(
                 self.data_module.num_feature_info,
@@ -230,7 +230,7 @@ class SklearnBase(BaseEstimator):
         )
 
         self.built = True
-        self.base_model = self.task_model.base_model
+        self.estimator = self.task_model.estimator
 
         return self
 
@@ -399,7 +399,7 @@ class SklearnBase(BaseEstimator):
             **trainer_kwargs,
         )
         self.task_model.train()
-        self.task_model.base_model.train()
+        self.task_model.estimator.train()
         self.trainer.fit(self.task_model, self.data_module)  # type: ignore
 
         self.best_model_path = checkpoint_callback.best_model_path
@@ -458,7 +458,7 @@ class SklearnBase(BaseEstimator):
         # Process data in batches
         encoded_outputs = []
         for batch in tqdm(data_loader):
-            embeddings = self.task_model.base_model.encode(
+            embeddings = self.task_model.estimator.encode(
                 batch
             )  # Call your encode function
             encoded_outputs.append(embeddings)

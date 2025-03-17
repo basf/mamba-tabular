@@ -89,7 +89,7 @@ class TaskModel(pl.LightningModule):
         else:
             output_dim = num_classes
 
-        self.base_model = model_class(
+        self.estimator = model_class(
             config=config,
             feature_information=feature_information,
             num_classes=output_dim,
@@ -112,7 +112,7 @@ class TaskModel(pl.LightningModule):
             Model output.
         """
 
-        return self.base_model.forward(num_features, cat_features, embeddings)
+        return self.estimator.forward(num_features, cat_features, embeddings)
 
     def compute_loss(self, predictions, y_true):
         """Compute the loss for the given predictions and true labels.
@@ -130,7 +130,7 @@ class TaskModel(pl.LightningModule):
             Computed loss.
         """
         if self.lss:
-            if getattr(self.base_model, "returns_ensemble", False):
+            if getattr(self.estimator, "returns_ensemble", False):
                 loss = 0.0
                 for ensemble_member in range(predictions.shape[1]):
                     loss += self.family.compute_loss(  # type: ignore
@@ -143,7 +143,7 @@ class TaskModel(pl.LightningModule):
                     y_true.squeeze(-1),
                 )
 
-        if getattr(self.base_model, "returns_ensemble", False):  # Ensemble case
+        if getattr(self.estimator, "returns_ensemble", False):  # Ensemble case
             if (
                 self.loss_fct.__class__.__name__ == "CrossEntropyLoss"
                 and predictions.dim() == 3
@@ -191,8 +191,8 @@ class TaskModel(pl.LightningModule):
         data, labels = batch
 
         # Check if the model has a `penalty_forward` method
-        if hasattr(self.base_model, "penalty_forward"):
-            preds, penalty = self.base_model.penalty_forward(*data)
+        if hasattr(self.estimator, "penalty_forward"):
+            preds, penalty = self.estimator.penalty_forward(*data)
             loss = self.compute_loss(preds, labels) + penalty
         else:
             preds = self(*data)
@@ -396,7 +396,7 @@ class TaskModel(pl.LightningModule):
 
         # Initialize the optimizer with the chosen class and parameters
         optimizer = optimizer_class(
-            self.base_model.parameters(),
+            self.estimator.parameters(),
             lr=self.lr,
             weight_decay=self.weight_decay,
             **self.optimizer_params,  # Pass any additional optimizer-specific parameters
@@ -443,9 +443,9 @@ class TaskModel(pl.LightningModule):
             Path to save the pretrained embeddings.
         """
         print("🚀 Pretraining embeddings...")
-        self.base_model.train()
+        self.estimator.train()
 
-        optimizer = torch.optim.Adam(self.base_model.embedding_parameters(), lr=lr)
+        optimizer = torch.optim.Adam(self.estimator.embedding_parameters(), lr=lr)
 
         # 🔥 Single tqdm progress bar across all epochs and batches
         total_batches = pretrain_epochs * len(train_dataloader)
@@ -459,7 +459,7 @@ class TaskModel(pl.LightningModule):
                 optimizer.zero_grad()
 
                 # Forward pass through embeddings only
-                embeddings = self.base_model.encode(data, grad=True)
+                embeddings = self.estimator.encode(data, grad=True)
 
                 # Compute nearest neighbors based on task type
                 knn_indices = self.get_knn(labels, k_neighbors, regression)
@@ -481,7 +481,7 @@ class TaskModel(pl.LightningModule):
         progress_bar.close()
 
         # Save pretrained embeddings
-        torch.save(self.base_model.get_embedding_state_dict(), save_path)
+        torch.save(self.estimator.get_embedding_state_dict(), save_path)
         print(f"✅ Embeddings saved to {save_path}")
 
     def get_knn(self, labels, k_neighbors=5, regression=True, device=""):
