@@ -23,6 +23,8 @@ Mambular is a Python library for tabular deep learning. It includes models that 
 
 <h3>⚡ What's New ⚡</h3>
 <ul>
+  <li>New Models: `Tangos`, `AutoInt`, `Trompt`</li>
+  <li>Pretraining optionality for suitable models.</li>
   <li>Individual preprocessing: preprocess each feature differently, use pre-trained models for categorical encoding</li>
   <li>Extract latent representations of tables</li>
   <li>Use embeddings as inputs</li>
@@ -78,7 +80,8 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 | `NDTF`           | A neural decision forest using soft decision trees. See [Kontschieder et al.](https://openaccess.thecvf.com/content_iccv_2015/html/Kontschieder_Deep_Neural_Decision_ICCV_2015_paper.html) for inspiration. |
 | `SAINT`          | Improve neural networs via Row Attention and Contrastive Pre-Training, introduced [here](https://arxiv.org/pdf/2106.01342).                         |
 | `AutoInt`        | Automatic Feature Interaction Learning via Self-Attentive Neural Networks introduced [here](https://arxiv.org/abs/1810.11921).                      |
-| `Trompt `        | Trompt: Towards a Better Deep Neural Network for Tabular Data introduced [here](https://arxiv.org/abs/2305.18446).                                  |
+| `Trompt`        | Trompt: Towards a Better Deep Neural Network for Tabular Data introduced [here](https://arxiv.org/abs/2305.18446).                                  |
+| `Tangos`        | Tangos: Regularizing Tabular Neural Networks through Gradient Orthogonalization and Specialization introduced [here](https://openreview.net/pdf?id=n6H86gW8u0d).                                  |
 
 
 
