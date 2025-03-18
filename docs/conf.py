@@ -19,8 +19,11 @@ author = "Anton Frederik Thielmann, Manish Kumar, Christoph Weisser, Benjamin Sa
 
 VERSION_PATH = "../mambular/__version__.py"
 with open(VERSION_PATH) as f:
-    VERSION = f.readlines()[-1].split()[-1].strip("\"'")
-release = VERSION
+    lines = f.readlines()
+    for line in lines:
+        if line.startswith("__version__"):
+            version = line.split("=")[-1].strip().strip('"')
+            release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
