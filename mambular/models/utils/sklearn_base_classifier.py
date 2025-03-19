@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 from sklearn.metrics import accuracy_score, log_loss
 from .sklearn_parent import SklearnBase
+import numpy as np
 
 
 class SklearnBaseClassifier(SklearnBase):
@@ -85,6 +86,8 @@ class SklearnBaseClassifier(SklearnBase):
             The built classifier.
         """
 
+        num_classes = len(np.unique(y))
+
         return super()._build_model(
             X,
             y,
@@ -94,6 +97,7 @@ class SklearnBaseClassifier(SklearnBase):
             y_val=y_val,
             embeddings=embeddings,
             embeddings_val=embeddings_val,
+            num_classes=num_classes,
             random_state=random_state,
             batch_size=batch_size,
             shuffle=shuffle,
@@ -190,6 +194,7 @@ class SklearnBaseClassifier(SklearnBase):
             The fitted classifier.
         """
 
+        num_classes = len(np.unique(y))
         return super().fit(
             X=X,
             y=y,
@@ -215,6 +220,7 @@ class SklearnBaseClassifier(SklearnBase):
             train_metrics=train_metrics,
             val_metrics=val_metrics,
             rebuild=rebuild,
+            num_classes=num_classes,
             **trainer_kwargs,
         )
 
