@@ -96,6 +96,39 @@ class TaskModel(pl.LightningModule):
             **kwargs,
         )
 
+    def setup(self, stage=None):
+        if stage == "fit" and hasattr(self.estimator, "uses_nca_candidates"):
+            all_train_num = []
+            all_train_cat = []
+            all_train_embeddings = []
+            all_train_targets = []
+
+            device = self.device if hasattr(self, "device") else self.trainer.device
+
+            for batch in self.trainer.datamodule.train_dataloader():
+                (num_features, cat_features, embeddings), labels = batch
+
+                all_train_num.append([f.to(device) for f in num_features])  # Keep lists
+                all_train_cat.append([f.to(device) for f in cat_features])  # Keep lists
+                if embeddings is not None:
+                    all_train_embeddings.append([f.to(device) for f in embeddings])
+                all_train_targets.append(labels.to(device))
+
+            # Maintain structure: each feature type remains a list of tensors
+            self.train_features = (
+                [torch.cat(features, dim=0) for features in zip(*all_train_num)],
+                [torch.cat(features, dim=0) for features in zip(*all_train_cat)],
+                (
+                    [
+                        torch.cat(features, dim=0)
+                        for features in zip(*all_train_embeddings)
+                    ]
+                    if all_train_embeddings
+                    else None
+                ),
+            )
+            self.train_targets = torch.cat(all_train_targets, dim=0)
+
     def forward(self, num_features, cat_features, embeddings):
         """Forward pass through the model.
 
@@ -184,7 +217,7 @@ class TaskModel(pl.LightningModule):
             Index of the batch.
 
         Returns
-        -------
+        ------
         Tensor
             Training loss.
         """
@@ -194,6 +227,14 @@ class TaskModel(pl.LightningModule):
         if hasattr(self.estimator, "penalty_forward"):
             preds, penalty = self.estimator.penalty_forward(*data)
             loss = self.compute_loss(preds, labels) + penalty
+        elif hasattr(self.estimator, "uses_nca_candidates"):
+            preds = self.estimator.nca_train(
+                *data,
+                targets=labels,
+                candidate_x=self.train_features,
+                candidate_y=self.train_targets,
+            )
+            loss = self.compute_loss(preds, labels)
         else:
             preds = self(*data)
             loss = self.compute_loss(preds, labels)
@@ -234,7 +275,12 @@ class TaskModel(pl.LightningModule):
         """
 
         data, labels = batch
-        preds = self(*data)
+        if hasattr(self.estimator, "nca_validate") and self.train_features is not None:
+            preds = self.estimator.nca_validate(
+                *data, candidate_x=self.train_features, candidate_y=self.train_targets
+            )
+        else:
+            preds = self(*data)
         val_loss = self.compute_loss(preds, labels)
 
         self.log(
@@ -276,7 +322,12 @@ class TaskModel(pl.LightningModule):
             Test loss.
         """
         data, labels = batch
-        preds = self(*data)
+        if hasattr(self.estimator, "nca_predict") and self.train_features is not None:
+            preds = self.estimator.nca_predict(
+                *data, candidates_x=self.train_features, candidates_y=self.train_targets
+            )
+        else:
+            preds = self(*data)
         test_loss = self.compute_loss(preds, labels)
 
         self.log(
@@ -305,8 +356,14 @@ class TaskModel(pl.LightningModule):
         Tensor
             Predictions.
         """
-
-        preds = self(*batch)
+        if hasattr(self.estimator, "nca_predict") and self.train_features is not None:
+            preds = self.estimator.nca_predict(
+                *batch,
+                candidate_x=self.train_features,
+                candidate_y=self.train_targets,
+            )
+        else:
+            preds = self(*batch)
 
         return preds
 
@@ -425,7 +482,7 @@ class TaskModel(pl.LightningModule):
         temperature=0.1,
         save_path="pretrained_embeddings.pth",
         regression=True,
-        lr=1e-04
+        lr=1e-04,
     ):
         """Pretrain embeddings before full model training.
 
@@ -594,7 +651,7 @@ class TaskModel(pl.LightningModule):
             )  # Shape: (N * k_neighbors)
 
             # Compute cosine embedding loss
-            loss += -1.0*loss_fn(embeddings_s, positive_pairs, labels)
+            loss += -1.0 * loss_fn(embeddings_s, positive_pairs, labels)
 
         # Average loss across all sequence steps
         loss /= S
