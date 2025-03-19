@@ -14,8 +14,10 @@ from .autoint import AutoInt
 from .trompt import Trompt
 from .enode import ENODE
 from .tangos import Tangos
+from .modern_nca import ModernNCA
 
 __all__ = [
+    "ModernNCA",
     "Tangos",
     "ENODE",
     "Trompt",
