@@ -120,6 +120,7 @@ class SklearnBase(BaseEstimator):
         y_val=None,
         embeddings=None,
         embeddings_val=None,
+        num_classes: int = None,
         random_state: int = 101,
         batch_size: int = 128,
         shuffle: bool = True,
@@ -223,6 +224,7 @@ class SklearnBase(BaseEstimator):
             weight_decay=(
                 weight_decay if weight_decay is not None else self.config.weight_decay
             ),
+            num_classes=num_classes,
             train_metrics=train_metrics,
             val_metrics=val_metrics,
             optimizer_type=self.optimizer_type,
@@ -273,6 +275,7 @@ class SklearnBase(BaseEstimator):
         y_val=None,
         embeddings=None,
         embeddings_val=None,
+        num_classes: int = None,
         max_epochs: int = 100,
         random_state: int = 101,
         batch_size: int = 128,
@@ -357,6 +360,7 @@ class SklearnBase(BaseEstimator):
                 y_val=y_val,
                 embeddings=embeddings,
                 embeddings_val=embeddings_val,
+                num_classes=num_classes,
                 random_state=random_state,
                 batch_size=batch_size,
                 shuffle=shuffle,
