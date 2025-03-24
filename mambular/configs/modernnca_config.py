@@ -32,3 +32,9 @@ class DefaultModernNCAConfig(BaseConfig):
     head_skip_layers: bool = False
     head_activation: Callable = nn.SELU()  # noqa: RUF009
     head_use_batch_norm: bool = False
+
+    # Embedding Parameters
+    emebedding_type: str = "plr"
+    plr_lite: bool = True
+    n_frequencies: int = 75
+    frequencies_init_scale: float = 0.045
