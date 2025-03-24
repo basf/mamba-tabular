@@ -29,8 +29,12 @@ from .autoint import AutoIntClassifier, AutoIntLSS, AutoIntRegressor
 from .trompt import TromptClassifier, TromptLSS, TromptRegressor
 from .enode import ENODEClassifier, ENODELSS, ENODERegressor
 from .tangos import TangosClassifier, TangosLSS, TangosRegressor
+from .modern_nca import ModernNCARegressor, ModernNCAClassifier, ModernNCALSS
 
 __all__ = [
+    "ModernNCARegressor",
+    "ModernNCAClassifier",
+    "ModernNCALSS",
     "TangosClassifier",
     "TangosLSS",
     "TangosRegressor",

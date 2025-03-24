@@ -3,6 +3,7 @@ name = "mambular"
 
 version = "1.4.0"
 
+
 description = "A python package for tabular deep learning with mamba blocks."
 authors = ["Anton Thielmann", "Manish Kumar", "Christoph Weisser"]
 readme = "README.md"
