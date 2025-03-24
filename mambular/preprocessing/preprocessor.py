@@ -27,6 +27,7 @@ from .prepro_utils import (
     OneHotFromOrdinal,
     ToFloatTransformer,
 )
+from .utils import check_inputs
 from sklearn.base import TransformerMixin
 
 
@@ -118,6 +119,7 @@ class Preprocessor(TransformerMixin):
         use_decision_tree_knots=True,
         knots_strategy="uniform",
         spline_implementation="sklearn",
+        min_unique_vals=5,
     ):
         self.n_bins = n_bins
         self.numerical_preprocessing = (
@@ -176,6 +178,7 @@ class Preprocessor(TransformerMixin):
         self.use_decision_tree_knots = use_decision_tree_knots
         self.knots_strategy = knots_strategy
         self.spline_implementation = spline_implementation
+        self.min_unique_vals = min_unique_vals
 
     def get_params(self, deep=True):
         """Get parameters for the preprocessor.
@@ -307,6 +310,15 @@ class Preprocessor(TransformerMixin):
         self._fit_embeddings(embeddings)
 
         numerical_features, categorical_features = self._detect_column_types(X)
+
+        check_inputs(
+            X,
+            y,
+            numerical_features,
+            categorical_features,
+            task_type=self.task,
+            min_samples=self.min_unique_vals,
+        )
         transformers = []
 
         if numerical_features:

@@ -15,8 +15,10 @@ from .trompt_config import DefaultTromptConfig
 from .base_config import BaseConfig
 from .enode_config import DefaultENODEConfig
 from .tangos_config import DefaultTangosConfig
+from .modernnca_config import DefaultModernNCAConfig
 
 __all__ = [
+    "DefaultModernNCAConfig",
     "DefaultTangosConfig",
     "DefaultENODEConfig",
     "DefaultTromptConfig",
