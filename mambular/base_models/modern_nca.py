@@ -22,7 +22,7 @@ class ModernNCA(BaseModel):
         self.save_hyperparameters(ignore=["feature_information"])
 
         self.returns_ensemble = False
-        self.uses_nca_candidates = True
+        self.uses_candidates = True
 
         self.T = config.temperature
         self.sample_rate = config.sample_rate
@@ -31,6 +31,7 @@ class ModernNCA(BaseModel):
                 *feature_information,
                 config=config,
             )
+            print(self.embedding_layer)
             input_dim = np.sum(
                 [len(info) * self.hparams.d_model for info in feature_information]
             )
@@ -75,7 +76,7 @@ class ModernNCA(BaseModel):
             x = self.post_encoder(x)
         return self.tabular_head(x)
 
-    def nca_train(self, *data, targets, candidate_x, candidate_y):
+    def train_with_candidates(self, *data, targets, candidate_x, candidate_y):
         """NCA-style training forward pass selecting candidates."""
         if self.hparams.use_embeddings:
             x = self.embedding_layer(*data)
@@ -85,6 +86,7 @@ class ModernNCA(BaseModel):
             B, S, D = candidate_x.shape
             candidate_x = candidate_x.reshape(B, S * D)
         else:
+
             x = torch.cat([t for tensors in data for t in tensors], dim=1)
             candidate_x = torch.cat(
                 [t for tensors in candidate_x for t in tensors], dim=1
@@ -129,7 +131,7 @@ class ModernNCA(BaseModel):
 
         return logits
 
-    def nca_validate(self, *data, candidate_x, candidate_y):
+    def validate_with_candidates(self, *data, candidate_x, candidate_y):
         """Validation forward pass with NCA-style candidate selection."""
         if self.hparams.use_embeddings:
             x = self.embedding_layer(*data)
@@ -172,7 +174,7 @@ class ModernNCA(BaseModel):
 
         return logits
 
-    def nca_predict(self, *data, candidate_x, candidate_y):
+    def predict_with_candidates(self, *data, candidate_x, candidate_y):
         """Prediction forward pass with candidate selection."""
         if self.hparams.use_embeddings:
             x = self.embedding_layer(*data)

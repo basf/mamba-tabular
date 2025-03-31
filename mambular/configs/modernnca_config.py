@@ -34,7 +34,7 @@ class DefaultModernNCAConfig(BaseConfig):
     head_use_batch_norm: bool = False
 
     # Embedding Parameters
-    emebedding_type: str = "plr"
+    embedding_type: str = "plr"
     plr_lite: bool = True
     n_frequencies: int = 75
     frequencies_init_scale: float = 0.045
