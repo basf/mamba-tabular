@@ -277,7 +277,8 @@ class TaskModel(pl.LightningModule):
         data, labels = batch
         if hasattr(self.estimator, "validate_with_candidates") and self.train_features is not None:
             preds = self.estimator.validate_with_candidates(
-                *data, candidate_x=self.train_features, candidate_y=self.train_targets
+                                                    *data, 
+                                                    candidate_x=self.train_features, candidate_y=self.train_targets
             )
         else:
             preds = self(*data)
