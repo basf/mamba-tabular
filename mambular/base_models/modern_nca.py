@@ -31,7 +31,7 @@ class ModernNCA(BaseModel):
                 *feature_information,
                 config=config,
             )
-            print(self.embedding_layer)
+            
             input_dim = np.sum(
                 [len(info) * self.hparams.d_model for info in feature_information]
             )
