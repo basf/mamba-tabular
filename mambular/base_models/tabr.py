@@ -146,7 +146,7 @@ class TabR(BaseModel):
 
             except ImportError:
                 raise ImportError("Failed to import delu module for TabR. Ensure all dependencies are installed\n" 
-                "You can install faiss running 'pip install delu'.") from None
+                "You can install delu running 'pip install delu'.") from None
 
         if TabR.faiss is None: 
             try: 
@@ -158,8 +158,8 @@ class TabR(BaseModel):
                 print("Successfully lazy imported faiss dependency")
 
             except ImportError as e:
-                raise ImportError("Failed to import a required module for TabR. Ensure all dependencies are installed\n" 
-                "You can install delu by running 'pip install delu'.") from None
+                raise ImportError("Failed to import faiss module for TabR. Ensure all dependencies are installed\n" 
+                "You can install faiss running 'pip install faiss-cpu' for CPU and 'pip install faiss-gpu' for GPU.") from None
 
     def _encode(
             self, 
