@@ -9,9 +9,11 @@ from .utils.basemodel import BaseModel
 from torch import Tensor
 import math
 
-
-
 class TabR(BaseModel):
+    delu = None
+    faiss = None
+    faiss_torch_utils = None
+
     def __init__(
         self,
         feature_information: tuple,
@@ -21,6 +23,10 @@ class TabR(BaseModel):
     ):
         super().__init__(config=config, **kwargs)
         self.save_hyperparameters(ignore=["feature_information"])
+
+        # lazy import 
+        if TabR.delu or TabR.faiss or TabR.faiss_torch_utils is None: 
+            self._lazy_import_dependencies()
 
         self.returns_ensemble = False
         self.uses_candidates = True
@@ -86,12 +92,8 @@ class TabR(BaseModel):
 
         # Retrieval Module: R
         self.normalization = Normalization(d_main) if mixer_normalization else None
-        
-        # lazy import
-        import delu
-        import faiss
-        import faiss.contrib.torch_utils
 
+        delu = TabR.delu
         self.label_encoder = (
             nn.Linear(1, d_main)
             if num_classes == 1
@@ -133,6 +135,31 @@ class TabR(BaseModel):
         else: 
             assert isinstance(self.label_encoder[0], nn.Embedding)
             nn.init.uniform_(self.label_encoder[0].weight, -1.0, 1.0)  # type: ignore[code]  # noqa: E501
+
+    def _lazy_import_dependencies(self):
+        """Lazily import external dependencies and store them as class attributes."""
+        if TabR.delu is None: 
+            try:
+                import delu
+                TabR.delu = delu
+                print("Successfully lazy imported delu dependency.")
+
+            except ImportError:
+                raise ImportError("Failed to import delu module for TabR. Ensure all dependencies are installed\n" 
+                "You can install faiss running 'pip install delu'.") from None
+
+        if TabR.faiss is None: 
+            try: 
+                import faiss
+                import faiss.contrib.torch_utils
+                
+                TabR.faiss = faiss
+                TabR.faiss_torch_utils = faiss.contrib.torch_utils
+                print("Successfully lazy imported faiss dependency")
+
+            except ImportError as e:
+                raise ImportError("Failed to import a required module for TabR. Ensure all dependencies are installed\n" 
+                "You can install delu by running 'pip install delu'.") from None
 
     def _encode(
             self, 
@@ -210,7 +237,8 @@ class TabR(BaseModel):
                 else torch.cat(
                     [
                         self._encode(x)[1] # normalized x
-                        for x in delu.iter_batches(
+                        # for x in delu.iter_batches(
+                        for x in TabR.delu.iter_batches(
                             candidate_x, 
                             self.candidate_encoding_batch_size
                         )
@@ -229,12 +257,12 @@ class TabR(BaseModel):
             # initializing the search index
             if self.search_index is None:
                 self.search_index = (
-                    faiss.GpuIndexFlatL2(
-                        faiss.StandardGpuResources(), 
+                    TabR.faiss.GpuIndexFlatL2(
+                        TabR.faiss.StandardGpuResources(), 
                         d_main
                     )
                     if device.type == 'cuda'
-                    else faiss.IndexFlatL2(d_main)
+                    else TabR.faiss.IndexFlatL2(d_main)
                 )
             # Updating the index is much faster than creating a new one.
             self.search_index.reset()
@@ -318,7 +346,7 @@ class TabR(BaseModel):
                 else torch.cat(
                     [
                         self._encode(x)[1] # normalized x
-                        for x in delu.iter_batches(
+                        for x in TabR.delu.iter_batches(
                             candidate_x, 
                             self.candidate_encoding_batch_size
                         )
@@ -333,19 +361,15 @@ class TabR(BaseModel):
         device = k.device
         context_size = self.context_size
 
-        # lazy import 
-        import faiss
-        import faiss.contrib.torch_utils
         if self.search_index is None:
             self.search_index = (
-                faiss.GpuIndexFlatL2(faiss.StandardGpuResources(), d_main)
+                TabR.faiss.GpuIndexFlatL2(TabR.faiss.StandardGpuResources(), d_main)
                 if device.type == 'cuda'
-                else faiss.IndexFlatL2(d_main)
+                else TabR.faiss.IndexFlatL2(d_main)
             )
             
         # Updating the index is much faster than creating a new one.
         self.search_index.reset()
-        # print(candidate_k)
         self.search_index.add(candidate_k.to(torch.float32))  # type: ignore[code]
         distances: Tensor
         context_idx: Tensor
@@ -407,7 +431,7 @@ class TabR(BaseModel):
                 else torch.cat(
                     [
                         self._encode(x)[1] # normalized x
-                        for x in delu.iter_batches(
+                        for x in TabR.delu.iter_batches(
                             candidate_x, 
                             self.candidate_encoding_batch_size
                         )
@@ -422,19 +446,16 @@ class TabR(BaseModel):
         device = k.device
         context_size = self.context_size
 
-        # lazy import 
-        import faiss
-        import faiss.contrib.torch_utils
         if self.search_index is None:
             self.search_index = (
-                faiss.GpuIndexFlatL2(faiss.StandardGpuResources(), d_main)
+                TabR.faiss.GpuIndexFlatL2(TabR.faiss.StandardGpuResources(), d_main)
                 if device.type == 'cuda'
-                else faiss.IndexFlatL2(d_main)
+                else TabR.faiss.IndexFlatL2(d_main)
             )
+
             
         # Updating the index is much faster than creating a new one.
         self.search_index.reset()
-        # print(candidate_k)
         self.search_index.add(candidate_k.to(torch.float32))  # type: ignore[code]
         distances: Tensor
         context_idx: Tensor
