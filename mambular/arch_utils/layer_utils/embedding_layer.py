@@ -125,6 +125,8 @@ class EmbeddingLayer(nn.Module):
         if self.layer_norm_after_embedding:
             self.embedding_norm = nn.LayerNorm(self.d_model)
 
+        self.feature_info = (num_feature_info, cat_feature_info, emb_feature_info)
+
     def forward(self, num_features, cat_features, emb_features):
         """Defines the forward pass of the model.
 
@@ -171,6 +173,8 @@ class EmbeddingLayer(nn.Module):
 
         # Process numerical embeddings based on embedding_type
         if self.embedding_type == "plr":
+            # check pre-processing type compatibility with plr
+            self.check_plr_embedding_compatibility(self.feature_info)
             # For PLR, pass all numerical features together
             if num_features is not None:
                 num_features = torch.stack(num_features, dim=1).squeeze(
@@ -226,6 +230,21 @@ class EmbeddingLayer(nn.Module):
             x = self.embedding_dropout(x)
 
         return x
+    
+    def check_plr_embedding_compatibility(self, feature_info:tuple):
+        # List of incompatible preprocessing terms for PLR embedding
+        incompatible_terms = ['ple', 'one-hot', 'polynomial', 'splines', 'sigmoid', 'rbf']
+        
+        # Iterate through each dictionary in the tuple (data)
+        for sub_dict in feature_info:
+            # Iterate through each feature in the current dictionary
+            for feature, properties in sub_dict.items():
+                preprocessing = properties.get('preprocessing', '')
+                
+                # Check for incompatible terms in the preprocessing string
+                for term in incompatible_terms:
+                    if term in preprocessing:
+                        raise ValueError(f"PLR embedding type doesn't work with the '{term}' pre-processing method.\n")
 
 
 class OneHotEncoding(nn.Module):

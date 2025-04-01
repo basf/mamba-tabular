@@ -83,6 +83,7 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 | `Trompt`        | Trompt: Towards a Better Deep Neural Network for Tabular Data introduced [here](https://arxiv.org/abs/2305.18446).                                  |
 | `Tangos`        | Tangos: Regularizing Tabular Neural Networks through Gradient Orthogonalization and Specialization introduced [here](https://openreview.net/pdf?id=n6H86gW8u0d).                                  |
 | `ModernNCA`        | Revisiting Nearest Neighbor for Tabular Data: A Deep Tabular Baseline Two Decades Later introduced [here](https://arxiv.org/abs/2407.03257).                                  |
+| `TabR` | TabR: Tabular Deep Learning Meets Nearest Neighbors in 2023 [here](https://arxiv.org/abs/2307.14338) |
 
 
 
