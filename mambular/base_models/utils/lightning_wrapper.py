@@ -97,7 +97,7 @@ class TaskModel(pl.LightningModule):
         )
 
     def setup(self, stage=None):
-        if stage == "fit" and hasattr(self.estimator, "uses_nca_candidates"):
+        if stage == "fit" and hasattr(self.estimator, "uses_candidates"):
             all_train_num = []
             all_train_cat = []
             all_train_embeddings = []
@@ -227,8 +227,8 @@ class TaskModel(pl.LightningModule):
         if hasattr(self.estimator, "penalty_forward"):
             preds, penalty = self.estimator.penalty_forward(*data)
             loss = self.compute_loss(preds, labels) + penalty
-        elif hasattr(self.estimator, "uses_nca_candidates"):
-            preds = self.estimator.nca_train(
+        elif hasattr(self.estimator, "train_with_candidates"):
+            preds = self.estimator.train_with_candidates(
                 *data,
                 targets=labels,
                 candidate_x=self.train_features,
@@ -275,9 +275,10 @@ class TaskModel(pl.LightningModule):
         """
 
         data, labels = batch
-        if hasattr(self.estimator, "nca_validate") and self.train_features is not None:
-            preds = self.estimator.nca_validate(
-                *data, candidate_x=self.train_features, candidate_y=self.train_targets
+        if hasattr(self.estimator, "validate_with_candidates") and self.train_features is not None:
+            preds = self.estimator.validate_with_candidates(
+                                                    *data, 
+                                                    candidate_x=self.train_features, candidate_y=self.train_targets
             )
         else:
             preds = self(*data)
@@ -322,10 +323,10 @@ class TaskModel(pl.LightningModule):
             Test loss.
         """
         data, labels = batch
-        if hasattr(self.estimator, "nca_predict") and self.train_features is not None:
-            preds = self.estimator.nca_predict(
+        if hasattr(self.estimator, 'predict_with_candidates') and self.train_features is not None:
+            preds = self.estimator.predict_with_candidates(
                 *data, candidates_x=self.train_features, candidates_y=self.train_targets
-            )
+            )   
         else:
             preds = self(*data)
         test_loss = self.compute_loss(preds, labels)
@@ -356,8 +357,8 @@ class TaskModel(pl.LightningModule):
         Tensor
             Predictions.
         """
-        if hasattr(self.estimator, "nca_predict") and self.train_features is not None:
-            preds = self.estimator.nca_predict(
+        if hasattr(self.estimator, "predict_with_candidates") and self.train_features is not None:
+            preds = self.estimator.predict_with_candidates(
                 *batch,
                 candidate_x=self.train_features,
                 candidate_y=self.train_targets,
