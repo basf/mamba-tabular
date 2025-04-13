@@ -120,8 +120,11 @@ pip install mamba-ssm
 
 <h2> Preprocessing </h2>
 
-Mambular simplifies data preprocessing with a range of tools designed for easy transformation of tabular data.
-Specify a default method, or a dictionary defining individual preprocessing methods for each feature.
+Mambular uses pretab preprocessing: https://github.com/OpenTabular/PreTab
+
+Hence, datatypes etc. are detected automatically and all preprocessing methods from pretab as well as from Sklearn.preprocessing are available.
+Additionally, you can specify that each feature is preprocessed differently, according to your requirements, by setting the `feature_preprocessing={}`argument during model initialization.
+For an overview over all available methods: [pretab](https://github.com/OpenTabular/PreTab)
 
 <h3> Data Type Detection and Transformation </h3>
 
