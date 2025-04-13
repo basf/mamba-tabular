@@ -1,4 +1,4 @@
-from ..preprocessing.preprocessor import Preprocessor
+from pretab.preprocessor import Preprocessor
 
 
 def generate_docstring(config, model_description, examples):
