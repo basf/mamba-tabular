@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 from ...base_models.utils.lightning_wrapper import TaskModel
 from ...data_utils.datamodule import MambularDataModule
-from ...preprocessing import Preprocessor
+from pretab.preprocessor import Preprocessor
 from ...utils.config_mapper import (
     activation_mapper,
     get_search_space,
