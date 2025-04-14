@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 from ...base_models.utils.lightning_wrapper import TaskModel
 from ...data_utils.datamodule import MambularDataModule
-from ...preprocessing import Preprocessor
+from pretab.preprocessor import Preprocessor
 
 from ...utils.distributional_metrics import (
     beta_brier_score,
@@ -245,8 +245,11 @@ class SklearnBaseLSS(BaseEstimator):
             num_classes=self.family.param_count,
             family=self.family,
             config=self.config,
-            cat_feature_info=self.data_module.cat_feature_info,
-            num_feature_info=self.data_module.num_feature_info,
+            feature_information=(
+                self.data_module.num_feature_info,
+                self.data_module.cat_feature_info,
+                self.data_module.embedding_feature_info,
+            ),
             lr=lr if lr is not None else self.config.lr,
             lr_patience=(
                 lr_patience if lr_patience is not None else self.config.lr_patience
@@ -454,11 +457,13 @@ class SklearnBaseLSS(BaseEstimator):
         )
         self.trainer.fit(self.task_model, self.data_module)  # type: ignore
 
-        best_model_path = checkpoint_callback.best_model_path
-        if best_model_path:
-            checkpoint = torch.load(best_model_path)
+        self.best_model_path = checkpoint_callback.best_model_path
+        if self.best_model_path:
+            torch.serialization.add_safe_globals([type(self.config)])
+            checkpoint = torch.load(self.best_model_path, weights_only=False)
             self.task_model.load_state_dict(checkpoint["state_dict"])  # type: ignore
 
+        self.is_fitted_ = True
         return self
 
     def predict(self, X, raw=False, device=None):

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mambular"
 
-version = "1.4.0"
+version = "1.5.0"
 
 
 description = "A python package for tabular deep learning with mamba blocks."
@@ -27,6 +27,7 @@ scikit-optimize = "^0.10.2"
 einops = "^0.8.0"
 accelerate = "^1.2.1"
 scipy = "^1.15.0"
+pretab = "^0.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1"

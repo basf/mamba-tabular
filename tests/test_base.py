@@ -8,6 +8,7 @@ from mambular.base_models.utils import BaseModel
 # Paths for models and configs
 MODEL_MODULE_PATH = "mambular.base_models"
 CONFIG_MODULE_PATH = "mambular.configs"
+EXCLUDED_CLASSES = {"TabR"}
 
 # Discover all models
 model_classes = []
@@ -22,7 +23,12 @@ for filename in os.listdir(os.path.dirname(__file__) + "/../mambular/base_models
         module = importlib.import_module(module_name)
 
         for name, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, BaseModel) and obj is not BaseModel:
+            if (
+                issubclass(obj, BaseModel)
+                and obj is not BaseModel
+                and obj.__name__ not in EXCLUDED_CLASSES
+            ):
+
                 model_classes.append(obj)
 
 

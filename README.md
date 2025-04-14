@@ -23,7 +23,7 @@ Mambular is a Python library for tabular deep learning. It includes models that 
 
 <h3>⚡ What's New ⚡</h3>
 <ul>
-  <li>New Models: `Tangos`, `AutoInt`, `Trompt`</li>
+  <li>New Models: `Tangos`, `AutoInt`, `Trompt`, `ModernNCA`</li>
   <li>Pretraining optionality for suitable models.</li>
   <li>Individual preprocessing: preprocess each feature differently, use pre-trained models for categorical encoding</li>
   <li>Extract latent representations of tables</li>
@@ -82,6 +82,8 @@ Mambular is a Python package that brings the power of advanced deep learning arc
 | `AutoInt`        | Automatic Feature Interaction Learning via Self-Attentive Neural Networks introduced [here](https://arxiv.org/abs/1810.11921).                      |
 | `Trompt`        | Trompt: Towards a Better Deep Neural Network for Tabular Data introduced [here](https://arxiv.org/abs/2305.18446).                                  |
 | `Tangos`        | Tangos: Regularizing Tabular Neural Networks through Gradient Orthogonalization and Specialization introduced [here](https://openreview.net/pdf?id=n6H86gW8u0d).                                  |
+| `ModernNCA`        | Revisiting Nearest Neighbor for Tabular Data: A Deep Tabular Baseline Two Decades Later introduced [here](https://arxiv.org/abs/2407.03257).                                  |
+| `TabR` | TabR: Tabular Deep Learning Meets Nearest Neighbors in 2023 [here](https://arxiv.org/abs/2307.14338) |
 
 
 
@@ -118,8 +120,11 @@ pip install mamba-ssm
 
 <h2> Preprocessing </h2>
 
-Mambular simplifies data preprocessing with a range of tools designed for easy transformation of tabular data.
-Specify a default method, or a dictionary defining individual preprocessing methods for each feature.
+Mambular uses pretab preprocessing: https://github.com/OpenTabular/PreTab
+
+Hence, datatypes etc. are detected automatically and all preprocessing methods from pretab as well as from Sklearn.preprocessing are available.
+Additionally, you can specify that each feature is preprocessed differently, according to your requirements, by setting the `feature_preprocessing={}`argument during model initialization.
+For an overview over all available methods: [pretab](https://github.com/OpenTabular/PreTab)
 
 <h3> Data Type Detection and Transformation </h3>
 
